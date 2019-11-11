@@ -1,0 +1,74 @@
+<div class="topic--search">
+  <h1>Queries</h1>
+  <p>Queries allow you to search the KJV. Queries are performed on individual verses.</p>
+  <p>Two query types are available: Word Query or Phrase Query.</p>
+  <p>Word Queries are specified by a single word or a comma separated list of words. Query results will list all verses which contain all those words.</p>
+  <p>For example, "forgive,sin" will find all verses that contain both "forgive" and "sin".</p>
+  <p>Phrase Queries are specified by a word phrase. Query results will list all verses contain that phrase.</p>
+  <p>For example, "son of man" will find all verses that contain the phrase "son of man".</p>
+  <h2>Wildcards</h2>
+  <p>Individual words in both Word and Phrase Queries may contain an optional wildcard character (*) to find variants of a word.</p>
+  <p>For example, "lord*" will find all occurrences of "lord", "lords", "lord's", "lordly", or "lordship".</p>
+  <h2>Case Sensitivity</h2>
+  <p>To perform a case sensitive search, prepend an at sign (&#64;) to the Query.</p>
+  <p>For example, "@LORD*" will find all occurrences of "LORD" and "LORD'S", but not "lord", "lords", "lord's", "lordly", "lordship", "Lord", or "Lord's".</p>
+  <h1>Search Window</h1>
+  <p>The Search window is used perform queries and analyze results.</p>
+  <p>The Search window has two task panes: Lookup and Result.</p>
+  <h2>Lookup Pane</h2>
+  <p>The Lookup pane is used perform queries.</p>
+  <p>Enter a query in the input field. Tap the Search button, or press Enter, to set the Active Query.</p>
+  <p>The Active Filter is reset to Tome and the Result pane is opened.</p>
+  <h2>Result Pane</h2>
+  <p>The Result pane displays the verse list matching the Active Query and Active Filter.</p>
+  <p>The upper toolbar displays the Active Filter and Active Query.</p>
+  <p>Tap a verse to open the Read pane at that verse.</p>
+  <p>Verses are displayed in groups of fifty. Tap the Load More button to display the next group. Use the Filter pane to quickly reduce result set size.</p>
+  <h3>Strong Mode</h3>
+  <p>This toggle button sets the Strong Mode:</p>
+  <div class="entry entry--icon">
+    <div class="icon-description">Strong Mode</div>
+    <div class="icon-holder">
+      <svg class="icon-svg">
+        <title>Strong Mode</title>
+        <use class="icon-holder__use icon-holder__use--strong-mode" xlink:href="icons.svg#strong-mode"></use>
+      </svg>
+    </div>
+  </div>
+  <br>
+  <p>When Strong Mode is on, tapping a verse will open the Strong Verse pane for that verse.</p>
+  <hr>
+  <p>The following auxiliary panes are available via the lower toolbar</p>
+  <hr>
+  <h3>Filter Pane</h3>
+  <p>The Filter pane displays a list of filters grouped by Tome, Book, or Chapter.</p>
+  <p>Summary information is presented in the form: tome/book/chapter (word count/verse count).</p>
+  <p>The upper toolbar displays the Active Query.</p>
+  <p>These buttons expand/collapse book entries:</p>
+  <div class="entry entry--icon">
+      <div class="icon-description">Expand</div>
+      <div class="icon-holder">
+        <svg class="icon-svg">
+          <title>Expand</title>
+          <use class="icon-holder__use icon-holder__use--next" xlink:href="icons.svg#next"></use>
+        </svg>
+      </div>
+    </div>
+    <div class="entry entry--icon">
+      <div class="icon-description">Collapse</div>
+      <div class="icon-holder">
+        <svg class="icon-svg">
+          <title>Collapse</title>
+          <use class="icon-holder__use icon-holder__use--down" xlink:href="icons.svg#down"></use>
+        </svg>
+      </div>
+    </div>
+  <br>
+  <p>Tap a filter entry to set the Active Filter and open the Result pane.</p>
+  <h3>History Pane</h3>
+  <p>The History pane displays a list of previous queries.</p>
+  <p>Tap an history entry to set the Active Query.</p>
+  <p>The Active Filter is reset to Tome and the Result pane is opened.</p>
+  <p>The history list is managed via their Action Menu. Tap the Menu button to open the Action Menu. You may reorder or delete entries as desired.</p>
+  <p>To remove all history entries, tap the Clear History button.</p>
+</div>

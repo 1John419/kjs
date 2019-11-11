@@ -1,0 +1,22 @@
+{
+  "name": "1 John 4:19 KJS",
+  "short_name": "KJS",
+  "description": "Offline King James with Strong Search",
+  "background_color": "white",
+  "dir": "ltr",
+  "display": "standalone",
+  "lang": "en-us",
+  "orientation": "any",
+  "scope": "./",
+  "start_url": "./",
+  "theme_color": "#3F51B5",
+  "icons": [{
+      "src": "./png/icon-192.png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "./png/icon-512.png",
+      "sizes": "512x512"
+    }
+  ]
+}

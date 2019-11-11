@@ -1,0 +1,487 @@
+<div class="topic--overview">
+  <h1>Design</h1>
+  <p>This is an offline application. Once downloaded, an internet connection is not required to use it.</p>
+  <p>The application supports any Android, Windows, or Linux platform with the latest version of Google Chrome or Mozilla Firefox web browser. (It should also support the Safari web browser, but has not been tested on Mac/iOS platforms.)</p>
+  <p>On an Android platform, the best user experience is available using Chrome for Android. By selecting 'Add to Home screen', the application mimics a native Android app.</p>
+  <h1>Layout And Icons</h1>
+  <p>The application uses seven main windows: Read, Navigator, Bookmark, Search, Strong, Setting, and Help.</p>
+  <p>Each window contains one or more task panes. Task panes may also have Action Menu (see below) and/or auxiliary task panes. This can be visualized as follows:</p>
+  <ul class="tree">
+    <li class="tree--window">
+      <div class="tree-entry tree-entry--window">
+        <div class="tree-description">Window</div>
+      </div>
+      <ul>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-description">Task Pane</div>
+          </div>
+          <ul>
+            <li>
+              <div class="tree-entry tree-entry--task-menu">
+                <div class="tree-description">Action Menu Task Pane</div>
+              </div>
+            </li>
+            <li>
+              <div class="tree-entry tree-entry--task-aux">
+                <div class="tree-description">Auxiliary Task Pane</div>
+              </div>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <p>All windows have an upper and lower toolbar. These provide context information and buttons to access other features.</p>
+  <p>The Read window lower toolbar contains buttons to open the other windows.</p>
+  <p>On smaller devices, only one window is visible at a time. Tap the desired button to display that window. Tap the Back button to return to the Read window.</p>
+  <div class="entry entry--icon">
+    <div class="icon-description">Back</div>
+    <div class="icon-holder">
+      <svg class="icon-svg">
+        <title>Back</title>
+        <use class="icon-holder__use icon-holder__use--next" xlink:href="icons.svg#back"></use>
+      </svg>
+    </div>
+  </div>
+  <br>
+  <p>On larger devices, the Read window is always visible and a single sidebar displays one of the other windows.</p>
+  <p>In summary, application windows, panes, and associated icons can be visualized as follows:</p>
+  <ul class="tree">
+    <li>
+      <div class="tree-entry tree-entry--window">
+        <div class="tree-description">Read</div>
+      </div>
+      <ul>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-description">Read</div>
+          </div>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <div class="tree-entry tree-entry--window">
+        <div class="tree-icon">
+          <svg class="icon-svg">
+            <title>Navigator</title>
+            <use class="icon-holder__use icon-holder__use--navigator" xlink:href="icons.svg#navigator"></use>
+          </svg>
+        </div>
+        <div class="tree-description">Navigator</div>
+      </div>
+      <ul>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-icon">
+              <svg class="icon-svg">
+                <title>Book</title>
+                <use class="icon-holder__use icon-holder__use--navigator-book" xlink:href="icons.svg#navigator-book"></use>
+              </svg>
+            </div>
+            <div class="tree-description">Book</div>
+          </div>
+        </li>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-icon">
+              <svg class="icon-svg">
+                <title>Chapter</title>
+                <use class="icon-holder__use icon-holder__use--navigator-chapter" xlink:href="icons.svg#navigator-chapter"></use>
+              </svg>
+            </div>
+            <div class="tree-description">Chapter</div>
+          </div>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <div class="tree-entry tree-entry--window">
+        <div class="tree-icon">
+          <svg class="icon-svg">
+            <title>Bookmark</title>
+            <use class="icon-holder__use icon-holder__use--bookmark" xlink:href="icons.svg#bookmark"></use>
+          </svg>
+        </div>
+        <div class="tree-description">Bookmark</div>
+      </div>
+      <ul>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-icon">
+              <svg class="icon-svg">
+                <title>List</title>
+                <use class="icon-holder__use icon-holder__use--bookmark-list" xlink:href="icons.svg#bookmark-list"></use>
+              </svg>
+            </div>
+            <div class="tree-description">List</div>
+          </div>
+          <ul>
+            <li>
+              <div class="tree-entry tree-entry--task-menu">
+                <div class="tree-icon">
+                  <svg class="icon-svg">
+                    <title>Move/Copy</title>
+                    <use class="icon-holder__use icon-holder__use--move-copy" xlink:href="icons.svg#move-copy"></use>
+                  </svg>
+                </div>
+                <div class="tree-description">Move/Copy</div>
+              </div>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-icon">
+              <svg class="icon-svg">
+                <title>Folder</title>
+                <use class="icon-holder__use icon-holder__use--bookmark-folder" xlink:href="icons.svg#bookmark-folder"></use>
+              </svg>
+            </div>
+            <div class="tree-description">Folder</div>
+          </div>
+          <ul>
+            <li>
+              <div class="tree-entry tree-entry--task-menu">
+                <div class="tree-icon">
+                  <svg class="icon-svg">
+                    <title>Rename</title>
+                    <use class="icon-holder__use icon-holder__use--rename" xlink:href="icons.svg#rename"></use>
+                  </svg>
+                </div>
+                <div class="tree-description">Rename</div>
+              </div>
+            </li>
+            <li>
+              <div class="tree-entry tree-entry--task-menu">
+                <div class="tree-icon">
+                  <svg class="icon-svg">
+                    <title>Delete</title>
+                    <use class="icon-holder__use icon-holder__use--delete" xlink:href="icons.svg#delete"></use>
+                  </svg>
+                </div>
+                <div class="tree-description">Delete</div>
+              </div>
+            </li>
+            <li>
+              <div class="tree-entry tree-entry--task-aux">
+                <div class="tree-icon">
+                  <svg class="icon-svg">
+                    <title>Add</title>
+                    <use class="icon-holder__use icon-holder__use--bookmark-folder-add" xlink:href="icons.svg#bookmark-folder-add"></use>
+                  </svg>
+                </div>
+                <div class="tree-description">Add</div>
+              </div>
+            </li>
+            <li>
+              <div class="tree-entry tree-entry--task-aux">
+                <div class="tree-icon">
+                  <svg class="icon-svg">
+                    <title>Import</title>
+                    <use class="icon-holder__use icon-holder__use--import" xlink:href="icons.svg#import"></use>
+                  </svg>
+                </div>
+                <div class="tree-description">Import</div>
+              </div>
+            </li>
+            <li>
+              <div class="tree-entry tree-entry--task-aux">
+                <div class="tree-icon">
+                  <svg class="icon-svg">
+                    <title>Export</title>
+                    <use class="icon-holder__use icon-holder__use--export" xlink:href="icons.svg#export"></use>
+                  </svg>
+                </div>
+                <div class="tree-description">Export</div>
+              </div>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <div class="tree-entry tree-entry--window">
+        <div class="tree-icon">
+          <svg class="icon-svg">
+            <title>Search</title>
+            <use class="icon-holder__use icon-holder__use--search" xlink:href="icons.svg#search"></use>
+          </svg>
+        </div>
+        <div class="tree-description">Search</div>
+      </div>
+      <ul>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-icon">
+              <svg class="icon-svg">
+                <title>Lookup</title>
+                <use class="icon-holder__use icon-holder__use--search-lookup" xlink:href="icons.svg#search-lookup"></use>
+              </svg>
+            </div>
+            <div class="tree-description">Lookup</div>
+          </div>
+        </li>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-icon">
+              <svg class="icon-svg">
+                <title>Result</title>
+                <use class="icon-holder__use icon-holder__use--result" xlink:href="icons.svg#result"></use>
+              </svg>
+            </div>
+            <div class="tree-description">Result</div>
+          </div>
+          <ul>
+            <li>
+              <div class="tree-entry tree-entry--task-aux">
+                <div class="tree-icon">
+                  <svg class="icon-svg">
+                    <title>Filter</title>
+                    <use class="icon-holder__use icon-holder__use--filter" xlink:href="icons.svg#filter"></use>
+                  </svg>
+                </div>
+                <div class="tree-description">Filter</div>
+              </div>
+            </li>
+            <li>
+              <div class="tree-entry tree-entry--task-aux">
+                <div class="tree-icon">
+                  <svg class="icon-svg">
+                    <title>History</title>
+                    <use class="icon-holder__use icon-holder__use--history" xlink:href="icons.svg#history"></use>
+                  </svg>
+                </div>
+                <div class="tree-description">History</div>
+              </div>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <div class="tree-entry tree-entry--window">
+        <div class="tree-icon">
+          <svg class="icon-svg">
+            <title>Strong</title>
+            <use class="icon-holder__use icon-holder__use--strong" xlink:href="icons.svg#strong"></use>
+          </svg>
+        </div>
+        <div class="tree-description">Strong</div>
+      </div>
+      <ul>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-icon">
+              <svg class="icon-svg">
+                <title>Verse</title>
+                <use class="icon-holder__use icon-holder__use--strong-verse" xlink:href="icons.svg#strong-verse"></use>
+              </svg>
+            </div>
+            <div class="tree-description">Verse</div>
+          </div>
+        </li>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-icon">
+              <svg class="icon-svg">
+                <title>Definition</title>
+                <use class="icon-holder__use icon-holder__use--strong-def" xlink:href="icons.svg#strong-def"></use>
+              </svg>
+            </div>
+            <div class="tree-description">Definition</div>
+          </div>
+          <ul>
+            <li>
+              <div class="tree-entry tree-entry--task-aux">
+                <div class="tree-icon">
+                  <svg class="icon-svg">
+                    <title>Lookup</title>
+                    <use class="icon-holder__use icon-holder__use--strong-lookup" xlink:href="icons.svg#strong-lookup"></use>
+                  </svg>
+                </div>
+                <div class="tree-description">Lookup</div>
+              </div>
+            </li>
+            <li>
+              <div class="tree-entry tree-entry--task-aux">
+                <div class="tree-icon">
+                  <svg class="icon-svg">
+                    <title>History</title>
+                    <use class="icon-holder__use icon-holder__use--history" xlink:href="icons.svg#history"></use>
+                  </svg>
+                </div>
+                <div class="tree-description">History</div>
+              </div>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-icon">
+              <svg class="icon-svg">
+                <title>Result</title>
+                <use class="icon-holder__use icon-holder__use--result" xlink:href="icons.svg#result"></use>
+              </svg>
+            </div>
+            <div class="tree-description">Result</div>
+          </div>
+          <ul>
+            <li>
+              <div class="tree-entry tree-entry--task-aux">
+                <div class="tree-icon">
+                  <svg class="icon-svg">
+                    <title>Filter</title>
+                    <use class="icon-holder__use icon-holder__use--filter" xlink:href="icons.svg#filter"></use>
+                  </svg>
+                </div>
+                <div class="tree-description">Filter</div>
+              </div>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <div class="tree-entry tree-entry--window">
+        <div class="tree-icon">
+          <svg class="icon-svg">
+            <title>Setting</title>
+            <use class="icon-holder__use icon-holder__use--setting" xlink:href="icons.svg#setting"></use>
+          </svg>
+        </div>
+        <div class="tree-description">Setting</div>
+      </div>
+      <ul>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-description">Setting</div>
+          </div>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <div class="tree-entry tree-entry--window">
+        <div class="tree-icon">
+          <svg class="icon-svg">
+            <title>Help</title>
+            <use class="icon-holder__use icon-holder__use--help" xlink:href="icons.svg#help"></use>
+          </svg>
+        </div>
+        <div class="tree-description">Help</div>
+      </div>
+      <ul>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-icon">
+              <svg class="icon-svg">
+                <title>Read</title>
+                <use class="icon-holder__use icon-holder__use--help-read" xlink:href="icons.svg#help-read"></use>
+              </svg>
+            </div>
+            <div class="tree-description">Read</div>
+          </div>
+        </li>
+        <li>
+          <div class="tree-entry tree-entry--task">
+            <div class="tree-icon">
+              <svg class="icon-svg">
+                <title>Topic</title>
+                <use class="icon-holder__use icon-holder__use--help-topic" xlink:href="icons.svg#help-topic"></use>
+              </svg>
+            </div>
+            <div class="tree-description">Topic</div>
+          </div>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h1>Action Menus</h1>
+  <p>The List, Folder, and History task panes provide for additional actions on individual entries via an Action Menu.</p>
+  <p>Tap the Menu button to open the Action Menu for that entry:</p>
+  <div class="entry entry--icon">
+    <div class="icon-description">Menu</div>
+    <div class="icon-holder">
+      <svg class="icon-svg">
+        <title>Menu</title>
+        <use class="icon-holder__use icon-holder__use--menu" xlink:href="icons.svg#menu"></use>
+      </svg>
+    </div>
+  </div>
+  <br>
+  <p>Tap the Cancel button to close the Action Menu:</p>
+  <div class="entry entry--icon">
+    <div class="icon-description">Cancel</div>
+    <div class="icon-holder">
+      <svg class="icon-holder icon-svg">
+        <title>Cancel</title>
+        <use class="icon-holder icon-holder__use icon-holder icon-holder__use--cancel" xlink:href="icons.svg#cancel"></use>
+      </svg>
+    </div>
+  </div>
+  <br>
+  <p>The following action buttons are available (as appropriate):</p>
+  <div class="entry entry--icon">
+    <div class="icon-description">Move Up</div>
+    <div class="icon-holder">
+      <svg class="icon-holder icon-svg">
+        <title>Move Up</title>
+        <use class="icon-holder icon-holder__use icon-holder icon-holder__use-upc" xlink:href="icons.svg#up"></use>
+      </svg>
+    </div>
+  </div>
+  <div class="entry entry--icon">
+    <div class="icon-description">Move Down</div>
+    <div class="icon-holder">
+      <svg class="icon-holder icon-svg">
+        <title>Move Down</title>
+        <use class="icon-holder icon-holder__use icon-holder icon-holder__use--down" xlink:href="icons.svg#down"></use>
+      </svg>
+    </div>
+  </div>
+  <div class="entry entry--icon">
+    <div class="icon-description">Delete</div>
+    <div class="icon-holder">
+      <svg class="icon-holder icon-svg">
+        <title>Delete</title>
+        <use class="icon-holder icon-holder__use icon-holder icon-holder__use--delete" xlink:href="icons.svg#delete"></use>
+      </svg>
+    </div>
+  </div>
+  <div class="entry entry--icon">
+    <div class="icon-description">Rename</div>
+    <div class="icon-holder">
+      <svg class="icon-holder icon-svg">
+        <title>Rename</title>
+        <use class="icon-holder icon-holder__use icon-holder icon-holder__use--rename" xlink:href="icons.svg#rename"></use>
+      </svg>
+    </div>
+  </div>
+  <div class="entry entry--icon">
+    <div class="icon-description">Move/Copy</div>
+    <div class="icon-holder">
+      <svg class="icon-holder icon-svg">
+        <title>Move/Copy</title>
+        <use class="icon-holder icon-holder__use icon-holder icon-holder__use--move-copy" xlink:href="icons.svg#move-copy"></use>
+      </svg>
+    </div>
+  </div>
+  <div class="entry entry--icon">
+    <div class="icon-description">Move</div>
+    <div class="icon-holder">
+      <svg class="icon-holder icon-svg">
+        <title>Move</title>
+        <use class="icon-holder icon-holder__use icon-holder icon-holder__use--move" xlink:href="icons.svg#move"></use>
+      </svg>
+    </div>
+  </div>
+  <div class="entry entry--icon">
+    <div class="icon-description">Copy</div>
+    <div class="icon-holder">
+      <svg class="icon-holder icon-svg">
+        <title>Copy</title>
+        <use class="icon-holder icon-holder__use icon-holder icon-holder__use--copy" xlink:href="icons.svg#copy"></use>
+      </svg>
+    </div>
+  </div>
+</div>

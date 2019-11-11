@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" class="font--roboto">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Offline King James Strong Search">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#3F51B5">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" href="./favicon.png">
+  <link rel="apple-touch-icon" href="./png/touch-icon-057.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="./png/touch-icon-152.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="./png/touch-icon-167.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./png/touch-icon-180.png">
+  <style>
+    *,
+    ::before,
+    ::after {
+      box-sizing: inherit;
+    }
+
+    body {
+      background-color: hsl(198, 71%, 92%);
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body * {
+      max-height: 1000000px;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 1.0rem 0;
+    }
+
+    html {
+      font-family: 'Roboto', sans-serif;
+      font-size: 16px;
+      height: 100%;
+    }
+
+    p {
+      margin: 0 0 0.5rem;
+      padding: 0;
+    }
+
+    .container {
+      display: flex;
+      flex-flow: row nowrap;
+      height: 100%;
+    }
+
+    .loading {
+      align-self: center;
+      flex: 1 1 auto;
+      text-align: center;
+    }
+
+    .loading--hide {
+      display: none;
+    }
+
+    .spinner {
+      animation: spin 1.0s linear infinite;
+      fill: hsl(18, 50%, 50%);
+      margin-top: 1.0rem;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+  </style>
+  <title>KJS</title>
+</head>
+
+<body>
+  <div class="container" role="main">
+    <div class="loading">
+      <h1>1 John 4:19</h1>
+      <h1>KJS</h1>
+      <p>Downloading application.</p>
+      <p>Please wait...</p>
+      <svg class="spinner" width="100" height="100" viewBox="0 0 24 24">
+        <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm8 12c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8 8 3.582 8 8zm-19 0c0-6.065 4.935-11 11-11v2c-4.962 0-9 4.038-9 9 0 2.481 1.009 4.731 2.639 6.361l-1.414 1.414.015.014c-2-1.994-3.24-4.749-3.24-7.789z" />
+      </svg>
+    </div>
+  </div>
+  <script>
+    'use strict';
+
+    let prod = true;
+    // let prod = false;
+    let updateFound = false;
+    let newInstall = false;
+
+    window.onload = () => {
+      console.log(`window.onload:      ${Date.now()}`);
+      if (prod) {
+        swEvents();
+      } else {
+        loadApp();
+      }
+    };
+
+    let swEvents = () => {
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.ready.then(() => {
+          console.log(`sw.ready:           ${Date.now()}`);
+          if (!updateFound) {
+            loadApp();
+          } else {
+            newInstall = true;
+            console.log(`new install:        ${Date.now()}`);
+          }
+        }).catch((error) => {
+          console.log(`sw.ready error: ${error.message}`);
+        });
+      }
+
+      navigator.serviceWorker.register('./sw.js').then((reg) => {
+        console.log(`sw registered:      ${Date.now()}`);
+        reg.onupdatefound = () => {
+          updateFound = true;
+          console.log(`reg.updatefound:    ${Date.now()}`);
+          const newWorker = reg.installing;
+          newWorker.onstatechange = (event) => {
+            if (event.target.state === 'activated') {
+              console.log(`nw.activated:       ${Date.now()}`);
+              if (newInstall) {
+                loadApp();
+              } else {
+                refresh();
+              }
+            }
+          };
+        };
+      }).catch((error) => {
+        console.log(`reg.error: ${error.message}`);
+      });
+    };
+
+    let refresh = () => {
+      console.log(`refresh():          ${Date.now()}`);
+      // window.location.reload(true);
+    };
+
+    let loadApp = () => {
+      console.log(`loadApp():          ${Date.now()}`);
+
+      let loading = document.querySelector('.loading');
+      loading.classList.add('loading--hide');
+
+      let css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = './css/kjs.css';
+      document.head.appendChild(css);
+
+      let font = document.createElement('link');
+      font.rel = 'stylesheet';
+      font.href = './css/font.css';
+      document.head.appendChild(font);
+
+      let script = document.createElement('script');
+      if (prod) {
+        script.src = './bundle.js';
+      } else {
+        script.type = 'module';
+        script.src = './js/app.js';
+      }
+      document.body.appendChild(script);
+    };
+
+  </script>
+</body>
+
+</html>

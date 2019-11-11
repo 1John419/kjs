@@ -1,0 +1,107 @@
+@font-face {
+  font-display: swap;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'),
+    local('Roboto-Regular'), url('../font/roboto-v19-latin-regular.woff2')
+    format('woff2');
+}
+
+.font--roboto {
+  font-family: 'Roboto', sans-serif;
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans Regular'),
+    local('OpenSans-Regular'), url('../font/open-sans-v16-latin-regular.woff2')
+    format('woff2');
+}
+
+.font--open-sans {
+  font-family: 'Open Sans', sans-serif;
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Lato Regular'),
+    local('Lato-Regular'),
+    url('../font/lato-v15-latin-regular.woff2')
+    format('woff2');
+}
+
+.font--lato {
+  font-family: 'Lato', sans-serif;
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Slabo';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Slabo 27px'),
+    local('Slabo27px-Regular'),
+    url('../font/slabo-27px-v5-latin-regular.woff2')
+    format('woff2');
+}
+
+.font--slabo {
+  font-family: 'Slabo', serif;
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Merriweather';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Merriweather'),
+    local('Merriweather-Regular'),
+    url('../font/merriweather-v20-latin-regular.woff2')
+    format('woff2');
+}
+
+.font--merriweather {
+  font-family: 'Merriweather', serif;
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Slab Regular'),
+    local('RobotoSlab-Regular'),
+    url('../font/roboto-slab-v8-latin-regular.woff2')
+    format('woff2');
+}
+
+.font--roboto-slab {
+  font-family: 'Roboto Slab', serif;
+}
+
+.font-size--s {
+  font-size: 0.8rem;
+}
+
+.font-size--m {
+  font-size: 1.0rem;
+}
+
+.font-size--l {
+  font-size: 1.2rem;
+}
+
+.font-size--xl {
+  font-size: 1.4rem;
+}
+
+.font-size--xxl {
+  font-size: 1.6rem;
+}
