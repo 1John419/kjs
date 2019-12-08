@@ -445,6 +445,18 @@ button::-moz-focus-inner {
   padding: 0.5rem;
 }
 
+.scroll--bookmark-folder {
+  position: relative;
+}
+
+.scroll--bookmark-list {
+  position: relative;
+}
+
+.scroll--bookmark-move-copy {
+  position: relative;
+}
+
 .scroll--help-read {
   padding-top: 0;
 }
@@ -453,8 +465,16 @@ button::-moz-focus-inner {
   padding: 0.5rem;
 }
 
+.scroll--search-history {
+  position: relative;
+}
+
 .scroll--setting {
   padding: 0.5rem;
+}
+
+.scroll--strong-history {
+  position: relative;
 }
 
 .selector--font-size {
