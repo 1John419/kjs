@@ -2,7 +2,7 @@ let appPrefix = 'kjs';
 
 let appCaches = [
   {
-    name: 'kjs-core-20191110.03',
+    name: 'kjs-core-20191207.01',
     urls: [
       './',
       './index.html',
