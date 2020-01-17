@@ -1,11 +1,7 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { strong } from '../Tome/strong.js';
-
-import { removeAllChildren } from '../util.js';
-
+import { strongCitations } from '../data/strongDb.js';
 import {
   templateActionMenu,
   templateBtnIcon,
@@ -15,6 +11,7 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
+import { removeAllChildren } from '../util.js';
 
 const actionSet = [
   { icon: 'up', label: 'Up' },
@@ -30,6 +27,8 @@ const lowerToolSet = [
 const upperToolSet = [
   { type: 'banner', modifier: 'strong-history', text: 'Strong History' }
 ];
+
+const firstXlit = 0;
 
 class StrongHistoryView {
 
@@ -78,9 +77,9 @@ class StrongHistoryView {
     entry.classList.add('entry', 'entry--history');
     let btnEntry = document.createElement('button');
     btnEntry.classList.add('btn-entry', 'btn-entry--history');
-    let transliteration = strong.defs[strongDef][1];
-    let first = transliteration.replace(',', '').split(' ')[0];
-    btnEntry.textContent = `${strongDef} ${first}`;
+    let transliteration = strongCitations[strongDef];
+    let first = transliteration.replace(',', '').split(' ')[firstXlit];
+    btnEntry.textContent = `${strongDef} ${first.normalize('NFC')}`;
     btnEntry.dataset.def = strongDef;
     let btnMenu = templateBtnIcon('menu', 'Menu');
     entry.appendChild(btnEntry);

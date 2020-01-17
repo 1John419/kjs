@@ -1,9 +1,18 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { strong } from '../Tome/strong.js';
-
+import {
+  tomeBinVerseCount,
+  tomeBinWordCount
+} from '../data/binIdx.js';
+import {
+  defDefinition,
+  defLemma,
+  defPronunciation,
+  defTranliteration,
+  wordKjvWord,
+  wordTomeBin
+} from '../data/strongIdx.js';
 import {
   templateElement,
   templatePage,
@@ -11,7 +20,6 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
-
 import {
   removeAllChildren
 } from '../util.js';
@@ -25,7 +33,9 @@ const lowerToolSet = [
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'strong-def', text: 'Strong Definition' }
+  { type: 'btn', icon: 'prev', label: 'Previous Strong' },
+  { type: 'banner', modifier: 'strong-def', text: 'Strong Definition' },
+  { type: 'btn', icon: 'next', label: 'Next Strong' },
 ];
 
 class StrongDefView {
@@ -41,18 +51,21 @@ class StrongDefView {
     this.toolbarLower.addEventListener('click', (event) => {
       this.toolbarLowerClick(event);
     });
+    this.toolbarUpper.addEventListener('click', (event) => {
+      this.toolbarUpperClick(event);
+    });
   }
 
   buildDef() {
-    let def = strong.defs[this.strongDef];
     let fragment = document.createDocumentFragment();
-    let lemma = templateElement(
-      'div', 'strong-def', 'lemma', 'Lemma', def[0]);
-    let xlit = templateElement(
-      'div', 'strong-def', 'xlit', 'Transliteration', def[1]);
-    let pron = templateElement(
-      'div', 'strong-def', 'pron', 'Pronunciation', def[2]);
-    let definition = this.buildDefinition(def[3]);
+    let lemma = templateElement('div', 'strong-def', 'lemma', '',
+      this.def[defLemma].normalize('NFC'));
+    let xlit = templateElement('div', 'strong-def', 'xlit', '',
+      this.def[defTranliteration].normalize('NFC'));
+    let pron = templateElement('div', 'strong-def', 'pron', '',
+      this.def[defPronunciation].normalize('NFC'));
+    let definition = this.buildDefinition(this.def[defDefinition]
+      .normalize('NFC'));
     fragment.appendChild(lemma);
     fragment.appendChild(xlit);
     fragment.appendChild(pron);
@@ -62,16 +75,15 @@ class StrongDefView {
 
   buildDefinition(definition) {
     let frags = definition.split(/[HG]\d+/);
-    let nums = definition.match(/[HG]\d+/g);
-    let defDiv = templateElement(
-      'div', 'strong-def', 'def', 'Definition', null);
-    if (nums) {
+    let words = definition.match(/[HG]\d+/g);
+    let defDiv = templateElement('div', 'strong-def', 'def', '', null);
+    if (words) {
       frags.map((value, index) => {
         let span = document.createElement('span');
         span.textContent = value;
         defDiv.appendChild(span);
-        if (nums[index]) {
-          let num = nums[index];
+        if (words[index]) {
+          let num = words[index];
           let btn = templateElement(
             'button', 'btn-strong-def', null, num, num);
           btn.dataset.strongDef = num;
@@ -103,15 +115,15 @@ class StrongDefView {
   }
 
   buildWords() {
-    let kjvWords = strong.words[this.strongDef];
-    let strongWords = templateElement(
-      'div', 'strong-words', null, 'Strong Words', null);
-    for (let kjvWord in kjvWords) {
-      let word = kjvWords[kjvWord];
-      let label = `${kjvWord} (${word[0]}/${word[1]})`;
+    let strongWords = templateElement('div', 'strong-words', null, '', null);
+    for (let word of this.words) {
+      let kjvWord = word[wordKjvWord];
+      let tomeBin = word[wordTomeBin];
+      let label =
+        `${kjvWord} (${tomeBin[tomeBinWordCount]}/${tomeBin[tomeBinVerseCount]})`;
       let btn = templateElement(
         'button', 'btn-strong-word', null, label, label);
-      btn.dataset.word = kjvWord;
+      btn.dataset.word = word[wordKjvWord];
       strongWords.appendChild(btn);
     }
     return strongWords;
@@ -122,14 +134,18 @@ class StrongDefView {
     bus.publish('strong-def.select', strongDef);
   }
 
-  defUpdate(strongDef) {
-    this.strongDef = strongDef;
+  defUpdate(strongDefObj) {
+    this.strongDefObj = strongDefObj;
+    this.strongDef = this.strongDefObj.k;
+    this.def = this.strongDefObj.v;
     this.updateBanner();
     this.updateList();
   }
 
   getElements() {
+    this.btnPrev = this.toolbarUpper.querySelector('.btn-icon--prev');
     this.banner = this.toolbarUpper.querySelector('.banner--strong-def');
+    this.btnNext = this.toolbarUpper.querySelector('.btn-icon--next');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
     this.btnLookup = this.toolbarLower.querySelector(
@@ -201,11 +217,14 @@ class StrongDefView {
       this.show();
     });
 
-    bus.subscribe('strong.def.update', (strongDef) => {
-      this.defUpdate(strongDef);
+    bus.subscribe('strong.def.update', (strongDefObj) => {
+      this.defUpdate(strongDefObj);
     });
     bus.subscribe('strong.word.update', (strongWord) => {
       this.wordUpdate(strongWord);
+    });
+    bus.subscribe('strong.wordObj.update', (strongWordObj) => {
+      this.wordObjUpdate(strongWordObj);
     });
   }
 
@@ -223,6 +242,18 @@ class StrongDefView {
         bus.publish('strong-verse', null);
       } else if (target === this.btnResult) {
         bus.publish('strong-result', null);
+      }
+    }
+  }
+
+  toolbarUpperClick(event) {
+    event.preventDefault();
+    let target = event.target.closest('button');
+    if (target) {
+      if (target === this.btnPrev) {
+        bus.publish('strong-def.prev.strong', 1);
+      } else if (target === this.btnNext) {
+        bus.publish('strong-def.next.strong', 2);
       }
     }
   }
@@ -260,6 +291,11 @@ class StrongDefView {
   wordClick(btn) {
     let word = btn.dataset.word;
     bus.publish('strong-def.word.select', word);
+  }
+
+  wordObjUpdate(strongWordObj) {
+    this.strongWordObj = strongWordObj;
+    this.words = this.strongWordObj.v;
   }
 
   wordUpdate(strongWord) {

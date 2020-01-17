@@ -1,7 +1,7 @@
 {
   "name": "1 John 4:19 KJS",
   "short_name": "KJS",
-  "description": "Offline King James with Strong Search",
+  "description": "Offline King James with Strong Bible Search",
   "background_color": "white",
   "dir": "ltr",
   "display": "standalone",
@@ -9,7 +9,7 @@
   "orientation": "any",
   "scope": "./",
   "start_url": "./",
-  "theme_color": "#3F51B5",
+  "theme_color": "#000000",
   "icons": [{
       "src": "./png/icon-192.png",
       "sizes": "192x192"

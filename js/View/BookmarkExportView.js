@@ -1,8 +1,7 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { tome } from '../Tome/tome.js';
+import { tomeName } from '../data/tomeDb.js';
 
 import {
   templateDivDialog,
@@ -42,7 +41,7 @@ class BookmarkExportview {
 
   buildBookmarkPkg() {
     let bookmarkPkg = {};
-    bookmarkPkg.tome = tome.name;
+    bookmarkPkg.tome = tomeName;
     bookmarkPkg.folders = this.folders;
     return JSON.stringify(bookmarkPkg, null, 2);
   }

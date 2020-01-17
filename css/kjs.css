@@ -1,3 +1,9 @@
+*,
+::before,
+::after {
+  box-sizing: inherit;
+}
+
 a {
   color: var(--ui-border);
   font-weight: bold;
@@ -8,6 +14,13 @@ body {
   background-color: var(--ui-bg);
   border: 1px solid var(--ui-border);
   color: var(--ui-fg);
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body * {
+  max-height: 1000000px;
 }
 
 button {
@@ -23,6 +36,12 @@ button {
   padding: 0;
 }
 
+h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 1.0rem 0;
+}
+
 h2 {
   font-size: 1.1rem;
   font-weight: 700;
@@ -33,6 +52,12 @@ h3 {
   font-size: 1.0rem;
   font-weight: 700;
   margin: 1.0rem 0 0.25rem 0;
+}
+
+html {
+  font-family: sans-serif;
+  font-size: 16px;
+  height: 100%;
 }
 
 input {
@@ -48,7 +73,8 @@ input {
 }
 
 p {
-  margin-bottom: 1.0rem;
+  margin: 0 0 1.0rem 0;
+  padding: 0;
 }
 
 textarea {
@@ -61,10 +87,6 @@ textarea {
   margin: 0;
   outline: none;
   padding: 0;
-}
-
-button::-moz-focus-inner {
-  border: none;
 }
 
 .action-menu {
@@ -164,13 +186,15 @@ button::-moz-focus-inner {
 }
 
 .btn-font-size {
-  height: var(--target-size);
-  margin: 0;
-  padding: 3px;
-  width: var(--target-size);
+  border: solid 1px var(--ui-fill);
+  border-radius: var(--border-radius);
+  color: var(--ui-fill);
+  height: calc(var(--target-size) - 8px);
+  margin: 3px;
+  width: calc(var(--target-size) - 8px);
 }
 
-.btn-font-size--active .font-size-label{
+.btn-font-size--active {
   background-color: var(--ui-tool-comp);
 }
 
@@ -213,7 +237,7 @@ button::-moz-focus-inner {
 }
 
 .btn-strong-def {
-  border: dashed 1px;
+  border: solid 1px;
   border-radius: var(--border-radius);
   height: var(--target-size);
   margin: 0 0.25rem 0.25rem 0.25rem;
@@ -251,17 +275,17 @@ button::-moz-focus-inner {
 }
 
 .column-2 {
-  -moz-column-count: 2;
-  -ms-column-count: 2;
-  -webkit-column-count: 2;
   column-count: 2;
 }
 
 .column-3 {
-  -moz-column-count: 3;
-  -ms-column-count: 3;
-  -webkit-column-count: 3;
   column-count: 3;
+}
+
+.container {
+  display: flex;
+  flex-flow: row nowrap;
+  height: 100%;
 }
 
 .content {
@@ -334,12 +358,10 @@ button::-moz-focus-inner {
   border: solid 1px var(--ui-fill);
   border-radius: var(--border-radius);
   color: var(--ui-fill);
-  display: table-cell;
   height: calc(var(--target-size) - 6px);
-  margin: 0;
+  line-height: calc(var(--target-size) - 6px);
   padding: 0;
   text-align: center;
-  vertical-align: middle;
   width: calc(var(--target-size) - 6px);
 }
 
@@ -357,7 +379,7 @@ button::-moz-focus-inner {
   margin: 0;
   outline: none;
   overflow: hidden;
-  padding: 0;
+  padding: 3px;
   width: var(--target-size);
 }
 
@@ -375,8 +397,50 @@ button::-moz-focus-inner {
   text-align: center;
 }
 
+.load {
+  background-color: hsl(0, 0%, 82%);
+  color: hsl(0, 0%, 5%);
+  display: flex;
+  flex: 1 1 auto;
+  flex-flow: column nowrap;
+  overflow: auto;
+}
+
 .load--hide {
   display: none;
+}
+
+.load-banner {
+  align-self: center;
+  background-color: transparent;
+  flex: 1 1 auto;
+  overflow: hidden;
+  padding: 0 0.5rem;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.load-bar {
+  background-color: hsl(0, 0%, 62%);
+  display: flex;
+  flex: 0 0 calc(var(--target-size) + 1px);
+  flex-flow: row nowrap;
+}
+
+.load-bar--lower {
+  border-top: 1px solid black;
+}
+
+.load-bar--upper {
+  border-bottom: 1px solid black;
+}
+
+.load-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0.5rem;
+  text-align: center;
 }
 
 .message--bookmark-import {
@@ -445,18 +509,6 @@ button::-moz-focus-inner {
   padding: 0.5rem;
 }
 
-.scroll--bookmark-folder {
-  position: relative;
-}
-
-.scroll--bookmark-list {
-  position: relative;
-}
-
-.scroll--bookmark-move-copy {
-  position: relative;
-}
-
 .scroll--help-read {
   padding-top: 0;
 }
@@ -465,16 +517,8 @@ button::-moz-focus-inner {
   padding: 0.5rem;
 }
 
-.scroll--search-history {
-  position: relative;
-}
-
 .scroll--setting {
   padding: 0.5rem;
-}
-
-.scroll--strong-history {
-  position: relative;
 }
 
 .selector--font-size {
@@ -482,6 +526,7 @@ button::-moz-focus-inner {
   border: solid 1px var(--ui-border);
   display: flex;
   flex-flow: row nowrap;
+  height: var(--target-size);
   justify-content: center;
   margin-bottom: 1.0rem;
 }

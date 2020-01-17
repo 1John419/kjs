@@ -1,8 +1,7 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { getChapterPkg } from '../util.js';
+import { chapterIdxByVerseIdx } from '../util.js';
 
 class StrongController {
 
@@ -14,21 +13,25 @@ class StrongController {
     bus.publish('sidebar.change', 'none');
   }
 
+  chapterIdxUpdate() {
+    if (this.selectVerseIdx) {
+      if (this.panes === 1) {
+        bus.publish('sidebar.select', 'none');
+      }
+      bus.publish('read.scroll-to-verse', this.selectVerseIdx);
+      this.selectVerseIdx = null;
+    }
+  }
+
   def() {
     bus.publish('strong.task.change', 'strong-def');
   }
 
   defSelect(strongDef) {
-    bus.publish('strong.def.change', strongDef);
-    bus.publish('strong.word.first', null);
-    bus.publish('strong.filter.reset', null);
-    bus.publish('strong.task.change', 'strong-def');
+    bus.publish('strong.def.sub-change', strongDef);
   }
 
-  defUpdate(strongDef) {
-    this.strongDef = strongDef;
-    bus.publish('strong.word.first', null);
-    bus.publish('strong.filter.reset', null);
+  defUpdate() {
     bus.publish('strong.task.change', 'strong-def');
   }
 
@@ -83,20 +86,25 @@ class StrongController {
   }
 
   modeToggle() {
-    bus.publish('strong.strong.mode.toggle', null);
+    bus.publish('strong.strong-mode.toggle', null);
+  }
+
+  nextStrong() {
+    bus.publish('strong.next', null);
   }
 
   panesUpdate(panes) {
     this.panes = panes;
   }
 
+  prevStrong() {
+    bus.publish('strong.prev', null);
+  }
+
   readSelect(verseIdx) {
-    let chapterPkg = getChapterPkg(verseIdx);
-    bus.publish('chapterPkg.change', chapterPkg);
-    if (this.panes === 1) {
-      bus.publish('sidebar.select', 'none');
-    }
-    bus.publish('read.scroll-to-verse', verseIdx);
+    this.selectVerseIdx = verseIdx;
+    let chapterIdx = chapterIdxByVerseIdx(verseIdx);
+    bus.publish('chapterIdx.change', chapterIdx);
   }
 
   show() {
@@ -117,6 +125,10 @@ class StrongController {
   }
 
   subscribe() {
+    bus.subscribe('chapterIdx.update', () => {
+      this.chapterIdxUpdate();
+    });
+
     bus.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
@@ -128,6 +140,12 @@ class StrongController {
     bus.subscribe('strong-def', () => {
       this.def();
     });
+    bus.subscribe('strong-def.next.strong',
+      () => { this.nextStrong(); }
+    );
+    bus.subscribe('strong-def.prev.strong',
+      () => { this.prevStrong(); }
+    );
     bus.subscribe('strong-def.select', (strongDef) => {
       this.defSelect(strongDef);
     });
@@ -188,8 +206,8 @@ class StrongController {
     bus.subscribe('strong.back', () => {
       this.back();
     });
-    bus.subscribe('strong.def.update', (strongDef) => {
-      this.defUpdate(strongDef);
+    bus.subscribe('strong.def.update', () => {
+      this.defUpdate();
     });
     bus.subscribe('strong.hide', () => {
       this.hide();
@@ -197,14 +215,11 @@ class StrongController {
     bus.subscribe('strong.show', () => {
       this.show();
     });
-    bus.subscribe('strong.strong.mode.click', () => {
+    bus.subscribe('strong.strong-mode.click', () => {
       this.modeToggle();
     });
     bus.subscribe('strong.task.update', (strongTask) => {
       this.taskUpdate(strongTask);
-    });
-    bus.subscribe('strong.word.update', (strongWord) => {
-      this.wordUpdate(strongWord);
     });
   }
 
@@ -224,19 +239,12 @@ class StrongController {
 
   verseSelect(strongDef) {
     bus.publish('strong.def.change', strongDef);
-    bus.publish('strong.word.first', null);
-    bus.publish('strong.filter.reset', null);
     bus.publish('strong.task.change', 'strong-def');
   }
 
   wordSelect(strongWord) {
     bus.publish('strong.word.change', strongWord);
-    bus.publish('strong.filter.reset', null);
     bus.publish('strong.task.change', 'strong-result');
-  }
-
-  wordUpdate(strongWord) {
-    this.strongWord = strongWord;
   }
 
 }

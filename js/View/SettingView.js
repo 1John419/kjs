@@ -1,7 +1,6 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
 import {
   templateBtnIcon,
   templateElement,
@@ -30,10 +29,7 @@ const fontSize = [
 const templateBtnFontSize = (size, label) => {
   let btnFontSize = templateElement(
     'button', 'btn-font-size', null, label, null);
-  let div = document.createElement('div');
-  div.classList.add('font-size-label');
-  div.textContent = 'Aa';
-  btnFontSize.appendChild(div);
+  btnFontSize.textContent = 'Aa';
   btnFontSize.classList.add(`font-size--${size}`);
   btnFontSize.dataset.size = `font-size--${size}`;
   return btnFontSize;

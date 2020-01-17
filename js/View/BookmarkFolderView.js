@@ -1,9 +1,6 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { removeAllChildren } from '../util.js';
-
 import {
   templateActionMenu,
   templateElement,
@@ -13,6 +10,7 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
+import { removeAllChildren } from '../util.js';
 
 const actionSet = [
   { icon: 'up', label: 'Up' },

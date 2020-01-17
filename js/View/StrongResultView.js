@@ -1,18 +1,38 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { tome } from '../Tome/tome.js';
-
-import { strong } from '../Tome/strong.js';
-
 import {
-  getBookName,
-  getChapterName,
-  getRefName,
-  removeAllChildren
-} from '../util.js';
-
+  tomeBinBooks,
+  bookBinChapters,
+  bookBinSliceEnd,
+  bookBinSliceStart,
+  bookBinVerseCount,
+  bookBinWordCount,
+  chapterBinSliceEnd,
+  chapterBinSliceStart,
+  chapterBinVerseCount,
+  chapterBinWordCount,
+  tomeBinVerses,
+  tomeBinVerseCount,
+  tomeBinWordCount
+} from '../data/binIdx.js';
+import {
+  mapSliceEnd,
+  mapSliceStart,
+  mapStrongNums
+} from '../data/strongIdx.js';
+import {
+  tomeAcrostics,
+  tomeBooks,
+  tomeChapters,
+  tomeName
+} from '../data/tomeDb.js';
+import {
+  bookLongName,
+  chapterName,
+  verseCitation,
+  verseText
+} from '../data/tomeIdx.js';
 import {
   templateElement,
   templatePage,
@@ -20,19 +40,23 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
+import {
+  removeAllChildren
+} from '../util.js';
 
 const lowerToolSet = [
   { type: 'btn', icon: 'back', label: 'Back' },
   { type: 'btn', icon: 'filter', label: 'Strong Filter' },
-  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' },
   { type: 'btn', icon: 'strong-verse', label: 'Strong Verse' },
-  { type: 'btn', icon: 'strong-def', label: 'Strong Definition' }
+  { type: 'btn', icon: 'strong-def', label: 'Strong Definition' },
+  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
 ];
 
 const upperToolSet = [
   { type: 'banner', modifier: 'strong-result', text: 'Strong Search' }
 ];
 
+const binIdx = 0;
 const loadIncrement = 50;
 
 class StrongResultView {
@@ -53,58 +77,59 @@ class StrongResultView {
     });
   }
 
-  addVerse(verseIdx) {
+  addVerse(verseObj) {
     let btn = document.createElement('button');
     btn.classList.add('btn-result');
-    btn.dataset.verseIdx = verseIdx;
+    btn.dataset.verseIdx = verseObj.k;
     let resultText = document.createElement('span');
     resultText.classList.add('span-search-text');
-    let acrostic = this.buildAcrosticSpan(verseIdx);
-    let ref = this.buildRefSpan(verseIdx);
+    let acrostic = this.buildAcrosticSpan(verseObj);
+    let ref = this.buildRefSpan(verseObj);
     resultText.appendChild(ref);
     if (acrostic) {
       resultText.appendChild(acrostic);
     }
-    let text = this.buildStrongText(verseIdx);
+    let text = this.buildStrongText(verseObj);
     resultText.insertAdjacentHTML('beforeend', text);
     btn.appendChild(resultText);
     return btn;
   }
 
   applyFilter() {
-    let tomeBin = strong.words[this.strongDef][this.strongWord];
+    let tomeBin = this.strongWordTomeBin;
     let bookIdx = this.strongFilter.bookIdx;
     let chapterIdx = this.strongFilter.chapterIdx;
     if (bookIdx === -1 && chapterIdx === -1) {
-      this.filteredVerses = tomeBin[3];
-      this.wordCount = tomeBin[0];
-      this.verseCount = tomeBin[1];
-      this.citation = tome.name;
+      this.filteredVerses = tomeBin[tomeBinVerses];
+      this.wordCount = tomeBin[tomeBinWordCount];
+      this.verseCount = tomeBin[tomeBinVerseCount];
+      this.citation = tomeName;
     } else {
-      let books = tomeBin[2];
+      let books = tomeBin[tomeBinBooks];
       let bookBin = this.findBin(books, bookIdx);
       if (chapterIdx === -1) {
-        this.filteredVerses = tomeBin[3].slice(bookBin[3], bookBin[4]);
-        this.wordCount = bookBin[1];
-        this.verseCount = bookBin[2];
-        this.citation = getBookName(bookIdx);
+        this.filteredVerses = tomeBin[tomeBinVerses]
+          .slice(bookBin[bookBinSliceStart], bookBin[bookBinSliceEnd]);
+        this.wordCount = bookBin[bookBinWordCount];
+        this.verseCount = bookBin[bookBinVerseCount];
+        this.citation = tomeBooks[bookIdx][bookLongName];
       } else {
-        let chapters = bookBin[5];
+        let chapters = bookBin[bookBinChapters];
         let chapterBin = this.findBin(chapters, chapterIdx);
-        this.filteredVerses = tomeBin[3].slice(chapterBin[3],
-          chapterBin[4]);
-        this.wordCount = chapterBin[1];
-        this.verseCount = chapterBin[2];
-        this.citation = getChapterName(chapterIdx);
+        this.filteredVerses = tomeBin[tomeBinVerses]
+          .slice(chapterBin[chapterBinSliceStart],
+            chapterBin[chapterBinSliceEnd]);
+        this.wordCount = chapterBin[chapterBinWordCount];
+        this.verseCount = chapterBin[chapterBinVerseCount];
+        this.citation = tomeChapters[chapterIdx][chapterName];
       }
     }
   }
 
-  buildAcrosticSpan(verseIdx) {
+  buildAcrosticSpan(verseObj) {
     let acrosticSpan = undefined;
-    let acrostics = tome.acrostics;
-    if (acrostics) {
-      let acrostic = acrostics[verseIdx];
+    if (tomeAcrostics) {
+      let acrostic = tomeAcrostics[verseObj.k];
       if (acrostic) {
         acrosticSpan = document.createElement('span');
         acrosticSpan.classList.add('verse-acrostic');
@@ -141,24 +166,23 @@ class StrongResultView {
     container.appendChild(this.page);
   }
 
-  buildRefSpan(verseIdx) {
+  buildRefSpan(verseObj) {
     let refSpan = document.createElement('span');
     refSpan.classList.add('verse-ref');
-    refSpan.textContent = getRefName(verseIdx);
+    refSpan.textContent = verseObj.v[verseCitation];
     return refSpan;
   }
 
-  buildStrongText(verseIdx) {
+  buildStrongText(verseObj) {
+    let verseIdx = verseObj.k;
+    let verse = verseObj.v;
     let parts = [];
-    let kjvWords = tome.verses[verseIdx].split(' ');
-    let fragments = strong.fragments[verseIdx];
-    for (let fragment of fragments) {
-      let sliceStart = fragment[0];
-      let sliceEnd = fragment[1];
-      let strongNums = fragment[2];
-      let strongStr = strongNums.join(' ');
-      let cleanNums = strongNums.map(x => x.replace(/[()]/g, ''));
-      let phrase = kjvWords.slice(sliceStart, sliceEnd).join(' ');
+    let kjvWords = verse[verseText].split(' ');
+    let maps = this.strongWordMapObjs.find(x => x.k === verseIdx).v;
+    for (let map of maps) {
+      let strongStr = map[mapStrongNums].join(' ');
+      let cleanNums = map[mapStrongNums].map(x => x.replace(/[()]/g, ''));
+      let phrase = kjvWords.slice(map[mapSliceStart], map[mapSliceEnd]).join(' ');
       parts.push(phrase);
       if (cleanNums.includes(this.strongDef)) {
         parts.push(`<span class="super">${strongStr}</span>`);
@@ -182,8 +206,9 @@ class StrongResultView {
     this.list.classList.add(this.fontSize);
   }
 
-  defUpdate(strongDef) {
-    this.strongDef = strongDef;
+  defUpdate(strongDefObj) {
+    this.strongDefObj = strongDefObj;
+    this.strongDef = this.strongDefObj.k;
   }
 
   filterUpdate(strongFilter) {
@@ -197,7 +222,7 @@ class StrongResultView {
 
   findBin(bins, idx) {
     return bins.find((bin) => {
-      return bin[0] === idx;
+      return bin[binIdx] === idx;
     });
   }
 
@@ -278,8 +303,9 @@ class StrongResultView {
     }
 
     let fragment = document.createDocumentFragment();
-    for (let idx of verses) {
-      let verse = this.addVerse(idx);
+    let verseObjs = this.strongWordVerseObjs.filter(x => verses.includes(x.k));
+    for (let verseObj of verseObjs) {
+      let verse = this.addVerse(verseObj);
       fragment.appendChild(verse);
     }
     this.list.appendChild(fragment);
@@ -344,17 +370,26 @@ class StrongResultView {
       this.show();
     });
 
-    bus.subscribe('strong.def.update', (strongDef) => {
-      this.defUpdate(strongDef);
+    bus.subscribe('strong.def.update', (strongDefObj) => {
+      this.defUpdate(strongDefObj);
     });
     bus.subscribe('strong.filter.update', (strongFilter) => {
       this.filterUpdate(strongFilter);
     });
-    bus.subscribe('strong.strong.mode.update', (strongMode) => {
+    bus.subscribe('strong.strong-mode.update', (strongMode) => {
       this.modeUpdate(strongMode);
     });
     bus.subscribe('strong.word.update', (strongWord) => {
       this.wordUpdate(strongWord);
+    });
+    bus.subscribe('strong.wordTomeBin.update', (wordTomeBin) => {
+      this.wordTomeBinUpdate(wordTomeBin);
+    });
+    bus.subscribe('strong.wordMap.update', (wordMapObjs) => {
+      this.wordMapUpdate(wordMapObjs);
+    });
+    bus.subscribe('strong.wordVerse.update', (wordVerseObjs) => {
+      this.wordVerseUpdate(wordVerseObjs);
     });
   }
 
@@ -367,7 +402,7 @@ class StrongResultView {
       } else if (target === this.btnFilter) {
         bus.publish('strong-filter', null);
       } else if (target === this.btnStrongMode) {
-        bus.publish('strong.strong.mode.click', null);
+        bus.publish('strong.strong-mode.click', null);
       } else if (target === this.btnStrongDef) {
         bus.publish('strong-def', null);
       } else if (target === this.btnStrongVerse) {
@@ -388,6 +423,18 @@ class StrongResultView {
     this.loadIdx = 0;
     this.loadedVerses = 0;
     this.loadVerses();
+  }
+
+  wordMapUpdate(wordMapObjs) {
+    this.strongWordMapObjs = wordMapObjs;
+  }
+
+  wordTomeBinUpdate(wordTomeBin) {
+    this.strongWordTomeBin = wordTomeBin;
+  }
+
+  wordVerseUpdate(wordVerseObjs) {
+    this.strongWordVerseObjs = wordVerseObjs;
   }
 
   wordUpdate(strongWord) {

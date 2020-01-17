@@ -1,7 +1,6 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
 import { appPrefix } from '../util.js';
 
 const validColumns = [ 1, 2, 3];
@@ -25,7 +24,7 @@ class ReadModel {
   modeChange(strongMode) {
     this.strongMode = strongMode;
     this.saveMode();
-    bus.publish('read.strong.mode.update', this.strongMode);
+    bus.publish('read.strong-mode.update', this.strongMode);
   }
 
   modeToogle() {
@@ -129,7 +128,7 @@ class ReadModel {
     bus.subscribe('read.restore',
       () => { this.restore(); }
     );
-    bus.subscribe('read.strong.mode.toggle', () => {
+    bus.subscribe('read.strong-mode.toggle', () => {
       this.modeToogle();
     });
 

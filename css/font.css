@@ -3,9 +3,8 @@
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
-  src: local('Roboto'),
-    local('Roboto-Regular'), url('../font/roboto-v19-latin-regular.woff2')
-    format('woff2');
+  src: local('Roboto'), local('Roboto-Regular'),
+    url('../font/roboto-v20-latin-regular.woff2') format('woff2');
 }
 
 .font--roboto {
@@ -17,9 +16,8 @@
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: 400;
-  src: local('Open Sans Regular'),
-    local('OpenSans-Regular'), url('../font/open-sans-v16-latin-regular.woff2')
-    format('woff2');
+  src: local('Open Sans Regular'), local('OpenSans-Regular'),
+    url('../font/open-sans-v17-latin-regular.woff2') format('woff2');
 }
 
 .font--open-sans {
@@ -31,10 +29,8 @@
   font-family: 'Lato';
   font-style: normal;
   font-weight: 400;
-  src: local('Lato Regular'),
-    local('Lato-Regular'),
-    url('../font/lato-v15-latin-regular.woff2')
-    format('woff2');
+  src: local('Lato Regular'), local('Lato-Regular'),
+    url('../font/lato-v16-latin-regular.woff2') format('woff2');
 }
 
 .font--lato {
@@ -43,17 +39,15 @@
 
 @font-face {
   font-display: swap;
-  font-family: 'Slabo';
+  font-family: 'Roboto Slab';
   font-style: normal;
   font-weight: 400;
-  src: local('Slabo 27px'),
-    local('Slabo27px-Regular'),
-    url('../font/slabo-27px-v5-latin-regular.woff2')
-    format('woff2');
+  src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'),
+    url('../font/roboto-slab-v10-latin-regular.woff2') format('woff2');
 }
 
-.font--slabo {
-  font-family: 'Slabo', serif;
+.font--roboto-slab {
+  font-family: 'Roboto Slab', serif;
 }
 
 @font-face {
@@ -61,10 +55,8 @@
   font-family: 'Merriweather';
   font-style: normal;
   font-weight: 400;
-  src: local('Merriweather'),
-    local('Merriweather-Regular'),
-    url('../font/merriweather-v20-latin-regular.woff2')
-    format('woff2');
+  src: local('Merriweather'), local('Merriweather-Regular'),
+    url('../font/merriweather-v21-latin-regular.woff2') format('woff2');
 }
 
 .font--merriweather {
@@ -73,17 +65,16 @@
 
 @font-face {
   font-display: swap;
-  font-family: 'Roboto Slab';
+  font-family: 'Playfair Display';
   font-style: normal;
   font-weight: 400;
-  src: local('Roboto Slab Regular'),
-    local('RobotoSlab-Regular'),
-    url('../font/roboto-slab-v8-latin-regular.woff2')
-    format('woff2');
+  src: local('Playfair Display Regular'), local('PlayfairDisplay-Regular'),
+    local('Slabo27px-Regular'),
+    url('../font/playfair-display-v18-latin-regular.woff2') format('woff2');
 }
 
-.font--roboto-slab {
-  font-family: 'Roboto Slab', serif;
+.font--playfair-display {
+  font-family: 'Playfair Display', serif;
 }
 
 .font-size--s {

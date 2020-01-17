@@ -1,7 +1,6 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
 import {
   templateActionMenu,
   templateBtnIcon,
@@ -11,9 +10,8 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
-
 import {
-  getRefName,
+  citationByVerseIdx,
   removeAllChildren
 } from '../util.js';
 
@@ -81,7 +79,7 @@ class BookmarkListView {
     entry.classList.add('entry', 'entry--bookmark');
     let btnRef = document.createElement('button');
     btnRef.classList.add('btn-entry', 'btn-entry--bookmark');
-    btnRef.textContent = getRefName(verseIdx);
+    btnRef.textContent = citationByVerseIdx(verseIdx);
     btnRef.dataset.verseIdx = verseIdx;
     entry.appendChild(btnRef);
     let btnMenu = templateBtnIcon('menu', 'Menu');
@@ -232,7 +230,7 @@ class BookmarkListView {
       this.show();
     });
 
-    bus.subscribe('bookmark.strong.mode.update', (strongMode) => {
+    bus.subscribe('bookmark.strong-mode.update', (strongMode) => {
       this.modeUpdate(strongMode);
     });
 
@@ -256,7 +254,7 @@ class BookmarkListView {
       } else if (target === this.btnSortInvert) {
         bus.publish('bookmark-list.sort-invert', null);
       } else if (target === this.btnStrongMode) {
-        bus.publish('bookmark.strong.mode.click', null);
+        bus.publish('bookmark.strong-mode.click', null);
       } else if (target === this.btnBookmarkFolder) {
         bus.publish('bookmark-folder', null);
       }

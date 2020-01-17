@@ -1,14 +1,13 @@
 'use strict';
 
-import { tome } from './Tome/tome.js';
-
 import {
-  idxBook,
-  idxChapter,
-  idxChapterNum,
-  idxLongName,
-  idxVerseNum
-} from './tomeIdx.js';
+  tomeChapters
+} from './data/tomeDb.js';
+import {
+  chapterFirstVerseIdx,
+  chapterLastVerseIdx,
+  chapterName
+} from './data/tomeIdx.js';
 
 export const appPrefix = 'kjs';
 
@@ -18,35 +17,21 @@ export const centerScrollElement = (scrollElement, element) => {
   scrollElement.scrollTop = y;
 };
 
-export const getBookName = (bookIdx) => {
-  return tome.books[bookIdx][idxLongName];
+export const chapterByVerseIdx = (verseIdx) => {
+  let chapterIdx = chapterIdxByVerseIdx(verseIdx);
+  return tomeChapters[chapterIdx];
 };
 
-export const getChapterName = (chapterIdx) => {
-  let chapter = tome.chapters[chapterIdx];
-  let book = tome.books[chapter[idxBook]];
-  return `${book[idxLongName]} ${chapter[idxChapterNum]}`;
+export const chapterIdxByVerseIdx = (verseIdx) => {
+  let chapterIdx = tomeChapters
+    .findIndex(x => x[chapterLastVerseIdx] >= verseIdx);
+  return chapterIdx;
 };
 
-export const getChapterPkg = (verseIdx) => {
-  let ref = tome.refs[verseIdx];
-  let bookIdx = ref[idxBook];
-  let chapterIdx = ref[idxChapter];
-  let chapterName = getChapterName(chapterIdx);
-  let chapterPkg = {
-    bookIdx,
-    chapterIdx,
-    chapterName
-  };
-  return chapterPkg;
-};
-
-export const getRefName = (verseIdx) => {
-  let ref = tome.refs[verseIdx];
-  let chapterIdx = ref[idxChapter];
-  let chapterName = getChapterName(chapterIdx);
-  let verseNum = ref[idxVerseNum];
-  return `${chapterName}:${verseNum}`;
+export const citationByVerseIdx = (verseIdx) => {
+  let chapter = chapterByVerseIdx(verseIdx);
+  let num = verseIdx - chapter[chapterFirstVerseIdx] + 1;
+  return `${chapter[chapterName]}:${num}`;
 };
 
 export const range = (start, stop, step = 1) => {

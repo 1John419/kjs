@@ -1,7 +1,6 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
 import { appPrefix } from '../util.js';
 
 const validTasks = ['help-read', 'help-topic'];

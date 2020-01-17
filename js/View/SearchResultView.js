@@ -1,16 +1,33 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { tome } from '../Tome/tome.js';
-
 import {
-  getBookName,
-  getChapterName,
-  getRefName,
-  removeAllChildren
-} from '../util.js';
-
+  bookBinChapters,
+  bookBinSliceEnd,
+  bookBinSliceStart,
+  bookBinVerseCount,
+  bookBinWordCount,
+  chapterBinSliceEnd,
+  chapterBinSliceStart,
+  chapterBinVerseCount,
+  chapterBinWordCount,
+  tomeBinBooks,
+  tomeBinVerseCount,
+  tomeBinVerses,
+  tomeBinWordCount
+} from '../data/binIdx.js';
+import {
+  tomeAcrostics,
+  tomeBooks,
+  tomeChapters,
+  tomeName
+} from '../data/tomeDb.js';
+import {
+  bookLongName,
+  chapterName,
+  verseCitation,
+  verseText
+} from '../data/tomeIdx.js';
 import {
   templateElement,
   templatePage,
@@ -18,19 +35,21 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
+import { removeAllChildren } from '../util.js';
 
 const lowerToolSet = [
   { type: 'btn', icon: 'back', label: 'Back' },
+  { type: 'btn', icon: 'search-lookup', label: 'Search Lookup' },
   { type: 'btn', icon: 'filter', label: 'Search Filter' },
   { type: 'btn', icon: 'history', label: 'Search History' },
-  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' },
-  { type: 'btn', icon: 'search-lookup', label: 'Search Lookup' }
+  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
 ];
 
 const upperToolSet = [
   { type: 'banner', modifier: 'search-result', text: null }
 ];
 
+const binIdx = 0;
 const loadIncrement = 50;
 
 class SearchResultView {
@@ -51,15 +70,15 @@ class SearchResultView {
     });
   }
 
-  addVerse(verseIdx) {
+  addVerse(verseObj) {
     let btn = document.createElement('button');
     btn.classList.add('btn-result');
-    btn.dataset.verseIdx = verseIdx;
+    btn.dataset.verseIdx = verseObj.k;
     let searchText = document.createElement('span');
     searchText.classList.add('span-result-text');
-    let acrostic = this.buildAcrosticSpan(verseIdx);
-    let ref = this.buildRefSpan(verseIdx);
-    let text = document.createTextNode(tome.verses[verseIdx]);
+    let acrostic = this.buildAcrosticSpan(verseObj);
+    let ref = this.buildRefSpan(verseObj);
+    let text = document.createTextNode(verseObj.v[verseText]);
     searchText.appendChild(ref);
     if (acrostic) {
       searchText.appendChild(acrostic);
@@ -74,35 +93,35 @@ class SearchResultView {
     let bookIdx = this.searchFilter.bookIdx;
     let chapterIdx = this.searchFilter.chapterIdx;
     if (bookIdx === -1 && chapterIdx === -1) {
-      this.filteredVerses = tomeBin[3];
-      this.wordCount = tomeBin[0];
-      this.verseCount = tomeBin[1];
-      this.citation = tome.name;
+      this.filteredVerses = tomeBin[tomeBinVerses];
+      this.wordCount = tomeBin[tomeBinWordCount];
+      this.verseCount = tomeBin[tomeBinVerseCount];
+      this.citation = tomeName;
     } else {
-      let books = tomeBin[2];
+      let books = tomeBin[tomeBinBooks];
       let bookBin = this.findBin(books, bookIdx);
       if (chapterIdx === -1) {
-        this.filteredVerses = tomeBin[3].slice(bookBin[3], bookBin[4]);
-        this.wordCount = bookBin[1];
-        this.verseCount = bookBin[2];
-        this.citation = getBookName(bookIdx);
+        this.filteredVerses = tomeBin[tomeBinVerses].slice(
+          bookBin[bookBinSliceStart], bookBin[bookBinSliceEnd]);
+        this.wordCount = bookBin[bookBinWordCount];
+        this.verseCount = bookBin[bookBinVerseCount];
+        this.citation = tomeBooks[bookIdx][bookLongName];
       } else {
-        let chapters = bookBin[5];
+        let chapters = bookBin[bookBinChapters];
         let chapterBin = this.findBin(chapters, chapterIdx);
-        this.filteredVerses = tomeBin[3].slice(chapterBin[3],
-          chapterBin[4]);
-        this.wordCount = chapterBin[1];
-        this.verseCount = chapterBin[2];
-        this.citation = getChapterName(chapterIdx);
+        this.filteredVerses = tomeBin[tomeBinVerses].slice(
+          chapterBin[chapterBinSliceStart], chapterBin[chapterBinSliceEnd]);
+        this.wordCount = chapterBin[chapterBinWordCount];
+        this.verseCount = chapterBin[chapterBinVerseCount];
+        this.citation = tomeChapters[chapterIdx][chapterName];
       }
     }
   }
 
-  buildAcrosticSpan(verseIdx) {
+  buildAcrosticSpan(verseObj) {
     let acrosticSpan = undefined;
-    let acrostics = tome.acrostics;
-    if (acrostics) {
-      let acrostic = acrostics[verseIdx];
+    if (tomeAcrostics) {
+      let acrostic = tomeAcrostics[verseObj.k];
       if (acrostic) {
         acrosticSpan = document.createElement('span');
         acrosticSpan.classList.add('verse-acrostic');
@@ -138,10 +157,10 @@ class SearchResultView {
     container.appendChild(this.page);
   }
 
-  buildRefSpan(verseIdx) {
+  buildRefSpan(verseObj) {
     let refSpan = document.createElement('span');
     refSpan.classList.add('verse-ref');
-    refSpan.textContent = getRefName(verseIdx);
+    refSpan.textContent = verseObj.v[verseCitation];
     return refSpan;
   }
 
@@ -172,7 +191,7 @@ class SearchResultView {
 
   findBin(bins, idx) {
     return bins.find((bin) => {
-      return bin[0] === idx;
+      return bin[binIdx] === idx;
     });
   }
 
@@ -251,8 +270,9 @@ class SearchResultView {
     }
 
     let fragment = document.createDocumentFragment();
-    for (let idx of verses) {
-      let verse = this.addVerse(idx);
+    let verseObjs = this.searchVerseObjs.filter(x => verses.includes(x.k));
+    for (let verseObj of verseObjs) {
+      let verse = this.addVerse(verseObj);
       fragment.appendChild(verse);
     }
     this.list.appendChild(fragment);
@@ -321,9 +341,11 @@ class SearchResultView {
     bus.subscribe('search.filter.update', (searchFilter) => {
       this.filterUpdate(searchFilter);
     });
-
-    bus.subscribe('search.strong.mode.update', (strongMode) => {
+    bus.subscribe('search.strong-mode.update', (strongMode) => {
       this.modeUpdate(strongMode);
+    });
+    bus.subscribe('search.verses.update', (searchVerseObjs) => {
+      this.versesUpdate(searchVerseObjs);
     });
   }
 
@@ -338,7 +360,7 @@ class SearchResultView {
       } else if (target === this.btnHistory) {
         bus.publish('search-history', null);
       } else if (target === this.btnStrongMode) {
-        bus.publish('search.strong.mode.click', null);
+        bus.publish('search.strong-mode.click', null);
       } else if (target === this.btnSearchLookup) {
         bus.publish('search-lookup', null);
       }
@@ -359,6 +381,10 @@ class SearchResultView {
       this.loadedVerses = 0;
       this.loadVerses();
     }
+  }
+
+  versesUpdate(searchVerseObjs) {
+    this.searchVerseObjs = searchVerseObjs;
   }
 
 }

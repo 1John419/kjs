@@ -1,8 +1,7 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { getChapterPkg } from '../util.js';
+import { chapterIdxByVerseIdx } from '../util.js';
 
 class SearchController {
 
@@ -12,6 +11,16 @@ class SearchController {
 
   back() {
     bus.publish('sidebar.change', 'none');
+  }
+
+  chapterIdxUpdate() {
+    if (this.selectVerseIdx) {
+      if (this.panes === 1) {
+        bus.publish('sidebar.select', 'none');
+      }
+      bus.publish('read.scroll-to-verse', this.selectVerseIdx);
+      this.selectVerseIdx = null;
+    }
   }
 
   filter() {
@@ -70,7 +79,7 @@ class SearchController {
   }
 
   modeToggle() {
-    bus.publish('search.strong.mode.toggle', null);
+    bus.publish('search.strong-mode.toggle', null);
   }
 
   panesUpdate(panes) {
@@ -83,12 +92,9 @@ class SearchController {
   }
 
   readSelect(verseIdx) {
-    let chapterPkg = getChapterPkg(verseIdx);
-    bus.publish('chapterPkg.change', chapterPkg);
-    if (this.panes === 1) {
-      bus.publish('sidebar.select', 'none');
-    }
-    bus.publish('read.scroll-to-verse', verseIdx);
+    this.selectVerseIdx = verseIdx;
+    let chapterIdx = chapterIdxByVerseIdx(verseIdx);
+    bus.publish('chapterIdx.change', chapterIdx);
   }
 
   result() {
@@ -110,6 +116,10 @@ class SearchController {
   }
 
   subscribe() {
+    bus.subscribe('chapterIdx.update', () => {
+      this.chapterIdxUpdate();
+    });
+
     bus.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
@@ -172,7 +182,7 @@ class SearchController {
     bus.subscribe('search.show', () => {
       this.show();
     });
-    bus.subscribe('search.strong.mode.click', () => {
+    bus.subscribe('search.strong-mode.click', () => {
       this.modeToggle();
     });
     bus.subscribe('search.task.update', (searchTask) => {

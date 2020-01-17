@@ -20,10 +20,6 @@ class HelpController {
     this.subscribe();
   }
 
-  panesUpdate(panes) {
-    this.panes = panes;
-  }
-
   read() {
     bus.publish('help.task.change', 'help-read');
   }
@@ -59,10 +55,6 @@ class HelpController {
     });
     bus.subscribe('help.task.update', (helpTask) => {
       this.taskUpdate(helpTask);
-    });
-
-    bus.subscribe('panes.update', (panes) => {
-      this.panesUpdate(panes);
     });
 
     bus.subscribe('sidebar.update', (sidebar) => {

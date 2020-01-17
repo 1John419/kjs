@@ -1,9 +1,11 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { tome } from '../Tome/tome.js';
-
+import {
+  tomeDb,
+  tomeName,
+  tomeVerseCount
+} from '../data/tomeDb.js';
 import { appPrefix } from '../util.js';
 
 const numSortAscend = (a, b) => a - b;
@@ -13,6 +15,8 @@ const bookmarkFolderReroute = ['bookmark-folder-add', 'bookmark-folder-delete',
 ];
 const bookmarkListReroute = ['bookmark-move-copy'];
 const validTasks = ['bookmark-list', 'bookmark-folder'];
+
+const firstEntry = 0;
 
 class BookmarkModel {
 
@@ -80,7 +84,7 @@ class BookmarkModel {
     if (!newFolder) {
       newFolder = this.createFolder(folderName);
       this.folders = [newFolder, ...this.folders];
-      this.folder = this.folders[0];
+      this.folder = this.folders[firstEntry];
       this.activeFolder = folderName;
       this.saveActiveFolder();
       this.updateFolder();
@@ -136,7 +140,6 @@ class BookmarkModel {
   foldersAreValid(folders) {
     let status = 'OK';
     let error = false;
-    let maxIdx = tome.verses.length - 1;
     try {
       folders.some((folder) => {
         if (
@@ -153,7 +156,7 @@ class BookmarkModel {
             if (
               !Number.isInteger(bookmark) ||
               bookmark < 0 ||
-              bookmark > maxIdx
+              bookmark > this.maxIdx
             ) {
               status = 'Invalid verse';
               error = true;
@@ -223,13 +226,14 @@ class BookmarkModel {
   }
 
   initialize() {
+    this.maxIdx = tomeVerseCount - 1;
     this.subscribe();
   }
 
   modeChange(strongMode) {
     this.strongMode = strongMode;
     this.saveMode();
-    bus.publish('bookmark.strong.mode.update', this.strongMode);
+    bus.publish('bookmark.strong-mode.update', this.strongMode);
   }
 
   modeToogle() {
@@ -248,6 +252,11 @@ class BookmarkModel {
     }
   }
 
+  async moveCopyChange(verseIdx) {
+    this.moveCopyVerseObj = await tomeDb.verses.get(verseIdx);
+    bus.publish('bookmark.move-copy.update', this.moveCopyVerseObj);
+  }
+
   moveCopyListChange(verseIdx) {
     let foldersNotFoundIn = this.folders.filter(
       (folder) => !folder.bookmarks.some((element) => element === verseIdx)
@@ -259,14 +268,14 @@ class BookmarkModel {
   reorderBookmarks(fromIdx, toIdx) {
     let bookmarks = this.folder.bookmarks;
     bookmarks.splice(
-      toIdx, 0, bookmarks.splice(fromIdx, 1)[0]
+      toIdx, 0, bookmarks.splice(fromIdx, 1)[firstEntry]
     );
     this.updateFolder();
   }
 
   reorderFolders(fromIdx, toIdx) {
     this.folders.splice(
-      toIdx, 0, this.folders.splice(fromIdx, 1)[0]
+      toIdx, 0, this.folders.splice(fromIdx, 1)[firstEntry]
     );
     this.updateFolder();
     this.updateFolderList();
@@ -276,7 +285,7 @@ class BookmarkModel {
     if (this.folders.length === 0) {
       this.folderAdd('Default');
     }
-    let firstFolder = this.folders[0].name;
+    let firstFolder = this.folders[firstEntry].name;
     this.folderChange(firstFolder);
   }
 
@@ -422,7 +431,7 @@ class BookmarkModel {
     bus.subscribe('bookmark.sort-invert', () => {
       this.sortInvert();
     });
-    bus.subscribe('bookmark.strong.mode.toggle', () => {
+    bus.subscribe('bookmark.strong-mode.toggle', () => {
       this.modeToogle();
     });
     bus.subscribe('bookmark.task.change', (bookmarkTask) => {
@@ -456,6 +465,10 @@ class BookmarkModel {
 
     bus.subscribe('move-copy.list.change', (verseIdx) => {
       this.moveCopyListChange(verseIdx);
+    });
+
+    bus.subscribe('bookmark.move-copy.change', async (verseIdx) => {
+      await this.moveCopyChange(verseIdx);
     });
   }
 
@@ -494,7 +507,7 @@ class BookmarkModel {
     ) {
       status = 'Invalid package structure';
     }
-    if (bookmarkPkg.tome !== tome.name) {
+    if (bookmarkPkg.tome !== tomeName) {
       status = 'Tome mismatch';
     }
     return status;

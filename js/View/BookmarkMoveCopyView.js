@@ -1,12 +1,7 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import {
-  getRefName,
-  removeAllChildren
-} from '../util.js';
-
+import { verseCitation } from '../data/tomeIdx.js';
 import {
   templateActionMenu,
   templateBtnIcon,
@@ -16,6 +11,9 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
+import {
+  removeAllChildren
+} from '../util.js';
 
 const actionSet = [
   { icon: 'move', label: 'Move' },
@@ -171,6 +169,13 @@ class BookmarkMoveCopyView {
     bus.publish('bookmark-move-copy.move', movePkg);
   }
 
+  moveCopyUpdate(verseObj) {
+    this.moveCopyVerseObj = verseObj;
+    this.verseIdx = this.moveCopyVerseObj.k;
+    this.verse = this.moveCopyVerseObj.v;
+    bus.publish('bookmark-move-copy.ready', null);
+  }
+
   scrollToTop() {
     if (this.page.classList.contains('page--hide')) {
       this.scrollReset = true;
@@ -210,8 +215,8 @@ class BookmarkMoveCopyView {
       this.show();
     });
 
-    bus.subscribe('verse.to.move-copy', (verseIdx) => {
-      this.verseToMoveCopy(verseIdx);
+    bus.subscribe('bookmark.move-copy.update', (verseObj) => {
+      this.moveCopyUpdate(verseObj);
     });
   }
 
@@ -226,7 +231,7 @@ class BookmarkMoveCopyView {
   }
 
   updateBanner() {
-    let ref = getRefName(this.verseIdx);
+    let ref = this.verse[verseCitation];
     this.banner.innerHTML = `${ref} <br> Move/Copy to Folder:`;
   }
 
@@ -244,10 +249,6 @@ class BookmarkMoveCopyView {
       }
       this.list.appendChild(fragment);
     }
-  }
-
-  verseToMoveCopy(verseIdx) {
-    this.verseIdx = verseIdx;
   }
 
 }

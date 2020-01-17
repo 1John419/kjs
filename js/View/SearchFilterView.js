@@ -1,17 +1,27 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { tome } from '../Tome/tome.js';
-
-import { idxBook } from '../tomeIdx.js';
-
 import {
-  getBookName,
-  getChapterName,
-  removeAllChildren
-} from '../util.js';
-
+  bookBinBookIdx,
+  bookBinChapters,
+  bookBinVerseCount,
+  bookBinWordCount,
+  chapterBinChapterIdx,
+  chapterBinVerseCount,
+  chapterBinWordCount,
+  tomeBinBooks,
+  tomeBinVerseCount,
+  tomeBinWordCount
+} from '../data/binIdx.js';
+import {
+  tomeChapters,
+  tomeName,
+  tomeBooks
+} from '../data/tomeDb.js';
+import {
+  bookLongName,
+  chapterName
+} from '../data/tomeIdx.js';
 import {
   templateBtnIcon,
   templateElement,
@@ -20,6 +30,9 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
+import {
+  removeAllChildren
+} from '../util.js';
 
 const lowerToolSet = [
   { type: 'btn', icon: 'result', label: 'Search Result' }
@@ -45,10 +58,10 @@ class SearchFilterView {
   }
 
   buildBookFilter(bookBin) {
-    let bookIdx = bookBin[0];
-    let wordCount = bookBin[1];
-    let verseCount = bookBin[2];
-    let citation = getBookName(bookIdx);
+    let bookIdx = bookBin[bookBinBookIdx];
+    let wordCount = bookBin[bookBinWordCount];
+    let verseCount = bookBin[bookBinVerseCount];
+    let citation = tomeBooks[bookIdx][bookLongName];
 
     let bookFilter = document.createElement('div');
     bookFilter.classList.add('filter', 'filter--book');
@@ -73,11 +86,11 @@ class SearchFilterView {
   }
 
   buildChapterFilter(bookBin, chapterBin) {
-    let bookIdx = bookBin[0];
-    let chapterIdx = chapterBin[0];
-    let wordCount = chapterBin[1];
-    let verseCount = chapterBin[2];
-    let citation = getChapterName(chapterIdx);
+    let bookIdx = bookBin[bookBinBookIdx];
+    let chapterIdx = chapterBin[chapterBinChapterIdx];
+    let wordCount = chapterBin[chapterBinWordCount];
+    let verseCount = chapterBin[chapterBinVerseCount];
+    let citation = tomeChapters[chapterIdx][chapterName];
 
     let btnFilter = document.createElement('button');
     btnFilter.classList.add('btn-filter', 'btn-filter--chapter',
@@ -94,11 +107,11 @@ class SearchFilterView {
     let tomeBin = this.rig.tomeBin;
     let tomeFilter = this.buildTomeFilter(tomeBin);
     fragment.appendChild(tomeFilter);
-    let books = tomeBin[2];
+    let books = tomeBin[tomeBinBooks];
     for (let bookBin of books) {
       let bookFilter = this.buildBookFilter(bookBin);
       fragment.appendChild(bookFilter);
-      let chapters = bookBin[5];
+      let chapters = bookBin[bookBinChapters];
       for (let chapterBin of chapters) {
         let chapterFilter = this.buildChapterFilter(bookBin, chapterBin);
         fragment.appendChild(chapterFilter);
@@ -126,9 +139,9 @@ class SearchFilterView {
   }
 
   buildTomeFilter(tomeBin) {
-    let citation = tome.name;
-    let wordCount = tomeBin[0];
-    let verseCount = tomeBin[1];
+    let citation = tomeName;
+    let wordCount = tomeBin[tomeBinWordCount];
+    let verseCount = tomeBin[tomeBinVerseCount];
 
     let btnFilter = document.createElement('button');
     btnFilter.classList.add('btn-filter', 'btn-filter--tome');
@@ -155,9 +168,9 @@ class SearchFilterView {
   }
 
   foldClick(btnFold) {
-    let bookIdx = btnFold.dataset.bookIdx;
+    let bookIdxStr = btnFold.dataset.bookIdx;
     let chapters = this.list.querySelectorAll(
-      `.btn-filter--chapter[data-book-idx="${bookIdx}"]`
+      `.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`
     );
     for (let chapter of chapters) {
       chapter.classList.add('btn-filter--hide');
@@ -249,9 +262,9 @@ class SearchFilterView {
   }
 
   unfoldClick(btnUnfold) {
-    let bookIdx = btnUnfold.dataset.bookIdx;
+    let bookIdxStr = btnUnfold.dataset.bookIdx;
     let chapters = this.list.querySelectorAll(
-      `.btn-filter--chapter[data-book-idx="${bookIdx}"]`
+      `.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`
     );
     for (let chapter of chapters) {
       chapter.classList.remove('btn-filter--hide');

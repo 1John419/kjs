@@ -1,14 +1,26 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
+import { tomeBinVerses } from '../data/binIdx.js';
+import {
+  strongDb,
+  strongNums
+} from '../data/strongDb.js';
+import {
+  wordKjvWord,
+  wordTomeBin
+} from '../data/strongIdx.js';
+import { tomeDb } from '../data/tomeDb.js';
 import { appPrefix } from '../util.js';
-
-import { strong } from '../Tome/strong.js';
 
 const strongDefReroute = ['strong-history', 'strong-lookup'];
 const strongResultReroute = ['strong-filter'];
 const validTasks = ['strong-def', 'strong-verse', 'strong-result'];
+
+const firstEntry = 0;
+const firstWord = 0;
+
+const IDX_1_JOHN_4_19 = 30622;
 
 class StrongModel {
 
@@ -23,23 +35,39 @@ class StrongModel {
     }
   }
 
-  defChange(strongDef) {
-    if (!strong.defs[strongDef]) {
+  addSubHistory() {
+    if (this.strongHistory.indexOf(this.strongDef) === -1) {
+      this.strongHistory.splice(this.strongIdx, 0, this.strongDef);
+      this.updateHistory();
+    }
+  }
+
+  async defChange(strongDef) {
+    if (!strongNums.includes(strongDef)) {
       bus.publish('strong.def.error', 'Invalid Strong Number');
     } else {
       this.strongDef = strongDef;
       this.saveDef();
       this.addHistory();
-      bus.publish('strong.def.update', this.strongDef);
+      this.strongIdx = this.strongHistory.indexOf(this.strongDef);
+      this.strongDefObj = await strongDb.defs.get(this.strongDef);
+      this.strongWordObj = await strongDb.words.get(this.strongDef);
+      this.updateNum();
+      bus.publish('strong.def.update', this.strongDefObj);
+      await this.wordFirst();
     }
   }
 
-  defIsValid(strongDef) {
-    let result = false;
-    if (strong.defs[strongDef]) {
-      result = true;
-    }
-    return result;
+  async defSubChange(strongDef) {
+    this.strongDef = strongDef;
+    this.saveDef();
+    this.addSubHistory();
+    this.strongIdx = this.strongHistory.indexOf(this.strongDef);
+    this.strongDefObj = await strongDb.defs.get(this.strongDef);
+    this.strongWordObj = await strongDb.words.get(this.strongDef);
+    this.updateNum();
+    bus.publish('strong.def.update', this.strongDefObj);
+    await this.wordFirst();
   }
 
   filterChange(strongFilter) {
@@ -109,7 +137,7 @@ class StrongModel {
   modeChange(strongMode) {
     this.strongMode = strongMode;
     this.saveMode();
-    bus.publish('strong.strong.mode.update', this.strongMode);
+    bus.publish('strong.strong-mode.update', this.strongMode);
   }
 
   modeToogle() {
@@ -117,20 +145,22 @@ class StrongModel {
   }
 
   reorderHistory(fromIdx, toIdx) {
-    this.strongHistory.splice(toIdx, 0, this.strongHistory.splice(fromIdx, 1)[0]);
+    this.strongHistory.splice(toIdx, 0,
+      this.strongHistory.splice(fromIdx, 1)[firstEntry]);
   }
 
-  restore() {
+  async restore() {
     this.restoreHistory();
-    this.restoreDef();
-    this.restoreWord();
+    await this.restoreDef();
+    this.strongIdx = this.strongHistory.findIndex(x => x === this.strongDef);
+    await this.restoreWord();
     this.restoreFilter();
-    this.restoreVerse();
+    await this.restoreVerseIdx();
     this.restoreMode();
     this.restoreTask();
   }
 
-  restoreDef() {
+  async restoreDef() {
     let defaultDef = 'G2424';
     let strongDef = localStorage.getItem(`${appPrefix}-strongDef`);
     if (!strongDef) {
@@ -141,11 +171,11 @@ class StrongModel {
       } catch (error) {
         strongDef = defaultDef;
       }
-      if (!this.defIsValid(strongDef)) {
+      if (!strongNums.includes(strongDef)) {
         strongDef = defaultDef;
       }
     }
-    this.defChange(strongDef);
+    await this.defChange(strongDef);
   }
 
   restoreFilter() {
@@ -224,25 +254,25 @@ class StrongModel {
     this.taskChange(strongTask);
   }
 
-  restoreVerse() {
-    let defaultVerse = 30622;
-    let strongVerse = localStorage.getItem(`${appPrefix}-strongVerse`);
-    if (!strongVerse) {
-      strongVerse = defaultVerse;
+  async restoreVerseIdx() {
+    let defaultVerseIdx = IDX_1_JOHN_4_19;
+    let strongVerseIdx = localStorage.getItem(`${appPrefix}-strongVerseIdx`);
+    if (!strongVerseIdx) {
+      strongVerseIdx = defaultVerseIdx;
     } else {
       try {
-        strongVerse = JSON.parse(strongVerse);
+        strongVerseIdx = JSON.parse(strongVerseIdx);
       } catch (error) {
-        strongVerse = defaultVerse;
+        strongVerseIdx = defaultVerseIdx;
       }
-      if (!Number.isInteger(strongVerse)) {
-        strongVerse = defaultVerse;
+      if (!Number.isInteger(strongVerseIdx)) {
+        strongVerseIdx = defaultVerseIdx;
       }
     }
-    this.verseChange(strongVerse);
+    await this.verseIdxChange(strongVerseIdx);
   }
 
-  restoreWord() {
+  async restoreWord() {
     let defaultWord = null;
     let strongWord = localStorage.getItem(`${appPrefix}-strongWord`);
     if (!strongWord) {
@@ -257,7 +287,7 @@ class StrongModel {
         strongWord = defaultWord;
       }
     }
-    this.wordChange(strongWord);
+    await this.wordChange(strongWord);
   }
 
   saveDef() {
@@ -285,9 +315,9 @@ class StrongModel {
       JSON.stringify(this.strongTask));
   }
 
-  saveVerse() {
-    localStorage.setItem(`${appPrefix}-strongVerse`,
-      JSON.stringify(this.strongVerse));
+  saveVerseIdx() {
+    localStorage.setItem(`${appPrefix}-strongVerseIdx`,
+      JSON.stringify(this.strongVerseIdx));
   }
 
   saveWord() {
@@ -295,16 +325,32 @@ class StrongModel {
       JSON.stringify(this.strongWord));
   }
 
+  async strongNext() {
+    this.strongIdx -= 1;
+    if (this.strongIdx < 0) {
+      this.strongIdx = this.strongHistory.length - 1;
+    }
+    await this.defChange(this.strongHistory[this.strongIdx]);
+  }
+
+  async strongPrev() {
+    this.strongIdx += 1;
+    if (this.strongIdx >= this.strongHistory.length) {
+      this.strongIdx = 0;
+    }
+    await this.defChange(this.strongHistory[this.strongIdx]);
+  }
+
   subscribe() {
-    bus.subscribe('strong.def.change', (strongDef) => {
-      this.defChange(strongDef);
+    bus.subscribe('strong.def.change', async (strongDef) => {
+      await this.defChange(strongDef);
+    });
+    bus.subscribe('strong.def.sub-change', async (strongDef) => {
+      await this.defSubChange(strongDef);
     });
 
     bus.subscribe('strong.filter.change', (strongFilter) => {
       this.filterChange(strongFilter);
-    });
-    bus.subscribe('strong.filter.reset', () => {
-      this.filterReset();
     });
 
     bus.subscribe('strong.history.clear', () => {
@@ -320,23 +366,27 @@ class StrongModel {
       this.historyUp(strongDef);
     });
 
-    bus.subscribe('strong.restore', () => {
-      this.restore();
+    bus.subscribe('strong.next', async () => {
+      await this.strongNext();
     });
-    bus.subscribe('strong.strong.mode.toggle', () => {
+    bus.subscribe('strong.prev', async () => {
+      await this.strongPrev();
+    });
+
+    bus.subscribe('strong.restore', async () => {
+      await this.restore();
+    });
+    bus.subscribe('strong.strong-mode.toggle', () => {
       this.modeToogle();
     });
     bus.subscribe('strong.task.change', (strongTask) => {
       this.taskChange(strongTask);
     });
-    bus.subscribe('strong.verse.change', (verseIdx) => {
-      this.verseChange(verseIdx);
+    bus.subscribe('strong.verse.change', async (verseIdx) => {
+      await this.verseIdxChange(verseIdx);
     });
-    bus.subscribe('strong.word.change', (strongWord) => {
-      this.wordChange(strongWord);
-    });
-    bus.subscribe('strong.word.first', () => {
-      this.wordFirst();
+    bus.subscribe('strong.word.change', async (strongWord) => {
+      await this.wordChange(strongWord);
     });
   }
 
@@ -358,21 +408,49 @@ class StrongModel {
     bus.publish('strong.history.update', this.strongHistory);
   }
 
-  verseChange(verseIdx) {
-    this.strongVerse = verseIdx;
-    this.saveVerse();
-    bus.publish('strong.verse.update', this.strongVerse);
+  updateNum() {
+    this.words = this.strongWordObj.v;
+    bus.publish('strong.wordObj.update', this.strongWordObj);
   }
 
-  wordChange(strongWord) {
+  async updateWordMaps() {
+    let verses = this.wordTomeBin[tomeBinVerses];
+    this.wordMapObjs = await strongDb.maps.bulkGet(verses);
+    bus.publish('strong.wordMap.update', this.wordMapObjs);
+  }
+
+  async updateWordVerses() {
+    let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
+    this.wordTomeBin = word[wordTomeBin];
+    bus.publish('strong.wordTomeBin.update', this.wordTomeBin);
+    let verses = this.wordTomeBin[tomeBinVerses];
+    this.wordVerseObjs = await tomeDb.verses.bulkGet(verses);
+    bus.publish('strong.wordVerse.update', this.wordVerseObjs);
+  }
+
+  async verseIdxChange(verseIdx) {
+    this.strongVerseIdx = verseIdx;
+    this.saveVerseIdx();
+    this.strongMapObj = await strongDb.maps.get(this.strongVerseIdx);
+    bus.publish('strong.map.update', this.strongMapObj);
+    this.strongVerseObj = await tomeDb.verses.get(this.strongVerseIdx);
+    bus.publish('strong.verse.update', this.strongVerseObj);
+  }
+
+  async wordChange(strongWord) {
     this.strongWord = strongWord;
     this.saveWord();
+    let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
+    this.wordTomeBin = word[wordTomeBin];
+    await this.updateWordVerses();
+    await this.updateWordMaps();
+    this.filterReset();
     bus.publish('strong.word.update', this.strongWord);
   }
 
-  wordFirst() {
-    let firstWord = Object.keys(strong.words[this.strongDef])[0];
-    this.wordChange(firstWord);
+  async wordFirst() {
+    let firstKjvWord = this.words[firstWord][wordKjvWord];
+    await this.wordChange(firstKjvWord);
   }
 
 }

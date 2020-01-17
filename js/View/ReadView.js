@@ -1,21 +1,14 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { tome } from '../Tome/tome.js';
-
 import {
-  idxFirstVerse,
-  idxLastVerse,
-  idxVerseNum
-} from '../tomeIdx.js';
-
+  tomeAcrostics, tomeChapters
+} from '../data/tomeDb.js';
 import {
-  centerScrollElement,
-  range,
-  removeAllChildren
-} from '../util.js';
-
+  chapterName,
+  verseNum,
+  verseText
+} from '../data/tomeIdx.js';
 import {
   templateElement,
   templateToolbarLower,
@@ -23,6 +16,10 @@ import {
   templateScroll,
   templateToolbarUpper
 } from '../template.js';
+import {
+  centerScrollElement,
+  removeAllChildren
+} from '../util.js';
 
 const lowerToolSet = [
   { type: 'btn', icon: 'navigator', label: 'Navigator' },
@@ -76,9 +73,8 @@ class ReadView {
 
   buildAcrosticSpan(verseIdx) {
     let acrosticSpan = undefined;
-    let acrostics = tome.acrostics;
-    if (acrostics) {
-      let acrostic = acrostics[verseIdx];
+    if (tomeAcrostics) {
+      let acrostic = tomeAcrostics[verseIdx];
       if (acrostic) {
         acrosticSpan = templateElement(
           'span', 'verse-acrostic', null, null, acrostic + ' ');
@@ -105,30 +101,30 @@ class ReadView {
     container.appendChild(this.page);
   }
 
-  buildVerse(verseIdx) {
+  buildVerse(verseObj) {
     let verse = templateElement('div', 'verse', null, null, null);
-    verse.dataset.verseIdx = verseIdx;
-    let verseNum = this.buildVerseNum(verseIdx);
+    verse.dataset.verseIdx = verseObj.k;
+    let verseNum = this.buildVerseNum(verseObj);
     verse.appendChild(verseNum);
-    let acrostic = this.buildAcrosticSpan(verseIdx);
+    let acrostic = this.buildAcrosticSpan(verseObj.k);
     if (acrostic) {
       verse.appendChild(acrostic);
     }
-    let verseText = this.buildVerseText(verseIdx);
-    verse.appendChild(verseText);
+    let text = this.buildVerseText(verseObj);
+    verse.appendChild(text);
     return verse;
   }
 
-  buildVerseNum(verseIdx) {
-    let verseNum = templateElement('span', 'verse-num', null, null,
-      tome.refs[verseIdx][idxVerseNum] + ' ');
-    return verseNum;
+  buildVerseNum(verseObj) {
+    let num = templateElement('span', 'verse-num', null, null,
+      verseObj.v[verseNum] + ' ');
+    return num;
   }
 
-  buildVerseText(verseIdx) {
-    let verseText = templateElement('span', 'verse-text', null, null,
-      tome.verses[verseIdx]);
-    return verseText;
+  buildVerseText(verseObj) {
+    let text = templateElement('span', 'verse-text', null, null,
+      verseObj.v[verseText]);
+    return text;
   }
 
   changeTheme() {
@@ -138,8 +134,8 @@ class ReadView {
     this.body.classList.add(this.theme.themeClass);
   }
 
-  chapterPkgUpdate(chapterPkg) {
-    this.chapterPkg = chapterPkg;
+  chapterIdxUpdate(chapterIdx) {
+    this.chapterIdx = chapterIdx;
     this.updateBanner();
     this.updateVerses();
   }
@@ -240,6 +236,10 @@ class ReadView {
     this.btnNavigator.classList.add('btn-icon--active');
   }
 
+  navigatorVersesUpdate(verseObjs) {
+    this.verseObjs = verseObjs;
+  }
+
   panesUpdate(panes) {
     if (panes === 1 || panes === 2) {
       this.btnColumnOne.classList.add('btn-icon--hide');
@@ -280,13 +280,20 @@ class ReadView {
     }
   }
 
-  scrollToVerse(verseIdx) {
-    let element = this.list.querySelector(
-      `[data-verse-idx="${verseIdx}"]`
-    );
-    if (element) {
-      centerScrollElement(this.scroll, element);
+  scrollToVerse() {
+    if (this.scrollVerse) {
+      let element = this.list.querySelector(
+        `[data-verse-idx="${this.scrollVerse}"]`
+      );
+      if (element) {
+        centerScrollElement(this.scroll, element);
+      }
+      this.scrollVerse = null;
     }
+  }
+
+  setScrollToVerse(verseIdx) {
+    this.scrollVerse = verseIdx;
   }
 
   searchHide() {
@@ -337,8 +344,8 @@ class ReadView {
       this.bookmarkShow();
     });
 
-    bus.subscribe('chapterPkg.update', (chapterPkg) => {
-      this.chapterPkgUpdate(chapterPkg);
+    bus.subscribe('chapterIdx.update', (chapterIdx) => {
+      this.chapterIdxUpdate(chapterIdx);
     });
 
     bus.subscribe('column.update', (column) => {
@@ -370,6 +377,9 @@ class ReadView {
     bus.subscribe('navigator.show', () => {
       this.navigatorShow();
     });
+    bus.subscribe('navigator.verses.update', (verseObjs) => {
+      this.navigatorVersesUpdate(verseObjs);
+    });
 
     bus.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
@@ -379,12 +389,12 @@ class ReadView {
       this.hide();
     });
     bus.subscribe('read.scroll-to-verse', (verseIdx) => {
-      this.scrollToVerse(verseIdx);
+      this.setScrollToVerse(verseIdx);
     });
     bus.subscribe('read.show', () => {
       this.show();
     });
-    bus.subscribe('read.strong.mode.update', (strongMode) => {
+    bus.subscribe('read.strong-mode.update', (strongMode) => {
       this.modeUpdate(strongMode);
     });
 
@@ -434,7 +444,7 @@ class ReadView {
         } else if (target === this.btnStrong) {
           bus.publish('sidebar.select', 'strong');
         } else if (target === this.btnStrongMode) {
-          bus.publish('read.strong.mode.click', null);
+          bus.publish('read.strong-mode.click', null);
         } else if (target === this.btnSetting) {
           bus.publish('sidebar.select', 'setting');
         } else if (target === this.btnHelp) {
@@ -469,7 +479,7 @@ class ReadView {
   }
 
   updateBanner() {
-    this.banner.textContent = this.chapterPkg.chapterName;
+    this.banner.textContent = tomeChapters[this.chapterIdx][chapterName];
   }
 
   updateColumn() {
@@ -507,14 +517,13 @@ class ReadView {
     this.scrollToTop();
     removeAllChildren(this.list);
     let fragment = document.createDocumentFragment();
-    let chapter = tome.chapters[this.chapterPkg.chapterIdx];
-    let indices = range(chapter[idxFirstVerse], chapter[idxLastVerse] + 1);
-    for (let idx of indices) {
-      let verse = this.buildVerse(idx);
+    for (let verseObj of this.verseObjs) {
+      let verse = this.buildVerse(verseObj);
       fragment.appendChild(verse);
     }
     this.list.appendChild(fragment);
     this.refreshVerseBookmarks();
+    this.scrollToVerse();
   }
 
   verseClick(verse) {

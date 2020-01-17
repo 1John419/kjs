@@ -1,11 +1,15 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { tome } from '../Tome/tome.js';
-
-import { strong } from '../Tome/strong.js';
-
+import {
+  verseCitation,
+  verseText
+} from '../data/tomeIdx.js';
+import {
+  mapSliceEnd,
+  mapSliceStart,
+  mapStrongNums
+} from '../data/strongIdx.js';
 import {
   templateElement,
   templatePage,
@@ -13,9 +17,7 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
-
 import {
-  getRefName,
   removeAllChildren
 } from '../util.js';
 
@@ -62,8 +64,8 @@ class StrongVerseView {
     container.appendChild(this.page);
   }
 
-  buildStrongFragemnt(fragment) {
-    let text = this.verseWords.slice(fragment[0], fragment[1])
+  buildStrongFragment(map) {
+    let text = this.verseWords.slice(map[mapSliceStart], map[mapSliceEnd])
       .join(' ');
     let strongFragment = templateElement('div', 'strong-fragment',
       null, null, null);
@@ -71,7 +73,7 @@ class StrongVerseView {
       null, null, text);
     let strongList = templateElement('div', 'strong-list',
       null, null, null);
-    for (let num of fragment[2]) {
+    for (let num of map[mapStrongNums]) {
       let btn = templateElement('button', 'btn-strong',
         null, null, num);
       btn.dataset.strongDef = num.replace(/[()]/g, '');
@@ -93,8 +95,7 @@ class StrongVerseView {
   }
 
   getVerseWords() {
-    let verse = tome.verses[this.strongVerse];
-    let clean_verse = verse.replace(/[,.?;:!()-]/g, '');
+    let clean_verse = this.verse[verseText].replace(/[,.?;:!()-]/g, '');
     this.verseWords = clean_verse.split(' ');
   }
 
@@ -116,6 +117,11 @@ class StrongVerseView {
       let strongDef = target.dataset.strongDef;
       bus.publish('strong-verse.select', strongDef);
     }
+  }
+
+  mapUpdate(strongMapObj) {
+    this.strongMapObj = strongMapObj;
+    this.maps = this.strongMapObj.v;
   }
 
   panesUpdate(panes) {
@@ -142,14 +148,6 @@ class StrongVerseView {
     }
   }
 
-  strongVerseUpdate(verseIdx) {
-    this.strongVerse = verseIdx;
-    if (this.strongVerse >= 0) {
-      this.updateBanner();
-      this.updateList();
-    }
-  }
-
   subscribe() {
     bus.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
@@ -162,8 +160,11 @@ class StrongVerseView {
       this.show();
     });
 
-    bus.subscribe('strong.verse.update', (verseIdx) => {
-      this.strongVerseUpdate(verseIdx);
+    bus.subscribe('strong.map.update', (strongMapObj) => {
+      this.mapUpdate(strongMapObj);
+    });
+    bus.subscribe('strong.verse.update', (strongVerseObj) => {
+      this.verseUpdate(strongVerseObj);
     });
   }
 
@@ -182,9 +183,7 @@ class StrongVerseView {
   }
 
   updateBanner() {
-    if (this.strongVerse >= 0) {
-      this.banner.textContent = getRefName(this.strongVerse);
-    }
+    this.banner.textContent = this.verse[verseCitation];
   }
 
   updateList() {
@@ -192,11 +191,19 @@ class StrongVerseView {
     removeAllChildren(this.list);
     let docFragment = document.createDocumentFragment();
     this.getVerseWords();
-    for (let fragment of strong.fragments[this.strongVerse]) {
-      let strongFragment = this.buildStrongFragemnt(fragment);
-      docFragment.appendChild(strongFragment);
+    for (let map of this.maps) {
+      let strongMap = this.buildStrongFragment(map);
+      docFragment.appendChild(strongMap);
     }
     this.list.appendChild(docFragment);
+  }
+
+  verseUpdate(strongVerseObj) {
+    this.strongVerseObj = strongVerseObj;
+    this.strongVerse = this.strongVerseObj.k;
+    this.verse = this.strongVerseObj.v;
+    this.updateBanner();
+    this.updateList();
   }
 
 }

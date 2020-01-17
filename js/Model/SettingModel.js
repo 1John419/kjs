@@ -1,12 +1,15 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
 import { appPrefix } from '../util.js';
 
 const validFontSizes = ['font-size--s', 'font-size--m', 'font-size--l',
   'font-size--xl', 'font-size--xxl'
 ];
+
+const fontDefault = 0;
+const fontSizeDefault = 1;
+const themeDefault = 1;
 
 class SettingModel {
 
@@ -58,16 +61,16 @@ class SettingModel {
       fontClass: 'font--lato'
     });
     this.fonts.push({
-      fontName: 'Slabo',
-      fontClass: 'font--slabo'
+      fontName: 'Roboto Slab',
+      fontClass: 'font--roboto-slab'
     });
     this.fonts.push({
       fontName: 'Merriweather',
       fontClass: 'font--merriweather'
     });
     this.fonts.push({
-      fontName: 'Roboto Slab',
-      fontClass: 'font--roboto-slab'
+      fontName: 'Playfair Display',
+      fontClass: 'font--playfair-display'
     });
     bus.publish('fonts.update', this.fonts);
   }
@@ -114,7 +117,7 @@ class SettingModel {
   }
 
   restoreFont() {
-    let defaultFont = this.fonts[0];
+    let defaultFont = this.fonts[fontDefault];
     let font = localStorage.getItem(`${appPrefix}-font`);
     if (!font) {
       font = defaultFont;
@@ -132,7 +135,7 @@ class SettingModel {
   }
 
   restoreFontSize() {
-    let defaultFontSize = validFontSizes[1];
+    let defaultFontSize = validFontSizes[fontSizeDefault];
     let fontSize = localStorage.getItem(`${appPrefix}-fontSize`);
     if (!fontSize) {
       fontSize = defaultFontSize;
@@ -150,7 +153,7 @@ class SettingModel {
   }
 
   restoreTheme() {
-    let defaultTheme = this.themes[1];
+    let defaultTheme = this.themes[themeDefault];
     let theme = localStorage.getItem(`${appPrefix}-theme`);
     if (!theme) {
       theme = defaultTheme;

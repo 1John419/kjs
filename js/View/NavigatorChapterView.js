@@ -1,24 +1,18 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { tome } from '../Tome/tome.js';
-
 import {
-  idxBook,
-  idxChapter,
-  idxChapterNum,
-  idxFirstChapter,
-  idxLastChapter,
-  idxLongName
-} from '../tomeIdx.js';
-
+  tomeBooks,
+  tomeChapters
+} from '../data/tomeDb.js';
 import {
-  getChapterName,
-  range,
-  removeAllChildren
-} from '../util.js';
-
+  bookFirstChapterIdx,
+  bookLastChapterIdx,
+  bookLongName,
+  chapterBookIdx,
+  chapterName,
+  chapterNum
+} from '../data/tomeIdx.js';
 import {
   templateElement,
   templatePage,
@@ -26,6 +20,10 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
+import {
+  range,
+  removeAllChildren
+} from '../util.js';
 
 const lowerToolSet = [
   { type: 'btn', icon: 'back', label: 'Back' },
@@ -51,15 +49,16 @@ class NavigatorChapterView {
     });
   }
 
-  buildBtnContent(chapter) {
+  buildBtnContent(chapterIdx) {
+    let chapter = tomeChapters[chapterIdx];
     let btn = document.createElement('button');
     btn.classList.add('btn-chapter');
-    btn.dataset.bookIdx = chapter[idxBook];
-    btn.dataset.chapterIdx = chapter[idxChapter];
-    btn.dataset.chapterName = getChapterName(chapter[idxChapter]);
-    let chapterStr = (chapter[idxChapterNum]).toString();
-    btn.textContent = chapterStr;
-    btn.setAttribute('aria-label', `Chapter ${chapterStr}`);
+    btn.dataset.bookIdx = chapter[chapterBookIdx];
+    btn.dataset.chapterIdx = chapterIdx;
+    btn.dataset.chapterName = chapter[chapterName];
+    let num = chapter[chapterNum];
+    btn.textContent = num;
+    btn.setAttribute('aria-label', num);
     return btn;
   }
 
@@ -69,18 +68,6 @@ class NavigatorChapterView {
       this.updateBanner();
       this.updateChapterList();
     }
-  }
-
-  buildChapterPkg(btn) {
-    let bookIdx = parseInt(btn.dataset.bookIdx);
-    let chapterIdx = parseInt(btn.dataset.chapterIdx);
-    let chapterName = btn.dataset.chapterName;
-    let chapterPkg = {
-      bookIdx: bookIdx,
-      chapterIdx: chapterIdx,
-      chapterName: chapterName
-    };
-    return chapterPkg;
   }
 
   buildPage() {
@@ -101,10 +88,12 @@ class NavigatorChapterView {
     container.appendChild(this.page);
   }
 
-  chapterPkgUpdate(chapterPkg) {
-    let oldPkg = this.chapterPkg || chapterPkg;
-    this.chapterPkg = chapterPkg;
-    if (oldPkg.bookIdx !== this.chapterPkg.bookIdx) {
+  chapterIdxUpdate(chapterIdx) {
+    let oldChapterIdx = this.chapterIdx || chapterIdx;
+    let oldBookIdx = tomeChapters[oldChapterIdx][chapterBookIdx];
+    this.chapterIdx = chapterIdx;
+    let bookIdx = tomeChapters[this.chapterIdx][chapterBookIdx];
+    if (oldBookIdx !== bookIdx) {
       this.updateBanner();
       this.updateChapterList();
     }
@@ -112,8 +101,8 @@ class NavigatorChapterView {
   }
 
   contentClick(btn) {
-    let chapterPkg = this.buildChapterPkg(btn);
-    bus.publish('navigator-chapter.select', chapterPkg);
+    let chapterIdx = parseInt(btn.dataset.chapterIdx);
+    bus.publish('navigator-chapter.select', chapterIdx);
   }
 
   getElements() {
@@ -169,12 +158,12 @@ class NavigatorChapterView {
   }
 
   subscribe() {
-    bus.subscribe('book.change', (bookIdx) => {
+    bus.subscribe('bookIdx.change', (bookIdx) => {
       this.bookChange(bookIdx);
     });
 
-    bus.subscribe('chapterPkg.update', (chapterPkg) => {
-      this.chapterPkgUpdate(chapterPkg);
+    bus.subscribe('chapterIdx.update', (chapterIdx) => {
+      this.chapterIdxUpdate(chapterIdx);
     });
 
     bus.subscribe('navigator-chapter.hide', () => {
@@ -207,14 +196,14 @@ class NavigatorChapterView {
       activeBtn.classList.remove('btn-chapter--active');
     }
     let selector =
-      `.btn-chapter[data-chapter-idx="${this.chapterPkg.chapterIdx}"]`;
+      `.btn-chapter[data-chapter-idx="${this.chapterIdx}"]`;
     activeBtn = this.list.querySelector(selector);
     activeBtn.classList.add('btn-chapter--active');
   }
 
   updateBanner() {
-    let bookName = tome.books[this.bookIdx][idxLongName];
-    this.banner.innerHTML = `${bookName}`;
+    let longName = tomeBooks[this.bookIdx][bookLongName];
+    this.banner.innerHTML = `${longName}`;
   }
 
   updateChapterList() {
@@ -222,10 +211,11 @@ class NavigatorChapterView {
     removeAllChildren(this.list);
     let list = document.createElement('div');
     list.classList.add('content', 'content--chapter');
-    let book = tome.books[this.bookIdx];
-    let indices = range(book[idxFirstChapter], book[idxLastChapter] + 1);
+    let book = tomeBooks[this.bookIdx];
+    let indices = range(book[bookFirstChapterIdx],
+      book[bookLastChapterIdx] + 1);
     for (let idx of indices) {
-      let btn = this.buildBtnContent(tome.chapters[idx]);
+      let btn = this.buildBtnContent(idx);
       list.appendChild(btn);
     }
     this.list.appendChild(list);

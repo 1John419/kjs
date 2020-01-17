@@ -1,17 +1,27 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { tome } from '../Tome/tome.js';
-
-import { strong } from '../Tome/strong.js';
-
 import {
-  getBookName,
-  getChapterName,
-  removeAllChildren
-} from '../util.js';
-
+  bookBinBookIdx,
+  bookBinChapters,
+  bookBinVerseCount,
+  bookBinWordCount,
+  chapterBinChapterIdx,
+  chapterBinVerseCount,
+  chapterBinWordCount,
+  tomeBinBooks,
+  tomeBinVerseCount,
+  tomeBinWordCount
+} from '../data/binIdx.js';
+import {
+  tomeChapters,
+  tomeName,
+  tomeBooks
+} from '../data/tomeDb.js';
+import {
+  bookLongName,
+  chapterName
+} from '../data/tomeIdx.js';
 import {
   templateBtnIcon,
   templateElement,
@@ -20,6 +30,9 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
+import {
+  removeAllChildren
+} from '../util.js';
 
 const lowerToolSet = [
   { type: 'btn', icon: 'result', label: 'Strong Result' }
@@ -45,10 +58,10 @@ class StrongFilterView {
   }
 
   buildBookFilter(bookBin) {
-    let bookIdx = bookBin[0];
-    let wordCount = bookBin[1];
-    let verseCount = bookBin[2];
-    let citation = getBookName(bookIdx);
+    let bookIdx = bookBin[bookBinBookIdx];
+    let wordCount = bookBin[bookBinWordCount];
+    let verseCount = bookBin[bookBinVerseCount];
+    let citation = tomeBooks[bookIdx][bookLongName];
 
     let bookFilter = document.createElement('div');
     bookFilter.classList.add('filter', 'filter--book');
@@ -73,11 +86,11 @@ class StrongFilterView {
   }
 
   buildChapterFilter(bookBin, chapterBin) {
-    let bookIdx = bookBin[0];
-    let chapterIdx = chapterBin[0];
-    let wordCount = chapterBin[1];
-    let verseCount = chapterBin[2];
-    let citation = getChapterName(chapterIdx);
+    let bookIdx = bookBin[bookBinBookIdx];
+    let chapterIdx = chapterBin[chapterBinChapterIdx];
+    let wordCount = chapterBin[chapterBinWordCount];
+    let verseCount = chapterBin[chapterBinVerseCount];
+    let citation = tomeChapters[chapterIdx][chapterName];
 
     let btnFilter = document.createElement('button');
     btnFilter.classList.add('btn-filter', 'btn-filter--chapter',
@@ -91,14 +104,13 @@ class StrongFilterView {
 
   buildFilters() {
     let fragment = document.createDocumentFragment();
-    let tomeBin = strong.words[this.strongDef][this.strongWord];
-    let tomeFilter = this.buildTomeFilter(tomeBin);
+    let tomeFilter = this.buildTomeFilter();
     fragment.appendChild(tomeFilter);
-    let books = tomeBin[2];
+    let books = this.strongWordTomeBin[tomeBinBooks];
     for (let bookBin of books) {
       let bookFilter = this.buildBookFilter(bookBin);
       fragment.appendChild(bookFilter);
-      let chapters = bookBin[5];
+      let chapters = bookBin[bookBinChapters];
       for (let chapterBin of chapters) {
         let chapterFilter = this.buildChapterFilter(bookBin, chapterBin);
         fragment.appendChild(chapterFilter);
@@ -125,10 +137,10 @@ class StrongFilterView {
     container.appendChild(this.page);
   }
 
-  buildTomeFilter(tomeBin) {
-    let citation = tome.name;
-    let wordCount = tomeBin[0];
-    let verseCount = tomeBin[1];
+  buildTomeFilter() {
+    let citation = tomeName;
+    let wordCount = this.strongWordTomeBin[tomeBinWordCount];
+    let verseCount = this.strongWordTomeBin[tomeBinVerseCount];
 
     let btnFilter = document.createElement('button');
     btnFilter.classList.add('btn-filter', 'btn-filter--tome');
@@ -139,8 +151,9 @@ class StrongFilterView {
     return btnFilter;
   }
 
-  defUpdate(strongDef) {
-    this.strongDef = strongDef;
+  defUpdate(strongDefObj) {
+    this.strongDefObj = strongDefObj;
+    this.strongDef = this.strongDefObj.k;
   }
 
   filterClick(btnFilter) {
@@ -159,9 +172,9 @@ class StrongFilterView {
   }
 
   foldClick(btnFold) {
-    let bookIdx = btnFold.dataset.bookIdx;
+    let bookIdxStr = btnFold.dataset.bookIdx;
     let chapters = this.list.querySelectorAll(
-      `.btn-filter--chapter[data-book-idx="${bookIdx}"]`
+      `.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`
     );
     for (let chapter of chapters) {
       chapter.classList.add('btn-filter--hide');
@@ -228,14 +241,17 @@ class StrongFilterView {
       this.show();
     });
 
-    bus.subscribe('strong.def.update', (strongDef) => {
-      this.defUpdate(strongDef);
+    bus.subscribe('strong.def.update', (strongDefObj) => {
+      this.defUpdate(strongDefObj);
     });
     bus.subscribe('strong.filter.update', (strongFilter) => {
       this.filterUpdate(strongFilter);
     });
     bus.subscribe('strong.word.update', (strongWord) => {
       this.wordUpdate(strongWord);
+    });
+    bus.subscribe('strong.wordTomeBin.update', (strongWordTomeBin) => {
+      this.wordTomeBinUpdate(strongWordTomeBin);
     });
   }
 
@@ -250,9 +266,9 @@ class StrongFilterView {
   }
 
   unfoldClick(btnUnfold) {
-    let bookIdx = btnUnfold.dataset.bookIdx;
+    let bookIdxStr = btnUnfold.dataset.bookIdx;
     let chapters = this.list.querySelectorAll(
-      `.btn-filter--chapter[data-book-idx="${bookIdx}"]`
+      `.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`
     );
     for (let chapter of chapters) {
       chapter.classList.remove('btn-filter--hide');
@@ -286,6 +302,10 @@ class StrongFilterView {
     removeAllChildren(this.list);
     let list = this.buildFilters();
     this.list.appendChild(list);
+  }
+
+  wordTomeBinUpdate(strongWordTomeBin) {
+    this.strongWordTomeBin = strongWordTomeBin;
   }
 
   wordUpdate(strongWord) {

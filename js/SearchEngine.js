@@ -1,11 +1,33 @@
 'use strict';
 
-import { tome } from './Tome/tome.js';
-
 import {
-  idxBook,
-  idxChapter,
-} from './tomeIdx.js';
+  tomeBooks,
+  tomeChapters,
+  tomeDb,
+  tomeWords
+} from './data/tomeDb.js';
+import {
+  bookLastVerseIdx,
+  chapterLastVerseIdx,
+  verseText,
+  wordCount,
+  wordVerseIdx
+} from './data/tomeIdx.js';
+import {
+  bookBinBookIdx,
+  bookBinChapters,
+  bookBinSliceEnd,
+  bookBinVerseCount,
+  bookBinWordCount,
+  chapterBinChapterIdx,
+  chapterBinSliceEnd,
+  chapterBinVerseCount,
+  chapterBinWordCount,
+  tomeBinBooks,
+  tomeBinVerseCount,
+  tomeBinVerses,
+  tomeBinWordCount
+} from './data/binIdx.js';
 
 const numSort = (a, b) => a - b;
 
@@ -17,16 +39,9 @@ const product = (sets) =>
     []
   ]);
 
-const IdxTomeWordCount = 0;
-const idxTomeVerseCount = 1;
-const idxBookIdx = 0;
-const idxChapterIdx = 0;
-const idxWordCount = 1;
-const idxVerseCount = 2;
-const idxSliceEnd = 4;
-const idxBooks = 2;
-const idxVerses = 3;
-const idxChapters = 5;
+const firstMatch = 1;
+const firstSet = 0;
+const secondSet = 1;
 
 class SearchEngine {
 
@@ -34,18 +49,19 @@ class SearchEngine {
     this.initialize();
   }
 
-  buildBins() {
+  buildBins(verseIdx) {
     let tomeBin = this.rig.tomeBin;
-    let versesLength = tomeBin[idxVerses].length;
-    tomeBin[IdxTomeWordCount] += this.verseCount;
-    tomeBin[idxTomeVerseCount] += 1;
+    let versesLength = tomeBin[tomeBinVerses].length;
+    tomeBin[tomeBinWordCount] += this.verseCount;
+    tomeBin[tomeBinVerseCount] += 1;
 
-    let ref = tome.refs[this.verseIdx];
-    let bookIdx = ref[idxBook];
-    let chapterIdx = ref[idxChapter];
+    let book = tomeBooks.find(x => x[bookLastVerseIdx] >= verseIdx);
+    let bookIdx = tomeBooks.indexOf(book);
+    let chapter = tomeChapters.find(x => x[chapterLastVerseIdx] >= verseIdx);
+    let chapterIdx = tomeChapters.indexOf(chapter);
 
-    let bookBin = tomeBin[idxBooks].find(
-      (x) => x[idxBookIdx] === bookIdx
+    let bookBin = tomeBin[tomeBinBooks].find(
+      x => x[bookBinBookIdx] === bookIdx
     );
     if (!bookBin) {
       let wordCount = 0;
@@ -53,7 +69,7 @@ class SearchEngine {
       let sliceStart = versesLength - 1;
       let sliceEnd = sliceStart;
       let chapters = [];
-      tomeBin[idxBooks].push([
+      tomeBin[tomeBinBooks].push([
         bookIdx,
         wordCount,
         verseCount,
@@ -61,32 +77,80 @@ class SearchEngine {
         sliceEnd,
         chapters
       ]);
-      bookBin = tomeBin[idxBooks][tomeBin[idxBooks].length - 1];
+      bookBin = tomeBin[tomeBinBooks][tomeBin[tomeBinBooks].length - 1];
     }
-    bookBin[idxWordCount] += this.verseCount;
-    bookBin[idxVerseCount] += 1;
-    bookBin[idxSliceEnd] += 1;
+    bookBin[bookBinWordCount] += this.verseCount;
+    bookBin[bookBinVerseCount] += 1;
+    bookBin[bookBinSliceEnd] += 1;
 
-    let chapterBin = bookBin[idxChapters].find(
-      (x) => x[idxChapterIdx] === chapterIdx
+    let chapterBin = bookBin[bookBinChapters].find(
+      (x) => x[chapterBinChapterIdx] === chapterIdx
     );
     if (!chapterBin) {
       let wordCount = 0;
       let verseCount = 0;
       let sliceStart = versesLength - 1;
       let sliceEnd = sliceStart;
-      bookBin[idxChapters].push([
+      bookBin[bookBinChapters].push([
         chapterIdx,
         wordCount,
         verseCount,
         sliceStart,
         sliceEnd
       ]);
-      chapterBin = bookBin[idxChapters][bookBin[idxChapters].length - 1];
+      chapterBin = bookBin[bookBinChapters][bookBin[bookBinChapters].length - 1];
     }
-    chapterBin[idxWordCount] += this.verseCount;
-    chapterBin[idxVerseCount] += 1;
-    chapterBin[idxSliceEnd] += 1;
+    chapterBin[chapterBinWordCount] += this.verseCount;
+    chapterBin[chapterBinVerseCount] += 1;
+    chapterBin[chapterBinSliceEnd] += 1;
+  }
+
+  buildCombinations() {
+    this.combinations = product(this.patterns);
+  }
+
+  buildIntersects() {
+    let verses = new Set();
+    for (let set of this.sets) {
+      let intersect = this.intersectAll(set);
+      for (let verse of [...intersect]) {
+        verses.add(verse);
+      }
+    }
+    this.intersects = [...verses].sort(numSort);
+  }
+
+  buildPatterns() {
+    this.rig.wordStatus = 'OK';
+    this.patterns = [];
+    let missingTerms = [];
+    for (let term of this.terms) {
+      let re = new RegExp(`^${term.replace(/\*/g, '.*')}$`, this.testFlags);
+      let words = tomeWords.filter(x => re.test(x));
+      if (words.length > 0) {
+        this.patterns.push(words);
+      } else {
+        missingTerms.push(term);
+      }
+    }
+    if (missingTerms.length > 0) {
+      this.rig.wordStatus = `'${missingTerms.join(', ')}' not found`;
+    }
+  }
+
+  async buildPhraseVerses() {
+    let allVerses = [...this.intersects].sort(numSort);
+    let verseObjs = await tomeDb.verses.bulkGet(allVerses);
+    for (let verseObj of verseObjs) {
+      this.verseIdx = verseObj.k;
+      let re = this.buildRegExp(this.searchTerms, this.flags);
+      let text = verseObj.v[verseText].replace(/[!();:,.?-]/g, '');
+      this.verseCount = (text.match(re) || []).length;
+      if (this.verseCount > 0) {
+        this.rig.tomeBin[tomeBinVerses].push(this.verseIdx);
+        this.buildBins(this.verseIdx);
+      }
+    }
   }
 
   buildRegExp(term, flags) {
@@ -106,6 +170,7 @@ class SearchEngine {
     } else {
       this.rig.type = 'INVALID';
       this.flags = query.startsWith('@') ? 'g' : 'gi';
+      this.testFlags = query.startsWith('@') ? '' : 'i';
       this.searchTerms = this.rig.query
         .replace('@', '')
         .trim()
@@ -134,97 +199,42 @@ class SearchEngine {
     }
   }
 
-  buildSearchCombinations() {
-    this.combinations = product(this.patterns);
-  }
-
-  buildSearchIntersects() {
-    let verses = new Set();
-    for (let set of this.sets) {
-      let intersect = this.intersectAll(set);
-      for (let verse of [...intersect]) {
-        verses.add(verse);
-      }
-    }
-    this.intersects = [...verses].sort(numSort);
-  }
-
-  buildSearchPatterns() {
-    this.rig.tomeWords = 'OK';
-    this.patterns = [];
-    let missingTerms = [];
-    for (let term of this.terms) {
-      let regExp = this.buildRegExp(term, 'gi');
-      let words = this.getTomeWords(regExp);
-      if (words.length > 0) {
-        this.patterns.push(words);
-      } else {
-        missingTerms.push(term);
-      }
-    }
-    if (missingTerms.length > 0) {
-      this.rig.tomeWords = `'${missingTerms.join(', ')}' not found`;
-    }
-  }
-
-  buildSearchPhraseVerses() {
-    let allVerses = [...this.intersects].sort(numSort);
-    for (let idx of allVerses) {
-      this.verseIdx = idx;
-      let text = tome.verses[idx].replace(/[!();:,.?-]/g, '');
-      let regExp = this.buildRegExp(
-        this.searchTerms, this.flags
-      );
-      this.verseCount = (text.match(regExp) || []).length;
-      if (this.verseCount > 0) {
-        this.rig.tomeBin[idxVerses].push(idx);
-        this.buildBins();
-      }
-    }
-  }
-
-  buildSearchSets() {
+  async buildSets() {
     this.sets = [];
+
+    let unique = [...new Set([].concat.apply([], this.combinations))].sort();
+    this.wordObjs = await tomeDb.words.bulkGet(unique);
+
+    let words = {};
+    this.wordObjs.map(obj => words[obj.k] = obj.v);
+
     for (let combination of this.combinations) {
       let comboSets = [];
       for (let word of combination) {
-        comboSets.push(new Set(tome.wordVerses[word]));
+        let verseKeys = words[word].map(x => x[wordVerseIdx]);
+        comboSets.push(new Set(verseKeys));
       }
       this.sets.push(comboSets);
     }
   }
 
-  buildSearchWordVerses() {
-    let allVerses = [...this.intersects].sort(numSort);
-    for (let idx of allVerses) {
-      this.verseIdx = idx;
-      let text = tome.verses[idx].replace(/[!();:,.?-]/g, '');
-      this.verseCount = 0;
-      let error = false;
-      this.terms.every((term) => {
-        let regExp = this.buildRegExp(term, this.flags);
-        let hits = (text.match(regExp) || []).length;
-        if (hits === 0) {
-          this.verseCount = 0;
-        } else {
-          this.verseCount += hits;
-          error = true;
-        }
-        return error;
-      });
+  async buildWords() {
+    let allVerses = [...this.intersects];
+    for (let verseIdx of allVerses) {
+      this.verseIdx = verseIdx;
+      this.getVerseCount(verseIdx);
       if (this.verseCount > 0) {
-        this.rig.tomeBin[idxVerses].push(idx);
-        this.buildBins();
+        this.rig.tomeBin[tomeBinVerses].push(this.verseIdx);
+        this.buildBins(this.verseIdx);
       }
     }
   }
 
-  buildSearchVerses() {
-    this.initializeTomeBin();
+  async buildVerses() {
     if (this.rig.type === 'PHRASE') {
-      this.buildSearchPhraseVerses(this.rig);
+      await this.buildPhraseVerses(this.rig);
     } else if (this.rig.type === 'WORD') {
-      this.buildSearchWordVerses(this.rig);
+      await this.buildWords(this.rig);
     }
   }
 
@@ -232,18 +242,19 @@ class SearchEngine {
     let result;
     let matches = [];
     while ((result = regEx.exec(str)) !== null) {
-      matches.push(result[1]);
+      matches.push(result[firstMatch]);
     }
     return matches.length === 0 ? undefined : matches;
   }
 
-  getTomeWords(regExp) {
-    let tomeWords = [];
-    let words = this.findAllMatches(tome.wordList, regExp);
-    if (words) {
-      tomeWords = tomeWords.concat(words);
+  getVerseCount(verseIdx) {
+    this.verseCount = 0;
+    for (let wordVerseObj of this.wordObjs) {
+      let verseCount = wordVerseObj.v.find(x => x[wordVerseIdx] === verseIdx);
+      if (verseCount) {
+        this.verseCount += verseCount[wordCount];
+      }
     }
-    return tomeWords;
   }
 
   initialize() {
@@ -267,14 +278,14 @@ class SearchEngine {
     let intersect = undefined;
     let numOfSets = sets.length;
     if (numOfSets > 0) {
-      if (Array.isArray(sets[0])) {
-        sets = [...sets[0]];
+      if (Array.isArray(sets[firstSet])) {
+        sets = [...sets[firstSet]];
         numOfSets = sets.length;
       }
       if (numOfSets < 2) {
-        intersect = sets[0];
+        intersect = sets[firstSet];
       } else {
-        intersect = this.intersection(sets[0], sets[1]);
+        intersect = this.intersection(sets[firstSet], sets[secondSet]);
         if (numOfSets > 2) {
           for (let i = 2; i < numOfSets; i++) {
             intersect = this.intersection(intersect, sets[i]);
@@ -289,19 +300,17 @@ class SearchEngine {
     return new Set([...set1].filter((x) => set2.has(x)));
   }
 
-  performSearch(query) {
+  async performSearch(query) {
     this.buildRig(query);
-    if (
-      this.rig.type === 'WORD' ||
-      this.rig.type === 'PHRASE'
-    ) {
-      this.buildSearchPatterns();
-      if (this.rig.tomeWords === 'OK') {
+    this.initializeTomeBin();
+    if (this.rig.type === 'WORD' || this.rig.type === 'PHRASE') {
+      this.buildPatterns();
+      if (this.rig.wordStatus === 'OK') {
         this.rig.state = 'OK';
-        this.buildSearchCombinations();
-        this.buildSearchSets();
-        this.buildSearchIntersects();
-        this.buildSearchVerses();
+        this.buildCombinations();
+        await this.buildSets();
+        this.buildIntersects();
+        await this.buildVerses();
       }
     }
     return this.rig;

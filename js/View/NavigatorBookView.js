@@ -1,15 +1,11 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { tome } from '../Tome/tome.js';
-
+import { tomeBooks } from '../data/tomeDb.js';
 import {
-  idxBook,
-  idxLongName,
-  idxShortName
-} from '../tomeIdx.js';
-
+  bookLongName,
+  bookShortName
+} from '../data/tomeIdx.js';
 import {
   templateElement,
   templatePage,
@@ -70,12 +66,12 @@ class NavigatorBookView {
     this.list.appendChild(booksGreek);
   }
 
-  buildBtnBook(book) {
+  buildBtnBook(bookIdx) {
     let btn = document.createElement('button');
     btn.classList.add('btn-book');
-    btn.dataset.bookIdx = book[idxBook];
-    btn.textContent = book[idxShortName];
-    btn.setAttribute('aria-label', book[idxLongName]);
+    btn.dataset.bookIdx = bookIdx;
+    btn.textContent = tomeBooks[bookIdx][bookShortName];
+    btn.setAttribute('aria-label', tomeBooks[bookIdx][bookLongName]);
     return btn;
   }
 
@@ -84,7 +80,7 @@ class NavigatorBookView {
     booksGreek.classList.add('content', 'content--greek-book');
     let greekIndices = indices.slice(greekFirstIdx);
     for (let idx of greekIndices) {
-      let btn = this.buildBtnBook(tome.books[idx]);
+      let btn = this.buildBtnBook(idx);
       booksGreek.appendChild(btn);
     }
     return booksGreek;
@@ -95,7 +91,7 @@ class NavigatorBookView {
     booksHebrew.classList.add('content', 'content--hebrew-book');
     let hebrewIndices = indices.slice(0, greekFirstIdx);
     for (let idx of hebrewIndices) {
-      let btn = this.buildBtnBook(tome.books[idx]);
+      let btn = this.buildBtnBook(idx);
       booksHebrew.appendChild(btn);
     }
     return booksHebrew;
@@ -120,7 +116,7 @@ class NavigatorBookView {
   }
 
   contentClick(btn) {
-    let bookIdx = btn.dataset.bookIdx;
+    let bookIdx = parseInt(btn.dataset.bookIdx);
     bus.publish('navigator-book.select', bookIdx);
   }
 
@@ -165,7 +161,7 @@ class NavigatorBookView {
   }
 
   subscribe() {
-    bus.subscribe('book.change', (bookIdx) => {
+    bus.subscribe('bookIdx.change', (bookIdx) => {
       this.bookChange(bookIdx);
     });
 

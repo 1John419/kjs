@@ -1,9 +1,9 @@
 1 John 4:19 We love him, because he first loved us.
 
 ## KJS
-An Offline King James with Strong Search Application for Android, Windows, and Linux.
+An Offline King James with Strong Bible Search Application.
 
-This application is dedicated to our glorious Lord and Saviour Jesus Christ.
+Dedicated to our precious Lord and Saviour Jesus Christ.
 
 "Heaven and earth shall pass away, but my words shall not pass away."
 

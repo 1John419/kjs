@@ -1,16 +1,11 @@
 'use strict';
 
 import { bus } from '../EventBus.js';
-
-import { tome } from '../Tome/tome.js';
-
+import { tomeBooks } from '../data/tomeDb.js';
 import {
-  idxChapter,
-  idxFirstChapter,
-  idxLastChapter
-} from '../tomeIdx.js';
-
-import { getChapterName } from '../util.js';
+  bookFirstChapterIdx,
+  bookLastChapterIdx
+} from '../data/tomeIdx.js';
 
 class NavigatorController {
 
@@ -28,14 +23,15 @@ class NavigatorController {
 
   bookSelect(bookIdx) {
     if (bookIdx !== this.lastBookIdx) {
-      bus.publish('book.change', bookIdx);
+      bus.publish('bookIdx.change', bookIdx);
     }
     this.lastBookIdx = bookIdx;
-    let book = tome.books[bookIdx];
-    let chapterCount = book[idxLastChapter] - book[idxFirstChapter] + 1;
+    let book = tomeBooks[bookIdx];
+    let chapterCount =
+      book[bookLastChapterIdx] - book[bookFirstChapterIdx] + 1;
     if (this.panes > 1 || chapterCount === 1) {
-      let chapter = this.buildFirstChapter(bookIdx);
-      bus.publish('chapterPkg.change', chapter);
+      let chapterIdx = tomeBooks[bookIdx][bookFirstChapterIdx];
+      bus.publish('chapterIdx.change', chapterIdx);
     }
     if (this.panes === 1 && chapterCount === 1) {
       bus.publish('sidebar.change', 'none');
@@ -44,27 +40,18 @@ class NavigatorController {
     }
   }
 
-  buildFirstChapter(bookIdx) {
-    let firstChapterIdx = tome.books[bookIdx][idxFirstChapter];
-    let chapterIdx = tome.chapters[firstChapterIdx][idxChapter];
-    let chapterName = getChapterName(chapterIdx);
-    let chapter = {
-      bookIdx: bookIdx,
-      chapterIdx: chapterIdx,
-      chapterName: chapterName
-    };
-    return chapter;
-  }
-
   chapter() {
     bus.publish('navigator.task.change', 'navigator-chapter');
   }
 
-  chapterSelect(chapterPkg) {
-    bus.publish('chapterPkg.change', chapterPkg);
+  chapterIdxUpdate() {
     if (this.panes === 1) {
       bus.publish('sidebar.select', 'none');
     }
+  }
+
+  chapterSelect(chapterIdx) {
+    bus.publish('chapterIdx.change', chapterIdx);
   }
 
   hide() {
@@ -89,6 +76,10 @@ class NavigatorController {
   }
 
   subscribe() {
+    bus.subscribe('chapterIdx.update', () => {
+      this.chapterIdxUpdate();
+    });
+
     bus.subscribe('navigator-book', () => {
       this.book();
     });
@@ -99,8 +90,8 @@ class NavigatorController {
     bus.subscribe('navigator-chapter', () => {
       this.chapter();
     });
-    bus.subscribe('navigator-chapter.select', (chapterPkg) => {
-      this.chapterSelect(chapterPkg);
+    bus.subscribe('navigator-chapter.select', (chapterIdx) => {
+      this.chapterSelect(chapterIdx);
     });
 
     bus.subscribe('navigator.back', () => {

@@ -2,44 +2,39 @@ let appPrefix = 'kjs';
 
 let appCaches = [
   {
-    name: 'kjs-core-20191207.01',
+    name: 'kjs-core-20200117.01',
     urls: [
       './',
-      './index.html',
-      './manifest.json',
-      './sw.js',
       './bundle.js',
-      './icons.svg',
-      './css/kjs.css'
-    ]
-  },
-  {
-    name: 'kjs-font-20191110.01',
-    urls: [
-      './css/font.css',
-      './font/lato-v15-latin-regular.woff2',
-      './font/merriweather-v20-latin-regular.woff2',
-      './font/open-sans-v16-latin-regular.woff2',
-      './font/roboto-slab-v8-latin-regular.woff2',
-      './font/roboto-v19-latin-regular.woff2',
-      './font/slabo-27px-v5-latin-regular.woff2'
-    ]
-  },
-  {
-    name: 'kjs-icon-20191110.01',
-    urls: [
       './favicon.png',
-      './png/icon-032.png',
-      './png/icon-192.png',
-      './png/icon-512.png',
-      './png/touch-icon-057.png',
-      './png/touch-icon-152.png',
-      './png/touch-icon-167.png',
-      './png/touch-icon-180.png'
+      './icons.svg',
+      './index.html',
+      './js/load.js',
+      './manifest.json',
+      './robots.txt',
+      './sw.js'
     ]
   },
   {
-    name: 'kjs-help-20191110.01',
+    name: 'kjs-css-20200117.01',
+    urls: [
+      './css/kjs.css',
+      './css/font.css'
+    ]
+  },
+  {
+    name: 'kjs-font-20200117.01',
+    urls: [
+      './font/lato-v16-latin-regular.woff2',
+      './font/merriweather-v21-latin-regular.woff2',
+      './font/open-sans-v17-latin-regular.woff2',
+      './font/playfair-display-v18-latin-regular.woff2',
+      './font/roboto-slab-v10-latin-regular.woff2',
+      './font/roboto-v20-latin-regular.woff2'
+    ]
+  },
+  {
+    name: 'kjs-help-20200117.01',
     urls: [
       './help/about.html',
       './help/bookmark.html',
@@ -51,6 +46,26 @@ let appCaches = [
       './help/setting.html',
       './help/strong.html',
       './help/thats-my-king.html'
+    ]
+  },
+  {
+    name: 'kjs-lzma-20200117.01',
+    urls: [
+      './lzma/strong.json.lzma',
+      './lzma/tome.kjv.json.lzma'
+    ]
+  },
+  {
+    name: 'kjs-png-20200117.01',
+    urls: [
+      './favicon.png',
+      './png/icon-032.png',
+      './png/icon-192.png',
+      './png/icon-512.png',
+      './png/touch-icon-057.png',
+      './png/touch-icon-152.png',
+      './png/touch-icon-167.png',
+      './png/touch-icon-180.png'
     ]
   }
 ];
