@@ -27,8 +27,8 @@ const lowerToolSet = [
   { type: 'btn', icon: 'back', label: 'Back' },
   { type: 'btn', icon: 'sort-ascend', label: 'Sort Ascending' },
   { type: 'btn', icon: 'sort-invert', label: 'Sort Invert' },
-  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' },
-  { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' }
+  { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' },
+  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
 ];
 
 const upperToolSet = [
