@@ -130,22 +130,22 @@ class ReadController {
       this.columnUpdate(column);
     });
 
-    bus.subscribe('read.bookmark.add',
-      (verseIdx) => { this.bookmarkAdd(verseIdx); }
-    );
-    bus.subscribe('read.bookmark.delete',
-      (verseIdx) => { this.bookmarkDelete(verseIdx); }
-    );
+    bus.subscribe('read.bookmark.add', (verseIdx) => {
+      this.bookmarkAdd(verseIdx);
+    });
+    bus.subscribe('read.bookmark.delete', (verseIdx) => {
+      this.bookmarkDelete(verseIdx);
+    });
 
-    bus.subscribe('read.column.select',
-      (column) => { this.columnSelect(column); }
-    );
-    bus.subscribe('read.next.chapter',
-      () => { this.nextChapter(); }
-    );
-    bus.subscribe('read.prev.chapter',
-      () => { this.prevChapter(); }
-    );
+    bus.subscribe('read.column.select', (column) => {
+      this.columnSelect(column);
+    });
+    bus.subscribe('read.next.chapter', () => {
+      this.nextChapter();
+    });
+    bus.subscribe('read.prev.chapter', () => {
+      this.prevChapter();
+    });
     bus.subscribe('read.strong-mode.click', () => {
       this.modeToggle();
     });

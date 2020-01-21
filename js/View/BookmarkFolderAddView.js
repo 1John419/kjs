@@ -97,13 +97,13 @@ class BookmarkFolderAddView {
   saveClick() {
     let name = this.inputName.value;
     if (name) {
-      this.inputName.value = '';
       bus.publish('bookmark-folder-add.save', name);
     }
   }
 
   show() {
     this.page.classList.remove('page--hide');
+    this.inputName.value = '';
     this.inputName.focus();
   }
 

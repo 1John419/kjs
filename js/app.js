@@ -60,10 +60,6 @@ const progress = (msg) => {
   loadScroll.scrollTop = loadScroll.scrollHeight;
 };
 
-const sleep = (ms) => {
-  return new Promise(resolve => setTimeout(resolve, ms));
-};
-
 (async function() {
   let body = document.body;
   let load = body.querySelector('.load');
@@ -116,7 +112,6 @@ const sleep = (ms) => {
   let helpTopicView = new HelpTopicView();
   let helpController = new HelpController();
 
-  // await sleep(5000);
   load.classList.add('load--hide');
   document.documentElement.classList.add(APP_FONT);
 

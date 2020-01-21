@@ -15,7 +15,7 @@ class StrongController {
 
   chapterIdxUpdate() {
     if (this.selectVerseIdx) {
-      if (this.panes === 1) {
+      if (this.panes === 1 && this.sidebar !== 'none') {
         bus.publish('sidebar.select', 'none');
       }
       bus.publish('read.scroll-to-verse', this.selectVerseIdx);

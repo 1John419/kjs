@@ -45,9 +45,10 @@ class NavigatorController {
   }
 
   chapterIdxUpdate() {
-    if (this.panes === 1) {
+    if (this.panes === 1 && this.sidebar === 'navigator') {
       bus.publish('sidebar.select', 'none');
     }
+    bus.publish('read.scroll-to-top');
   }
 
   chapterSelect(chapterIdx) {

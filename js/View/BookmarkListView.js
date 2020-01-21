@@ -145,8 +145,8 @@ class BookmarkListView {
   }
 
   hide() {
-    this.page.classList.add('page--hide');
     this.actionMenu.classList.add('action-menu--hide');
+    this.page.classList.add('page--hide');
   }
 
   initialize() {
@@ -200,19 +200,11 @@ class BookmarkListView {
   }
 
   scrollToTop() {
-    if (this.page.classList.contains('page--hide')) {
-      this.scrollReset = true;
-    } else {
-      this.scroll.scrollTop = 0;
-    }
+    this.scroll.scrollTop = 0;
   }
 
   show() {
     this.page.classList.remove('page--hide');
-    if (this.scrollReset) {
-      this.scroll.scrollTop = 0;
-      this.scrollReset = false;
-    }
   }
 
   showActionMenu(target) {

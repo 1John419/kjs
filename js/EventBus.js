@@ -7,7 +7,7 @@ class EventBus {
   }
 
   async publish(topic, data) {
-    // console.log(topic);
+    console.log(topic);
     if (this.topics[topic] && this.topics[topic].length >= 1) {
       for (let listener of this.topics[topic]) {
         await listener(data);

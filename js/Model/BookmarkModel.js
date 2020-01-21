@@ -88,6 +88,7 @@ class BookmarkModel {
       this.activeFolder = folderName;
       this.saveActiveFolder();
       this.updateFolder();
+      bus.publish('folder.added', null);
     }
   }
 

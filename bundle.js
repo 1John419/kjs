@@ -5357,7 +5357,7 @@
       }
 
       async publish(topic, data) {
-        // console.log(topic);
+        console.log(topic);
         if (this.topics[topic] && this.topics[topic].length >= 1) {
           for (let listener of this.topics[topic]) {
             await listener(data);
@@ -5398,7 +5398,7 @@
     const appPrefix = 'kjs';
 
     const centerScrollElement = (scrollElement, element) => {
-      let y = element.offsetTop -
+      let y = element.offsetTop - scrollElement.offsetTop -
         (scrollElement.clientHeight - element.clientHeight) / 2;
       scrollElement.scrollTop = y;
     };
@@ -5817,6 +5817,7 @@
         this.chapterIdx = chapterIdx;
         this.updateBanner();
         this.updateVerses();
+        this.refreshVerseBookmarks();
       }
 
       columnUpdate(column) {
@@ -5952,27 +5953,15 @@
       }
 
       scrollToTop() {
-        if (this.page.classList.contains('page--hide')) {
-          this.scrollReset = true;
-        } else {
-          this.scroll.scrollTop = 0;
-        }
+        this.scroll.scrollTop = 0;
       }
 
-      scrollToVerse() {
-        if (this.scrollVerse) {
-          let element = this.list.querySelector(
-            `[data-verse-idx="${this.scrollVerse}"]`
-          );
-          if (element) {
-            centerScrollElement(this.scroll, element);
-          }
-          this.scrollVerse = null;
+      scrollToVerse(verseIdx) {
+        let element = this.list.querySelector(
+          `[data-verse-idx="${verseIdx}"]`);
+        if (element) {
+          centerScrollElement(this.scroll, element);
         }
-      }
-
-      setScrollToVerse(verseIdx) {
-        this.scrollVerse = verseIdx;
       }
 
       searchHide() {
@@ -5995,10 +5984,6 @@
 
       show() {
         this.page.classList.remove('page--hide');
-        if (this.scrollReset) {
-          this.scroll.scrollTop = 0;
-          this.scrollReset = false;
-        }
       }
 
       sidebarUpdate(sidebar) {
@@ -6067,8 +6052,11 @@
         bus.subscribe('read.hide', () => {
           this.hide();
         });
+        bus.subscribe('read.scroll-to-top', () => {
+          this.scrollToTop();
+        });
         bus.subscribe('read.scroll-to-verse', (verseIdx) => {
-          this.setScrollToVerse(verseIdx);
+          this.scrollToVerse(verseIdx);
         });
         bus.subscribe('read.show', () => {
           this.show();
@@ -6193,7 +6181,6 @@
       }
 
       updateVerses() {
-        this.scrollToTop();
         removeAllChildren(this.list);
         let fragment = document.createDocumentFragment();
         for (let verseObj of this.verseObjs) {
@@ -6201,8 +6188,6 @@
           fragment.appendChild(verse);
         }
         this.list.appendChild(fragment);
-        this.refreshVerseBookmarks();
-        this.scrollToVerse();
       }
 
       verseClick(verse) {
@@ -6350,22 +6335,22 @@
           this.columnUpdate(column);
         });
 
-        bus.subscribe('read.bookmark.add',
-          (verseIdx) => { this.bookmarkAdd(verseIdx); }
-        );
-        bus.subscribe('read.bookmark.delete',
-          (verseIdx) => { this.bookmarkDelete(verseIdx); }
-        );
+        bus.subscribe('read.bookmark.add', (verseIdx) => {
+          this.bookmarkAdd(verseIdx);
+        });
+        bus.subscribe('read.bookmark.delete', (verseIdx) => {
+          this.bookmarkDelete(verseIdx);
+        });
 
-        bus.subscribe('read.column.select',
-          (column) => { this.columnSelect(column); }
-        );
-        bus.subscribe('read.next.chapter',
-          () => { this.nextChapter(); }
-        );
-        bus.subscribe('read.prev.chapter',
-          () => { this.prevChapter(); }
-        );
+        bus.subscribe('read.column.select', (column) => {
+          this.columnSelect(column);
+        });
+        bus.subscribe('read.next.chapter', () => {
+          this.nextChapter();
+        });
+        bus.subscribe('read.prev.chapter', () => {
+          this.prevChapter();
+        });
         bus.subscribe('read.strong-mode.click', () => {
           this.modeToggle();
         });
@@ -6819,19 +6804,11 @@
       }
 
       scrollToTop() {
-        if (this.page.classList.contains('page--hide')) {
-          this.scrollReset = true;
-        } else {
-          this.scroll.scrollTop = 0;
-        }
+        this.scroll.scrollTop = 0;
       }
 
       show() {
         this.page.classList.remove('page--hide');
-        if (this.scrollReset) {
-          this.scroll.scrollTop = 0;
-          this.scrollReset = false;
-        }
       }
 
       subscribe() {
@@ -6938,9 +6915,10 @@
       }
 
       chapterIdxUpdate() {
-        if (this.panes === 1) {
+        if (this.panes === 1 && this.sidebar === 'navigator') {
           bus.publish('sidebar.select', 'none');
         }
+        bus.publish('read.scroll-to-top');
       }
 
       chapterSelect(chapterIdx) {
@@ -7101,6 +7079,7 @@
           this.activeFolder = folderName;
           this.saveActiveFolder();
           this.updateFolder();
+          bus.publish('folder.added', null);
         }
       }
 
@@ -7657,8 +7636,8 @@
       }
 
       hide() {
-        this.page.classList.add('page--hide');
         this.actionMenu.classList.add('action-menu--hide');
+        this.page.classList.add('page--hide');
       }
 
       initialize() {
@@ -7712,19 +7691,11 @@
       }
 
       scrollToTop() {
-        if (this.page.classList.contains('page--hide')) {
-          this.scrollReset = true;
-        } else {
-          this.scroll.scrollTop = 0;
-        }
+        this.scroll.scrollTop = 0;
       }
 
       show() {
         this.page.classList.remove('page--hide');
-        if (this.scrollReset) {
-          this.scroll.scrollTop = 0;
-          this.scrollReset = false;
-        }
       }
 
       showActionMenu(target) {
@@ -7967,20 +7938,12 @@
       }
 
       scrollToTop() {
-        if (this.page.classList.contains('page--hide')) {
-          this.scrollReset = true;
-        } else {
-          this.scroll.scrollTop = 0;
-        }
+        this.scroll.scrollTop = 0;
       }
 
       show() {
         this.updateBanner();
         this.page.classList.remove('page--hide');
-        if (this.scrollReset) {
-          this.scroll.scrollTop = 0;
-          this.scrollReset = false;
-        }
       }
 
       showActionMenu(target) {
@@ -8210,19 +8173,11 @@
       }
 
       scrollToTop() {
-        if (this.page.classList.contains('page--hide')) {
-          this.scrollReset = true;
-        } else {
-          this.scroll.scrollTop = 0;
-        }
+        this.scroll.scrollTop = 0;
       }
 
       show() {
         this.page.classList.remove('page--hide');
-        if (this.scrollReset) {
-          this.scroll.scrollTop = 0;
-          this.scrollReset = false;
-        }
       }
 
       showActionMenu(target) {
@@ -8371,13 +8326,13 @@
       saveClick() {
         let name = this.inputName.value;
         if (name) {
-          this.inputName.value = '';
           bus.publish('bookmark-folder-add.save', name);
         }
       }
 
       show() {
         this.page.classList.remove('page--hide');
+        this.inputName.value = '';
         this.inputName.focus();
       }
 
@@ -8898,7 +8853,7 @@
 
       chapterIdxUpdate() {
         if (this.selectVerseIdx) {
-          if (this.panes === 1) {
+          if (this.panes === 1 && this.sidebar !== 'none') {
             bus.publish('sidebar.select', 'none');
           }
           bus.publish('read.scroll-to-verse', this.selectVerseIdx);
@@ -8918,9 +8873,12 @@
         bus.publish('bookmark.task.change', 'bookmark-folder-add');
       }
 
+      folderAdded() {
+        bus.publish('bookmark.task.change', 'bookmark-list');
+      }
+
       folderAddSave(name) {
         bus.publish('folder.add', name);
-        bus.publish('bookmark.task.change', 'bookmark-list');
       }
 
       folderDelete(folderName) {
@@ -9153,6 +9111,10 @@
 
         bus.subscribe('chapterIdx.update', () => {
           this.chapterIdxUpdate();
+        });
+
+        bus.subscribe('folder.added', () => {
+          this.folderAdded();
         });
 
         bus.subscribe('panes.update', (panes) => {
@@ -10033,9 +9995,9 @@
         this.list.appendChild(fragment);
 
         if (this.loadIdx < this.verseCount) {
-          this.loadMore.classList.remove('load--hide');
+          this.loadMore.classList.remove('btn-load-more--hide');
         } else {
-          this.loadMore.classList.add('load--hide');
+          this.loadMore.classList.add('btn-load-more--hide');
         }
       }
 
@@ -10329,19 +10291,11 @@
       }
 
       scrollToTop() {
-        if (this.page.classList.contains('page--hide')) {
-          this.scrollReset = true;
-        } else {
-          this.scroll.scrollTop = 0;
-        }
+        this.scroll.scrollTop = 0;
       }
 
       show() {
         this.page.classList.remove('page--hide');
-        if (this.scrollReset) {
-          this.scroll.scrollTop = 0;
-          this.scrollReset = false;
-        }
       }
 
       subscribe() {
@@ -10578,19 +10532,11 @@
       }
 
       scrollToTop() {
-        if (this.page.classList.contains('page--hide')) {
-          this.scrollReset = true;
-        } else {
-          this.scroll.scrollTop = 0;
-        }
+        this.scroll.scrollTop = 0;
       }
 
       show() {
         this.page.classList.remove('page--hide');
-        if (this.scrollReset) {
-          this.scroll.scrollTop = 0;
-          this.scrollReset = false;
-        }
       }
 
       showActionMenu(target) {
@@ -10806,7 +10752,7 @@
 
       chapterIdxUpdate() {
         if (this.selectVerseIdx) {
-          if (this.panes === 1) {
+          if (this.panes === 1 && this.sidebar !== 'none') {
             bus.publish('sidebar.select', 'none');
           }
           bus.publish('read.scroll-to-verse', this.selectVerseIdx);
@@ -11605,19 +11551,11 @@
       }
 
       scrollToTop() {
-        if (this.page.classList.contains('page--hide')) {
-          this.scrollReset = true;
-        } else {
-          this.scroll.scrollTop = 0;
-        }
+        this.scroll.scrollTop = 0;
       }
 
       show() {
         this.page.classList.remove('page--hide');
-        if (this.scrollReset) {
-          this.scroll.scrollTop = 0;
-          this.scrollReset = false;
-        }
       }
 
       subscribe() {
@@ -11906,19 +11844,11 @@
       }
 
       scrollToTop() {
-        if (this.page.classList.contains('page--hide')) {
-          this.scrollReset = true;
-        } else {
-          this.scroll.scrollTop = 0;
-        }
+        this.scroll.scrollTop = 0;
       }
 
       show() {
         this.page.classList.remove('page--hide');
-        if (this.scrollReset) {
-          this.scroll.scrollTop = 0;
-          this.scrollReset = false;
-        }
       }
 
       subscribe() {
@@ -12175,19 +12105,11 @@
       }
 
       scrollToTop() {
-        if (this.page.classList.contains('page--hide')) {
-          this.scrollReset = true;
-        } else {
-          this.scroll.scrollTop = 0;
-        }
+        this.scroll.scrollTop = 0;
       }
 
       show() {
         this.page.classList.remove('page--hide');
-        if (this.scrollReset) {
-          this.scroll.scrollTop = 0;
-          this.scrollReset = false;
-        }
       }
 
       showActionMenu(target) {
@@ -12646,9 +12568,9 @@
         this.list.appendChild(fragment);
 
         if (this.loadIdx < this.verseCount) {
-          this.loadMore.classList.remove('load--hide');
+          this.loadMore.classList.remove('btn-load-more--hide');
         } else {
-          this.loadMore.classList.add('load--hide');
+          this.loadMore.classList.add('btn-load-more--hide');
         }
       }
 
@@ -12670,19 +12592,11 @@
       }
 
       scrollToTop() {
-        if (this.page.classList.contains('page--hide')) {
-          this.scrollReset = true;
-        } else {
-          this.scroll.scrollTop = 0;
-        }
+        this.scroll.scrollTop = 0;
       }
 
       show() {
         this.page.classList.remove('page--hide');
-        if (this.scrollReset) {
-          this.scroll.scrollTop = 0;
-          this.scrollReset = false;
-        }
       }
 
       subscribe() {
@@ -12890,19 +12804,11 @@
       }
 
       scrollToTop() {
-        if (this.page.classList.contains('page--hide')) {
-          this.scrollReset = true;
-        } else {
-          this.scroll.scrollTop = 0;
-        }
+        this.scroll.scrollTop = 0;
       }
 
       show() {
         this.page.classList.remove('page--hide');
-        if (this.scrollReset) {
-          this.scroll.scrollTop = 0;
-          this.scrollReset = false;
-        }
       }
 
       subscribe() {
@@ -12977,7 +12883,7 @@
 
       chapterIdxUpdate() {
         if (this.selectVerseIdx) {
-          if (this.panes === 1) {
+          if (this.panes === 1 && this.sidebar !== 'none') {
             bus.publish('sidebar.select', 'none');
           }
           bus.publish('read.scroll-to-verse', this.selectVerseIdx);
@@ -14329,7 +14235,6 @@
       let helpTopicView = new HelpTopicView();
       let helpController = new HelpController();
 
-      // await sleep(5000);
       load.classList.add('load--hide');
       document.documentElement.classList.add(APP_FONT);
 

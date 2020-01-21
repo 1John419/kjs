@@ -15,7 +15,7 @@ class BookmarkController {
 
   chapterIdxUpdate() {
     if (this.selectVerseIdx) {
-      if (this.panes === 1) {
+      if (this.panes === 1 && this.sidebar !== 'none') {
         bus.publish('sidebar.select', 'none');
       }
       bus.publish('read.scroll-to-verse', this.selectVerseIdx);
@@ -35,9 +35,12 @@ class BookmarkController {
     bus.publish('bookmark.task.change', 'bookmark-folder-add');
   }
 
+  folderAdded() {
+    bus.publish('bookmark.task.change', 'bookmark-list');
+  }
+
   folderAddSave(name) {
     bus.publish('folder.add', name);
-    bus.publish('bookmark.task.change', 'bookmark-list');
   }
 
   folderDelete(folderName) {
@@ -270,6 +273,10 @@ class BookmarkController {
 
     bus.subscribe('chapterIdx.update', () => {
       this.chapterIdxUpdate();
+    });
+
+    bus.subscribe('folder.added', () => {
+      this.folderAdded();
     });
 
     bus.subscribe('panes.update', (panes) => {

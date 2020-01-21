@@ -2,7 +2,8 @@
 
 import { bus } from '../EventBus.js';
 import {
-  tomeAcrostics, tomeChapters
+  tomeAcrostics,
+  tomeChapters
 } from '../data/tomeDb.js';
 import {
   chapterName,
@@ -138,6 +139,7 @@ class ReadView {
     this.chapterIdx = chapterIdx;
     this.updateBanner();
     this.updateVerses();
+    this.refreshVerseBookmarks();
   }
 
   columnUpdate(column) {
@@ -273,27 +275,15 @@ class ReadView {
   }
 
   scrollToTop() {
-    if (this.page.classList.contains('page--hide')) {
-      this.scrollReset = true;
-    } else {
-      this.scroll.scrollTop = 0;
-    }
+    this.scroll.scrollTop = 0;
   }
 
-  scrollToVerse() {
-    if (this.scrollVerse) {
-      let element = this.list.querySelector(
-        `[data-verse-idx="${this.scrollVerse}"]`
-      );
-      if (element) {
-        centerScrollElement(this.scroll, element);
-      }
-      this.scrollVerse = null;
+  scrollToVerse(verseIdx) {
+    let element = this.list.querySelector(
+      `[data-verse-idx="${verseIdx}"]`);
+    if (element) {
+      centerScrollElement(this.scroll, element);
     }
-  }
-
-  setScrollToVerse(verseIdx) {
-    this.scrollVerse = verseIdx;
   }
 
   searchHide() {
@@ -316,10 +306,6 @@ class ReadView {
 
   show() {
     this.page.classList.remove('page--hide');
-    if (this.scrollReset) {
-      this.scroll.scrollTop = 0;
-      this.scrollReset = false;
-    }
   }
 
   sidebarUpdate(sidebar) {
@@ -388,8 +374,11 @@ class ReadView {
     bus.subscribe('read.hide', () => {
       this.hide();
     });
+    bus.subscribe('read.scroll-to-top', () => {
+      this.scrollToTop();
+    });
     bus.subscribe('read.scroll-to-verse', (verseIdx) => {
-      this.setScrollToVerse(verseIdx);
+      this.scrollToVerse(verseIdx);
     });
     bus.subscribe('read.show', () => {
       this.show();
@@ -514,7 +503,6 @@ class ReadView {
   }
 
   updateVerses() {
-    this.scrollToTop();
     removeAllChildren(this.list);
     let fragment = document.createDocumentFragment();
     for (let verseObj of this.verseObjs) {
@@ -522,8 +510,6 @@ class ReadView {
       fragment.appendChild(verse);
     }
     this.list.appendChild(fragment);
-    this.refreshVerseBookmarks();
-    this.scrollToVerse();
   }
 
   verseClick(verse) {

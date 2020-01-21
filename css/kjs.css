@@ -224,6 +224,10 @@ textarea {
   width: 100%;
 }
 
+.btn-load-more--hide {
+  display: none;
+}
+
 .btn-result {
   flex: 1 1 auto;
   margin-bottom: 0.5rem;
@@ -286,6 +290,7 @@ textarea {
   display: flex;
   flex-flow: row nowrap;
   height: 100%;
+  overflow: hidden;
 }
 
 .content {
@@ -486,14 +491,14 @@ textarea {
 
 .page {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 0 100%;
   flex-flow: column nowrap;
   overflow: auto;
   /* crucial */
 }
 
 .page--hide {
-  display: none;
+  order: 10;
 }
 
 :root {
@@ -798,6 +803,6 @@ textarea {
 
   .page--read {
     border-right: solid 1px var(--ui-border);
-    flex: 1 1 auto;
+    flex: 0 0 calc(100% - 320px);
   }
 }

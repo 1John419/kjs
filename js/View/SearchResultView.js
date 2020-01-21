@@ -278,9 +278,9 @@ class SearchResultView {
     this.list.appendChild(fragment);
 
     if (this.loadIdx < this.verseCount) {
-      this.loadMore.classList.remove('load--hide');
+      this.loadMore.classList.remove('btn-load-more--hide');
     } else {
-      this.loadMore.classList.add('load--hide');
+      this.loadMore.classList.add('btn-load-more--hide');
     }
   }
 

@@ -311,9 +311,9 @@ class StrongResultView {
     this.list.appendChild(fragment);
 
     if (this.loadIdx < this.verseCount) {
-      this.loadMore.classList.remove('load--hide');
+      this.loadMore.classList.remove('btn-load-more--hide');
     } else {
-      this.loadMore.classList.add('load--hide');
+      this.loadMore.classList.add('btn-load-more--hide');
     }
   }
 
@@ -335,19 +335,11 @@ class StrongResultView {
   }
 
   scrollToTop() {
-    if (this.page.classList.contains('page--hide')) {
-      this.scrollReset = true;
-    } else {
-      this.scroll.scrollTop = 0;
-    }
+    this.scroll.scrollTop = 0;
   }
 
   show() {
     this.page.classList.remove('page--hide');
-    if (this.scrollReset) {
-      this.scroll.scrollTop = 0;
-      this.scrollReset = false;
-    }
   }
 
   subscribe() {
