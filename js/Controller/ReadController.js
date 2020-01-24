@@ -18,24 +18,21 @@ class ReadController {
     bus.publish('bookmark.delete', verseIdx);
   }
 
-  columnSelect(column) {
-    this.column = column;
-    bus.publish('column.change', column);
+  columnModeToggle() {
+    bus.publish('read.column-mode.toggle', null);
   }
 
-  columnUpdate(column) {
-    this.column = column;
+  columnModeUpdate(columnMode) {
+    this.columnMode = columnMode;
   }
 
   decreasePanes() {
     if (this.panes === 1) {
       this.lastSidebar = this.sidebar;
       bus.publish('sidebar.change', 'none');
-      bus.publish('read.column.select', 1);
-    } else if (this.panes === 2) {
-      bus.publish('read.column.select', 1);
-    } else if (this.panes === 3 && this.column > 1) {
-      bus.publish('read.column.select', 2);
+    }
+    if (this.columnMode && this.panes < 3) {
+      bus.publish('read.column-mode.toggle', null);
     }
   }
 
@@ -68,10 +65,6 @@ class ReadController {
     bus.publish('setting.restore', null);
     bus.publish('help.restore', null);
     bus.publish('read.restore', null);
-  }
-
-  modeToggle() {
-    bus.publish('read.strong-mode.toggle', null);
   }
 
   nextChapter() {
@@ -117,6 +110,10 @@ class ReadController {
     }
   }
 
+  strongModeToggle() {
+    bus.publish('read.strong-mode.toggle', null);
+  }
+
   strongSelect(verseIdx) {
     bus.publish('strong.verse.change', verseIdx);
     bus.publish('strong.task.change', 'strong-verse');
@@ -126,10 +123,6 @@ class ReadController {
   }
 
   subscribe() {
-    bus.subscribe('column.update', (column) => {
-      this.columnUpdate(column);
-    });
-
     bus.subscribe('read.bookmark.add', (verseIdx) => {
       this.bookmarkAdd(verseIdx);
     });
@@ -137,18 +130,25 @@ class ReadController {
       this.bookmarkDelete(verseIdx);
     });
 
-    bus.subscribe('read.column.select', (column) => {
-      this.columnSelect(column);
+    bus.subscribe('read.column-mode.click', () => {
+      this.columnModeToggle();
     });
+    bus.subscribe('read.column-mode.update', (columnMode) => {
+      this.columnModeUpdate(columnMode);
+    });
+
     bus.subscribe('read.next.chapter', () => {
       this.nextChapter();
     });
+
     bus.subscribe('read.prev.chapter', () => {
       this.prevChapter();
     });
+
     bus.subscribe('read.strong-mode.click', () => {
-      this.modeToggle();
+      this.strongModeToggle();
     });
+
     bus.subscribe('read.strong.select', (verseIdx) => {
       this.strongSelect(verseIdx);
     });

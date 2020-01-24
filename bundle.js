@@ -5395,7 +5395,7 @@
     const wordVerseIdx = 0;
     const wordCount = 1;
 
-    const appPrefix = 'kjs';
+    const appPrefix = 'kjs-test';
 
     const centerScrollElement = (scrollElement, element) => {
       let y = element.offsetTop - scrollElement.offsetTop -
@@ -5432,7 +5432,10 @@
       }
     };
 
-    const validColumns = [ 1, 2, 3];
+    const sideScrollElement = (scrollElement, element) => {
+      let x = element.offsetLeft - 8;
+      scrollElement.scrollLeft = x;
+    };
 
     class ReadModel {
 
@@ -5440,24 +5443,18 @@
         this.initialize();
       }
 
-      columnChange(column) {
-        this.column = column;
-        this.saveColumn();
-        bus.publish('column.update', this.column);
+      columnModeChange(columnMode) {
+        this.columnMode = columnMode;
+        this.saveColumnMode();
+        bus.publish('read.column-mode.update', this.columnMode);
+      }
+
+      columnModeToogle() {
+        this.columnModeChange(!this.columnMode);
       }
 
       initialize() {
         this.subscribe();
-      }
-
-      modeChange(strongMode) {
-        this.strongMode = strongMode;
-        this.saveMode();
-        bus.publish('read.strong-mode.update', this.strongMode);
-      }
-
-      modeToogle() {
-        this.modeChange(!this.strongMode);
       }
 
       panesChange(panes) {
@@ -5466,51 +5463,51 @@
       }
 
       restore() {
-        this.restoreColumn();
-        this.restoreMode();
+        this.restoreColumnMode();
+        this.restoreStrongMode();
       }
 
-      restoreColumn() {
-        let defaultColumn = 1;
-        let column = localStorage.getItem(`${appPrefix}-column`);
-        if (!column) {
-          column = defaultColumn;
+      restoreColumnMode() {
+        let defaultColumnMode = false;
+        let columnMode = localStorage.getItem(`${appPrefix}-columnMode`);
+        if (!columnMode) {
+          columnMode = defaultColumnMode;
         } else {
           try {
-            column = JSON.parse(column);
+            columnMode = JSON.parse(columnMode);
           } catch (error) {
-            column = defaultColumn;
+            columnMode = defaultColumnMode;
           }
-          if (!validColumns.includes(column)) {
-            column = defaultColumn;
+          if (typeof columnMode !== 'boolean') {
+            columnMode = defaultColumnMode;
           }
         }
-        this.columnChange(column);
+        this.columnModeChange(columnMode);
       }
 
-      restoreMode() {
-        let defaultMode = false;
+      restoreStrongMode() {
+        let defaultStrongMode = false;
         let strongMode = localStorage.getItem(`${appPrefix}-readStrongMode`);
         if (!strongMode) {
-          strongMode = defaultMode;
+          strongMode = defaultStrongMode;
         } else {
           try {
             strongMode = JSON.parse(strongMode);
           } catch (error) {
-            strongMode = defaultMode;
+            strongMode = defaultStrongMode;
           }
           if (typeof strongMode !== 'boolean') {
-            strongMode = defaultMode;
+            strongMode = defaultStrongMode;
           }
         }
-        this.modeChange(strongMode);
+        this.strongModeChange(strongMode);
       }
 
-      saveColumn() {
-        localStorage.setItem(`${appPrefix}-column`, JSON.stringify(this.column));
+      saveColumnMode() {
+        localStorage.setItem(`${appPrefix}-columnMode`, JSON.stringify(this.columnMode));
       }
 
-      saveMode() {
+      saveStrongMode() {
         localStorage.setItem(`${appPrefix}-readStrongMode`,
           JSON.stringify(this.strongMode));
       }
@@ -5545,20 +5542,29 @@
         this.sidebarChange(sidebar);
       }
 
-      subscribe() {
-        bus.subscribe('column.change',
-          (column) => { this.columnChange(column); }
-        );
+      strongModeChange(strongMode) {
+        this.strongMode = strongMode;
+        this.saveStrongMode();
+        bus.publish('read.strong-mode.update', this.strongMode);
+      }
 
+      strongModeToogle() {
+        this.strongModeChange(!this.strongMode);
+      }
+
+      subscribe() {
         bus.subscribe('panes.change', (panes) => {
           this.panesChange(panes);
         });
 
+        bus.subscribe('read.column-mode.toggle', () => {
+          this.columnModeToogle();
+        });
         bus.subscribe('read.restore',
           () => { this.restore(); }
         );
         bus.subscribe('read.strong-mode.toggle', () => {
-          this.modeToogle();
+          this.strongModeToogle();
         });
 
         bus.subscribe('sidebar.change', (sidebar) => {
@@ -5707,9 +5713,7 @@
       { type: 'btn', icon: 'strong', label: 'Strong' },
       { type: 'btn', icon: 'setting', label: 'Setting' },
       { type: 'btn', icon: 'help', label: 'Help' },
-      { type: 'btn', icon: 'column-1', label: 'Single Column' },
-      { type: 'btn', icon: 'column-2', label: 'Double Column' },
-      { type: 'btn', icon: 'column-3', label: 'Triple Column' },
+      { type: 'btn', icon: 'column-mode', label: 'Column Mode' },
       { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
     ];
 
@@ -5820,10 +5824,10 @@
         this.refreshVerseBookmarks();
       }
 
-      columnUpdate(column) {
-        this.column = column;
-        this.updateColumn();
-        this.updateColumnBtn();
+      columnModeUpdate(columnMode) {
+        this.columnMode = columnMode;
+        this.updateColumnModeBtn();
+        this.updateColumnMode();
       }
 
       folderUpdate(folder) {
@@ -5861,10 +5865,7 @@
         this.btnStrongMode = this.toolbarLower.querySelector('.btn-icon--strong-mode');
         this.btnSetting = this.toolbarLower.querySelector('.btn-icon--setting');
         this.btnHelp = this.toolbarLower.querySelector('.btn-icon--help');
-        this.btnColumnOne = this.toolbarLower.querySelector('.btn-icon--column-1');
-        this.btnColumnTwo = this.toolbarLower.querySelector('.btn-icon--column-2');
-        this.btnColumnThree = this.toolbarLower.querySelector('.btn-icon--column-3');
-
+        this.btnColumnMode = this.toolbarLower.querySelector('.btn-icon--column-mode');
         this.columnBtns = [
           this.btnColumnOne, this.btnColumnTwo, this.btnColumnThree
         ];
@@ -5899,15 +5900,6 @@
         }
       }
 
-      modeUpdate(strongMode) {
-        this.strongMode = strongMode;
-        if (this.strongMode) {
-          this.btnStrongMode.classList.add('btn-icon--active');
-        } else {
-          this.btnStrongMode.classList.remove('btn-icon--active');
-        }
-      }
-
       navigatorHide() {
         this.btnNavigator.classList.remove('btn-icon--active');
       }
@@ -5921,18 +5913,10 @@
       }
 
       panesUpdate(panes) {
-        if (panes === 1 || panes === 2) {
-          this.btnColumnOne.classList.add('btn-icon--hide');
-          this.btnColumnTwo.classList.add('btn-icon--hide');
-          this.btnColumnThree.classList.add('btn-icon--hide');
-        } else if (panes === 3) {
-          this.btnColumnOne.classList.remove('btn-icon--hide');
-          this.btnColumnTwo.classList.remove('btn-icon--hide');
-          this.btnColumnThree.classList.add('btn-icon--hide');
+        if (panes < 3) {
+          this.btnColumnMode.classList.add('btn-icon--hide');
         } else {
-          this.btnColumnOne.classList.remove('btn-icon--hide');
-          this.btnColumnTwo.classList.remove('btn-icon--hide');
-          this.btnColumnThree.classList.remove('btn-icon--hide');
+          this.btnColumnMode.classList.remove('btn-icon--hide');
         }
       }
 
@@ -5954,13 +5938,18 @@
 
       scrollToTop() {
         this.scroll.scrollTop = 0;
+        this.scroll.scrollLeft = 0;
       }
 
       scrollToVerse(verseIdx) {
         let element = this.list.querySelector(
           `[data-verse-idx="${verseIdx}"]`);
         if (element) {
-          centerScrollElement(this.scroll, element);
+          if (this.columnMode) {
+            sideScrollElement(this.scroll, element);
+          } else {
+            centerScrollElement(this.scroll, element);
+          }
         }
       }
 
@@ -5996,6 +5985,15 @@
         }
       }
 
+      strongModeUpdate(strongMode) {
+        this.strongMode = strongMode;
+        if (this.strongMode) {
+          this.btnStrongMode.classList.add('btn-icon--active');
+        } else {
+          this.btnStrongMode.classList.remove('btn-icon--active');
+        }
+      }
+
       strongShow() {
         this.btnStrong.classList.add('btn-icon--active');
       }
@@ -6010,10 +6008,6 @@
 
         bus.subscribe('chapterIdx.update', (chapterIdx) => {
           this.chapterIdxUpdate(chapterIdx);
-        });
-
-        bus.subscribe('column.update', (column) => {
-          this.columnUpdate(column);
         });
 
         bus.subscribe('folder.update', (folder) => {
@@ -6049,6 +6043,9 @@
           this.panesUpdate(panes);
         });
 
+        bus.subscribe('read.column-mode.update', (columnMode) => {
+          this.columnModeUpdate(columnMode);
+        });
         bus.subscribe('read.hide', () => {
           this.hide();
         });
@@ -6062,7 +6059,7 @@
           this.show();
         });
         bus.subscribe('read.strong-mode.update', (strongMode) => {
-          this.modeUpdate(strongMode);
+          this.strongModeUpdate(strongMode);
         });
 
         bus.subscribe('search.hide', () => {
@@ -6100,6 +6097,7 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnStrongMode ||
+            target === this.btnColumnMode ||
             !target.classList.contains('btn-icon--active')
           ) {
             if (target === this.btnNavigator) {
@@ -6110,18 +6108,14 @@
               bus.publish('sidebar.select', 'search');
             } else if (target === this.btnStrong) {
               bus.publish('sidebar.select', 'strong');
-            } else if (target === this.btnStrongMode) {
-              bus.publish('read.strong-mode.click', null);
             } else if (target === this.btnSetting) {
               bus.publish('sidebar.select', 'setting');
             } else if (target === this.btnHelp) {
               bus.publish('sidebar.select', 'help');
-            } else if (target === this.btnColumnOne) {
-              bus.publish('read.column.select', 1);
-            } else if (target === this.btnColumnTwo) {
-              bus.publish('read.column.select', 2);
-            } else if (target === this.btnColumnThree) {
-              bus.publish('read.column.select', 3);
+            } else if (target === this.btnColumnMode) {
+              bus.publish('read.column-mode.click', null);
+            } else if (target === this.btnStrongMode) {
+              bus.publish('read.strong-mode.click', null);
             }
           }
         }
@@ -6149,21 +6143,20 @@
         this.banner.textContent = tomeChapters[this.chapterIdx][chapterName];
       }
 
-      updateColumn() {
-        this.list.classList.remove('column-2', 'column-3');
-        if (this.column === 2) {
-          this.list.classList.add('column-2');
-        } else if (this.column === 3) {
-          this.list.classList.add('column-3');
+      updateColumnMode() {
+        if (this.columnMode) {
+          this.list.classList.add('list--read-column');
+        } else {
+          this.list.classList.remove('list--read-column');
         }
       }
 
-      updateColumnBtn() {
-        if (this.activeColumnBtn) {
-          this.activeColumnBtn.classList.remove('btn-icon--active');
+      updateColumnModeBtn() {
+        if (this.columnMode) {
+          this.btnColumnMode.classList.add('btn-icon--active');
+        } else {
+          this.btnColumnMode.classList.remove('btn-icon--active');
         }
-        this.activeColumnBtn = this.columnBtns[this.column - 1];
-        this.activeColumnBtn.classList.add('btn-icon--active');
       }
 
       updateFont() {
@@ -6187,6 +6180,8 @@
           let verse = this.buildVerse(verseObj);
           fragment.appendChild(verse);
         }
+        let lastVerse = templateElement('div', 'verse-last', null, null, null);
+        fragment.appendChild(lastVerse);
         this.list.appendChild(fragment);
       }
 
@@ -6223,24 +6218,21 @@
         bus.publish('bookmark.delete', verseIdx);
       }
 
-      columnSelect(column) {
-        this.column = column;
-        bus.publish('column.change', column);
+      columnModeToggle() {
+        bus.publish('read.column-mode.toggle', null);
       }
 
-      columnUpdate(column) {
-        this.column = column;
+      columnModeUpdate(columnMode) {
+        this.columnMode = columnMode;
       }
 
       decreasePanes() {
         if (this.panes === 1) {
           this.lastSidebar = this.sidebar;
           bus.publish('sidebar.change', 'none');
-          bus.publish('read.column.select', 1);
-        } else if (this.panes === 2) {
-          bus.publish('read.column.select', 1);
-        } else if (this.panes === 3 && this.column > 1) {
-          bus.publish('read.column.select', 2);
+        }
+        if (this.columnMode && this.panes < 3) {
+          bus.publish('read.column-mode.toggle', null);
         }
       }
 
@@ -6273,10 +6265,6 @@
         bus.publish('setting.restore', null);
         bus.publish('help.restore', null);
         bus.publish('read.restore', null);
-      }
-
-      modeToggle() {
-        bus.publish('read.strong-mode.toggle', null);
       }
 
       nextChapter() {
@@ -6322,6 +6310,10 @@
         }
       }
 
+      strongModeToggle() {
+        bus.publish('read.strong-mode.toggle', null);
+      }
+
       strongSelect(verseIdx) {
         bus.publish('strong.verse.change', verseIdx);
         bus.publish('strong.task.change', 'strong-verse');
@@ -6331,10 +6323,6 @@
       }
 
       subscribe() {
-        bus.subscribe('column.update', (column) => {
-          this.columnUpdate(column);
-        });
-
         bus.subscribe('read.bookmark.add', (verseIdx) => {
           this.bookmarkAdd(verseIdx);
         });
@@ -6342,18 +6330,25 @@
           this.bookmarkDelete(verseIdx);
         });
 
-        bus.subscribe('read.column.select', (column) => {
-          this.columnSelect(column);
+        bus.subscribe('read.column-mode.click', () => {
+          this.columnModeToggle();
         });
+        bus.subscribe('read.column-mode.update', (columnMode) => {
+          this.columnModeUpdate(columnMode);
+        });
+
         bus.subscribe('read.next.chapter', () => {
           this.nextChapter();
         });
+
         bus.subscribe('read.prev.chapter', () => {
           this.prevChapter();
         });
+
         bus.subscribe('read.strong-mode.click', () => {
-          this.modeToggle();
+          this.strongModeToggle();
         });
+
         bus.subscribe('read.strong.select', (verseIdx) => {
           this.strongSelect(verseIdx);
         });

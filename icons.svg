@@ -17,14 +17,8 @@
   <symbol id="cancel" viewBox="0 0 24 24">
     <path d="m12.714 7.5105h-3.7135v-1.5105l-3 2.695 3 2.805v-1.5h3.7135c1.5355 0 2.7805 1.178 2.7805 2.7135s-1.2445 2.7865-2.7805 2.7865h-3.7135v2.5h3.7135c2.92 0 5.2865-2.367 5.2865-5.2865s-2.3665-5.203-5.2865-5.203z"/>
   </symbol>
-  <symbol id="column-1" viewBox="0 0 24 24">
-    <path d="m3 3h18v2h-18zm0 4h18v2h-18zm0 4h18v2h-18zm0 4h18v2h-18zm0 4h18v2h-18z"/>
-  </symbol>
-  <symbol id="column-2" viewBox="0 0 24 24">
+  <symbol id="column-mode" viewBox="0 0 24 24">
     <path d="m13 19v2h8v-2zm-10 0v2h8v-2zm10-4v2h8v-2zm-10 0v2h8v-2zm10-4v2h8v-2zm-10 0v2h8v-2zm10-4v2h8v-2zm-10 0v2h8v-2zm10-4v2h8v-2zm-10 0v2h8v-2z"/>
-  </symbol>
-  <symbol id="column-3" viewBox="0 0 24 24">
-    <path d="m16.334 19v2h4.666v-2zm-6.6721 0v2h4.666v-2zm-6.6619 0v2h4.666v-2zm13.334-4v2h4.666v-2zm-6.6721 0v2h4.666v-2zm-6.6619 0v2h4.666v-2zm13.334-4v2h4.666v-2zm-6.6721 0v2h4.666v-2zm-6.6619 0v2h4.666v-2zm13.334-4v2h4.666v-2zm-6.6721 0v2h4.666v-2zm-6.6619 0v2h4.666v-2zm13.334-4v2h4.666v-2zm-6.6721 0v2h4.666v-2zm-6.6619 0v2h4.666v-2z"/>
   </symbol>
   <symbol id="copy" viewBox="0 0 24 24">
     <path d="m15 9v-3h-9v9h3v3h9v-9zm-6 5h-2v-7h7v2h-5zm8 3h-7v-7h7zm-1.5-4h-1.5v-1.5h-1v1.5h-1.5v1h1.5v1.5h1v-1.5h1.5z"/>

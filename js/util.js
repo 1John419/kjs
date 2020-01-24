@@ -9,7 +9,7 @@ import {
   chapterName
 } from './data/tomeIdx.js';
 
-export const appPrefix = 'kjs';
+export const appPrefix = 'kjs-test';
 
 export const centerScrollElement = (scrollElement, element) => {
   let y = element.offsetTop - scrollElement.offsetTop -
@@ -44,4 +44,9 @@ export const removeAllChildren = (element) => {
   while (element.hasChildNodes()) {
     element.removeChild(element.lastChild);
   }
+};
+
+export const sideScrollElement = (scrollElement, element) => {
+  let x = element.offsetLeft - 8;
+  scrollElement.scrollLeft = x;
 };

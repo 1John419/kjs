@@ -278,14 +278,6 @@ textarea {
   display: none;
 }
 
-.column-2 {
-  column-count: 2;
-}
-
-.column-3 {
-  column-count: 3;
-}
-
 .container {
   display: flex;
   flex-flow: row nowrap;
@@ -402,6 +394,21 @@ textarea {
   text-align: center;
 }
 
+.list--read {
+  display: flex;
+  flex-direction: column;
+}
+
+.list--read-column {
+  flex-wrap: wrap;
+  height: 100%;
+}
+
+.list--read-column .verse {
+  margin: 0 0.5rem 0.5rem 0;
+  width: 320px;
+}
+
 .load {
   background-color: hsl(0, 0%, 82%);
   color: hsl(0, 0%, 5%);
@@ -493,8 +500,7 @@ textarea {
   display: flex;
   flex: 0 0 100%;
   flex-flow: column nowrap;
-  overflow: auto;
-  /* crucial */
+  overflow: auto;  /* crucial */
 }
 
 .page--hide {
@@ -763,6 +769,7 @@ textarea {
   break-inside: avoid;
   border: 1px solid transparent;
   cursor: pointer;
+  flex: 0 0 auto;
   margin-bottom: 0.5rem;
   min-height: var(--target-size);
   padding: 0.5rem;
@@ -776,6 +783,11 @@ textarea {
 .verse-acrostic {
   font-weight: bold;
   margin-right: 0.5rem;
+}
+
+.verse-last {
+  height: 1px;
+  width: 328px;
 }
 
 .verse-num {

@@ -3,32 +3,24 @@
 import { bus } from '../EventBus.js';
 import { appPrefix } from '../util.js';
 
-const validColumns = [ 1, 2, 3];
-
 class ReadModel {
 
   constructor() {
     this.initialize();
   }
 
-  columnChange(column) {
-    this.column = column;
-    this.saveColumn();
-    bus.publish('column.update', this.column);
+  columnModeChange(columnMode) {
+    this.columnMode = columnMode;
+    this.saveColumnMode();
+    bus.publish('read.column-mode.update', this.columnMode);
+  }
+
+  columnModeToogle() {
+    this.columnModeChange(!this.columnMode);
   }
 
   initialize() {
     this.subscribe();
-  }
-
-  modeChange(strongMode) {
-    this.strongMode = strongMode;
-    this.saveMode();
-    bus.publish('read.strong-mode.update', this.strongMode);
-  }
-
-  modeToogle() {
-    this.modeChange(!this.strongMode);
   }
 
   panesChange(panes) {
@@ -37,51 +29,51 @@ class ReadModel {
   }
 
   restore() {
-    this.restoreColumn();
-    this.restoreMode();
+    this.restoreColumnMode();
+    this.restoreStrongMode();
   }
 
-  restoreColumn() {
-    let defaultColumn = 1;
-    let column = localStorage.getItem(`${appPrefix}-column`);
-    if (!column) {
-      column = defaultColumn;
+  restoreColumnMode() {
+    let defaultColumnMode = false;
+    let columnMode = localStorage.getItem(`${appPrefix}-columnMode`);
+    if (!columnMode) {
+      columnMode = defaultColumnMode;
     } else {
       try {
-        column = JSON.parse(column);
+        columnMode = JSON.parse(columnMode);
       } catch (error) {
-        column = defaultColumn;
+        columnMode = defaultColumnMode;
       }
-      if (!validColumns.includes(column)) {
-        column = defaultColumn;
+      if (typeof columnMode !== 'boolean') {
+        columnMode = defaultColumnMode;
       }
     }
-    this.columnChange(column);
+    this.columnModeChange(columnMode);
   }
 
-  restoreMode() {
-    let defaultMode = false;
+  restoreStrongMode() {
+    let defaultStrongMode = false;
     let strongMode = localStorage.getItem(`${appPrefix}-readStrongMode`);
     if (!strongMode) {
-      strongMode = defaultMode;
+      strongMode = defaultStrongMode;
     } else {
       try {
         strongMode = JSON.parse(strongMode);
       } catch (error) {
-        strongMode = defaultMode;
+        strongMode = defaultStrongMode;
       }
       if (typeof strongMode !== 'boolean') {
-        strongMode = defaultMode;
+        strongMode = defaultStrongMode;
       }
     }
-    this.modeChange(strongMode);
+    this.strongModeChange(strongMode);
   }
 
-  saveColumn() {
-    localStorage.setItem(`${appPrefix}-column`, JSON.stringify(this.column));
+  saveColumnMode() {
+    localStorage.setItem(`${appPrefix}-columnMode`, JSON.stringify(this.columnMode));
   }
 
-  saveMode() {
+  saveStrongMode() {
     localStorage.setItem(`${appPrefix}-readStrongMode`,
       JSON.stringify(this.strongMode));
   }
@@ -116,20 +108,29 @@ class ReadModel {
     this.sidebarChange(sidebar);
   }
 
-  subscribe() {
-    bus.subscribe('column.change',
-      (column) => { this.columnChange(column); }
-    );
+  strongModeChange(strongMode) {
+    this.strongMode = strongMode;
+    this.saveStrongMode();
+    bus.publish('read.strong-mode.update', this.strongMode);
+  }
 
+  strongModeToogle() {
+    this.strongModeChange(!this.strongMode);
+  }
+
+  subscribe() {
     bus.subscribe('panes.change', (panes) => {
       this.panesChange(panes);
     });
 
+    bus.subscribe('read.column-mode.toggle', () => {
+      this.columnModeToogle();
+    });
     bus.subscribe('read.restore',
       () => { this.restore(); }
     );
     bus.subscribe('read.strong-mode.toggle', () => {
-      this.modeToogle();
+      this.strongModeToogle();
     });
 
     bus.subscribe('sidebar.change', (sidebar) => {

@@ -19,7 +19,8 @@ import {
 } from '../template.js';
 import {
   centerScrollElement,
-  removeAllChildren
+  removeAllChildren,
+  sideScrollElement
 } from '../util.js';
 
 const lowerToolSet = [
@@ -29,9 +30,7 @@ const lowerToolSet = [
   { type: 'btn', icon: 'strong', label: 'Strong' },
   { type: 'btn', icon: 'setting', label: 'Setting' },
   { type: 'btn', icon: 'help', label: 'Help' },
-  { type: 'btn', icon: 'column-1', label: 'Single Column' },
-  { type: 'btn', icon: 'column-2', label: 'Double Column' },
-  { type: 'btn', icon: 'column-3', label: 'Triple Column' },
+  { type: 'btn', icon: 'column-mode', label: 'Column Mode' },
   { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
 ];
 
@@ -142,10 +141,10 @@ class ReadView {
     this.refreshVerseBookmarks();
   }
 
-  columnUpdate(column) {
-    this.column = column;
-    this.updateColumn();
-    this.updateColumnBtn();
+  columnModeUpdate(columnMode) {
+    this.columnMode = columnMode;
+    this.updateColumnModeBtn();
+    this.updateColumnMode();
   }
 
   folderUpdate(folder) {
@@ -183,10 +182,7 @@ class ReadView {
     this.btnStrongMode = this.toolbarLower.querySelector('.btn-icon--strong-mode');
     this.btnSetting = this.toolbarLower.querySelector('.btn-icon--setting');
     this.btnHelp = this.toolbarLower.querySelector('.btn-icon--help');
-    this.btnColumnOne = this.toolbarLower.querySelector('.btn-icon--column-1');
-    this.btnColumnTwo = this.toolbarLower.querySelector('.btn-icon--column-2');
-    this.btnColumnThree = this.toolbarLower.querySelector('.btn-icon--column-3');
-
+    this.btnColumnMode = this.toolbarLower.querySelector('.btn-icon--column-mode');
     this.columnBtns = [
       this.btnColumnOne, this.btnColumnTwo, this.btnColumnThree
     ];
@@ -221,15 +217,6 @@ class ReadView {
     }
   }
 
-  modeUpdate(strongMode) {
-    this.strongMode = strongMode;
-    if (this.strongMode) {
-      this.btnStrongMode.classList.add('btn-icon--active');
-    } else {
-      this.btnStrongMode.classList.remove('btn-icon--active');
-    }
-  }
-
   navigatorHide() {
     this.btnNavigator.classList.remove('btn-icon--active');
   }
@@ -243,18 +230,10 @@ class ReadView {
   }
 
   panesUpdate(panes) {
-    if (panes === 1 || panes === 2) {
-      this.btnColumnOne.classList.add('btn-icon--hide');
-      this.btnColumnTwo.classList.add('btn-icon--hide');
-      this.btnColumnThree.classList.add('btn-icon--hide');
-    } else if (panes === 3) {
-      this.btnColumnOne.classList.remove('btn-icon--hide');
-      this.btnColumnTwo.classList.remove('btn-icon--hide');
-      this.btnColumnThree.classList.add('btn-icon--hide');
+    if (panes < 3) {
+      this.btnColumnMode.classList.add('btn-icon--hide');
     } else {
-      this.btnColumnOne.classList.remove('btn-icon--hide');
-      this.btnColumnTwo.classList.remove('btn-icon--hide');
-      this.btnColumnThree.classList.remove('btn-icon--hide');
+      this.btnColumnMode.classList.remove('btn-icon--hide');
     }
   }
 
@@ -276,13 +255,18 @@ class ReadView {
 
   scrollToTop() {
     this.scroll.scrollTop = 0;
+    this.scroll.scrollLeft = 0;
   }
 
   scrollToVerse(verseIdx) {
     let element = this.list.querySelector(
       `[data-verse-idx="${verseIdx}"]`);
     if (element) {
-      centerScrollElement(this.scroll, element);
+      if (this.columnMode) {
+        sideScrollElement(this.scroll, element);
+      } else {
+        centerScrollElement(this.scroll, element);
+      }
     }
   }
 
@@ -318,6 +302,15 @@ class ReadView {
     }
   }
 
+  strongModeUpdate(strongMode) {
+    this.strongMode = strongMode;
+    if (this.strongMode) {
+      this.btnStrongMode.classList.add('btn-icon--active');
+    } else {
+      this.btnStrongMode.classList.remove('btn-icon--active');
+    }
+  }
+
   strongShow() {
     this.btnStrong.classList.add('btn-icon--active');
   }
@@ -332,10 +325,6 @@ class ReadView {
 
     bus.subscribe('chapterIdx.update', (chapterIdx) => {
       this.chapterIdxUpdate(chapterIdx);
-    });
-
-    bus.subscribe('column.update', (column) => {
-      this.columnUpdate(column);
     });
 
     bus.subscribe('folder.update', (folder) => {
@@ -371,6 +360,9 @@ class ReadView {
       this.panesUpdate(panes);
     });
 
+    bus.subscribe('read.column-mode.update', (columnMode) => {
+      this.columnModeUpdate(columnMode);
+    });
     bus.subscribe('read.hide', () => {
       this.hide();
     });
@@ -384,7 +376,7 @@ class ReadView {
       this.show();
     });
     bus.subscribe('read.strong-mode.update', (strongMode) => {
-      this.modeUpdate(strongMode);
+      this.strongModeUpdate(strongMode);
     });
 
     bus.subscribe('search.hide', () => {
@@ -422,6 +414,7 @@ class ReadView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnStrongMode ||
+        target === this.btnColumnMode ||
         !target.classList.contains('btn-icon--active')
       ) {
         if (target === this.btnNavigator) {
@@ -432,18 +425,14 @@ class ReadView {
           bus.publish('sidebar.select', 'search');
         } else if (target === this.btnStrong) {
           bus.publish('sidebar.select', 'strong');
-        } else if (target === this.btnStrongMode) {
-          bus.publish('read.strong-mode.click', null);
         } else if (target === this.btnSetting) {
           bus.publish('sidebar.select', 'setting');
         } else if (target === this.btnHelp) {
           bus.publish('sidebar.select', 'help');
-        } else if (target === this.btnColumnOne) {
-          bus.publish('read.column.select', 1);
-        } else if (target === this.btnColumnTwo) {
-          bus.publish('read.column.select', 2);
-        } else if (target === this.btnColumnThree) {
-          bus.publish('read.column.select', 3);
+        } else if (target === this.btnColumnMode) {
+          bus.publish('read.column-mode.click', null);
+        } else if (target === this.btnStrongMode) {
+          bus.publish('read.strong-mode.click', null);
         }
       }
     }
@@ -471,21 +460,20 @@ class ReadView {
     this.banner.textContent = tomeChapters[this.chapterIdx][chapterName];
   }
 
-  updateColumn() {
-    this.list.classList.remove('column-2', 'column-3');
-    if (this.column === 2) {
-      this.list.classList.add('column-2');
-    } else if (this.column === 3) {
-      this.list.classList.add('column-3');
+  updateColumnMode() {
+    if (this.columnMode) {
+      this.list.classList.add('list--read-column');
+    } else {
+      this.list.classList.remove('list--read-column');
     }
   }
 
-  updateColumnBtn() {
-    if (this.activeColumnBtn) {
-      this.activeColumnBtn.classList.remove('btn-icon--active');
+  updateColumnModeBtn() {
+    if (this.columnMode) {
+      this.btnColumnMode.classList.add('btn-icon--active');
+    } else {
+      this.btnColumnMode.classList.remove('btn-icon--active');
     }
-    this.activeColumnBtn = this.columnBtns[this.column - 1];
-    this.activeColumnBtn.classList.add('btn-icon--active');
   }
 
   updateFont() {
@@ -509,6 +497,8 @@ class ReadView {
       let verse = this.buildVerse(verseObj);
       fragment.appendChild(verse);
     }
+    let lastVerse = templateElement('div', 'verse-last', null, null, null);
+    fragment.appendChild(lastVerse);
     this.list.appendChild(fragment);
   }
 
