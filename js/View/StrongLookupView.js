@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 
 import {
   templateDivDialog,
@@ -82,7 +82,7 @@ class StrongLookupView {
   findClick() {
     let strongNum = this.inputStrongNum.value;
     if (strongNum) {
-      bus.publish('strong-lookup.find', strongNum.toUpperCase());
+      queue.publish('strong-lookup.find', strongNum.toUpperCase());
     }
   }
 
@@ -122,14 +122,14 @@ class StrongLookupView {
   }
 
   subscribe() {
-    bus.subscribe('strong-lookup.hide', () => {
+    queue.subscribe('strong-lookup.hide', () => {
       this.hide();
     });
-    bus.subscribe('strong-lookup.show', () => {
+    queue.subscribe('strong-lookup.show', () => {
       this.show();
     });
 
-    bus.subscribe('strong.def.error', (message) => {
+    queue.subscribe('strong.def.error', (message) => {
       this.error(message);
     });
   }
@@ -139,7 +139,7 @@ class StrongLookupView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnDef) {
-        bus.publish('strong-def', null);
+        queue.publish('strong-def', null);
       }
     }
   }

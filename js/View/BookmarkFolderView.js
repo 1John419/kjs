@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import {
   templateActionMenu,
   templateElement,
@@ -108,11 +108,16 @@ class BookmarkFolderView {
   }
 
   delete(folderName) {
-    bus.publish('bookmark-folder.delete', folderName);
+    queue.publish('bookmark-folder.delete', folderName);
   }
 
   down(folderName) {
-    bus.publish('bookmark-folder.down', folderName);
+    queue.publish('bookmark-folder.down', folderName);
+  }
+
+  folderListUpdate(folderList) {
+    this.folderList = folderList;
+    this.updateList();
   }
 
   getElements() {
@@ -149,17 +154,12 @@ class BookmarkFolderView {
     if (target) {
       if (target.classList.contains('btn-entry')) {
         let folderName = target.textContent;
-        bus.publish('bookmark-folder.select', folderName);
+        queue.publish('bookmark-folder.select', folderName);
       } else if (target.classList.contains('btn-icon--menu')) {
         let entry = target.previousSibling;
         this.menuClick(entry);
       }
     }
-  }
-
-  listUpdate(folderList) {
-    this.folderList = folderList;
-    this.updateList();
   }
 
   menuClick(target) {
@@ -175,7 +175,7 @@ class BookmarkFolderView {
   }
 
   rename(folderName) {
-    bus.publish('bookmark-folder-rename', folderName);
+    queue.publish('bookmark-folder-rename', folderName);
   }
 
   scrollToTop() {
@@ -194,18 +194,18 @@ class BookmarkFolderView {
   }
 
   subscribe() {
-    bus.subscribe('bookmark-folder.hide', () => {
+    queue.subscribe('bookmark-folder.hide', () => {
       this.hide();
     });
-    bus.subscribe('bookmark-folder.show', () => {
+    queue.subscribe('bookmark-folder.show', () => {
       this.show();
     });
 
-    bus.subscribe('folder.list.update', (folderList) => {
-      this.listUpdate(folderList);
+    queue.subscribe('bookmark.folder-list.update', (folderList) => {
+      this.folderListUpdate(folderList);
     });
 
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
   }
@@ -215,21 +215,21 @@ class BookmarkFolderView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBack) {
-        bus.publish('bookmark.back', null);
+        queue.publish('bookmark.back', null);
       } else if (target === this.btnBookmarkList) {
-        bus.publish('bookmark-list', null);
+        queue.publish('bookmark-list', null);
       } else if (target === this.btnBookmarkFolderAdd) {
-        bus.publish('bookmark-folder-add', null);
+        queue.publish('bookmark-folder-add', null);
       } else if (target === this.btnExport) {
-        bus.publish('bookmark-export', null);
+        queue.publish('bookmark-export', null);
       } else if (target === this.btnImport) {
-        bus.publish('bookmark-import', null);
+        queue.publish('bookmark-import', null);
       }
     }
   }
 
   up(folderName) {
-    bus.publish('bookmark-folder.up', folderName);
+    queue.publish('bookmark-folder.up', folderName);
   }
 
   updateList() {

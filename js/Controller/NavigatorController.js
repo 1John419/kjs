@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import { tomeBooks } from '../data/tomeDb.js';
 import {
   bookFirstChapterIdx,
@@ -14,16 +14,16 @@ class NavigatorController {
   }
 
   back() {
-    bus.publish('sidebar.change', 'none');
+    queue.publish('sidebar.change', 'none');
   }
 
   book() {
-    bus.publish('navigator.task.change', 'navigator-book');
+    queue.publish('navigator.task.change', 'navigator-book');
   }
 
   bookSelect(bookIdx) {
     if (bookIdx !== this.lastBookIdx) {
-      bus.publish('bookIdx.change', bookIdx);
+      queue.publish('bookIdx.change', bookIdx);
     }
     this.lastBookIdx = bookIdx;
     let book = tomeBooks[bookIdx];
@@ -31,32 +31,32 @@ class NavigatorController {
       book[bookLastChapterIdx] - book[bookFirstChapterIdx] + 1;
     if (this.panes > 1 || chapterCount === 1) {
       let chapterIdx = tomeBooks[bookIdx][bookFirstChapterIdx];
-      bus.publish('chapterIdx.change', chapterIdx);
+      queue.publish('chapterIdx.change', chapterIdx);
     }
     if (this.panes === 1 && chapterCount === 1) {
-      bus.publish('sidebar.change', 'none');
+      queue.publish('sidebar.change', 'none');
     } else {
-      bus.publish('navigator.task.change', 'navigator-chapter');
+      queue.publish('navigator.task.change', 'navigator-chapter');
     }
   }
 
   chapter() {
-    bus.publish('navigator.task.change', 'navigator-chapter');
+    queue.publish('navigator.task.change', 'navigator-chapter');
   }
 
   chapterIdxUpdate() {
     if (this.panes === 1 && this.sidebar === 'navigator') {
-      bus.publish('sidebar.select', 'none');
+      queue.publish('sidebar.select', 'none');
     }
-    bus.publish('read.scroll-to-top');
+    queue.publish('read.scroll-to-top');
   }
 
   chapterSelect(chapterIdx) {
-    bus.publish('chapterIdx.change', chapterIdx);
+    queue.publish('chapterIdx.change', chapterIdx);
   }
 
   hide() {
-    bus.publish(`${this.navigatorTask}.hide`, null);
+    queue.publish(`${this.navigatorTask}.hide`, null);
   }
 
   initialize() {
@@ -69,7 +69,7 @@ class NavigatorController {
   }
 
   show() {
-    bus.publish(`${this.navigatorTask}.show`, null);
+    queue.publish(`${this.navigatorTask}.show`, null);
   }
 
   sidebarUpdate(sidebar) {
@@ -77,51 +77,53 @@ class NavigatorController {
   }
 
   subscribe() {
-    bus.subscribe('chapterIdx.update', () => {
+    queue.subscribe('chapterIdx.update', () => {
       this.chapterIdxUpdate();
     });
 
-    bus.subscribe('navigator-book', () => {
+    queue.subscribe('navigator-book', () => {
       this.book();
     });
-    bus.subscribe('navigator-book.select', (bookIdx) => {
+    queue.subscribe('navigator-book.select', (bookIdx) => {
       this.bookSelect(bookIdx);
     });
 
-    bus.subscribe('navigator-chapter', () => {
+    queue.subscribe('navigator-chapter', () => {
       this.chapter();
     });
-    bus.subscribe('navigator-chapter.select', (chapterIdx) => {
+    queue.subscribe('navigator-chapter.select', (chapterIdx) => {
       this.chapterSelect(chapterIdx);
     });
 
-    bus.subscribe('navigator.back', () => {
+    queue.subscribe('navigator.back', () => {
       this.back();
     });
-    bus.subscribe('navigator.hide', () => {
+    queue.subscribe('navigator.hide', () => {
       this.hide();
     });
-    bus.subscribe('navigator.show', () => {
+    queue.subscribe('navigator.show', () => {
       this.show();
     });
-    bus.subscribe('navigator.task.update', (navigatorTask) => {
+    queue.subscribe('navigator.task.update', (navigatorTask) => {
       this.taskUpdate(navigatorTask);
     });
 
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
 
-    bus.subscribe('sidebar.update', (sidebar) => {
+    queue.subscribe('sidebar.update', (sidebar) => {
       this.sidebarUpdate(sidebar);
     });
   }
 
   taskUpdate(navigatorTask) {
     if (this.sidebar === 'navigator') {
-      bus.publish(`${this.navigatorTask}.hide`, null);
-      this.navigatorTask = navigatorTask;
-      bus.publish(`${this.navigatorTask}.show`, null);
+      if (this.navigatorTask !== navigatorTask) {
+        queue.publish(`${this.navigatorTask}.hide`, null);
+        this.navigatorTask = navigatorTask;
+        queue.publish(`${this.navigatorTask}.show`, null);
+      }
     } else {
       this.navigatorTask = navigatorTask;
     }

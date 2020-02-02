@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import {
   bookBinBookIdx,
   bookBinChapters,
@@ -163,7 +163,7 @@ class StrongFilterView {
       bookIdx: bookIdx,
       chapterIdx: chapterIdx
     };
-    bus.publish('strong-filter.select', strongFilter);
+    queue.publish('strong-filter.select', strongFilter);
   }
 
   filterUpdate(strongFilter) {
@@ -226,23 +226,23 @@ class StrongFilterView {
   }
 
   subscribe() {
-    bus.subscribe('strong-filter.hide', () => {
+    queue.subscribe('strong-filter.hide', () => {
       this.hide();
     });
-    bus.subscribe('strong-filter.show', () => {
+    queue.subscribe('strong-filter.show', () => {
       this.show();
     });
 
-    bus.subscribe('strong.def.update', (strongDefObj) => {
+    queue.subscribe('strong.def.update', (strongDefObj) => {
       this.defUpdate(strongDefObj);
     });
-    bus.subscribe('strong.filter.update', (strongFilter) => {
+    queue.subscribe('strong.filter.update', (strongFilter) => {
       this.filterUpdate(strongFilter);
     });
-    bus.subscribe('strong.word.update', (strongWord) => {
+    queue.subscribe('strong.word.update', (strongWord) => {
       this.wordUpdate(strongWord);
     });
-    bus.subscribe('strong.wordTomeBin.update', (strongWordTomeBin) => {
+    queue.subscribe('strong.wordTomeBin.update', (strongWordTomeBin) => {
       this.wordTomeBinUpdate(strongWordTomeBin);
     });
   }
@@ -252,7 +252,7 @@ class StrongFilterView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnResult) {
-        bus.publish('strong-result', null);
+        queue.publish('strong-result', null);
       }
     }
   }

@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import { appPrefix } from '../util.js';
 
 const validTasks = ['help-read', 'help-topic'];
@@ -67,13 +67,13 @@ class HelpModel {
   }
 
   subscribe() {
-    bus.subscribe('help.restore', () => {
+    queue.subscribe('help.restore', () => {
       this.restore();
     });
-    bus.subscribe('help.task.change', (helpTask) => {
+    queue.subscribe('help.task.change', (helpTask) => {
       this.taskChange(helpTask);
     });
-    bus.subscribe('help.topic.change', (helpTopic) => {
+    queue.subscribe('help.topic.change', (helpTopic) => {
       this.topicChange(helpTopic);
     });
   }
@@ -81,13 +81,13 @@ class HelpModel {
   taskChange(helpTask) {
     this.helpTask = helpTask;
     this.saveHelpTask();
-    bus.publish('help.task.update', this.helpTask);
+    queue.publish('help.task.update', this.helpTask);
   }
 
   topicChange(helpTopic) {
     this.helpTopic = helpTopic;
     this.saveHelpTopic();
-    bus.publish('help.topic.update', this.helpTopic);
+    queue.publish('help.topic.update', this.helpTopic);
   }
 
 }

@@ -3,6 +3,10 @@
 import Dexie from '../lib/dexie.js';
 import { LZMA } from '../lib/decompress.js';
 import { defTranliteration } from '../data/strongIdx.js';
+import {
+  appPrefix,
+  dbVersion
+} from '../util.js';
 
 const strongStores = {
   defs: 'k',
@@ -11,18 +15,21 @@ const strongStores = {
 };
 
 const strongLzmaUrl = './lzma/strong.json.lzma';
+const strongVersion = 1;
 
 let progress = null;
-let strongCitations = {};
-let strongDb = null;
-let strongNums = null;
 
-const initializeStrong = async (cb) => {
+export let strongCitations = {};
+export let strongDb = null;
+export let strongNums = null;
+
+export const initializeStrong = async (cb) => {
   progress = cb ? cb : () => {};
   progress('');
   progress('* strong database *');
   progress('');
-  await openStrong();
+  await versionCheck();
+  await populateStrong();
   await loadStrongNums();
   await loadStrongCitations();
 };
@@ -39,10 +46,7 @@ const loadStrongNums = async () => {
   strongNums = strongDefObjs.map(x => x.k);
 };
 
-const openStrong = async () => {
-  strongDb = await new Dexie('strong');
-  await strongDb.version(1).stores(strongStores);
-  strongDb.open();
+const populateStrong = async () => {
   let wordsCount = await strongDb.words.count();
   if (wordsCount === 0) {
     progress('fetching...');
@@ -72,9 +76,20 @@ const openStrong = async () => {
   }
 };
 
-export {
-  initializeStrong,
-  strongCitations,
-  strongDb,
-  strongNums
+const versionCheck = async () => {
+  let currentVersion = dbVersion('strong');
+
+  strongDb = await new Dexie('strong');
+  await strongDb.version(1).stores(strongStores);
+  strongDb.open();
+
+  if (strongVersion !== currentVersion) {
+    progress('new version.');
+    for (let store of Object.keys(strongStores)) {
+      progress(`clearing ${store}...`);
+      await strongDb.table(store).clear();
+    }
+    localStorage.setItem(`${appPrefix}-strongVersion`,
+      JSON.stringify(strongVersion));
+  }
 };

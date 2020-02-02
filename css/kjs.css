@@ -455,6 +455,20 @@ textarea {
   text-align: center;
 }
 
+.message--bookmark-folder-add {
+  border: 1px solid var(--ui-border);
+  margin-top: 1.0rem;
+  min-height: 2.3rem;
+  padding: 0.5rem;
+}
+
+.message--bookmark-folder-rename {
+  border: 1px solid var(--ui-border);
+  margin-top: 1.0rem;
+  min-height: 2.3rem;
+  padding: 0.5rem;
+}
+
 .message--bookmark-import {
   border: 1px solid var(--ui-border);
   margin-top: 1.0rem;

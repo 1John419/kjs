@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import {
   verseCitation,
   verseText
@@ -115,7 +115,7 @@ class StrongVerseView {
     let target = event.target;
     if (target.classList.contains('btn-strong')) {
       let strongDef = target.dataset.strongDef;
-      bus.publish('strong-verse.select', strongDef);
+      queue.publish('strong-verse.select', strongDef);
     }
   }
 
@@ -141,21 +141,21 @@ class StrongVerseView {
   }
 
   subscribe() {
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
 
-    bus.subscribe('strong-verse.hide', () => {
+    queue.subscribe('strong-verse.hide', () => {
       this.hide();
     });
-    bus.subscribe('strong-verse.show', () => {
+    queue.subscribe('strong-verse.show', () => {
       this.show();
     });
 
-    bus.subscribe('strong.map.update', (strongMapObj) => {
+    queue.subscribe('strong.map.update', (strongMapObj) => {
       this.mapUpdate(strongMapObj);
     });
-    bus.subscribe('strong.verse.update', (strongVerseObj) => {
+    queue.subscribe('strong.verse.update', (strongVerseObj) => {
       this.verseUpdate(strongVerseObj);
     });
   }
@@ -165,11 +165,11 @@ class StrongVerseView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBack) {
-        bus.publish('strong.back', null);
+        queue.publish('strong.back', null);
       } else if (target === this.btnStrongDef) {
-        bus.publish('strong-def', null);
+        queue.publish('strong-def', null);
       } else if (target === this.btnResult) {
-        bus.publish('strong-result', null);
+        queue.publish('strong-result', null);
       }
     }
   }

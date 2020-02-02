@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import {
   tomeAcrostics,
   tomeChapters
@@ -44,6 +44,11 @@ class ReadView {
 
   constructor() {
     this.initialize();
+  }
+
+  activeFolderUpdate(activeFolder) {
+    this.activeFolder = activeFolder;
+    this.refreshVerseBookmarks();
   }
 
   addListeners() {
@@ -147,11 +152,6 @@ class ReadView {
     this.updateColumnMode();
   }
 
-  folderUpdate(folder) {
-    this.folder = folder;
-    this.refreshVerseBookmarks();
-  }
-
   fontSizeUpdate(fontSize) {
     this.fontSize = fontSize;
     this.updateFontSize();
@@ -239,7 +239,7 @@ class ReadView {
 
   refreshBookmarks(element) {
     let verseIdx = parseInt(element.dataset.verseIdx);
-    if (this.folder.bookmarks.indexOf(verseIdx) === -1) {
+    if (this.activeFolder.bookmarks.indexOf(verseIdx) === -1) {
       element.classList.remove('verse--bookmark');
     } else {
       element.classList.add('verse--bookmark');
@@ -316,95 +316,94 @@ class ReadView {
   }
 
   subscribe() {
-    bus.subscribe('bookmark.hide', () => {
+    queue.subscribe('bookmark.active-folder.update', (activeFolder) => {
+      this.activeFolderUpdate(activeFolder);
+    });
+    queue.subscribe('bookmark.hide', () => {
       this.bookmarkHide();
     });
-    bus.subscribe('bookmark.show', () => {
+    queue.subscribe('bookmark.show', () => {
       this.bookmarkShow();
     });
 
-    bus.subscribe('chapterIdx.update', (chapterIdx) => {
+    queue.subscribe('chapterIdx.update', (chapterIdx) => {
       this.chapterIdxUpdate(chapterIdx);
     });
 
-    bus.subscribe('folder.update', (folder) => {
-      this.folderUpdate(folder);
-    });
-
-    bus.subscribe('font.update', (font) => {
+    queue.subscribe('font.update', (font) => {
       this.fontUpdate(font);
     });
 
-    bus.subscribe('font-size.update', (fontSize) => {
+    queue.subscribe('font-size.update', (fontSize) => {
       this.fontSizeUpdate(fontSize);
     });
 
-    bus.subscribe('help.hide', () => {
+    queue.subscribe('help.hide', () => {
       this.helpHide();
     });
-    bus.subscribe('help.show', () => {
+    queue.subscribe('help.show', () => {
       this.helpShow();
     });
 
-    bus.subscribe('navigator.hide', () => {
+    queue.subscribe('navigator.hide', () => {
       this.navigatorHide();
     });
-    bus.subscribe('navigator.show', () => {
+    queue.subscribe('navigator.show', () => {
       this.navigatorShow();
     });
-    bus.subscribe('navigator.verses.update', (verseObjs) => {
+    queue.subscribe('navigator.verses.update', (verseObjs) => {
       this.navigatorVersesUpdate(verseObjs);
     });
 
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
 
-    bus.subscribe('read.column-mode.update', (columnMode) => {
+    queue.subscribe('read.column-mode.update', (columnMode) => {
       this.columnModeUpdate(columnMode);
     });
-    bus.subscribe('read.hide', () => {
+    queue.subscribe('read.hide', () => {
       this.hide();
     });
-    bus.subscribe('read.scroll-to-top', () => {
+    queue.subscribe('read.scroll-to-top', () => {
       this.scrollToTop();
     });
-    bus.subscribe('read.scroll-to-verse', (verseIdx) => {
+    queue.subscribe('read.scroll-to-verse', (verseIdx) => {
       this.scrollToVerse(verseIdx);
     });
-    bus.subscribe('read.show', () => {
+    queue.subscribe('read.show', () => {
       this.show();
     });
-    bus.subscribe('read.strong-mode.update', (strongMode) => {
+    queue.subscribe('read.strong-mode.update', (strongMode) => {
       this.strongModeUpdate(strongMode);
     });
 
-    bus.subscribe('search.hide', () => {
+    queue.subscribe('search.hide', () => {
       this.searchHide();
     });
-    bus.subscribe('search.show', () => {
+    queue.subscribe('search.show', () => {
       this.searchShow();
     });
 
-    bus.subscribe('setting.hide', () => {
+    queue.subscribe('setting.hide', () => {
       this.settingHide();
     });
-    bus.subscribe('setting.show', () => {
+    queue.subscribe('setting.show', () => {
       this.settingShow();
     });
 
-    bus.subscribe('strong.hide', () => {
+    queue.subscribe('strong.hide', () => {
       this.strongHide();
     });
-    bus.subscribe('strong.show', () => {
+    queue.subscribe('strong.show', () => {
       this.strongShow();
     });
 
-    bus.subscribe('sidebar.update', (sidebar) => {
+    queue.subscribe('sidebar.update', (sidebar) => {
       this.sidebarUpdate(sidebar);
     });
 
-    bus.subscribe('theme.update', (theme) => {
+    queue.subscribe('theme.update', (theme) => {
       this.themeUpdate(theme);
     });
   }
@@ -418,21 +417,21 @@ class ReadView {
         !target.classList.contains('btn-icon--active')
       ) {
         if (target === this.btnNavigator) {
-          bus.publish('sidebar.select', 'navigator');
+          queue.publish('sidebar.select', 'navigator');
         } else if (target === this.btnBookmark) {
-          bus.publish('sidebar.select', 'bookmark');
+          queue.publish('sidebar.select', 'bookmark');
         } else if (target === this.btnSearch) {
-          bus.publish('sidebar.select', 'search');
+          queue.publish('sidebar.select', 'search');
         } else if (target === this.btnStrong) {
-          bus.publish('sidebar.select', 'strong');
+          queue.publish('sidebar.select', 'strong');
         } else if (target === this.btnSetting) {
-          bus.publish('sidebar.select', 'setting');
+          queue.publish('sidebar.select', 'setting');
         } else if (target === this.btnHelp) {
-          bus.publish('sidebar.select', 'help');
+          queue.publish('sidebar.select', 'help');
         } else if (target === this.btnColumnMode) {
-          bus.publish('read.column-mode.click', null);
+          queue.publish('read.column-mode.click', null);
         } else if (target === this.btnStrongMode) {
-          bus.publish('read.strong-mode.click', null);
+          queue.publish('read.strong-mode.click', null);
         }
       }
     }
@@ -443,9 +442,9 @@ class ReadView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnPrev) {
-        bus.publish('read.prev.chapter', 1);
+        queue.publish('read.prev.chapter', 1);
       } else if (target === this.btnNext) {
-        bus.publish('read.next.chapter', 2);
+        queue.publish('read.next.chapter', 2);
       }
     }
   }
@@ -505,16 +504,16 @@ class ReadView {
   verseClick(verse) {
     let verseIdx = parseInt(verse.dataset.verseIdx);
     if (this.strongMode) {
-      bus.publish('read.strong.select', verseIdx);
+      queue.publish('read.strong.select', verseIdx);
     } else if (verse.classList.contains('verse--bookmark')) {
-      bus.publish('read.bookmark.delete', verseIdx);
+      queue.publish('read.bookmark.delete', verseIdx);
     } else {
-      bus.publish('read.bookmark.add', verseIdx);
+      queue.publish('read.bookmark.add', verseIdx);
     }
   }
 
   windowResize() {
-    bus.publish('window.resize', null);
+    queue.publish('window.resize', null);
   }
 
 }

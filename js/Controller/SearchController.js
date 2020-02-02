@@ -1,7 +1,7 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
-import { chapterIdxByVerseIdx } from '../util.js';
+import { queue } from '../CommandQueue.js';
+import { chapterIdxByVerseIdx } from '../data/tomeDb.js';
 
 class SearchController {
 
@@ -10,56 +10,55 @@ class SearchController {
   }
 
   back() {
-    bus.publish('sidebar.change', 'none');
+    queue.publish('sidebar.change', 'none');
   }
 
   chapterIdxUpdate() {
     if (this.selectVerseIdx) {
       if (this.panes === 1 && this.sidebar !== 'none') {
-        bus.publish('sidebar.select', 'none');
+        queue.publish('sidebar.select', 'none');
       }
-      bus.publish('read.scroll-to-verse', this.selectVerseIdx);
+      queue.publish('read.scroll-to-verse', this.selectVerseIdx);
       this.selectVerseIdx = null;
     }
   }
 
   filter() {
-    bus.publish('search.task.change', 'search-filter');
+    queue.publish('search.task.change', 'search-filter');
   }
 
   filterSelect(searchFilter) {
-    bus.publish('search.filter.change', searchFilter);
-    bus.publish('search.task.change', 'search-result');
+    queue.publish('search.filter.change', searchFilter);
+    queue.publish('search.task.change', 'search-result');
   }
 
   hide() {
-    bus.publish(`${this.searchTask}.hide`, null);
+    queue.publish(`${this.searchTask}.hide`, null);
   }
 
   history() {
-    bus.publish('search.task.change', 'search-history');
+    queue.publish('search.task.change', 'search-history');
   }
 
   historyClear() {
-    bus.publish('search.history.clear', null);
+    queue.publish('search.history.clear', null);
   }
 
   historyDelete(query) {
-    bus.publish('search.history.delete', query);
+    queue.publish('search.history.delete', query);
   }
 
   historyDown(query) {
-    bus.publish('search.history.down', query);
+    queue.publish('search.history.down', query);
   }
 
   historySelect(query) {
-    this.query = query;
-    bus.publish('search.query.change', this.query);
-    bus.publish('search.task.change', 'search-result');
+    queue.publish('search.query.change', query);
+    queue.publish('search.task.change', 'search-result');
   }
 
   historyUp(query) {
-    bus.publish('search.history.up', query);
+    queue.publish('search.history.up', query);
   }
 
   initialize() {
@@ -67,42 +66,47 @@ class SearchController {
   }
 
   lookup() {
-    bus.publish('search.task.change', 'search-lookup');
+    queue.publish('search.task.change', 'search-lookup');
   }
 
   lookupCancel() {
-    bus.publish('search.task.change', 'search-result');
+    queue.publish('search.task.change', 'search-result');
   }
 
   lookupSearch(query) {
-    bus.publish('search.query.change', query);
+    queue.publish('search.query.change', query);
   }
 
   modeToggle() {
-    bus.publish('search.strong-mode.toggle', null);
+    queue.publish('search.strong-mode.toggle', null);
   }
 
   panesUpdate(panes) {
     this.panes = panes;
   }
 
-  queryUpdate(query) {
-    this.query = query;
-    bus.publish('search.task.change', 'search-result');
+  queryChange() {
+    this.queryChangePending = true;
+  }
+
+  queryUpdate() {
+    if (this.queryChangePending) {
+      queue.publish('search.task.change', 'search-result');
+    }
   }
 
   readSelect(verseIdx) {
     this.selectVerseIdx = verseIdx;
     let chapterIdx = chapterIdxByVerseIdx(verseIdx);
-    bus.publish('chapterIdx.change', chapterIdx);
+    queue.publish('chapterIdx.change', chapterIdx);
   }
 
   result() {
-    bus.publish('search.task.change', 'search-result');
+    queue.publish('search.task.change', 'search-result');
   }
 
   show() {
-    bus.publish(`${this.searchTask}.show`, null);
+    queue.publish(`${this.searchTask}.show`, null);
   }
 
   sidebarUpdate(sidebar) {
@@ -110,95 +114,110 @@ class SearchController {
   }
 
   strongSelect(verseIdx) {
-    bus.publish('strong.verse.change', verseIdx);
-    bus.publish('strong.task.change', 'strong-verse');
-    bus.publish('sidebar.change', 'strong');
+    this.strongSelectPending = true;
+    queue.publish('strong.verse.change', verseIdx);
+  }
+
+  strongVerseUpdate() {
+    if (this.strongSelectPending) {
+      this.strongSelectPending = false;
+      queue.publish('sidebar.change', 'strong');
+    }
   }
 
   subscribe() {
-    bus.subscribe('chapterIdx.update', () => {
+    queue.subscribe('chapterIdx.update', () => {
       this.chapterIdxUpdate();
     });
 
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
 
-    bus.subscribe('search-filter', () => {
+    queue.subscribe('search-filter', () => {
       this.filter();
     });
-    bus.subscribe('search-filter.select', (searchFilter) => {
+    queue.subscribe('search-filter.select', (searchFilter) => {
       this.filterSelect(searchFilter);
     });
 
-    bus.subscribe('search-history', () => {
+    queue.subscribe('search-history', () => {
       this.history();
     });
-    bus.subscribe('search-history.clear', () => {
+    queue.subscribe('search-history.clear', () => {
       this.historyClear();
     });
-    bus.subscribe('search-history.delete', (query) => {
+    queue.subscribe('search-history.delete', (query) => {
       this.historyDelete(query);
     });
-    bus.subscribe('search-history.down', (query) => {
+    queue.subscribe('search-history.down', (query) => {
       this.historyDown(query);
     });
-    bus.subscribe('search-history.select', (query) => {
+    queue.subscribe('search-history.select', (query) => {
       this.historySelect(query);
     });
-    bus.subscribe('search-history.up', (query) => {
+    queue.subscribe('search-history.up', (query) => {
       this.historyUp(query);
     });
 
-    bus.subscribe('search-lookup', () => {
+    queue.subscribe('search-lookup', () => {
       this.lookup();
     });
-    bus.subscribe('search-lookup.cancel', () => {
+    queue.subscribe('search-lookup.cancel', () => {
       this.lookupCancel();
     });
-    bus.subscribe('search-lookup.search', (query) => {
+    queue.subscribe('search-lookup.search', (query) => {
       this.lookupSearch(query);
     });
 
-    bus.subscribe('search-result', () => {
+    queue.subscribe('search-result', () => {
       this.result();
     });
-    bus.subscribe('search-result.read-select', (verseIdx) => {
+    queue.subscribe('search-result.read-select', (verseIdx) => {
       this.readSelect(verseIdx);
     });
-    bus.subscribe('search-result.strong-select', (verseIdx) => {
+    queue.subscribe('search-result.strong-select', (verseIdx) => {
       this.strongSelect(verseIdx);
     });
 
-    bus.subscribe('search.back', () => {
+    queue.subscribe('search.back', () => {
       this.back();
     });
-    bus.subscribe('search.hide', () => {
+    queue.subscribe('search.hide', () => {
       this.hide();
     });
-    bus.subscribe('search.query.update', (query) => {
-      this.queryUpdate(query);
+    queue.subscribe('search.query.change', () => {
+      this.queryChange();
     });
-    bus.subscribe('search.show', () => {
+    queue.subscribe('search.query.update', () => {
+      this.queryUpdate();
+    });
+    queue.subscribe('search.show', () => {
       this.show();
     });
-    bus.subscribe('search.strong-mode.click', () => {
+    queue.subscribe('search.strong-mode.click', () => {
       this.modeToggle();
     });
-    bus.subscribe('search.task.update', (searchTask) => {
+    queue.subscribe('search.task.update', (searchTask) => {
       this.taskUpdate(searchTask);
     });
 
-    bus.subscribe('sidebar.update', (sidebar) => {
+    queue.subscribe('sidebar.update', (sidebar) => {
       this.sidebarUpdate(sidebar);
+    });
+
+    queue.subscribe('strong.verse.update', () => {
+      this.strongVerseUpdate();
     });
   }
 
   taskUpdate(searchTask) {
     if (this.sidebar === 'search') {
-      bus.publish(`${this.searchTask}.hide`, null);
-      this.searchTask = searchTask;
-      bus.publish(`${this.searchTask}.show`, null);
+      if (this.searchTask !== searchTask) {
+        queue.publish(`${this.searchTask}.hide`, null);
+        this.searchTask = searchTask;
+        queue.publish(`${this.searchTask}.show`, null);
+      }
     } else {
       this.searchTask = searchTask;
     }

@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 
 import {
   templateElement,
@@ -91,7 +91,7 @@ class BookmarkImportView {
     this.message.textContent = '';
     let pkgStr = this.textarea.value;
     if (pkgStr) {
-      bus.publish('bookmark-import.import', pkgStr);
+      queue.publish('bookmark-import.import', pkgStr);
     }
   }
 
@@ -114,13 +114,13 @@ class BookmarkImportView {
   }
 
   subscribe() {
-    bus.subscribe('bookmark-import.hide', () => {
+    queue.subscribe('bookmark-import.hide', () => {
       this.hide();
     });
-    bus.subscribe('bookmark-import.message', (message) => {
+    queue.subscribe('bookmark-import.message', (message) => {
       this.error(message);
     });
-    bus.subscribe('bookmark-import.show', () => {
+    queue.subscribe('bookmark-import.show', () => {
       this.show();
     });
   }
@@ -130,7 +130,7 @@ class BookmarkImportView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBookmarkFolder) {
-        bus.publish('bookmark-folder', null);
+        queue.publish('bookmark-folder', null);
       }
     }
   }

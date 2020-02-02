@@ -1,9 +1,10 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 
 import {
   templateDivDialog,
+  templateElement,
   templatePage,
   templateScroll,
   templateToolbarLower,
@@ -51,6 +52,11 @@ class BookmarkFolderAddView {
     this.scroll = templateScroll('bookmark-folder-add');
     this.dialog = templateDivDialog('bookmark-folder-add', dialogToolset);
     this.scroll.appendChild(this.dialog);
+
+    this.message = templateElement('div', 'message',
+      'bookmark-folder-add', null, null);
+    this.scroll.appendChild(this.message);
+
     this.page.appendChild(this.scroll);
 
     this.toolbarLower = templateToolbarLower(lowerToolSet);
@@ -66,6 +72,11 @@ class BookmarkFolderAddView {
     if (target === this.btnSave) {
       this.saveClick();
     }
+  }
+
+  error(message) {
+    this.message.textContent = message;
+    this.message.classList.remove('message--hide');
   }
 
   getElements() {
@@ -97,22 +108,27 @@ class BookmarkFolderAddView {
   saveClick() {
     let name = this.inputName.value;
     if (name) {
-      bus.publish('bookmark-folder-add.save', name);
+      queue.publish('bookmark-folder-add.save', name);
     }
   }
 
   show() {
     this.page.classList.remove('page--hide');
+    this.message.classList.add('message--hide');
     this.inputName.value = '';
     this.inputName.focus();
   }
 
   subscribe() {
-    bus.subscribe('bookmark-folder-add.hide', () => {
+    queue.subscribe('bookmark-folder-add.hide', () => {
       this.hide();
     });
-    bus.subscribe('bookmark-folder-add.show', () => {
+    queue.subscribe('bookmark-folder-add.show', () => {
       this.show();
+    });
+
+    queue.subscribe('bookmark.folder.add.error', (message) => {
+      this.error(message);
     });
   }
 
@@ -121,7 +137,7 @@ class BookmarkFolderAddView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBookmarkFolder) {
-        bus.publish('bookmark-folder', null);
+        queue.publish('bookmark-folder', null);
       }
     }
   }

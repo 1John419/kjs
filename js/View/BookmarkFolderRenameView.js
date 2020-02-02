@@ -1,9 +1,10 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 
 import {
   templateDivDialog,
+  templateElement,
   templatePage,
   templateScroll,
   templateToolbarLower,
@@ -52,6 +53,11 @@ class BookmarkFolderRenameView {
     this.scroll = templateScroll('bookmark-folder-rename');
     this.dialog = templateDivDialog('bookmark-folder-rename', dialogToolset);
     this.scroll.appendChild(this.dialog);
+
+    this.message = templateElement('div', 'message',
+      'bookmark-folder-rename', null, null);
+    this.scroll.appendChild(this.message);
+
     this.page.appendChild(this.scroll);
 
     this.toolbarLower = templateToolbarLower(lowerToolSet);
@@ -67,6 +73,11 @@ class BookmarkFolderRenameView {
     if (target === this.btnSave) {
       this.saveClick();
     }
+  }
+
+  error(message) {
+    this.message.textContent = message;
+    this.message.classList.remove('message--hide');
   }
 
   folderToRename(folderName) {
@@ -103,14 +114,14 @@ class BookmarkFolderRenameView {
   saveClick() {
     let name = this.inputName.value;
     if (name) {
-      this.inputName.value = '';
       this.namePkg.new = name;
-      bus.publish('bookmark-folder-rename.save', this.namePkg);
+      queue.publish('bookmark-folder-rename.save', this.namePkg);
     }
   }
 
   show() {
     this.page.classList.remove('page--hide');
+    this.message.classList.add('message--hide');
     this.namePkg = {
       old: this.folderName
     };
@@ -119,14 +130,18 @@ class BookmarkFolderRenameView {
   }
 
   subscribe() {
-    bus.subscribe('bookmark-folder-rename.hide', () => {
+    queue.subscribe('bookmark-folder-rename.hide', () => {
       this.hide();
     });
-    bus.subscribe('bookmark-folder-rename.show', (folderName) => {
+    queue.subscribe('bookmark-folder-rename.show', (folderName) => {
       this.show(folderName);
     });
 
-    bus.subscribe('folder.to.rename', (folderName) => {
+    queue.subscribe('bookmark.folder.rename.error', (message) => {
+      this.error(message);
+    });
+
+    queue.subscribe('folder.to.rename', (folderName) => {
       this.folderToRename(folderName);
     });
   }
@@ -136,7 +151,7 @@ class BookmarkFolderRenameView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBookmarkFolder) {
-        bus.publish('bookmark-folder', null);
+        queue.publish('bookmark-folder', null);
       }
     }
   }

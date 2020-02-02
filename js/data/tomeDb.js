@@ -2,6 +2,15 @@
 
 import Dexie from '../lib/dexie.js';
 import { LZMA } from '../lib/decompress.js';
+import {
+  appPrefix,
+  dbVersion
+} from '../util.js';
+import {
+  chapterFirstVerseIdx,
+  chapterLastVerseIdx,
+  chapterName
+} from './tomeIdx.js';
 
 const tomeStores = {
   lists: 'k',
@@ -10,23 +19,44 @@ const tomeStores = {
 };
 
 const tomeLzmaUrl = './lzma/tome.kjv.json.lzma';
-const tomeName = 'KJV';
+const tomeVersion = 1;
+
+export const tomeName = 'KJV';
+
+export let tomeAcrostics = {};
+export let tomeBooks = null;
+export let tomeChapters = null;
+export let tomeCitations = [];
+export let tomeDb = null;
+export let tomeVerseCount = null;
+export let tomeWords = null;
 
 let progress = null;
-let tomeAcrostics = {};
-let tomeBooks = null;
-let tomeChapters = null;
-let tomeCitations = [];
-let tomeDb = null;
-let tomeVerseCount = null;
-let tomeWords = null;
 
-const initializeTome = async (cb) => {
+export const chapterByVerseIdx = (verseIdx) => {
+  let chapterIdx = chapterIdxByVerseIdx(verseIdx);
+  return tomeChapters[chapterIdx];
+};
+
+export const chapterIdxByVerseIdx = (verseIdx) => {
+  let chapterIdx = tomeChapters
+    .findIndex(x => x[chapterLastVerseIdx] >= verseIdx);
+  return chapterIdx;
+};
+
+export const citationByVerseIdx = (verseIdx) => {
+  let chapter = chapterByVerseIdx(verseIdx);
+  let num = verseIdx - chapter[chapterFirstVerseIdx] + 1;
+  return `${chapter[chapterName]}:${num}`;
+};
+
+export const initializeTome = async (cb) => {
   progress = cb ? cb : () => {};
   progress('');
   progress('* tome database *');
   progress('');
-  await openTome();
+  await versionCheck();
+  await populateTome();
   await loadTomeAcrostics();
   await loadTomeBooks();
   await loadTomeChapters();
@@ -65,10 +95,7 @@ const loadTomeWords = async () => {
   tomeWords = wordObjs.map(x => x.k);
 };
 
-const openTome = async () => {
-  tomeDb = await new Dexie('tome');
-  await tomeDb.version(1).stores(tomeStores);
-  tomeDb.open();
+const populateTome = async () => {
   let wordCount = await tomeDb.words.count();
   if (wordCount === 0) {
     progress('fetching...');
@@ -98,14 +125,20 @@ const openTome = async () => {
   }
 };
 
-export {
-  initializeTome,
-  tomeAcrostics,
-  tomeBooks,
-  tomeChapters,
-  tomeCitations,
-  tomeDb,
-  tomeName,
-  tomeVerseCount,
-  tomeWords
+const versionCheck = async () => {
+  let currentVersion = dbVersion('tome');
+
+  tomeDb = await new Dexie('tome');
+  await tomeDb.version(1).stores(tomeStores);
+  tomeDb.open();
+
+  if (tomeVersion !== currentVersion) {
+    progress('new version.');
+    for (let store of Object.keys(tomeStores)) {
+      progress(`clearing ${store}...`);
+      await tomeDb.table(store).clear();
+    }
+    localStorage.setItem(`${appPrefix}-tomeVersion`,
+      JSON.stringify(tomeVersion));
+  }
 };

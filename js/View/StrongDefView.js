@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import {
   tomeBinVerseCount,
   tomeBinWordCount
@@ -131,7 +131,7 @@ class StrongDefView {
 
   defClick(btn) {
     let strongDef = btn.dataset.strongDef;
-    bus.publish('strong-def.select', strongDef);
+    queue.publish('strong-def.select', strongDef);
   }
 
   defUpdate(strongDefObj) {
@@ -140,6 +140,7 @@ class StrongDefView {
     this.def = this.strongDefObj.v;
     this.updateBanner();
     this.updateList();
+    this.updateActiveWord();
   }
 
   getElements() {
@@ -198,24 +199,24 @@ class StrongDefView {
   }
 
   subscribe() {
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
 
-    bus.subscribe('strong-def.hide', () => {
+    queue.subscribe('strong-def.hide', () => {
       this.hide();
     });
-    bus.subscribe('strong-def.show', () => {
+    queue.subscribe('strong-def.show', () => {
       this.show();
     });
 
-    bus.subscribe('strong.def.update', (strongDefObj) => {
+    queue.subscribe('strong.def.update', (strongDefObj) => {
       this.defUpdate(strongDefObj);
     });
-    bus.subscribe('strong.word.update', (strongWord) => {
+    queue.subscribe('strong.word.update', (strongWord) => {
       this.wordUpdate(strongWord);
     });
-    bus.subscribe('strong.wordObj.update', (strongWordObj) => {
+    queue.subscribe('strong.wordObj.update', (strongWordObj) => {
       this.wordObjUpdate(strongWordObj);
     });
   }
@@ -225,15 +226,15 @@ class StrongDefView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBack) {
-        bus.publish('strong.back', null);
+        queue.publish('strong.back', null);
       } else if (target === this.btnLookup) {
-        bus.publish('strong-lookup', null);
+        queue.publish('strong-lookup', null);
       } else if (target === this.btnHistory) {
-        bus.publish('strong-history', null);
+        queue.publish('strong-history', null);
       } else if (target === this.btnVerse) {
-        bus.publish('strong-verse', null);
+        queue.publish('strong-verse', null);
       } else if (target === this.btnResult) {
-        bus.publish('strong-result', null);
+        queue.publish('strong-result', null);
       }
     }
   }
@@ -243,9 +244,9 @@ class StrongDefView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnPrev) {
-        bus.publish('strong-def.prev.strong', 1);
+        queue.publish('strong-def.prev.strong', 1);
       } else if (target === this.btnNext) {
-        bus.publish('strong-def.next.strong', 2);
+        queue.publish('strong-def.next.strong', 2);
       }
     }
   }
@@ -282,7 +283,7 @@ class StrongDefView {
 
   wordClick(btn) {
     let word = btn.dataset.word;
-    bus.publish('strong-def.word.select', word);
+    queue.publish('strong-def.word.select', word);
   }
 
   wordObjUpdate(strongWordObj) {

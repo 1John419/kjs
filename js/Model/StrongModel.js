@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import { tomeBinVerses } from '../data/binIdx.js';
 import {
   strongDb,
@@ -44,17 +44,16 @@ class StrongModel {
 
   async defChange(strongDef) {
     if (!strongNums.includes(strongDef)) {
-      bus.publish('strong.def.error', 'Invalid Strong Number');
+      queue.publish('strong.def.error', 'Invalid Strong Number');
     } else {
       this.strongDef = strongDef;
       this.saveDef();
       this.addHistory();
       this.strongIdx = this.strongHistory.indexOf(this.strongDef);
       this.strongDefObj = await strongDb.defs.get(this.strongDef);
-      this.strongWordObj = await strongDb.words.get(this.strongDef);
-      this.updateNum();
-      bus.publish('strong.def.update', this.strongDefObj);
+      await this.updateWordObj();
       await this.wordFirst();
+      queue.publish('strong.def.update', this.strongDefObj);
     }
   }
 
@@ -64,16 +63,15 @@ class StrongModel {
     this.addSubHistory();
     this.strongIdx = this.strongHistory.indexOf(this.strongDef);
     this.strongDefObj = await strongDb.defs.get(this.strongDef);
-    this.strongWordObj = await strongDb.words.get(this.strongDef);
-    this.updateNum();
-    bus.publish('strong.def.update', this.strongDefObj);
+    await this.updateWordObj();
     await this.wordFirst();
+    queue.publish('strong.def.update', this.strongDefObj);
   }
 
   filterChange(strongFilter) {
     this.strongFilter = strongFilter;
     this.saveFilter();
-    bus.publish('strong.filter.update', this.strongFilter);
+    queue.publish('strong.filter.update', this.strongFilter);
   }
 
   filterIsValid(filter) {
@@ -94,7 +92,7 @@ class StrongModel {
   historyChange(strongHistory) {
     this.strongHistory = strongHistory;
     this.saveHistory();
-    bus.publish('strong.history.update', this.strongHistory);
+    queue.publish('strong.history.update', this.strongHistory);
   }
 
   historyClear() {
@@ -137,7 +135,7 @@ class StrongModel {
   modeChange(strongMode) {
     this.strongMode = strongMode;
     this.saveMode();
-    bus.publish('strong.strong-mode.update', this.strongMode);
+    queue.publish('strong.strong-mode.update', this.strongMode);
   }
 
   modeToogle() {
@@ -150,6 +148,7 @@ class StrongModel {
   }
 
   async restore() {
+    this.restoreTask();
     this.restoreHistory();
     await this.restoreDef();
     this.strongIdx = this.strongHistory.findIndex(x => x === this.strongDef);
@@ -157,7 +156,6 @@ class StrongModel {
     this.restoreFilter();
     await this.restoreVerseIdx();
     this.restoreMode();
-    this.restoreTask();
   }
 
   async restoreDef() {
@@ -330,7 +328,7 @@ class StrongModel {
     if (this.strongIdx < 0) {
       this.strongIdx = this.strongHistory.length - 1;
     }
-    await this.defChange(this.strongHistory[this.strongIdx]);
+    queue.publish('strong.def.change', this.strongHistory[this.strongIdx]);
   }
 
   async strongPrev() {
@@ -338,54 +336,54 @@ class StrongModel {
     if (this.strongIdx >= this.strongHistory.length) {
       this.strongIdx = 0;
     }
-    await this.defChange(this.strongHistory[this.strongIdx]);
+    queue.publish('strong.def.change', this.strongHistory[this.strongIdx]);
   }
 
   subscribe() {
-    bus.subscribe('strong.def.change', async (strongDef) => {
+    queue.subscribe('strong.def.change', async (strongDef) => {
       await this.defChange(strongDef);
     });
-    bus.subscribe('strong.def.sub-change', async (strongDef) => {
+    queue.subscribe('strong.def.sub-change', async (strongDef) => {
       await this.defSubChange(strongDef);
     });
 
-    bus.subscribe('strong.filter.change', (strongFilter) => {
+    queue.subscribe('strong.filter.change', (strongFilter) => {
       this.filterChange(strongFilter);
     });
 
-    bus.subscribe('strong.history.clear', () => {
+    queue.subscribe('strong.history.clear', () => {
       this.historyClear();
     });
-    bus.subscribe('strong.history.delete', (strongDef) => {
+    queue.subscribe('strong.history.delete', (strongDef) => {
       this.historyDelete(strongDef);
     });
-    bus.subscribe('strong.history.down', (strongDef) => {
+    queue.subscribe('strong.history.down', (strongDef) => {
       this.historyDown(strongDef);
     });
-    bus.subscribe('strong.history.up', (strongDef) => {
+    queue.subscribe('strong.history.up', (strongDef) => {
       this.historyUp(strongDef);
     });
 
-    bus.subscribe('strong.next', async () => {
+    queue.subscribe('strong.next', async () => {
       await this.strongNext();
     });
-    bus.subscribe('strong.prev', async () => {
+    queue.subscribe('strong.prev', async () => {
       await this.strongPrev();
     });
 
-    bus.subscribe('strong.restore', async () => {
+    queue.subscribe('strong.restore', async () => {
       await this.restore();
     });
-    bus.subscribe('strong.strong-mode.toggle', () => {
+    queue.subscribe('strong.strong-mode.toggle', () => {
       this.modeToogle();
     });
-    bus.subscribe('strong.task.change', (strongTask) => {
+    queue.subscribe('strong.task.change', (strongTask) => {
       this.taskChange(strongTask);
     });
-    bus.subscribe('strong.verse.change', async (verseIdx) => {
+    queue.subscribe('strong.verse.change', async (verseIdx) => {
       await this.verseIdxChange(verseIdx);
     });
-    bus.subscribe('strong.word.change', async (strongWord) => {
+    queue.subscribe('strong.word.change', async (strongWord) => {
       await this.wordChange(strongWord);
     });
   }
@@ -393,7 +391,7 @@ class StrongModel {
   taskChange(strongTask) {
     this.strongTask = strongTask;
     this.saveTask();
-    bus.publish('strong.task.update', this.strongTask);
+    queue.publish('strong.task.update', this.strongTask);
   }
 
   tomeFilter() {
@@ -405,52 +403,77 @@ class StrongModel {
 
   updateHistory() {
     this.saveHistory();
-    bus.publish('strong.history.update', this.strongHistory);
-  }
-
-  updateNum() {
-    this.words = this.strongWordObj.v;
-    bus.publish('strong.wordObj.update', this.strongWordObj);
+    queue.publish('strong.history.update', this.strongHistory);
   }
 
   async updateWordMaps() {
-    let verses = this.wordTomeBin[tomeBinVerses];
-    this.wordMapObjs = await strongDb.maps.bulkGet(verses);
-    bus.publish('strong.wordMap.update', this.wordMapObjs);
+    if (this.words.length) {
+      let verses = this.wordTomeBin[tomeBinVerses];
+      this.wordMapObjs = await strongDb.maps.bulkGet(verses);
+      queue.publish('strong.wordMap.update', this.wordMapObjs);
+    } else {
+      this.wordMapObjs = [];
+      queue.publish('strong.wordMap.update', this.wordMapObjs);
+    }
+  }
+
+  async updateWordObj() {
+    this.strongWordObj = await strongDb.words.get(this.strongDef);
+    this.words = this.strongWordObj.v;
+    queue.publish('strong.wordObj.update', this.strongWordObj);
   }
 
   async updateWordVerses() {
-    let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
-    this.wordTomeBin = word[wordTomeBin];
-    bus.publish('strong.wordTomeBin.update', this.wordTomeBin);
-    let verses = this.wordTomeBin[tomeBinVerses];
-    this.wordVerseObjs = await tomeDb.verses.bulkGet(verses);
-    bus.publish('strong.wordVerse.update', this.wordVerseObjs);
+    if (this.words.length) {
+      let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
+      this.wordTomeBin = word[wordTomeBin];
+      queue.publish('strong.wordTomeBin.update', this.wordTomeBin);
+      let verses = this.wordTomeBin[tomeBinVerses];
+      this.wordVerseObjs = await tomeDb.verses.bulkGet(verses);
+      queue.publish('strong.wordVerse.update', this.wordVerseObjs);
+    } else {
+      this.wordTomeBin = [];
+      queue.publish('strong.wordTomeBin.update', this.wordTomeBin);
+      this.wordVerseObjs = [];
+      queue.publish('strong.wordVerse.update', this.wordVerseObjs);
+    }
   }
 
   async verseIdxChange(verseIdx) {
     this.strongVerseIdx = verseIdx;
     this.saveVerseIdx();
     this.strongMapObj = await strongDb.maps.get(this.strongVerseIdx);
-    bus.publish('strong.map.update', this.strongMapObj);
+    queue.publish('strong.map.update', this.strongMapObj);
     this.strongVerseObj = await tomeDb.verses.get(this.strongVerseIdx);
-    bus.publish('strong.verse.update', this.strongVerseObj);
+    queue.publish('strong.verse.update', this.strongVerseObj);
   }
 
   async wordChange(strongWord) {
     this.strongWord = strongWord;
     this.saveWord();
-    let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
-    this.wordTomeBin = word[wordTomeBin];
-    await this.updateWordVerses();
-    await this.updateWordMaps();
-    this.filterReset();
-    bus.publish('strong.word.update', this.strongWord);
+    if (this.words.length) {
+      let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
+      this.wordTomeBin = word[wordTomeBin];
+      await this.updateWordVerses();
+      await this.updateWordMaps();
+      this.filterReset();
+      queue.publish('strong.word.update', this.strongWord);
+    } else {
+      this.wordTomeBin = [];
+      await this.updateWordVerses();
+      await this.updateWordMaps();
+      this.filterReset();
+      queue.publish('strong.word.update', this.strongWord);
+    }
   }
 
   async wordFirst() {
-    let firstKjvWord = this.words[firstWord][wordKjvWord];
-    await this.wordChange(firstKjvWord);
+    if (this.words.length) {
+      let firstKjvWord = this.words[firstWord][wordKjvWord];
+      await this.wordChange(firstKjvWord);
+    } else {
+      await this.wordChange(null);
+    }
   }
 
 }

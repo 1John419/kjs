@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 
 class SettingController {
 
@@ -9,21 +9,21 @@ class SettingController {
   }
 
   back() {
-    bus.publish('sidebar.change', 'none');
+    queue.publish('sidebar.change', 'none');
   }
 
   fontNext() {
     this.getNextFontIdx();
-    bus.publish('font.change', this.fonts[this.fontIdx]);
+    queue.publish('font.change', this.fonts[this.fontIdx]);
   }
 
   fontPrev() {
     this.getPrevFontIdx();
-    bus.publish('font.change', this.fonts[this.fontIdx]);
+    queue.publish('font.change', this.fonts[this.fontIdx]);
   }
 
   fontSize(fontSize) {
-    bus.publish('font-size.change', fontSize);
+    queue.publish('font-size.change', fontSize);
   }
 
   fontUpdate(font) {
@@ -61,51 +61,51 @@ class SettingController {
   }
 
   subscribe() {
-    bus.subscribe('font.update', (font) => {
+    queue.subscribe('font.update', (font) => {
       this.fontUpdate(font);
     });
 
-    bus.subscribe('fonts.update', (fonts) => {
+    queue.subscribe('fonts.update', (fonts) => {
       this.fontsUpdate(fonts);
     });
 
-    bus.subscribe('setting.back', () => {
+    queue.subscribe('setting.back', () => {
       this.back();
     });
-    bus.subscribe('setting.font-next', () => {
+    queue.subscribe('setting.font-next', () => {
       this.fontNext();
     });
-    bus.subscribe('setting.font-prev', () => {
+    queue.subscribe('setting.font-prev', () => {
       this.fontPrev();
     });
-    bus.subscribe('setting.font-size', (fontSize) => {
+    queue.subscribe('setting.font-size', (fontSize) => {
       this.fontSize(fontSize);
     });
 
-    bus.subscribe('setting.theme-next', () => {
+    queue.subscribe('setting.theme-next', () => {
       this.themeNext();
     });
-    bus.subscribe('setting.theme-prev', () => {
+    queue.subscribe('setting.theme-prev', () => {
       this.themePrev();
     });
 
-    bus.subscribe('theme.update', (theme) => {
+    queue.subscribe('theme.update', (theme) => {
       this.themeUpdate(theme);
     });
 
-    bus.subscribe('themes.update', (themes) => {
+    queue.subscribe('themes.update', (themes) => {
       this.themesUpdate(themes);
     });
   }
 
   themeNext() {
     this.getNextThemeIdx();
-    bus.publish('theme.change', this.themes[this.themeIdx]);
+    queue.publish('theme.change', this.themes[this.themeIdx]);
   }
 
   themePrev() {
     this.getPrevThemeIdx();
-    bus.publish('theme.change', this.themes[this.themeIdx]);
+    queue.publish('theme.change', this.themes[this.themeIdx]);
   }
 
   themeUpdate(theme) {

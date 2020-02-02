@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import { appPrefix } from '../util.js';
 
 const validFontSizes = ['font-size--s', 'font-size--m', 'font-size--l',
@@ -20,7 +20,7 @@ class SettingModel {
   fontChange(font) {
     this.font = font;
     this.saveFont();
-    bus.publish('font.update', this.font);
+    queue.publish('font.update', this.font);
   }
 
   fontIsValid(font) {
@@ -39,7 +39,7 @@ class SettingModel {
   fontSizeChange(fontSize) {
     this.fontSize = fontSize;
     this.saveFontSize();
-    bus.publish('font-size.update', this.fontSize);
+    queue.publish('font-size.update', this.fontSize);
   }
 
   initialize() {
@@ -72,7 +72,7 @@ class SettingModel {
       fontName: 'Playfair Display',
       fontClass: 'font--playfair-display'
     });
-    bus.publish('fonts.update', this.fonts);
+    queue.publish('fonts.update', this.fonts);
   }
 
   initializeThemes() {
@@ -105,7 +105,7 @@ class SettingModel {
       themeName: 'Amethyst',
       themeClass: 'theme--amethyst'
     });
-    bus.publish('themes.update', this.themes);
+    queue.publish('themes.update', this.themes);
   }
 
   restore() {
@@ -183,19 +183,19 @@ class SettingModel {
   }
 
   subscribe() {
-    bus.subscribe('font.change', (font) => {
+    queue.subscribe('font.change', (font) => {
       this.fontChange(font);
     });
 
-    bus.subscribe('font-size.change', (fontSize) => {
+    queue.subscribe('font-size.change', (fontSize) => {
       this.fontSizeChange(fontSize);
     });
 
-    bus.subscribe('setting.restore', () => {
+    queue.subscribe('setting.restore', () => {
       this.restore();
     });
 
-    bus.subscribe('theme.change', (theme) => {
+    queue.subscribe('theme.change', (theme) => {
       this.themeChange(theme);
     });
   }
@@ -203,7 +203,7 @@ class SettingModel {
   themeChange(theme) {
     this.theme = theme;
     this.saveTheme();
-    bus.publish('theme.update', this.theme);
+    queue.publish('theme.update', this.theme);
   }
 
   themeIsValid(theme) {

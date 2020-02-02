@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import {
   tomeChapters,
   tomeDb
@@ -25,6 +25,20 @@ class NavigatorModel {
     this.initialize();
   }
 
+  bookIdxChange(bookIdx) {
+    this.bookIdx = bookIdx;
+    queue.publish('bookIdx.update', this.bookIdx);
+  }
+
+  async chapterIdxChange(chapterIdx) {
+    this.chapterIdx = chapterIdx;
+    this.saveChapterIdx();
+    await this.updateVerses();
+    let bookIdx = tomeChapters[this.chapterIdx][chapterBookIdx];
+    this.bookIdxChange(bookIdx);
+    queue.publish('chapterIdx.update', this.chapterIdx);
+  }
+
   async chapterNext() {
     let nextChapterIdx = this.chapterIdx + 1;
     if (nextChapterIdx >= tomeChapters.length) {
@@ -43,15 +57,6 @@ class NavigatorModel {
 
   initialize() {
     this.subscribe();
-  }
-
-  async chapterIdxChange(chapterIdx) {
-    this.chapterIdx = chapterIdx;
-    this.saveChapterIdx();
-    await this.updateVerses();
-    let bookIdx = tomeChapters[this.chapterIdx][chapterBookIdx];
-    bus.publish('bookIdx.change', bookIdx);
-    bus.publish('chapterIdx.update', this.chapterIdx);
   }
 
   async restore() {
@@ -106,21 +111,25 @@ class NavigatorModel {
   }
 
   subscribe() {
-    bus.subscribe('chapter.next', async () => {
+    queue.subscribe('bookIdx.change', (bookIdx) => {
+      this.bookIdxChange(bookIdx);
+    });
+
+    queue.subscribe('chapter.next', async () => {
       await this.chapterNext();
     });
-    bus.subscribe('chapter.prev', async () => {
+    queue.subscribe('chapter.prev', async () => {
       await this.chapterPrev();
     });
 
-    bus.subscribe('chapterIdx.change', async (chapterIdx) => {
+    queue.subscribe('chapterIdx.change', async (chapterIdx) => {
       await this.chapterIdxChange(chapterIdx);
     });
 
-    bus.subscribe('navigator.restore', async () => {
+    queue.subscribe('navigator.restore', async () => {
       await this.restore();
     });
-    bus.subscribe('navigator.task.change', (navigatorTask) => {
+    queue.subscribe('navigator.task.change', (navigatorTask) => {
       this.taskChange(navigatorTask);
     });
   }
@@ -128,7 +137,7 @@ class NavigatorModel {
   taskChange(navigatorTask) {
     this.navigatorTask = navigatorTask;
     this.saveNavigatorTask();
-    bus.publish('navigator.task.update', this.navigatorTask);
+    queue.publish('navigator.task.update', this.navigatorTask);
   }
 
   async updateVerses() {
@@ -136,7 +145,7 @@ class NavigatorModel {
     let keys = range(chapter[chapterFirstVerseIdx],
       chapter[chapterLastVerseIdx] + 1);
     this.verseObjs = await tomeDb.verses.bulkGet(keys);
-    bus.publish('navigator.verses.update', this.verseObjs);
+    queue.publish('navigator.verses.update', this.verseObjs);
   }
 
 }

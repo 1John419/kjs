@@ -1,7 +1,7 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
-import { chapterIdxByVerseIdx } from '../util.js';
+import { queue } from '../CommandQueue.js';
+import { chapterIdxByVerseIdx } from '../data/tomeDb.js';
 
 class BookmarkController {
 
@@ -10,88 +10,91 @@ class BookmarkController {
   }
 
   back() {
-    bus.publish('sidebar.change', 'none');
+    queue.publish('sidebar.change', 'none');
   }
 
   chapterIdxUpdate() {
     if (this.selectVerseIdx) {
       if (this.panes === 1 && this.sidebar !== 'none') {
-        bus.publish('sidebar.select', 'none');
+        queue.publish('sidebar.select', 'none');
       }
-      bus.publish('read.scroll-to-verse', this.selectVerseIdx);
+      queue.publish('read.scroll-to-verse', this.selectVerseIdx);
       this.selectVerseIdx = null;
     }
   }
 
-  export() {
-    bus.publish('bookmark.task.change', 'bookmark-export');
+  export () {
+    queue.publish('bookmark.task.change', 'bookmark-export');
   }
 
   folder() {
-    bus.publish('bookmark.task.change', 'bookmark-folder');
+    queue.publish('bookmark.task.change', 'bookmark-folder');
   }
 
   folderAdd() {
-    bus.publish('bookmark.task.change', 'bookmark-folder-add');
+    queue.publish('bookmark.task.change', 'bookmark-folder-add');
   }
 
   folderAdded() {
-    bus.publish('bookmark.task.change', 'bookmark-list');
+    queue.publish('bookmark.task.change', 'bookmark-list');
   }
 
   folderAddSave(name) {
-    bus.publish('folder.add', name);
+    queue.publish('bookmark.folder.add', name);
   }
 
   folderDelete(folderName) {
-    bus.publish('folder.to.delete', folderName);
-    bus.publish('bookmark.task.change', 'bookmark-folder-delete');
+    queue.publish('folder.to.delete', folderName);
+    queue.publish('bookmark.task.change', 'bookmark-folder-delete');
   }
 
   folderDeleteConfirm(folderName) {
-    bus.publish('folder.delete', folderName);
-    bus.publish('bookmark.task.change', 'bookmark-folder');
+    queue.publish('bookmark.folder.delete', folderName);
+    queue.publish('bookmark.task.change', 'bookmark-folder');
   }
 
   folderDown(folderName) {
-    bus.publish('folder.down', folderName);
+    queue.publish('bookmark.folder.down', folderName);
   }
 
   folderRename(folderName) {
-    bus.publish('folder.to.rename', folderName);
-    bus.publish('bookmark.task.change', 'bookmark-folder-rename');
+    queue.publish('folder.to.rename', folderName);
+    queue.publish('bookmark.task.change', 'bookmark-folder-rename');
+  }
+
+  folderRenamed() {
+    queue.publish('bookmark.task.change', 'bookmark-folder');
   }
 
   folderRenameSave(namePkg) {
-    bus.publish('folder.rename', namePkg);
-    bus.publish('bookmark.task.change', 'bookmark-folder');
+    queue.publish('bookmark.folder.rename', namePkg);
   }
 
   folderSelect(folderName) {
-    bus.publish('folder.change', folderName);
-    bus.publish('bookmark.task.change', 'bookmark-list');
+    queue.publish('bookmark.active-folder.change', folderName);
+    queue.publish('bookmark.task.change', 'bookmark-list');
   }
 
   folderUp(folderName) {
-    bus.publish('folder.up', folderName);
+    queue.publish('bookmark.folder.up', folderName);
   }
 
   gotoBookmark(verseIdx) {
     this.selectVerseIdx = verseIdx;
     let chapterIdx = chapterIdxByVerseIdx(verseIdx);
-    bus.publish('chapterIdx.change', chapterIdx);
+    queue.publish('chapterIdx.change', chapterIdx);
   }
 
   hide() {
-    bus.publish(`${this.bookmarkTask}.hide`, null);
+    queue.publish(`${this.bookmarkTask}.hide`, null);
   }
 
   import() {
-    bus.publish('bookmark.task.change', 'bookmark-import');
+    queue.publish('bookmark.task.change', 'bookmark-import');
   }
 
   importImport(pkgStr) {
-    bus.publish('folder.import', pkgStr);
+    queue.publish('bookmark.pkg.import', pkgStr);
   }
 
   initialize() {
@@ -99,15 +102,15 @@ class BookmarkController {
   }
 
   list() {
-    bus.publish('bookmark.task.change', 'bookmark-list');
+    queue.publish('bookmark.task.change', 'bookmark-list');
   }
 
   listDelete(verseIdx) {
-    bus.publish('bookmark.delete', verseIdx);
+    queue.publish('bookmark.delete', verseIdx);
   }
 
   listDown(verseIdx) {
-    bus.publish('bookmark.down', verseIdx);
+    queue.publish('bookmark.down', verseIdx);
   }
 
   listSelect(verseIdx) {
@@ -115,36 +118,36 @@ class BookmarkController {
   }
 
   listSortAscend() {
-    bus.publish('bookmark.sort-ascend', null);
+    queue.publish('bookmark.sort-ascend', null);
   }
 
   listSortInvert() {
-    bus.publish('bookmark.sort-invert', null);
+    queue.publish('bookmark.sort-invert', null);
   }
 
   listUp(verseIdx) {
-    bus.publish('bookmark.up', verseIdx);
+    queue.publish('bookmark.up', verseIdx);
   }
 
   modeToggle() {
-    bus.publish('bookmark.strong-mode.toggle', null);
+    queue.publish('bookmark.strong-mode.toggle', null);
   }
 
   moveCopy(verseIdx) {
-    bus.publish('move-copy.list.change', verseIdx);
-    bus.publish('bookmark.move-copy.change', verseIdx);
+    queue.publish('bookmark-move-copy.list.change', verseIdx);
+    queue.publish('bookmark.move-copy.change', verseIdx);
   }
 
   moveCopyCopy(copyPkg) {
-    bus.publish('bookmark.copy', copyPkg);
+    queue.publish('bookmark.copy', copyPkg);
   }
 
   moveCopyMove(movePkg) {
-    bus.publish('bookmark.move', movePkg);
+    queue.publish('bookmark.move', movePkg);
   }
 
   moveCopyReady() {
-    bus.publish('bookmark.task.change', 'bookmark-move-copy');
+    queue.publish('bookmark.task.change', 'bookmark-move-copy');
   }
 
   panesUpdate(panes) {
@@ -152,7 +155,7 @@ class BookmarkController {
   }
 
   show() {
-    bus.publish(`${this.bookmarkTask}.show`, null);
+    queue.publish(`${this.bookmarkTask}.show`, null);
   }
 
   sidebarUpdate(sidebar) {
@@ -160,139 +163,153 @@ class BookmarkController {
   }
 
   strongSelect(verseIdx) {
-    bus.publish('strong.verse.change', verseIdx);
-    bus.publish('strong.task.change', 'strong-verse');
-    bus.publish('sidebar.change', 'strong');
+    this.strongSelectPending = true;
+    queue.publish('strong.verse.change', verseIdx);
+  }
+
+  strongVerseUpdate() {
+    if (this.strongSelectPending) {
+      this.strongSelectPending = false;
+      queue.publish('sidebar.change', 'strong');
+    }
   }
 
   subscribe() {
-    bus.subscribe('bookmark-export', () => {
+    queue.subscribe('bookmark-export', () => {
       this.export();
     });
 
-    bus.subscribe('bookmark-folder', () => {
+    queue.subscribe('bookmark-folder', () => {
       this.folder();
     });
-    bus.subscribe('bookmark-folder.delete', (folderName) => {
+    queue.subscribe('bookmark-folder.delete', (folderName) => {
       this.folderDelete(folderName);
     });
-    bus.subscribe('bookmark-folder.down', (folderName) => {
+    queue.subscribe('bookmark-folder.down', (folderName) => {
       this.folderDown(folderName);
     });
-    bus.subscribe('bookmark-folder.select', (folderName) => {
+    queue.subscribe('bookmark-folder.select', (folderName) => {
       this.folderSelect(folderName);
     });
-    bus.subscribe('bookmark-folder.up', (folderName) => {
+    queue.subscribe('bookmark-folder.up', (folderName) => {
       this.folderUp(folderName);
     });
 
-    bus.subscribe('bookmark-folder-add', () => {
+    queue.subscribe('bookmark-folder-add', () => {
       this.folderAdd();
     });
-    bus.subscribe('bookmark-folder-add.save', (name) => {
+    queue.subscribe('bookmark-folder-add.save', (name) => {
       this.folderAddSave(name);
     });
 
-    bus.subscribe('bookmark-folder-delete.confirm', (folderName) => {
+    queue.subscribe('bookmark-folder-delete.confirm', (folderName) => {
       this.folderDeleteConfirm(folderName);
     });
 
-    bus.subscribe('bookmark-folder-rename', (folderName) => {
+    queue.subscribe('bookmark-folder-rename', (folderName) => {
       this.folderRename(folderName);
     });
-    bus.subscribe('bookmark-folder-rename.save', (namePkg) => {
+    queue.subscribe('bookmark-folder-rename.save', (namePkg) => {
       this.folderRenameSave(namePkg);
     });
 
-    bus.subscribe('bookmark-import', () => {
+    queue.subscribe('bookmark-import', () => {
       this.import();
     });
-    bus.subscribe('bookmark-import.import', (pkgStr) => {
+    queue.subscribe('bookmark-import.import', (pkgStr) => {
       this.importImport(pkgStr);
     });
 
-    bus.subscribe('bookmark-list', () => {
+    queue.subscribe('bookmark-list', () => {
       this.list();
     });
-    bus.subscribe('bookmark-list.delete', (verseIdx) => {
+    queue.subscribe('bookmark-list.delete', (verseIdx) => {
       this.listDelete(verseIdx);
     });
-    bus.subscribe('bookmark-list.down', (verseIdx) => {
+    queue.subscribe('bookmark-list.down', (verseIdx) => {
       this.listDown(verseIdx);
     });
-    bus.subscribe('bookmark-list.select', (verseIdx) => {
+    queue.subscribe('bookmark-list.select', (verseIdx) => {
       this.listSelect(verseIdx);
     });
-    bus.subscribe('bookmark-list.sort-ascend', () => {
+    queue.subscribe('bookmark-list.sort-ascend', () => {
       this.listSortAscend();
     });
-    bus.subscribe('bookmark-list.sort-invert', () => {
+    queue.subscribe('bookmark-list.sort-invert', () => {
       this.listSortInvert();
     });
-    bus.subscribe('bookmark-list.strong-select', (verseIdx) => {
+    queue.subscribe('bookmark-list.strong-select', (verseIdx) => {
       this.strongSelect(verseIdx);
     });
-    bus.subscribe('bookmark-list.up', (verseIdx) => {
+    queue.subscribe('bookmark-list.up', (verseIdx) => {
       this.listUp(verseIdx);
     });
 
-    bus.subscribe('bookmark-move-copy', (verseIdx) => {
+    queue.subscribe('bookmark-move-copy', (verseIdx) => {
       this.moveCopy(verseIdx);
     });
-    bus.subscribe('bookmark-move-copy.copy', (copyPkg) => {
+    queue.subscribe('bookmark-move-copy.copy', (copyPkg) => {
       this.moveCopyCopy(copyPkg);
     });
-    bus.subscribe('bookmark-move-copy.move', (movePkg) => {
+    queue.subscribe('bookmark-move-copy.move', (movePkg) => {
       this.moveCopyMove(movePkg);
     });
-    bus.subscribe('bookmark-move-copy.ready', () => {
+    queue.subscribe('bookmark-move-copy.ready', () => {
       this.moveCopyReady();
     });
 
-    bus.subscribe('bookmark.back', () => {
+    queue.subscribe('bookmark.back', () => {
       this.back();
     });
-    bus.subscribe('bookmark.copy', () => {
+    queue.subscribe('bookmark.copy', () => {
       this.list();
     });
-    bus.subscribe('bookmark.hide', () => {
+    queue.subscribe('bookmark.folder.added', () => {
+      this.folderAdded();
+    });
+    queue.subscribe('bookmark.folder.renamed', () => {
+      this.folderRenamed();
+    });
+    queue.subscribe('bookmark.hide', () => {
       this.hide();
     });
-    bus.subscribe('bookmark.move', () => {
+    queue.subscribe('bookmark.move', () => {
       this.list();
     });
-    bus.subscribe('bookmark.show', () => {
+    queue.subscribe('bookmark.show', () => {
       this.show();
     });
-    bus.subscribe('bookmark.strong-mode.click', () => {
+    queue.subscribe('bookmark.strong-mode.click', () => {
       this.modeToggle();
     });
-    bus.subscribe('bookmark.task.update', (bookmarkTask) => {
+    queue.subscribe('bookmark.task.update', (bookmarkTask) => {
       this.taskUpdate(bookmarkTask);
     });
 
-    bus.subscribe('chapterIdx.update', () => {
+    queue.subscribe('chapterIdx.update', () => {
       this.chapterIdxUpdate();
     });
 
-    bus.subscribe('folder.added', () => {
-      this.folderAdded();
-    });
-
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
 
-    bus.subscribe('sidebar.update', (sidebar) => {
+    queue.subscribe('sidebar.update', (sidebar) => {
       this.sidebarUpdate(sidebar);
+    });
+
+    queue.subscribe('strong.verse.update', () => {
+      this.strongVerseUpdate();
     });
   }
 
   taskUpdate(bookmarkTask) {
     if (this.sidebar === 'bookmark') {
-      bus.publish(`${this.bookmarkTask}.hide`, null);
-      this.bookmarkTask = bookmarkTask;
-      bus.publish(`${this.bookmarkTask}.show`, null);
+      if (this.bookmarkTask !== bookmarkTask) {
+        queue.publish(`${this.bookmarkTask}.hide`, null);
+        this.bookmarkTask = bookmarkTask;
+        queue.publish(`${this.bookmarkTask}.show`, null);
+      }
     } else {
       this.bookmarkTask = bookmarkTask;
     }

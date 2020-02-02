@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import {
   tomeBooks,
   tomeChapters
@@ -62,7 +62,7 @@ class NavigatorChapterView {
     return btn;
   }
 
-  bookChange(bookIdx) {
+  bookIdxUpdate(bookIdx) {
     if (this.bookIdx !== bookIdx) {
       this.bookIdx = bookIdx;
       this.updateBanner();
@@ -102,7 +102,7 @@ class NavigatorChapterView {
 
   contentClick(btn) {
     let chapterIdx = parseInt(btn.dataset.chapterIdx);
-    bus.publish('navigator-chapter.select', chapterIdx);
+    queue.publish('navigator-chapter.select', chapterIdx);
   }
 
   getElements() {
@@ -150,22 +150,22 @@ class NavigatorChapterView {
   }
 
   subscribe() {
-    bus.subscribe('bookIdx.change', (bookIdx) => {
-      this.bookChange(bookIdx);
+    queue.subscribe('bookIdx.update', (bookIdx) => {
+      this.bookIdxUpdate(bookIdx);
     });
 
-    bus.subscribe('chapterIdx.update', (chapterIdx) => {
+    queue.subscribe('chapterIdx.update', (chapterIdx) => {
       this.chapterIdxUpdate(chapterIdx);
     });
 
-    bus.subscribe('navigator-chapter.hide', () => {
+    queue.subscribe('navigator-chapter.hide', () => {
       this.hide();
     });
-    bus.subscribe('navigator-chapter.show', () => {
+    queue.subscribe('navigator-chapter.show', () => {
       this.show();
     });
 
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
   }
@@ -175,9 +175,9 @@ class NavigatorChapterView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBack) {
-        bus.publish('navigator.back', null);
+        queue.publish('navigator.back', null);
       } else if (target === this.btnBook) {
-        bus.publish('navigator-book', null);
+        queue.publish('navigator-book', null);
       }
     }
   }

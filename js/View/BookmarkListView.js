@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import {
   templateActionMenu,
   templateBtnIcon,
@@ -10,10 +10,8 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
-import {
-  citationByVerseIdx,
-  removeAllChildren
-} from '../util.js';
+import { citationByVerseIdx } from '../data/tomeDb.js';
+import { removeAllChildren } from '../util.js';
 
 const actionSet = [
   { icon: 'up', label: 'Up' },
@@ -115,11 +113,11 @@ class BookmarkListView {
   }
 
   delete(verseIdx) {
-    bus.publish('bookmark-list.delete', verseIdx);
+    queue.publish('bookmark-list.delete', verseIdx);
   }
 
   down(verseIdx) {
-    bus.publish('bookmark-list.down', verseIdx);
+    queue.publish('bookmark-list.down', verseIdx);
   }
 
   getElements() {
@@ -163,9 +161,9 @@ class BookmarkListView {
       if (target.classList.contains('btn-entry')) {
         let verseIdx = parseInt(target.dataset.verseIdx);
         if (this.strongMode) {
-          bus.publish('bookmark-list.strong-select', verseIdx);
+          queue.publish('bookmark-list.strong-select', verseIdx);
         } else {
-          bus.publish('bookmark-list.select', verseIdx);
+          queue.publish('bookmark-list.select', verseIdx);
         }
       } else if (target.classList.contains('btn-icon--menu')) {
         let ref = target.previousSibling;
@@ -178,17 +176,8 @@ class BookmarkListView {
     this.showActionMenu(target);
   }
 
-  modeUpdate(strongMode) {
-    this.strongMode = strongMode;
-    if (this.strongMode) {
-      this.btnStrongMode.classList.add('btn-icon--active');
-    } else {
-      this.btnStrongMode.classList.remove('btn-icon--active');
-    }
-  }
-
   moveCopy(verseIdx) {
-    bus.publish('bookmark-move-copy', verseIdx);
+    queue.publish('bookmark-move-copy', verseIdx);
   }
 
   panesUpdate(panes) {
@@ -214,23 +203,31 @@ class BookmarkListView {
     this.actionMenu.classList.remove('action-menu--hide');
   }
 
+  strongModeUpdate(strongMode) {
+    this.strongMode = strongMode;
+    if (this.strongMode) {
+      this.btnStrongMode.classList.add('btn-icon--active');
+    } else {
+      this.btnStrongMode.classList.remove('btn-icon--active');
+    }
+  }
+
   subscribe() {
-    bus.subscribe('bookmark-list.hide', () => {
+    queue.subscribe('bookmark-list.hide', () => {
       this.hide();
     });
-    bus.subscribe('bookmark-list.show', () => {
+    queue.subscribe('bookmark-list.show', () => {
       this.show();
     });
 
-    bus.subscribe('bookmark.strong-mode.update', (strongMode) => {
-      this.modeUpdate(strongMode);
+    queue.subscribe('bookmark.active-folder.update', (activeFolder) => {
+      this.updateActiveFolder(activeFolder);
+    });
+    queue.subscribe('bookmark.strong-mode.update', (strongMode) => {
+      this.strongModeUpdate(strongMode);
     });
 
-    bus.subscribe('folder.update', (folder) => {
-      this.updateFolder(folder);
-    });
-
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
   }
@@ -240,29 +237,29 @@ class BookmarkListView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBack) {
-        bus.publish('bookmark.back', null);
+        queue.publish('bookmark.back', null);
       } else if (target === this.btnSortAscend) {
-        bus.publish('bookmark-list.sort-ascend', null);
+        queue.publish('bookmark-list.sort-ascend', null);
       } else if (target === this.btnSortInvert) {
-        bus.publish('bookmark-list.sort-invert', null);
+        queue.publish('bookmark-list.sort-invert', null);
       } else if (target === this.btnStrongMode) {
-        bus.publish('bookmark.strong-mode.click', null);
+        queue.publish('bookmark.strong-mode.click', null);
       } else if (target === this.btnBookmarkFolder) {
-        bus.publish('bookmark-folder', null);
+        queue.publish('bookmark-folder', null);
       }
     }
   }
 
   up(verseIdx) {
-    bus.publish('bookmark-list.up', verseIdx);
+    queue.publish('bookmark-list.up', verseIdx);
   }
 
   updateBanner() {
-    this.banner.innerHTML = `${this.folder.name}`;
+    this.banner.innerHTML = `${this.activeFolder.name}`;
   }
 
-  updateFolder(folder) {
-    this.folder = folder;
+  updateActiveFolder(activeFolder) {
+    this.activeFolder = activeFolder;
     this.updateBanner();
     this.updateList();
   }
@@ -270,12 +267,12 @@ class BookmarkListView {
   updateList() {
     this.scrollToTop();
     removeAllChildren(this.list);
-    if (this.folder.bookmarks.length === 0) {
+    if (this.activeFolder.bookmarks.length === 0) {
       this.empty.classList.remove('empty--hide');
     } else {
       this.empty.classList.add('empty--hide');
       let fragment = document.createDocumentFragment();
-      for (let verseIdx of this.folder.bookmarks) {
+      for (let verseIdx of this.activeFolder.bookmarks) {
         let ref = this.buildEntry(verseIdx);
         fragment.appendChild(ref);
       }

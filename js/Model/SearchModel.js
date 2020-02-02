@@ -1,11 +1,12 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import { SearchEngine } from '../SearchEngine.js';
 import { tomeBinVerses } from '../data/binIdx.js';
 import { tomeDb } from '../data/tomeDb.js';
 import { appPrefix } from '../util.js';
 
+const searchResultReroute = ['search-filter', 'search-history'];
 const validTasks = ['search-result', 'search-lookup', 'search-filter',
   'search-history'
 ];
@@ -30,7 +31,7 @@ class SearchModel {
   filterChange(searchFilter) {
     this.searchFilter = searchFilter;
     this.saveFilter();
-    bus.publish('search.filter.update', this.searchFilter);
+    queue.publish('search.filter.update', this.searchFilter);
   }
 
   filterIsValid(searchFilter) {
@@ -46,7 +47,7 @@ class SearchModel {
   historyChange(searchHistory) {
     this.searchHistory = searchHistory;
     this.saveHistory();
-    bus.publish('search.history.update', this.searchHistory);
+    queue.publish('search.history.update', this.searchHistory);
   }
 
   historyClear() {
@@ -89,8 +90,8 @@ class SearchModel {
 
   modeChange(strongMode) {
     this.strongMode = strongMode;
-    this.saveMode();
-    bus.publish('search.strong-mode.update', this.strongMode);
+    this.saveStrongMode();
+    queue.publish('search.strong-mode.update', this.strongMode);
   }
 
   modeToogle() {
@@ -108,16 +109,16 @@ class SearchModel {
       } else if (rig.wordStatus !== 'OK') {
         message = rig.wordStatus;
       }
-      bus.publish('search.query.error', message);
+      queue.publish('search.query.error', message);
     } else {
       this.rig = rig;
       this.searchQuery = searchQuery;
       this.saveQuery();
       this.addHistory();
       await this.updateSearchVerses();
-      bus.publish('search.query.update', this.searchQuery);
-      bus.publish('rig.update', this.rig);
+      queue.publish('rig.update', this.rig);
       this.resetFilter();
+      queue.publish('search.query.update', this.searchQuery);
     }
   }
 
@@ -132,11 +133,11 @@ class SearchModel {
   }
 
   async restore() {
+    this.restoreTask();
     this.restoreHistory();
     await this.restoreQuery();
     this.restoreFilter();
     this.restoreMode();
-    this.restoreTask();
   }
 
   restoreFilter() {
@@ -223,7 +224,9 @@ class SearchModel {
     } else {
       searchTask = JSON.parse(searchTask);
     }
-    if (!validTasks.includes(searchTask)) {
+    if (searchResultReroute.includes(searchTask)) {
+      searchTask = 'search-result';
+    } else if (!validTasks.includes(searchTask)) {
       searchTask = defaultTask;
     }
     this.taskChange(searchTask);
@@ -239,7 +242,7 @@ class SearchModel {
       JSON.stringify(this.searchHistory));
   }
 
-  saveMode() {
+  saveStrongMode() {
     localStorage.setItem(`${appPrefix}-searchStrongMode`,
       JSON.stringify(this.strongMode));
   }
@@ -255,34 +258,34 @@ class SearchModel {
   }
 
   subscribe() {
-    bus.subscribe('search.filter.change', (filter) => {
+    queue.subscribe('search.filter.change', (filter) => {
       this.filterChange(filter);
     });
 
-    bus.subscribe('search.history.clear', () => {
+    queue.subscribe('search.history.clear', () => {
       this.historyClear();
     });
-    bus.subscribe('search.history.delete', (query) => {
+    queue.subscribe('search.history.delete', (query) => {
       this.historyDelete(query);
     });
-    bus.subscribe('search.history.down', (query) => {
+    queue.subscribe('search.history.down', (query) => {
       this.historyDown(query);
     });
-    bus.subscribe('search.history.up', (query) => {
+    queue.subscribe('search.history.up', (query) => {
       this.historyUp(query);
     });
 
-    bus.subscribe('search.query.change', async (query) => {
+    queue.subscribe('search.query.change', async (query) => {
       await this.queryChange(query);
     });
 
-    bus.subscribe('search.restore', async () => {
+    queue.subscribe('search.restore', async () => {
       await this.restore();
     });
-    bus.subscribe('search.strong-mode.toggle', () => {
+    queue.subscribe('search.strong-mode.toggle', () => {
       this.modeToogle();
     });
-    bus.subscribe('search.task.change', (searchTask) => {
+    queue.subscribe('search.task.change', (searchTask) => {
       this.taskChange(searchTask);
     });
   }
@@ -290,7 +293,7 @@ class SearchModel {
   taskChange(searchTask) {
     this.searchTask = searchTask;
     this.saveTask();
-    bus.publish('search.task.update', this.searchTask);
+    queue.publish('search.task.update', this.searchTask);
   }
 
   tomeFilter() {
@@ -302,13 +305,13 @@ class SearchModel {
 
   updateHistory() {
     this.saveHistory();
-    bus.publish('search.history.update', this.searchHistory);
+    queue.publish('search.history.update', this.searchHistory);
   }
 
   async updateSearchVerses() {
     this.searchVerseObjs = await tomeDb.verses.bulkGet(
       this.rig.tomeBin[tomeBinVerses]);
-    bus.publish('search.verses.update', this.searchVerseObjs);
+    queue.publish('search.verses.update', this.searchVerseObjs);
   }
 
 }

@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 
 import {
   templateDivDialog,
@@ -58,7 +58,7 @@ class BookmarkFolderDeleteView {
   }
 
   deleteClick() {
-    bus.publish('bookmark-folder-delete.confirm', this.folderName);
+    queue.publish('bookmark-folder-delete.confirm', this.folderName);
   }
 
   dialogClick(event) {
@@ -102,14 +102,14 @@ class BookmarkFolderDeleteView {
   }
 
   subscribe() {
-    bus.subscribe('bookmark-folder-delete.hide', () => {
+    queue.subscribe('bookmark-folder-delete.hide', () => {
       this.hide();
     });
-    bus.subscribe('bookmark-folder-delete.show', () => {
+    queue.subscribe('bookmark-folder-delete.show', () => {
       this.show();
     });
 
-    bus.subscribe('folder.to.delete', (folderName) => {
+    queue.subscribe('folder.to.delete', (folderName) => {
       this.folderToDelete(folderName);
     });
   }
@@ -119,7 +119,7 @@ class BookmarkFolderDeleteView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBookmarkFolder) {
-        bus.publish('bookmark-folder', null);
+        queue.publish('bookmark-folder', null);
       }
     }
   }

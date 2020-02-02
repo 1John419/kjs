@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import { verseCitation } from '../data/tomeIdx.js';
 import {
   templateActionMenu,
@@ -110,7 +110,7 @@ class BookmarkMoveCopyView {
       to: folderName,
       verseIdx: this.verseIdx
     };
-    bus.publish('bookmark-move-copy.copy', copyPkg);
+    queue.publish('bookmark-move-copy.copy', copyPkg);
   }
 
   folderUpdate(bookmarksFolder) {
@@ -166,14 +166,14 @@ class BookmarkMoveCopyView {
       to: folderName,
       verseIdx: this.verseIdx
     };
-    bus.publish('bookmark-move-copy.move', movePkg);
+    queue.publish('bookmark-move-copy.move', movePkg);
   }
 
   moveCopyUpdate(verseObj) {
     this.moveCopyVerseObj = verseObj;
     this.verseIdx = this.moveCopyVerseObj.k;
     this.verse = this.moveCopyVerseObj.v;
-    bus.publish('bookmark-move-copy.ready', null);
+    queue.publish('bookmark-move-copy.ready', null);
   }
 
   scrollToTop() {
@@ -193,21 +193,21 @@ class BookmarkMoveCopyView {
   }
 
   subscribe() {
-    bus.subscribe('folder.update', (bookmarksFolder) => {
+    queue.subscribe('bookmark.active-folder.update', (bookmarksFolder) => {
       this.folderUpdate(bookmarksFolder);
     });
 
-    bus.subscribe('bookmark-move-copy.hide', () => {
+    queue.subscribe('bookmark-move-copy.hide', () => {
       this.hide();
     });
-    bus.subscribe('bookmark-move-copy.list.update', (moveCopyList) => {
+    queue.subscribe('bookmark-move-copy.list.update', (moveCopyList) => {
       this.listUpdate(moveCopyList);
     });
-    bus.subscribe('bookmark-move-copy.show', () => {
+    queue.subscribe('bookmark-move-copy.show', () => {
       this.show();
     });
 
-    bus.subscribe('bookmark.move-copy.update', (verseObj) => {
+    queue.subscribe('bookmark.move-copy.update', (verseObj) => {
       this.moveCopyUpdate(verseObj);
     });
   }
@@ -217,7 +217,7 @@ class BookmarkMoveCopyView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBookmarkFolder) {
-        bus.publish('bookmark-folder', null);
+        queue.publish('bookmark-folder', null);
       }
     }
   }

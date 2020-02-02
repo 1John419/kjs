@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 
 class HelpController {
 
@@ -9,11 +9,11 @@ class HelpController {
   }
 
   back() {
-    bus.publish('sidebar.change', 'none');
+    queue.publish('sidebar.change', 'none');
   }
 
   hide() {
-    bus.publish(`${this.helpTask}.hide`, null);
+    queue.publish(`${this.helpTask}.hide`, null);
   }
 
   initialize() {
@@ -21,11 +21,11 @@ class HelpController {
   }
 
   read() {
-    bus.publish('help.task.change', 'help-read');
+    queue.publish('help.task.change', 'help-read');
   }
 
   show() {
-    bus.publish(`${this.helpTask}.show`, null);
+    queue.publish(`${this.helpTask}.show`, null);
   }
 
   sidebarUpdate(sidebar) {
@@ -33,52 +33,54 @@ class HelpController {
   }
 
   subscribe() {
-    bus.subscribe('help-read', () => {
+    queue.subscribe('help-read', () => {
       this.read();
     });
 
-    bus.subscribe('help-topic', (helpTopic) => {
+    queue.subscribe('help-topic', (helpTopic) => {
       this.topic(helpTopic);
     });
-    bus.subscribe('help-topic.select', (helpTopic) => {
+    queue.subscribe('help-topic.select', (helpTopic) => {
       this.topicSelect(helpTopic);
     });
 
-    bus.subscribe('help.back', () => {
+    queue.subscribe('help.back', () => {
       this.back();
     });
-    bus.subscribe('help.hide', () => {
+    queue.subscribe('help.hide', () => {
       this.hide();
     });
-    bus.subscribe('help.show', () => {
+    queue.subscribe('help.show', () => {
       this.show();
     });
-    bus.subscribe('help.task.update', (helpTask) => {
+    queue.subscribe('help.task.update', (helpTask) => {
       this.taskUpdate(helpTask);
     });
 
-    bus.subscribe('sidebar.update', (sidebar) => {
+    queue.subscribe('sidebar.update', (sidebar) => {
       this.sidebarUpdate(sidebar);
     });
   }
 
   taskUpdate(helpTask) {
     if (this.sidebar === 'help') {
-      bus.publish(`${this.helpTask}.hide`, null);
-      this.helpTask = helpTask;
-      bus.publish(`${this.helpTask}.show`, null);
+      if (this.helpTask !== helpTask) {
+        queue.publish(`${this.helpTask}.hide`, null);
+        this.helpTask = helpTask;
+        queue.publish(`${this.helpTask}.show`, null);
+      }
     } else {
       this.helpTask = helpTask;
     }
   }
 
   topic() {
-    bus.publish('help.task.change', 'help-topic');
+    queue.publish('help.task.change', 'help-topic');
   }
 
   topicSelect(helpTopic) {
-    bus.publish('help.topic.change', helpTopic);
-    bus.publish('help.task.change', 'help-read');
+    queue.publish('help.topic.change', helpTopic);
+    queue.publish('help.task.change', 'help-read');
   }
 
 }

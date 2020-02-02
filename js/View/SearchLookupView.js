@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 
 import {
   templateDivDialog,
@@ -117,7 +117,7 @@ class SearchLookupView {
 
   searchClick() {
     let query = this.inputQuery.value;
-    bus.publish('search-lookup.search', query);
+    queue.publish('search-lookup.search', query);
   }
 
   show() {
@@ -129,17 +129,17 @@ class SearchLookupView {
   }
 
   subscribe() {
-    bus.subscribe('search.query.error', (message) => {
+    queue.subscribe('search.query.error', (message) => {
       this.error(message);
     });
-    bus.subscribe('search-lookup.hide', () => {
+    queue.subscribe('search-lookup.hide', () => {
       this.hide();
     });
-    bus.subscribe('search-lookup.show', () => {
+    queue.subscribe('search-lookup.show', () => {
       this.show();
     });
 
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
   }
@@ -149,9 +149,9 @@ class SearchLookupView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBack) {
-        bus.publish('search.back', null);
+        queue.publish('search.back', null);
       } else if (target === this.btnResult) {
-        bus.publish('search-result', null);
+        queue.publish('search-result', null);
       }
     }
   }

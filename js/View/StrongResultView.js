@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import {
   tomeBinBooks,
   bookBinChapters,
@@ -96,33 +96,40 @@ class StrongResultView {
   }
 
   applyFilter() {
-    let tomeBin = this.strongWordTomeBin;
-    let bookIdx = this.strongFilter.bookIdx;
-    let chapterIdx = this.strongFilter.chapterIdx;
-    if (bookIdx === -1 && chapterIdx === -1) {
-      this.filteredVerses = tomeBin[tomeBinVerses];
-      this.wordCount = tomeBin[tomeBinWordCount];
-      this.verseCount = tomeBin[tomeBinVerseCount];
-      this.citation = tomeName;
-    } else {
-      let books = tomeBin[tomeBinBooks];
-      let bookBin = this.findBin(books, bookIdx);
-      if (chapterIdx === -1) {
-        this.filteredVerses = tomeBin[tomeBinVerses]
-          .slice(bookBin[bookBinSliceStart], bookBin[bookBinSliceEnd]);
-        this.wordCount = bookBin[bookBinWordCount];
-        this.verseCount = bookBin[bookBinVerseCount];
-        this.citation = tomeBooks[bookIdx][bookLongName];
+    if (this.strongWordTomeBin.length) {
+      let tomeBin = this.strongWordTomeBin;
+      let bookIdx = this.strongFilter.bookIdx;
+      let chapterIdx = this.strongFilter.chapterIdx;
+      if (bookIdx === -1 && chapterIdx === -1) {
+        this.filteredVerses = tomeBin[tomeBinVerses];
+        this.wordCount = tomeBin[tomeBinWordCount];
+        this.verseCount = tomeBin[tomeBinVerseCount];
+        this.citation = tomeName;
       } else {
-        let chapters = bookBin[bookBinChapters];
-        let chapterBin = this.findBin(chapters, chapterIdx);
-        this.filteredVerses = tomeBin[tomeBinVerses]
-          .slice(chapterBin[chapterBinSliceStart],
-            chapterBin[chapterBinSliceEnd]);
-        this.wordCount = chapterBin[chapterBinWordCount];
-        this.verseCount = chapterBin[chapterBinVerseCount];
-        this.citation = tomeChapters[chapterIdx][chapterName];
+        let books = tomeBin[tomeBinBooks];
+        let bookBin = this.findBin(books, bookIdx);
+        if (chapterIdx === -1) {
+          this.filteredVerses = tomeBin[tomeBinVerses]
+            .slice(bookBin[bookBinSliceStart], bookBin[bookBinSliceEnd]);
+          this.wordCount = bookBin[bookBinWordCount];
+          this.verseCount = bookBin[bookBinVerseCount];
+          this.citation = tomeBooks[bookIdx][bookLongName];
+        } else {
+          let chapters = bookBin[bookBinChapters];
+          let chapterBin = this.findBin(chapters, chapterIdx);
+          this.filteredVerses = tomeBin[tomeBinVerses]
+            .slice(chapterBin[chapterBinSliceStart],
+              chapterBin[chapterBinSliceEnd]);
+          this.wordCount = chapterBin[chapterBinWordCount];
+          this.verseCount = chapterBin[chapterBinVerseCount];
+          this.citation = tomeChapters[chapterIdx][chapterName];
+        }
       }
+    } else {
+      this.filteredVerses = [];
+      this.wordCount = null;
+      this.verseCount = null;
+      this.citation = null;
     }
   }
 
@@ -209,12 +216,19 @@ class StrongResultView {
   defUpdate(strongDefObj) {
     this.strongDefObj = strongDefObj;
     this.strongDef = this.strongDefObj.k;
+    this.updateBanner();
+    this.updateList();
+  }
+
+  filterChange() {
+    this.filterChangePending = true;
   }
 
   filterUpdate(strongFilter) {
     this.strongFilter = strongFilter;
-    if (this.strongWord) {
-      this.applyFilter();
+    this.applyFilter();
+    if (this.filterChangePending) {
+      this.filterChangePending = false;
       this.updateBanner();
       this.updateList();
     }
@@ -275,9 +289,9 @@ class StrongResultView {
       if (btn.classList.contains('btn-result')) {
         let verseIdx = parseInt(btn.dataset.verseIdx);
         if (this.strongMode) {
-          bus.publish('strong-result.strong-select', verseIdx);
+          queue.publish('strong-result.strong-select', verseIdx);
         } else {
-          bus.publish('strong-result.read-select', verseIdx);
+          queue.publish('strong-result.read-select', verseIdx);
         }
       }
     }
@@ -343,44 +357,50 @@ class StrongResultView {
   }
 
   subscribe() {
-    bus.subscribe('font.update', (font) => {
+    queue.subscribe('font.update', (font) => {
       this.fontUpdate(font);
     });
 
-    bus.subscribe('font-size.update', (fontSize) => {
+    queue.subscribe('font-size.update', (fontSize) => {
       this.fontSizeUpdate(fontSize);
     });
 
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
 
-    bus.subscribe('strong-result.hide', () => {
+    queue.subscribe('strong-result.hide', () => {
       this.hide();
     });
-    bus.subscribe('strong-result.show', () => {
+    queue.subscribe('strong-result.show', () => {
       this.show();
     });
 
-    bus.subscribe('strong.def.update', (strongDefObj) => {
+    queue.subscribe('strong.def.update', (strongDefObj) => {
       this.defUpdate(strongDefObj);
     });
-    bus.subscribe('strong.filter.update', (strongFilter) => {
+    queue.subscribe('strong.filter.change', () => {
+      this.filterChange();
+    });
+    queue.subscribe('strong.filter.update', (strongFilter) => {
       this.filterUpdate(strongFilter);
     });
-    bus.subscribe('strong.strong-mode.update', (strongMode) => {
+    queue.subscribe('strong.strong-mode.update', (strongMode) => {
       this.modeUpdate(strongMode);
     });
-    bus.subscribe('strong.word.update', (strongWord) => {
+    queue.subscribe('strong.word.change', () => {
+      this.wordChange();
+    });
+    queue.subscribe('strong.word.update', (strongWord) => {
       this.wordUpdate(strongWord);
     });
-    bus.subscribe('strong.wordTomeBin.update', (wordTomeBin) => {
+    queue.subscribe('strong.wordTomeBin.update', (wordTomeBin) => {
       this.wordTomeBinUpdate(wordTomeBin);
     });
-    bus.subscribe('strong.wordMap.update', (wordMapObjs) => {
+    queue.subscribe('strong.wordMap.update', (wordMapObjs) => {
       this.wordMapUpdate(wordMapObjs);
     });
-    bus.subscribe('strong.wordVerse.update', (wordVerseObjs) => {
+    queue.subscribe('strong.wordVerse.update', (wordVerseObjs) => {
       this.wordVerseUpdate(wordVerseObjs);
     });
   }
@@ -390,23 +410,27 @@ class StrongResultView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBack) {
-        bus.publish('strong.back', null);
+        queue.publish('strong.back', null);
       } else if (target === this.btnFilter) {
-        bus.publish('strong-filter', null);
+        queue.publish('strong-filter', null);
       } else if (target === this.btnStrongMode) {
-        bus.publish('strong.strong-mode.click', null);
+        queue.publish('strong.strong-mode.click', null);
       } else if (target === this.btnStrongDef) {
-        bus.publish('strong-def', null);
+        queue.publish('strong-def', null);
       } else if (target === this.btnStrongVerse) {
-        bus.publish('strong-verse', null);
+        queue.publish('strong-verse', null);
       }
     }
   }
 
   updateBanner() {
-    this.banner.innerHTML = `${this.citation} ` +
-      `(${this.wordCount}/${this.verseCount})<br>` +
-      `${this.strongDef} ${this.strongWord}`;
+    if (this.citation) {
+      this.banner.innerHTML = `${this.citation} ` +
+        `(${this.wordCount}/${this.verseCount})<br>` +
+        `${this.strongDef} ${this.strongWord}`;
+    } else {
+      this.banner.innerHTML = this.strongDef;
+    }
   }
 
   updateList() {
@@ -415,6 +439,10 @@ class StrongResultView {
     this.loadIdx = 0;
     this.loadedVerses = 0;
     this.loadVerses();
+  }
+
+  wordChange() {
+    this.wordChangePending = true;
   }
 
   wordMapUpdate(wordMapObjs) {
@@ -431,6 +459,11 @@ class StrongResultView {
 
   wordUpdate(strongWord) {
     this.strongWord = strongWord;
+    if (this.wordChangePending) {
+      this.wordChangePending = false;
+      this.updateBanner();
+      this.updateList();
+    }
   }
 
 }

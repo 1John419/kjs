@@ -1,7 +1,7 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
-import { chapterIdxByVerseIdx } from '../util.js';
+import { queue } from '../CommandQueue.js';
+import { chapterIdxByVerseIdx } from '../data/tomeDb.js';
 
 class StrongController {
 
@@ -10,67 +10,80 @@ class StrongController {
   }
 
   back() {
-    bus.publish('sidebar.change', 'none');
+    queue.publish('sidebar.change', 'none');
   }
 
   chapterIdxUpdate() {
     if (this.selectVerseIdx) {
       if (this.panes === 1 && this.sidebar !== 'none') {
-        bus.publish('sidebar.select', 'none');
+        queue.publish('sidebar.select', 'none');
       }
-      bus.publish('read.scroll-to-verse', this.selectVerseIdx);
+      queue.publish('read.scroll-to-verse', this.selectVerseIdx);
       this.selectVerseIdx = null;
     }
   }
 
   def() {
-    bus.publish('strong.task.change', 'strong-def');
+    queue.publish('strong.task.change', 'strong-def');
   }
 
   defSelect(strongDef) {
-    bus.publish('strong.def.sub-change', strongDef);
+    queue.publish('strong.def.sub-change', strongDef);
+  }
+
+  defChange() {
+    this.defChangePending = true;
   }
 
   defUpdate() {
-    bus.publish('strong.task.change', 'strong-def');
+    if (this.defChangePending) {
+      this.defChangePending = false;
+      queue.publish('strong.task.change', 'strong-def');
+    }
   }
 
   filter() {
-    bus.publish('strong.task.change', 'strong-filter');
+    queue.publish('strong.task.change', 'strong-filter');
   }
 
   filterSelect(strongFilter) {
-    bus.publish('strong.filter.change', strongFilter);
-    bus.publish('strong.task.change', 'strong-result');
+    this.filterSelectPending = true;
+    queue.publish('strong.filter.change', strongFilter);
+  }
+
+  filterUpdate() {
+    if (this.filterSelectPending) {
+      this.filterSelectPending = false;
+      queue.publish('strong.task.change', 'strong-result');
+    }
   }
 
   hide() {
-    bus.publish(`${this.strongTask}.hide`, null);
+    queue.publish(`${this.strongTask}.hide`, null);
   }
 
   history() {
-    bus.publish('strong.task.change', 'strong-history');
+    queue.publish('strong.task.change', 'strong-history');
   }
 
   historyClear() {
-    bus.publish('strong.history.clear', null);
+    queue.publish('strong.history.clear', null);
   }
 
   historyDelete(strongDef) {
-    bus.publish('strong.history.delete', strongDef);
+    queue.publish('strong.history.delete', strongDef);
   }
 
   historyDown(strongDef) {
-    bus.publish('strong.history.down', strongDef);
+    queue.publish('strong.history.down', strongDef);
   }
 
   historySelect(strongDef) {
-    bus.publish('strong.def.change', strongDef);
-    bus.publish('strong.task.change', 'strong-def');
+    queue.publish('strong.def.change', strongDef);
   }
 
   historyUp(strongDef) {
-    bus.publish('strong.history.up', strongDef);
+    queue.publish('strong.history.up', strongDef);
   }
 
   initialize() {
@@ -78,19 +91,19 @@ class StrongController {
   }
 
   lookup() {
-    bus.publish('strong.task.change', 'strong-lookup');
+    queue.publish('strong.task.change', 'strong-lookup');
   }
 
   lookupFind(strongNum) {
-    bus.publish('strong.def.change', strongNum);
+    queue.publish('strong.def.change', strongNum);
   }
 
   modeToggle() {
-    bus.publish('strong.strong-mode.toggle', null);
+    queue.publish('strong.strong-mode.toggle', null);
   }
 
   nextStrong() {
-    bus.publish('strong.next', null);
+    queue.publish('strong.next', null);
   }
 
   panesUpdate(panes) {
@@ -98,17 +111,17 @@ class StrongController {
   }
 
   prevStrong() {
-    bus.publish('strong.prev', null);
+    queue.publish('strong.prev', null);
   }
 
   readSelect(verseIdx) {
     this.selectVerseIdx = verseIdx;
     let chapterIdx = chapterIdxByVerseIdx(verseIdx);
-    bus.publish('chapterIdx.change', chapterIdx);
+    queue.publish('chapterIdx.change', chapterIdx);
   }
 
   show() {
-    bus.publish(`${this.strongTask}.show`, null);
+    queue.publish(`${this.strongTask}.show`, null);
   }
 
   sidebarUpdate(sidebar) {
@@ -116,135 +129,168 @@ class StrongController {
   }
 
   search() {
-    bus.publish('strong.task.change', 'strong-result');
+    queue.publish('strong.task.change', 'strong-result');
   }
 
   strongSelect(verseIdx) {
-    bus.publish('strong.verse.change', verseIdx);
-    bus.publish('strong.task.change', 'strong-verse');
+    queue.publish('strong.verse.change', verseIdx);
   }
 
   subscribe() {
-    bus.subscribe('chapterIdx.update', () => {
+    queue.subscribe('chapterIdx.update', () => {
       this.chapterIdxUpdate();
     });
 
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
 
-    bus.subscribe('sidebar.update', (sidebar) => {
+    queue.subscribe('sidebar.update', (sidebar) => {
       this.sidebarUpdate(sidebar);
     });
 
-    bus.subscribe('strong-def', () => {
+    queue.subscribe('strong-def', () => {
       this.def();
     });
-    bus.subscribe('strong-def.next.strong',
+    queue.subscribe('strong-def.next.strong',
       () => { this.nextStrong(); }
     );
-    bus.subscribe('strong-def.prev.strong',
+    queue.subscribe('strong-def.prev.strong',
       () => { this.prevStrong(); }
     );
-    bus.subscribe('strong-def.select', (strongDef) => {
+    queue.subscribe('strong-def.select', (strongDef) => {
       this.defSelect(strongDef);
     });
-    bus.subscribe('strong-def.word.select', (strongWord) => {
+    queue.subscribe('strong-def.word.select', (strongWord) => {
       this.wordSelect(strongWord);
     });
 
-    bus.subscribe('strong-filter', () => {
+    queue.subscribe('strong-filter', () => {
       this.filter();
     });
-    bus.subscribe('strong-filter.select', (strongFilter) => {
+    queue.subscribe('strong-filter.select', (strongFilter) => {
       this.filterSelect(strongFilter);
     });
 
-    bus.subscribe('strong-history', () => {
+    queue.subscribe('strong-history', () => {
       this.history();
     });
-    bus.subscribe('strong-history.clear', () => {
+    queue.subscribe('strong-history.clear', () => {
       this.historyClear();
     });
-    bus.subscribe('strong-history.delete', (strongDef) => {
+    queue.subscribe('strong-history.delete', (strongDef) => {
       this.historyDelete(strongDef);
     });
-    bus.subscribe('strong-history.down', (strongDef) => {
+    queue.subscribe('strong-history.down', (strongDef) => {
       this.historyDown(strongDef);
     });
-    bus.subscribe('strong-history.select', (strongDef) => {
+    queue.subscribe('strong-history.select', (strongDef) => {
       this.historySelect(strongDef);
     });
-    bus.subscribe('strong-history.up', (strongDef) => {
+    queue.subscribe('strong-history.up', (strongDef) => {
       this.historyUp(strongDef);
     });
 
-    bus.subscribe('strong-lookup', () => {
+    queue.subscribe('strong-lookup', () => {
       this.lookup();
     });
-    bus.subscribe('strong-lookup.find', (strongNum) => {
+    queue.subscribe('strong-lookup.find', (strongNum) => {
       this.lookupFind(strongNum);
     });
 
-    bus.subscribe('strong-result', () => {
+    queue.subscribe('strong-result', () => {
       this.search();
     });
-    bus.subscribe('strong-result.read-select', (verseIdx) => {
+    queue.subscribe('strong-result.read-select', (verseIdx) => {
       this.readSelect(verseIdx);
     });
-    bus.subscribe('strong-result.strong-select', (verseIdx) => {
+    queue.subscribe('strong-result.strong-select', (verseIdx) => {
       this.strongSelect(verseIdx);
     });
 
-    bus.subscribe('strong-verse', () => {
+    queue.subscribe('strong-verse', () => {
       this.verse();
     });
-    bus.subscribe('strong-verse.select', (strongDef) => {
+    queue.subscribe('strong-verse.select', (strongDef) => {
       this.verseSelect(strongDef);
     });
 
-    bus.subscribe('strong.back', () => {
+    queue.subscribe('strong.back', () => {
       this.back();
     });
-    bus.subscribe('strong.def.update', () => {
+    queue.subscribe('strong.def.change', () => {
+      this.defChange();
+    });
+    queue.subscribe('strong.def.update', () => {
       this.defUpdate();
     });
-    bus.subscribe('strong.hide', () => {
+    queue.subscribe('strong.filter.update', () => {
+      this.filterUpdate();
+    });
+    queue.subscribe('strong.hide', () => {
       this.hide();
     });
-    bus.subscribe('strong.show', () => {
+    queue.subscribe('strong.show', () => {
       this.show();
     });
-    bus.subscribe('strong.strong-mode.click', () => {
+    queue.subscribe('strong.strong-mode.click', () => {
       this.modeToggle();
     });
-    bus.subscribe('strong.task.update', (strongTask) => {
+    queue.subscribe('strong.task.update', (strongTask) => {
       this.taskUpdate(strongTask);
+    });
+    queue.subscribe('strong.verse.change', () => {
+      this.verseChange();
+    });
+    queue.subscribe('strong.verse.update', () => {
+      this.verseUpdate();
+    });
+    queue.subscribe('strong.word.update', () => {
+      this.wordUpdate();
     });
   }
 
   taskUpdate(strongTask) {
     if (this.sidebar === 'strong') {
-      bus.publish(`${this.strongTask}.hide`, null);
-      this.strongTask = strongTask;
-      bus.publish(`${this.strongTask}.show`, null);
+      if (this.strongTask !== strongTask) {
+        queue.publish(`${this.strongTask}.hide`, null);
+        this.strongTask = strongTask;
+        queue.publish(`${this.strongTask}.show`, null);
+      }
     } else {
       this.strongTask = strongTask;
     }
   }
 
   verse() {
-    bus.publish('strong.task.change', 'strong-verse');
+    queue.publish('strong.task.change', 'strong-verse');
+  }
+
+  verseChange() {
+    this.verseChangePending = true;
   }
 
   verseSelect(strongDef) {
-    bus.publish('strong.def.change', strongDef);
-    bus.publish('strong.task.change', 'strong-def');
+    queue.publish('strong.def.change', strongDef);
+  }
+
+  verseUpdate() {
+    if (this.verseChangePending) {
+      this.verseChangePending = false;
+      queue.publish('strong.task.change', 'strong-verse');
+    }
   }
 
   wordSelect(strongWord) {
-    bus.publish('strong.word.change', strongWord);
-    bus.publish('strong.task.change', 'strong-result');
+    this.wordSelectPending = true;
+    queue.publish('strong.word.change', strongWord);
+  }
+
+  wordUpdate() {
+    if (this.wordSelectPending) {
+      this.wordSelectPending = false;
+      queue.publish('strong.task.change', 'strong-result');
+    }
   }
 
 }

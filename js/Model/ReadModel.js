@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import { appPrefix } from '../util.js';
 
 class ReadModel {
@@ -12,7 +12,7 @@ class ReadModel {
   columnModeChange(columnMode) {
     this.columnMode = columnMode;
     this.saveColumnMode();
-    bus.publish('read.column-mode.update', this.columnMode);
+    queue.publish('read.column-mode.update', this.columnMode);
   }
 
   columnModeToogle() {
@@ -25,7 +25,7 @@ class ReadModel {
 
   panesChange(panes) {
     this.panes = panes;
-    bus.publish('panes.update', this.panes);
+    queue.publish('panes.update', this.panes);
   }
 
   restore() {
@@ -85,7 +85,7 @@ class ReadModel {
   sidebarChange(sidebar) {
     this.sidebar = sidebar;
     this.saveSidebar();
-    bus.publish('sidebar.update', this.sidebar);
+    queue.publish('sidebar.update', this.sidebar);
   }
 
   sidebarRestore() {
@@ -111,7 +111,7 @@ class ReadModel {
   strongModeChange(strongMode) {
     this.strongMode = strongMode;
     this.saveStrongMode();
-    bus.publish('read.strong-mode.update', this.strongMode);
+    queue.publish('read.strong-mode.update', this.strongMode);
   }
 
   strongModeToogle() {
@@ -119,24 +119,24 @@ class ReadModel {
   }
 
   subscribe() {
-    bus.subscribe('panes.change', (panes) => {
+    queue.subscribe('panes.change', (panes) => {
       this.panesChange(panes);
     });
 
-    bus.subscribe('read.column-mode.toggle', () => {
+    queue.subscribe('read.column-mode.toggle', () => {
       this.columnModeToogle();
     });
-    bus.subscribe('read.restore',
+    queue.subscribe('read.restore',
       () => { this.restore(); }
     );
-    bus.subscribe('read.strong-mode.toggle', () => {
+    queue.subscribe('read.strong-mode.toggle', () => {
       this.strongModeToogle();
     });
 
-    bus.subscribe('sidebar.change', (sidebar) => {
+    queue.subscribe('sidebar.change', (sidebar) => {
       this.sidebarChange(sidebar);
     });
-    bus.subscribe('sidebar.restore', () => {
+    queue.subscribe('sidebar.restore', () => {
       this.sidebarRestore();
     });
   }

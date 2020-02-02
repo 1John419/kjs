@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import { tomeName } from '../data/tomeDb.js';
 
 import {
@@ -43,7 +43,7 @@ class BookmarkExportview {
     let bookmarkPkg = {};
     bookmarkPkg.tome = tomeName;
     bookmarkPkg.folders = this.folders;
-    return JSON.stringify(bookmarkPkg, null, 2);
+    return JSON.stringify(bookmarkPkg, null);
   }
 
   buildPage() {
@@ -92,14 +92,14 @@ class BookmarkExportview {
   }
 
   subscribe() {
-    bus.subscribe('bookmark-export.hide', () => {
+    queue.subscribe('bookmark-export.hide', () => {
       this.hide();
     });
-    bus.subscribe('bookmark-export.show', () => {
+    queue.subscribe('bookmark-export.show', () => {
       this.show();
     });
 
-    bus.subscribe('folders.update', (folders) => {
+    queue.subscribe('bookmark.folders.update', (folders) => {
       this.foldersUpdate(folders);
     });
   }
@@ -109,7 +109,7 @@ class BookmarkExportview {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBookmarkFolder) {
-        bus.publish('bookmark-folder', null);
+        queue.publish('bookmark-folder', null);
       }
     }
   }

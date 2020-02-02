@@ -1,15 +1,6 @@
 'use strict';
 
-import {
-  tomeChapters
-} from './data/tomeDb.js';
-import {
-  chapterFirstVerseIdx,
-  chapterLastVerseIdx,
-  chapterName
-} from './data/tomeIdx.js';
-
-export const appPrefix = 'kjs-test';
+export const appPrefix = 'kjs';
 
 export const centerScrollElement = (scrollElement, element) => {
   let y = element.offsetTop - scrollElement.offsetTop -
@@ -17,21 +8,24 @@ export const centerScrollElement = (scrollElement, element) => {
   scrollElement.scrollTop = y;
 };
 
-export const chapterByVerseIdx = (verseIdx) => {
-  let chapterIdx = chapterIdxByVerseIdx(verseIdx);
-  return tomeChapters[chapterIdx];
-};
-
-export const chapterIdxByVerseIdx = (verseIdx) => {
-  let chapterIdx = tomeChapters
-    .findIndex(x => x[chapterLastVerseIdx] >= verseIdx);
-  return chapterIdx;
-};
-
-export const citationByVerseIdx = (verseIdx) => {
-  let chapter = chapterByVerseIdx(verseIdx);
-  let num = verseIdx - chapter[chapterFirstVerseIdx] + 1;
-  return `${chapter[chapterName]}:${num}`;
+export const dbVersion = (dbName) => {
+  let defaultDbVersion = 0;
+  let dbVersion = localStorage.getItem(`${appPrefix}-${dbName}Version`);
+  if (!dbVersion) {
+    dbVersion = defaultDbVersion;
+  } else {
+    try {
+      dbVersion = JSON.parse(dbVersion);
+    } catch (error) {
+      dbVersion = defaultDbVersion;
+    }
+    if (typeof dbVersion !== 'number') {
+      dbVersion = defaultDbVersion;
+    }
+  }
+  localStorage.setItem(`${appPrefix}-${dbName}Version`,
+    JSON.stringify(dbVersion));
+  return dbVersion;
 };
 
 export const range = (start, stop, step = 1) => {

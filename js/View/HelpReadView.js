@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 
 import { helpTopicList } from './HelpTopicView.js';
 
@@ -79,18 +79,18 @@ class HelpReadView {
   }
 
   subscribe() {
-    bus.subscribe('help-read.show', () => {
+    queue.subscribe('help-read.show', () => {
       this.show();
     });
-    bus.subscribe('help-read.hide', () => {
+    queue.subscribe('help-read.hide', () => {
       this.hide();
     });
 
-    bus.subscribe('help.topic.update', (helpTopic) => {
+    queue.subscribe('help.topic.update', (helpTopic) => {
       this.topicUpdate(helpTopic);
     });
 
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
   }
@@ -100,9 +100,9 @@ class HelpReadView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBack) {
-        bus.publish('help.back', null);
+        queue.publish('help.back', null);
       } else if (target === this.btnHelpTopic) {
-        bus.publish('help-topic', null);
+        queue.publish('help-topic', null);
       }
     }
   }

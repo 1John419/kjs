@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import {
   bookBinChapters,
   bookBinSliceEnd,
@@ -244,9 +244,9 @@ class SearchResultView {
     let btn = target.closest('button');
     let verseIdx = parseInt(btn.dataset.verseIdx);
     if (this.strongMode) {
-      bus.publish('search-result.strong-select', verseIdx);
+      queue.publish('search-result.strong-select', verseIdx);
     } else {
-      bus.publish('search-result.read-select', verseIdx);
+      queue.publish('search-result.read-select', verseIdx);
     }
   }
 
@@ -315,36 +315,36 @@ class SearchResultView {
   }
 
   subscribe() {
-    bus.subscribe('font.update', (font) => {
+    queue.subscribe('font.update', (font) => {
       this.fontUpdate(font);
     });
 
-    bus.subscribe('font-size.update', (fontSize) => {
+    queue.subscribe('font-size.update', (fontSize) => {
       this.fontSizeUpdate(fontSize);
     });
 
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
 
-    bus.subscribe('rig.update', (rig) => {
+    queue.subscribe('rig.update', (rig) => {
       this.rigUpdate(rig);
     });
 
-    bus.subscribe('search-result.hide', () => {
+    queue.subscribe('search-result.hide', () => {
       this.hide();
     });
-    bus.subscribe('search-result.show', () => {
+    queue.subscribe('search-result.show', () => {
       this.show();
     });
 
-    bus.subscribe('search.filter.update', (searchFilter) => {
+    queue.subscribe('search.filter.update', (searchFilter) => {
       this.filterUpdate(searchFilter);
     });
-    bus.subscribe('search.strong-mode.update', (strongMode) => {
+    queue.subscribe('search.strong-mode.update', (strongMode) => {
       this.modeUpdate(strongMode);
     });
-    bus.subscribe('search.verses.update', (searchVerseObjs) => {
+    queue.subscribe('search.verses.update', (searchVerseObjs) => {
       this.versesUpdate(searchVerseObjs);
     });
   }
@@ -354,15 +354,15 @@ class SearchResultView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBack) {
-        bus.publish('search.back', null);
+        queue.publish('search.back', null);
       } else if (target === this.btnFilter) {
-        bus.publish('search-filter', null);
+        queue.publish('search-filter', null);
       } else if (target === this.btnHistory) {
-        bus.publish('search-history', null);
+        queue.publish('search-history', null);
       } else if (target === this.btnStrongMode) {
-        bus.publish('search.strong-mode.click', null);
+        queue.publish('search.strong-mode.click', null);
       } else if (target === this.btnSearchLookup) {
-        bus.publish('search-lookup', null);
+        queue.publish('search-lookup', null);
       }
     }
   }

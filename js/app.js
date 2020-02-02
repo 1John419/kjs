@@ -67,16 +67,15 @@ const progress = (msg) => {
   await initializeTome(progress);
   await initializeStrong(progress);
 
-  let readModel = new ReadModel();
   let readView = new ReadView();
   let readController = new ReadController();
+  let readModel = new ReadModel();
 
-  let navigatorModel = new NavigatorModel();
   let navigatorBookView = new NavigatorBookView();
   let navigatorChapterView = new NavigatorChapterView();
   let navigatorController = new NavigatorController();
+  let navigatorModel = new NavigatorModel();
 
-  let bookmarkModel = new BookmarkModel();
   let bookmarkListView = new BookmarkListView();
   let bookmarkMoveCopyView = new BookmarkMoveCopyView();
   let bookmarkFolderView = new BookmarkFolderView();
@@ -86,15 +85,15 @@ const progress = (msg) => {
   let bookmarkExportview = new BookmarkExportview();
   let bookmarkImportView = new BookmarkImportView();
   let bookmarkController = new BookmarkController();
+  let bookmarkModel = new BookmarkModel();
 
-  let searchModel = new SearchModel();
   let searchResultView = new SearchResultView();
   let searchFilterView = new SearchFilterView();
   let searchHistoryView = new SearchHistoryView();
   let searchLookupView = new SearchLookupView();
   let searchController = new SearchController();
+  let searchModel = new SearchModel();
 
-  let strongModel = new StrongModel();
   let strongDefView = new StrongDefView();
   let strongFilterView = new StrongFilterView();
   let strongHistoryView = new StrongHistoryView();
@@ -102,15 +101,16 @@ const progress = (msg) => {
   let strongSearchView = new StrongResultView();
   let strongVerseView = new StrongVerseView();
   let strongController = new StrongController();
+  let strongModel = new StrongModel();
 
-  let settingModel = new SettingModel();
   let settingView = new SettingView();
   let settingController = new SettingController();
+  let settingModel = new SettingModel();
 
-  let helpModel = new HelpModel();
   let helpReadView = new HelpReadView();
   let helpTopicView = new HelpTopicView();
   let helpController = new HelpController();
+  let helpModel = new HelpModel();
 
   load.classList.add('load--hide');
   document.documentElement.classList.add(APP_FONT);

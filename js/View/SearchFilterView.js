@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import {
   bookBinBookIdx,
   bookBinChapters,
@@ -159,7 +159,7 @@ class SearchFilterView {
       bookIdx: bookIdx,
       chapterIdx: chapterIdx
     };
-    bus.publish('search-filter.select', searchFilter);
+    queue.publish('search-filter.select', searchFilter);
   }
 
   filterUpdate(searchFilter) {
@@ -227,18 +227,18 @@ class SearchFilterView {
   }
 
   subscribe() {
-    bus.subscribe('rig.update', (rig) => {
+    queue.subscribe('rig.update', (rig) => {
       this.rigUpdate(rig);
     });
 
-    bus.subscribe('search-filter.hide', () => {
+    queue.subscribe('search-filter.hide', () => {
       this.hide();
     });
-    bus.subscribe('search-filter.show', () => {
+    queue.subscribe('search-filter.show', () => {
       this.show();
     });
 
-    bus.subscribe('search.filter.update', (filter) => {
+    queue.subscribe('search.filter.update', (filter) => {
       this.filterUpdate(filter);
     });
   }
@@ -248,7 +248,7 @@ class SearchFilterView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnSearchResult) {
-        bus.publish('search-result', null);
+        queue.publish('search-result', null);
       }
     }
   }

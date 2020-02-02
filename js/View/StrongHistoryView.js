@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import { strongCitations } from '../data/strongDb.js';
 import {
   templateActionMenu,
@@ -124,16 +124,16 @@ class StrongHistoryView {
     event.preventDefault();
     let target = event.target;
     if (target === this.btnClear) {
-      bus.publish('strong-history.clear', null);
+      queue.publish('strong-history.clear', null);
     }
   }
 
   delete(strongDef) {
-    bus.publish('strong-history.delete', strongDef);
+    queue.publish('strong-history.delete', strongDef);
   }
 
   down(strongDef) {
-    bus.publish('strong-history.down', strongDef);
+    queue.publish('strong-history.down', strongDef);
   }
 
   getElements() {
@@ -169,7 +169,7 @@ class StrongHistoryView {
     if (target) {
       if (target.classList.contains('btn-entry--history')) {
         let strongDef = target.dataset.def;
-        bus.publish('strong-history.select', strongDef);
+        queue.publish('strong-history.select', strongDef);
       } else if (target.classList.contains('btn-icon--menu')) {
         let entry = target.previousSibling;
         this.menuClick(entry);
@@ -197,14 +197,14 @@ class StrongHistoryView {
   }
 
   subscribe() {
-    bus.subscribe('strong-history.hide', () => {
+    queue.subscribe('strong-history.hide', () => {
       this.hide();
     });
-    bus.subscribe('strong-history.show', () => {
+    queue.subscribe('strong-history.show', () => {
       this.show();
     });
 
-    bus.subscribe('strong.history.update', (strongHistory) => {
+    queue.subscribe('strong.history.update', (strongHistory) => {
       this.historyUpdate(strongHistory);
     });
   }
@@ -214,13 +214,13 @@ class StrongHistoryView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnDef) {
-        bus.publish('strong-def', null);
+        queue.publish('strong-def', null);
       }
     }
   }
 
   up(strongDef) {
-    bus.publish('strong-history.up', strongDef);
+    queue.publish('strong-history.up', strongDef);
   }
 
   updateList() {

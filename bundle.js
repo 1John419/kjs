@@ -5175,6 +5175,70 @@
         };
     }());
 
+    const appPrefix = 'kjs';
+
+    const centerScrollElement = (scrollElement, element) => {
+      let y = element.offsetTop - scrollElement.offsetTop -
+        (scrollElement.clientHeight - element.clientHeight) / 2;
+      scrollElement.scrollTop = y;
+    };
+
+    const dbVersion = (dbName) => {
+      let defaultDbVersion = 0;
+      let dbVersion = localStorage.getItem(`${appPrefix}-${dbName}Version`);
+      if (!dbVersion) {
+        dbVersion = defaultDbVersion;
+      } else {
+        try {
+          dbVersion = JSON.parse(dbVersion);
+        } catch (error) {
+          dbVersion = defaultDbVersion;
+        }
+        if (typeof dbVersion !== 'number') {
+          dbVersion = defaultDbVersion;
+        }
+      }
+      localStorage.setItem(`${appPrefix}-${dbName}Version`,
+        JSON.stringify(dbVersion));
+      return dbVersion;
+    };
+
+    const range = (start, stop, step = 1) => {
+      return Array(Math.ceil((stop - start) / step))
+        .fill(start)
+        .map((x, y) => x + y * step);
+    };
+
+    const removeAllChildren = (element) => {
+      while (element.hasChildNodes()) {
+        element.removeChild(element.lastChild);
+      }
+    };
+
+    const sideScrollElement = (scrollElement, element) => {
+      let x = element.offsetLeft - 8;
+      scrollElement.scrollLeft = x;
+    };
+
+    const bookLongName = 0;
+    const bookShortName = 1;
+    const bookLastVerseIdx = 3;
+    const bookFirstChapterIdx = 4;
+    const bookLastChapterIdx = 5;
+
+    const chapterBookIdx = 0;
+    const chapterName = 1;
+    const chapterNum = 2;
+    const chapterFirstVerseIdx = 3;
+    const chapterLastVerseIdx = 4;
+
+    const verseText = 0;
+    const verseCitation = 3;
+    const verseNum = 4;
+
+    const wordVerseIdx = 0;
+    const wordCount = 1;
+
     const tomeStores = {
       lists: 'k',
       verses: 'k',
@@ -5182,9 +5246,10 @@
     };
 
     const tomeLzmaUrl = './lzma/tome.kjv.json.lzma';
+    const tomeVersion = 1;
+
     const tomeName = 'KJV';
 
-    let progress = null;
     let tomeAcrostics = {};
     let tomeBooks = null;
     let tomeChapters = null;
@@ -5193,12 +5258,32 @@
     let tomeVerseCount = null;
     let tomeWords = null;
 
+    let progress = null;
+
+    const chapterByVerseIdx = (verseIdx) => {
+      let chapterIdx = chapterIdxByVerseIdx(verseIdx);
+      return tomeChapters[chapterIdx];
+    };
+
+    const chapterIdxByVerseIdx = (verseIdx) => {
+      let chapterIdx = tomeChapters
+        .findIndex(x => x[chapterLastVerseIdx] >= verseIdx);
+      return chapterIdx;
+    };
+
+    const citationByVerseIdx = (verseIdx) => {
+      let chapter = chapterByVerseIdx(verseIdx);
+      let num = verseIdx - chapter[chapterFirstVerseIdx] + 1;
+      return `${chapter[chapterName]}:${num}`;
+    };
+
     const initializeTome = async (cb) => {
       progress = cb ? cb : () => {};
       progress('');
       progress('* tome database *');
       progress('');
-      await openTome();
+      await versionCheck();
+      await populateTome();
       await loadTomeAcrostics();
       await loadTomeBooks();
       await loadTomeChapters();
@@ -5237,10 +5322,7 @@
       tomeWords = wordObjs.map(x => x.k);
     };
 
-    const openTome = async () => {
-      tomeDb = await new Dexie('tome');
-      await tomeDb.version(1).stores(tomeStores);
-      tomeDb.open();
+    const populateTome = async () => {
       let wordCount = await tomeDb.words.count();
       if (wordCount === 0) {
         progress('fetching...');
@@ -5270,6 +5352,24 @@
       }
     };
 
+    const versionCheck = async () => {
+      let currentVersion = dbVersion('tome');
+
+      tomeDb = await new Dexie('tome');
+      await tomeDb.version(1).stores(tomeStores);
+      tomeDb.open();
+
+      if (tomeVersion !== currentVersion) {
+        progress('new version.');
+        for (let store of Object.keys(tomeStores)) {
+          progress(`clearing ${store}...`);
+          await tomeDb.table(store).clear();
+        }
+        localStorage.setItem(`${appPrefix}-tomeVersion`,
+          JSON.stringify(tomeVersion));
+      }
+    };
+
     const defLemma = 0;
     const defTranliteration = 1;
     const defPronunciation = 2;
@@ -5289,8 +5389,10 @@
     };
 
     const strongLzmaUrl = './lzma/strong.json.lzma';
+    const strongVersion = 1;
 
     let progress$1 = null;
+
     let strongCitations = {};
     let strongDb = null;
     let strongNums = null;
@@ -5300,7 +5402,8 @@
       progress$1('');
       progress$1('* strong database *');
       progress$1('');
-      await openStrong();
+      await versionCheck$1();
+      await populateStrong();
       await loadStrongNums();
       await loadStrongCitations();
     };
@@ -5317,10 +5420,7 @@
       strongNums = strongDefObjs.map(x => x.k);
     };
 
-    const openStrong = async () => {
-      strongDb = await new Dexie('strong');
-      await strongDb.version(1).stores(strongStores);
-      strongDb.open();
+    const populateStrong = async () => {
       let wordsCount = await strongDb.words.count();
       if (wordsCount === 0) {
         progress$1('fetching...');
@@ -5350,92 +5450,63 @@
       }
     };
 
-    class EventBus {
+    const versionCheck$1 = async () => {
+      let currentVersion = dbVersion('strong');
+
+      strongDb = await new Dexie('strong');
+      await strongDb.version(1).stores(strongStores);
+      strongDb.open();
+
+      if (strongVersion !== currentVersion) {
+        progress$1('new version.');
+        for (let store of Object.keys(strongStores)) {
+          progress$1(`clearing ${store}...`);
+          await strongDb.table(store).clear();
+        }
+        localStorage.setItem(`${appPrefix}-strongVersion`,
+          JSON.stringify(strongVersion));
+      }
+    };
+
+    class CommandQueue {
 
       constructor() {
-        this.topics = {};
+        this.queue = [];
+        this.queueRunning = false;
+        this.commands = {};
       }
 
-      async publish(topic, data) {
-        // console.log(topic);
-        if (this.topics[topic] && this.topics[topic].length >= 1) {
-          for (let listener of this.topics[topic]) {
-            await listener(data);
+      publish(command, data) {
+        console.log(command);
+        if (this.commands[command] && this.commands[command].length >= 1) {
+          for (let listener of this.commands[command]) {
+            this.queue.push({listener, data});
+          }
+          if (!this.queueRunning) {
+            this.runQueue();
           }
         }
       }
 
-      subscribe(topic, listener) {
-        if (!this.topics[topic]) {
-          this.topics[topic] = [];
+      runQueue() {
+        this.queueRunning = true;
+        while (this.queue.length) {
+          let task = this.queue.shift();
+          task.listener(task.data);
         }
-        this.topics[topic].push(listener);
+        this.queueRunning = false;
+      }
+
+      subscribe(command, listener) {
+        if (!this.commands[command]) {
+          this.commands[command] = [];
+        }
+        this.commands[command].push(listener);
       }
 
     }
 
-    let bus = new EventBus();
-
-    const bookLongName = 0;
-    const bookShortName = 1;
-    const bookLastVerseIdx = 3;
-    const bookFirstChapterIdx = 4;
-    const bookLastChapterIdx = 5;
-
-    const chapterBookIdx = 0;
-    const chapterName = 1;
-    const chapterNum = 2;
-    const chapterFirstVerseIdx = 3;
-    const chapterLastVerseIdx = 4;
-
-    const verseText = 0;
-    const verseCitation = 3;
-    const verseNum = 4;
-
-    const wordVerseIdx = 0;
-    const wordCount = 1;
-
-    const appPrefix = 'kjs-test';
-
-    const centerScrollElement = (scrollElement, element) => {
-      let y = element.offsetTop - scrollElement.offsetTop -
-        (scrollElement.clientHeight - element.clientHeight) / 2;
-      scrollElement.scrollTop = y;
-    };
-
-    const chapterByVerseIdx = (verseIdx) => {
-      let chapterIdx = chapterIdxByVerseIdx(verseIdx);
-      return tomeChapters[chapterIdx];
-    };
-
-    const chapterIdxByVerseIdx = (verseIdx) => {
-      let chapterIdx = tomeChapters
-        .findIndex(x => x[chapterLastVerseIdx] >= verseIdx);
-      return chapterIdx;
-    };
-
-    const citationByVerseIdx = (verseIdx) => {
-      let chapter = chapterByVerseIdx(verseIdx);
-      let num = verseIdx - chapter[chapterFirstVerseIdx] + 1;
-      return `${chapter[chapterName]}:${num}`;
-    };
-
-    const range = (start, stop, step = 1) => {
-      return Array(Math.ceil((stop - start) / step))
-        .fill(start)
-        .map((x, y) => x + y * step);
-    };
-
-    const removeAllChildren = (element) => {
-      while (element.hasChildNodes()) {
-        element.removeChild(element.lastChild);
-      }
-    };
-
-    const sideScrollElement = (scrollElement, element) => {
-      let x = element.offsetLeft - 8;
-      scrollElement.scrollLeft = x;
-    };
+    let queue = new CommandQueue();
 
     class ReadModel {
 
@@ -5446,7 +5517,7 @@
       columnModeChange(columnMode) {
         this.columnMode = columnMode;
         this.saveColumnMode();
-        bus.publish('read.column-mode.update', this.columnMode);
+        queue.publish('read.column-mode.update', this.columnMode);
       }
 
       columnModeToogle() {
@@ -5459,7 +5530,7 @@
 
       panesChange(panes) {
         this.panes = panes;
-        bus.publish('panes.update', this.panes);
+        queue.publish('panes.update', this.panes);
       }
 
       restore() {
@@ -5519,7 +5590,7 @@
       sidebarChange(sidebar) {
         this.sidebar = sidebar;
         this.saveSidebar();
-        bus.publish('sidebar.update', this.sidebar);
+        queue.publish('sidebar.update', this.sidebar);
       }
 
       sidebarRestore() {
@@ -5545,7 +5616,7 @@
       strongModeChange(strongMode) {
         this.strongMode = strongMode;
         this.saveStrongMode();
-        bus.publish('read.strong-mode.update', this.strongMode);
+        queue.publish('read.strong-mode.update', this.strongMode);
       }
 
       strongModeToogle() {
@@ -5553,24 +5624,24 @@
       }
 
       subscribe() {
-        bus.subscribe('panes.change', (panes) => {
+        queue.subscribe('panes.change', (panes) => {
           this.panesChange(panes);
         });
 
-        bus.subscribe('read.column-mode.toggle', () => {
+        queue.subscribe('read.column-mode.toggle', () => {
           this.columnModeToogle();
         });
-        bus.subscribe('read.restore',
+        queue.subscribe('read.restore',
           () => { this.restore(); }
         );
-        bus.subscribe('read.strong-mode.toggle', () => {
+        queue.subscribe('read.strong-mode.toggle', () => {
           this.strongModeToogle();
         });
 
-        bus.subscribe('sidebar.change', (sidebar) => {
+        queue.subscribe('sidebar.change', (sidebar) => {
           this.sidebarChange(sidebar);
         });
-        bus.subscribe('sidebar.restore', () => {
+        queue.subscribe('sidebar.restore', () => {
           this.sidebarRestore();
         });
       }
@@ -5729,6 +5800,11 @@
         this.initialize();
       }
 
+      activeFolderUpdate(activeFolder) {
+        this.activeFolder = activeFolder;
+        this.refreshVerseBookmarks();
+      }
+
       addListeners() {
         this.list.addEventListener('click', (event) => {
           this.listClick(event);
@@ -5830,11 +5906,6 @@
         this.updateColumnMode();
       }
 
-      folderUpdate(folder) {
-        this.folder = folder;
-        this.refreshVerseBookmarks();
-      }
-
       fontSizeUpdate(fontSize) {
         this.fontSize = fontSize;
         this.updateFontSize();
@@ -5922,7 +5993,7 @@
 
       refreshBookmarks(element) {
         let verseIdx = parseInt(element.dataset.verseIdx);
-        if (this.folder.bookmarks.indexOf(verseIdx) === -1) {
+        if (this.activeFolder.bookmarks.indexOf(verseIdx) === -1) {
           element.classList.remove('verse--bookmark');
         } else {
           element.classList.add('verse--bookmark');
@@ -5999,95 +6070,94 @@
       }
 
       subscribe() {
-        bus.subscribe('bookmark.hide', () => {
+        queue.subscribe('bookmark.active-folder.update', (activeFolder) => {
+          this.activeFolderUpdate(activeFolder);
+        });
+        queue.subscribe('bookmark.hide', () => {
           this.bookmarkHide();
         });
-        bus.subscribe('bookmark.show', () => {
+        queue.subscribe('bookmark.show', () => {
           this.bookmarkShow();
         });
 
-        bus.subscribe('chapterIdx.update', (chapterIdx) => {
+        queue.subscribe('chapterIdx.update', (chapterIdx) => {
           this.chapterIdxUpdate(chapterIdx);
         });
 
-        bus.subscribe('folder.update', (folder) => {
-          this.folderUpdate(folder);
-        });
-
-        bus.subscribe('font.update', (font) => {
+        queue.subscribe('font.update', (font) => {
           this.fontUpdate(font);
         });
 
-        bus.subscribe('font-size.update', (fontSize) => {
+        queue.subscribe('font-size.update', (fontSize) => {
           this.fontSizeUpdate(fontSize);
         });
 
-        bus.subscribe('help.hide', () => {
+        queue.subscribe('help.hide', () => {
           this.helpHide();
         });
-        bus.subscribe('help.show', () => {
+        queue.subscribe('help.show', () => {
           this.helpShow();
         });
 
-        bus.subscribe('navigator.hide', () => {
+        queue.subscribe('navigator.hide', () => {
           this.navigatorHide();
         });
-        bus.subscribe('navigator.show', () => {
+        queue.subscribe('navigator.show', () => {
           this.navigatorShow();
         });
-        bus.subscribe('navigator.verses.update', (verseObjs) => {
+        queue.subscribe('navigator.verses.update', (verseObjs) => {
           this.navigatorVersesUpdate(verseObjs);
         });
 
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
 
-        bus.subscribe('read.column-mode.update', (columnMode) => {
+        queue.subscribe('read.column-mode.update', (columnMode) => {
           this.columnModeUpdate(columnMode);
         });
-        bus.subscribe('read.hide', () => {
+        queue.subscribe('read.hide', () => {
           this.hide();
         });
-        bus.subscribe('read.scroll-to-top', () => {
+        queue.subscribe('read.scroll-to-top', () => {
           this.scrollToTop();
         });
-        bus.subscribe('read.scroll-to-verse', (verseIdx) => {
+        queue.subscribe('read.scroll-to-verse', (verseIdx) => {
           this.scrollToVerse(verseIdx);
         });
-        bus.subscribe('read.show', () => {
+        queue.subscribe('read.show', () => {
           this.show();
         });
-        bus.subscribe('read.strong-mode.update', (strongMode) => {
+        queue.subscribe('read.strong-mode.update', (strongMode) => {
           this.strongModeUpdate(strongMode);
         });
 
-        bus.subscribe('search.hide', () => {
+        queue.subscribe('search.hide', () => {
           this.searchHide();
         });
-        bus.subscribe('search.show', () => {
+        queue.subscribe('search.show', () => {
           this.searchShow();
         });
 
-        bus.subscribe('setting.hide', () => {
+        queue.subscribe('setting.hide', () => {
           this.settingHide();
         });
-        bus.subscribe('setting.show', () => {
+        queue.subscribe('setting.show', () => {
           this.settingShow();
         });
 
-        bus.subscribe('strong.hide', () => {
+        queue.subscribe('strong.hide', () => {
           this.strongHide();
         });
-        bus.subscribe('strong.show', () => {
+        queue.subscribe('strong.show', () => {
           this.strongShow();
         });
 
-        bus.subscribe('sidebar.update', (sidebar) => {
+        queue.subscribe('sidebar.update', (sidebar) => {
           this.sidebarUpdate(sidebar);
         });
 
-        bus.subscribe('theme.update', (theme) => {
+        queue.subscribe('theme.update', (theme) => {
           this.themeUpdate(theme);
         });
       }
@@ -6101,21 +6171,21 @@
             !target.classList.contains('btn-icon--active')
           ) {
             if (target === this.btnNavigator) {
-              bus.publish('sidebar.select', 'navigator');
+              queue.publish('sidebar.select', 'navigator');
             } else if (target === this.btnBookmark) {
-              bus.publish('sidebar.select', 'bookmark');
+              queue.publish('sidebar.select', 'bookmark');
             } else if (target === this.btnSearch) {
-              bus.publish('sidebar.select', 'search');
+              queue.publish('sidebar.select', 'search');
             } else if (target === this.btnStrong) {
-              bus.publish('sidebar.select', 'strong');
+              queue.publish('sidebar.select', 'strong');
             } else if (target === this.btnSetting) {
-              bus.publish('sidebar.select', 'setting');
+              queue.publish('sidebar.select', 'setting');
             } else if (target === this.btnHelp) {
-              bus.publish('sidebar.select', 'help');
+              queue.publish('sidebar.select', 'help');
             } else if (target === this.btnColumnMode) {
-              bus.publish('read.column-mode.click', null);
+              queue.publish('read.column-mode.click', null);
             } else if (target === this.btnStrongMode) {
-              bus.publish('read.strong-mode.click', null);
+              queue.publish('read.strong-mode.click', null);
             }
           }
         }
@@ -6126,9 +6196,9 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnPrev) {
-            bus.publish('read.prev.chapter', 1);
+            queue.publish('read.prev.chapter', 1);
           } else if (target === this.btnNext) {
-            bus.publish('read.next.chapter', 2);
+            queue.publish('read.next.chapter', 2);
           }
         }
       }
@@ -6188,16 +6258,16 @@
       verseClick(verse) {
         let verseIdx = parseInt(verse.dataset.verseIdx);
         if (this.strongMode) {
-          bus.publish('read.strong.select', verseIdx);
+          queue.publish('read.strong.select', verseIdx);
         } else if (verse.classList.contains('verse--bookmark')) {
-          bus.publish('read.bookmark.delete', verseIdx);
+          queue.publish('read.bookmark.delete', verseIdx);
         } else {
-          bus.publish('read.bookmark.add', verseIdx);
+          queue.publish('read.bookmark.add', verseIdx);
         }
       }
 
       windowResize() {
-        bus.publish('window.resize', null);
+        queue.publish('window.resize', null);
       }
 
     }
@@ -6211,15 +6281,15 @@
       }
 
       bookmarkAdd(verseIdx) {
-        bus.publish('bookmark.add', verseIdx);
+        queue.publish('bookmark.add', verseIdx);
       }
 
       bookmarkDelete(verseIdx) {
-        bus.publish('bookmark.delete', verseIdx);
+        queue.publish('bookmark.delete', verseIdx);
       }
 
       columnModeToggle() {
-        bus.publish('read.column-mode.toggle', null);
+        queue.publish('read.column-mode.toggle', null);
       }
 
       columnModeUpdate(columnMode) {
@@ -6229,21 +6299,21 @@
       decreasePanes() {
         if (this.panes === 1) {
           this.lastSidebar = this.sidebar;
-          bus.publish('sidebar.change', 'none');
+          queue.publish('sidebar.change', 'none');
         }
         if (this.columnMode && this.panes < 3) {
-          bus.publish('read.column-mode.toggle', null);
+          queue.publish('read.column-mode.toggle', null);
         }
       }
 
       increasePanes() {
         if (this.currentPanes === 1) {
           if (this.sidebar !== 'none') {
-            bus.publish('read.show', null);
+            queue.publish('read.show', null);
           } else if (this.lastSidebar === null) {
-            bus.publish('sidebar.change', 'navigator');
+            queue.publish('sidebar.change', 'navigator');
           } else {
-            bus.publish('sidebar.change', this.lastSidebar);
+            queue.publish('sidebar.change', this.lastSidebar);
           }
         }
       }
@@ -6257,110 +6327,118 @@
       initializeApp() {
         this.setPanes();
         this.currentPanes = this.panes;
-        bus.publish('sidebar.restore', null);
-        bus.publish('bookmark.restore', null);
-        bus.publish('navigator.restore', null);
-        bus.publish('search.restore', null);
-        bus.publish('strong.restore', null);
-        bus.publish('setting.restore', null);
-        bus.publish('help.restore', null);
-        bus.publish('read.restore', null);
+        queue.publish('bookmark.restore', null);
+        queue.publish('navigator.restore', null);
+        queue.publish('search.restore', null);
+        queue.publish('strong.restore', null);
+        queue.publish('setting.restore', null);
+        queue.publish('help.restore', null);
+        queue.publish('read.restore', null);
+        queue.publish('sidebar.restore', null);
       }
 
       nextChapter() {
-        bus.publish('chapter.next', null);
+        queue.publish('chapter.next', null);
       }
 
       prevChapter() {
-        bus.publish('chapter.prev', null);
+        queue.publish('chapter.prev', null);
       }
 
       setPanes() {
         this.panes = Math.min(Math.floor(window.innerWidth / SIDEBAR_WIDTH), 4);
-        bus.publish('panes.change', this.panes);
+        queue.publish('panes.change', this.panes);
       }
 
       sidebarSelect(sidebar) {
-        bus.publish('sidebar.change', sidebar);
+        queue.publish('sidebar.change', sidebar);
       }
 
       sidebarUpdate(sidebar) {
         if (sidebar !== this.sidebar) {
           if (sidebar === 'none') {
             this.lastSidebar = this.sidebar;
-            bus.publish(`${this.sidebar}.hide`, null);
+            queue.publish(`${this.sidebar}.hide`, null);
             this.sidebar = sidebar;
-            bus.publish('read.show', null);
+            queue.publish('read.show', null);
           } else if (this.panes === 1) {
             if (this.sidebar === 'none') {
-              bus.publish('read.hide', null);
+              queue.publish('read.hide', null);
             } else {
-              bus.publish(`${this.sidebar}.hide`, null);
+              queue.publish(`${this.sidebar}.hide`, null);
             }
             this.sidebar = sidebar;
-            bus.publish(`${this.sidebar}.show`, null);
+            queue.publish(`${this.sidebar}.show`, null);
           } else {
-            bus.publish('read.show', null);
-            if (this.sidebar !== 'none') {
-              bus.publish(`${this.sidebar}.hide`, null);
+            queue.publish('read.show', null);
+            if (this.sidebar && this.sidebar !== 'none') {
+              queue.publish(`${this.sidebar}.hide`, null);
             }
             this.sidebar = sidebar;
-            bus.publish(`${this.sidebar}.show`, null);
+            queue.publish(`${this.sidebar}.show`, null);
           }
         }
       }
 
       strongModeToggle() {
-        bus.publish('read.strong-mode.toggle', null);
+        queue.publish('read.strong-mode.toggle', null);
       }
 
       strongSelect(verseIdx) {
-        bus.publish('strong.verse.change', verseIdx);
-        bus.publish('strong.task.change', 'strong-verse');
-        if (this.sidebar !== 'strong') {
-          bus.publish('sidebar.change', 'strong');
+        this.strongSelectPending = true;
+        queue.publish('strong.verse.change', verseIdx);
+      }
+
+      strongVerseUpdate() {
+        if (this.strongSelectPending) {
+          this.strongSelectPending = false;
+          queue.publish('sidebar.change', 'strong');
         }
       }
 
       subscribe() {
-        bus.subscribe('read.bookmark.add', (verseIdx) => {
+        queue.subscribe('read.bookmark.add', (verseIdx) => {
           this.bookmarkAdd(verseIdx);
         });
-        bus.subscribe('read.bookmark.delete', (verseIdx) => {
+        queue.subscribe('read.bookmark.delete', (verseIdx) => {
           this.bookmarkDelete(verseIdx);
         });
 
-        bus.subscribe('read.column-mode.click', () => {
+        queue.subscribe('read.column-mode.click', () => {
           this.columnModeToggle();
         });
-        bus.subscribe('read.column-mode.update', (columnMode) => {
+        queue.subscribe('read.column-mode.update', (columnMode) => {
           this.columnModeUpdate(columnMode);
         });
 
-        bus.subscribe('read.next.chapter', () => {
+        queue.subscribe('read.next.chapter', () => {
           this.nextChapter();
         });
 
-        bus.subscribe('read.prev.chapter', () => {
+        queue.subscribe('read.prev.chapter', () => {
           this.prevChapter();
         });
 
-        bus.subscribe('read.strong-mode.click', () => {
+        queue.subscribe('read.strong-mode.click', () => {
           this.strongModeToggle();
         });
 
-        bus.subscribe('read.strong.select', (verseIdx) => {
+        queue.subscribe('read.strong.select', (verseIdx) => {
           this.strongSelect(verseIdx);
         });
 
-        bus.subscribe('sidebar.select', (sidebar) => {
+        queue.subscribe('sidebar.select', (sidebar) => {
           this.sidebarSelect(sidebar);
         });
-        bus.subscribe('sidebar.update', (sidebar) => {
+        queue.subscribe('sidebar.update', (sidebar) => {
           this.sidebarUpdate(sidebar);
         });
 
-        bus.subscribe('window.resize', () => {
+        queue.subscribe('strong.verse.update', () => {
+          this.strongVerseUpdate();
+        });
+
+        queue.subscribe('window.resize', () => {
           this.updatePanes();
         });
       }
@@ -6389,6 +6467,20 @@
         this.initialize();
       }
 
+      bookIdxChange(bookIdx) {
+        this.bookIdx = bookIdx;
+        queue.publish('bookIdx.update', this.bookIdx);
+      }
+
+      async chapterIdxChange(chapterIdx) {
+        this.chapterIdx = chapterIdx;
+        this.saveChapterIdx();
+        await this.updateVerses();
+        let bookIdx = tomeChapters[this.chapterIdx][chapterBookIdx];
+        this.bookIdxChange(bookIdx);
+        queue.publish('chapterIdx.update', this.chapterIdx);
+      }
+
       async chapterNext() {
         let nextChapterIdx = this.chapterIdx + 1;
         if (nextChapterIdx >= tomeChapters.length) {
@@ -6407,15 +6499,6 @@
 
       initialize() {
         this.subscribe();
-      }
-
-      async chapterIdxChange(chapterIdx) {
-        this.chapterIdx = chapterIdx;
-        this.saveChapterIdx();
-        await this.updateVerses();
-        let bookIdx = tomeChapters[this.chapterIdx][chapterBookIdx];
-        bus.publish('bookIdx.change', bookIdx);
-        bus.publish('chapterIdx.update', this.chapterIdx);
       }
 
       async restore() {
@@ -6470,21 +6553,25 @@
       }
 
       subscribe() {
-        bus.subscribe('chapter.next', async () => {
+        queue.subscribe('bookIdx.change', (bookIdx) => {
+          this.bookIdxChange(bookIdx);
+        });
+
+        queue.subscribe('chapter.next', async () => {
           await this.chapterNext();
         });
-        bus.subscribe('chapter.prev', async () => {
+        queue.subscribe('chapter.prev', async () => {
           await this.chapterPrev();
         });
 
-        bus.subscribe('chapterIdx.change', async (chapterIdx) => {
+        queue.subscribe('chapterIdx.change', async (chapterIdx) => {
           await this.chapterIdxChange(chapterIdx);
         });
 
-        bus.subscribe('navigator.restore', async () => {
+        queue.subscribe('navigator.restore', async () => {
           await this.restore();
         });
-        bus.subscribe('navigator.task.change', (navigatorTask) => {
+        queue.subscribe('navigator.task.change', (navigatorTask) => {
           this.taskChange(navigatorTask);
         });
       }
@@ -6492,7 +6579,7 @@
       taskChange(navigatorTask) {
         this.navigatorTask = navigatorTask;
         this.saveNavigatorTask();
-        bus.publish('navigator.task.update', this.navigatorTask);
+        queue.publish('navigator.task.update', this.navigatorTask);
       }
 
       async updateVerses() {
@@ -6500,7 +6587,7 @@
         let keys = range(chapter[chapterFirstVerseIdx],
           chapter[chapterLastVerseIdx] + 1);
         this.verseObjs = await tomeDb.verses.bulkGet(keys);
-        bus.publish('navigator.verses.update', this.verseObjs);
+        queue.publish('navigator.verses.update', this.verseObjs);
       }
 
     }
@@ -6532,7 +6619,7 @@
         });
       }
 
-      bookChange(bookIdx) {
+      bookIdxUpdate(bookIdx) {
         let activeBtn = this.list.querySelector('.btn-book--active');
         if (activeBtn) {
           activeBtn.classList.remove('btn-book--active');
@@ -6608,7 +6695,7 @@
 
       contentClick(btn) {
         let bookIdx = parseInt(btn.dataset.bookIdx);
-        bus.publish('navigator-book.select', bookIdx);
+        queue.publish('navigator-book.select', bookIdx);
       }
 
       getElements() {
@@ -6652,18 +6739,18 @@
       }
 
       subscribe() {
-        bus.subscribe('bookIdx.change', (bookIdx) => {
-          this.bookChange(bookIdx);
+        queue.subscribe('bookIdx.update', (bookIdx) => {
+          this.bookIdxUpdate(bookIdx);
         });
 
-        bus.subscribe('navigator-book.hide', () => {
+        queue.subscribe('navigator-book.hide', () => {
           this.hide();
         });
-        bus.subscribe('navigator-book.show', () => {
+        queue.subscribe('navigator-book.show', () => {
           this.show();
         });
 
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
       }
@@ -6673,9 +6760,9 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBack) {
-            bus.publish('navigator.back', null);
+            queue.publish('navigator.back', null);
           } else if (target === this.btnChapter) {
-            bus.publish('navigator-chapter', null);
+            queue.publish('navigator-chapter', null);
           }
         }
       }
@@ -6719,7 +6806,7 @@
         return btn;
       }
 
-      bookChange(bookIdx) {
+      bookIdxUpdate(bookIdx) {
         if (this.bookIdx !== bookIdx) {
           this.bookIdx = bookIdx;
           this.updateBanner();
@@ -6759,7 +6846,7 @@
 
       contentClick(btn) {
         let chapterIdx = parseInt(btn.dataset.chapterIdx);
-        bus.publish('navigator-chapter.select', chapterIdx);
+        queue.publish('navigator-chapter.select', chapterIdx);
       }
 
       getElements() {
@@ -6807,22 +6894,22 @@
       }
 
       subscribe() {
-        bus.subscribe('bookIdx.change', (bookIdx) => {
-          this.bookChange(bookIdx);
+        queue.subscribe('bookIdx.update', (bookIdx) => {
+          this.bookIdxUpdate(bookIdx);
         });
 
-        bus.subscribe('chapterIdx.update', (chapterIdx) => {
+        queue.subscribe('chapterIdx.update', (chapterIdx) => {
           this.chapterIdxUpdate(chapterIdx);
         });
 
-        bus.subscribe('navigator-chapter.hide', () => {
+        queue.subscribe('navigator-chapter.hide', () => {
           this.hide();
         });
-        bus.subscribe('navigator-chapter.show', () => {
+        queue.subscribe('navigator-chapter.show', () => {
           this.show();
         });
 
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
       }
@@ -6832,9 +6919,9 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBack) {
-            bus.publish('navigator.back', null);
+            queue.publish('navigator.back', null);
           } else if (target === this.btnBook) {
-            bus.publish('navigator-book', null);
+            queue.publish('navigator-book', null);
           }
         }
       }
@@ -6879,16 +6966,16 @@
       }
 
       back() {
-        bus.publish('sidebar.change', 'none');
+        queue.publish('sidebar.change', 'none');
       }
 
       book() {
-        bus.publish('navigator.task.change', 'navigator-book');
+        queue.publish('navigator.task.change', 'navigator-book');
       }
 
       bookSelect(bookIdx) {
         if (bookIdx !== this.lastBookIdx) {
-          bus.publish('bookIdx.change', bookIdx);
+          queue.publish('bookIdx.change', bookIdx);
         }
         this.lastBookIdx = bookIdx;
         let book = tomeBooks[bookIdx];
@@ -6896,32 +6983,32 @@
           book[bookLastChapterIdx] - book[bookFirstChapterIdx] + 1;
         if (this.panes > 1 || chapterCount === 1) {
           let chapterIdx = tomeBooks[bookIdx][bookFirstChapterIdx];
-          bus.publish('chapterIdx.change', chapterIdx);
+          queue.publish('chapterIdx.change', chapterIdx);
         }
         if (this.panes === 1 && chapterCount === 1) {
-          bus.publish('sidebar.change', 'none');
+          queue.publish('sidebar.change', 'none');
         } else {
-          bus.publish('navigator.task.change', 'navigator-chapter');
+          queue.publish('navigator.task.change', 'navigator-chapter');
         }
       }
 
       chapter() {
-        bus.publish('navigator.task.change', 'navigator-chapter');
+        queue.publish('navigator.task.change', 'navigator-chapter');
       }
 
       chapterIdxUpdate() {
         if (this.panes === 1 && this.sidebar === 'navigator') {
-          bus.publish('sidebar.select', 'none');
+          queue.publish('sidebar.select', 'none');
         }
-        bus.publish('read.scroll-to-top');
+        queue.publish('read.scroll-to-top');
       }
 
       chapterSelect(chapterIdx) {
-        bus.publish('chapterIdx.change', chapterIdx);
+        queue.publish('chapterIdx.change', chapterIdx);
       }
 
       hide() {
-        bus.publish(`${this.navigatorTask}.hide`, null);
+        queue.publish(`${this.navigatorTask}.hide`, null);
       }
 
       initialize() {
@@ -6934,7 +7021,7 @@
       }
 
       show() {
-        bus.publish(`${this.navigatorTask}.show`, null);
+        queue.publish(`${this.navigatorTask}.show`, null);
       }
 
       sidebarUpdate(sidebar) {
@@ -6942,51 +7029,53 @@
       }
 
       subscribe() {
-        bus.subscribe('chapterIdx.update', () => {
+        queue.subscribe('chapterIdx.update', () => {
           this.chapterIdxUpdate();
         });
 
-        bus.subscribe('navigator-book', () => {
+        queue.subscribe('navigator-book', () => {
           this.book();
         });
-        bus.subscribe('navigator-book.select', (bookIdx) => {
+        queue.subscribe('navigator-book.select', (bookIdx) => {
           this.bookSelect(bookIdx);
         });
 
-        bus.subscribe('navigator-chapter', () => {
+        queue.subscribe('navigator-chapter', () => {
           this.chapter();
         });
-        bus.subscribe('navigator-chapter.select', (chapterIdx) => {
+        queue.subscribe('navigator-chapter.select', (chapterIdx) => {
           this.chapterSelect(chapterIdx);
         });
 
-        bus.subscribe('navigator.back', () => {
+        queue.subscribe('navigator.back', () => {
           this.back();
         });
-        bus.subscribe('navigator.hide', () => {
+        queue.subscribe('navigator.hide', () => {
           this.hide();
         });
-        bus.subscribe('navigator.show', () => {
+        queue.subscribe('navigator.show', () => {
           this.show();
         });
-        bus.subscribe('navigator.task.update', (navigatorTask) => {
+        queue.subscribe('navigator.task.update', (navigatorTask) => {
           this.taskUpdate(navigatorTask);
         });
 
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
 
-        bus.subscribe('sidebar.update', (sidebar) => {
+        queue.subscribe('sidebar.update', (sidebar) => {
           this.sidebarUpdate(sidebar);
         });
       }
 
       taskUpdate(navigatorTask) {
         if (this.sidebar === 'navigator') {
-          bus.publish(`${this.navigatorTask}.hide`, null);
-          this.navigatorTask = navigatorTask;
-          bus.publish(`${this.navigatorTask}.show`, null);
+          if (this.navigatorTask !== navigatorTask) {
+            queue.publish(`${this.navigatorTask}.hide`, null);
+            this.navigatorTask = navigatorTask;
+            queue.publish(`${this.navigatorTask}.show`, null);
+          }
         } else {
           this.navigatorTask = navigatorTask;
         }
@@ -7010,31 +7099,25 @@
         this.initialize();
       }
 
-      activeFolderIsValid(activeFolder) {
-        return this.folders.some((folder) => {
-          return folder.folderName === activeFolder.folderName;
-        });
+      activeFolderChange(activeFolderName) {
+        this.activeFolderName = activeFolderName;
+        this.updateActiveFolderName();
+        this.updateActiveFolder();
       }
 
       add(verseIdx) {
-        let bookmarks = this.folder.bookmarks;
+        let bookmarks = this.activeFolder.bookmarks;
         if (bookmarks.indexOf(verseIdx) === -1) {
-          this.folder.bookmarks = [verseIdx, ...bookmarks];
-          this.updateFolder();
+          this.activeFolder.bookmarks = [verseIdx, ...bookmarks];
+          this.updateFolders();
+          this.updateActiveFolder();
         }
-      }
-
-      changeActiveFolder(folderName) {
-        this.folder = this.getFolder(folderName);
-        this.activeFolder = folderName;
-        this.saveActiveFolder();
-        this.updateFolder();
       }
 
       copy(copyPkg) {
         let toFolder = this.getFolder(copyPkg.to);
         toFolder.bookmarks = [copyPkg.verseIdx, ...toFolder.bookmarks];
-        this.updateFolder();
+        this.updateFolders();
       }
 
       createFolder(folderName) {
@@ -7049,19 +7132,22 @@
       }
 
       delete(verseIdx) {
-        let bookmarks = this.folder.bookmarks;
+        let bookmarks = this.activeFolder.bookmarks;
         let index = bookmarks.indexOf(verseIdx);
         if (index !== -1) {
           bookmarks.splice(index, 1);
-          this.updateFolder();
+          this.updateFolders();
+          this.updateActiveFolder();
         }
       }
 
       down(verseIdx) {
-        let bookmarks = this.folder.bookmarks;
+        let bookmarks = this.activeFolder.bookmarks;
         let index = bookmarks.indexOf(verseIdx);
         if (index !== bookmarks.length - 1 && index !== -1) {
           this.reorderBookmarks(index, index + 1);
+          this.updateFolders();
+          this.updateActiveFolder();
         }
       }
 
@@ -7070,39 +7156,40 @@
         if (!newFolder) {
           newFolder = this.createFolder(folderName);
           this.folders = [newFolder, ...this.folders];
-          this.folder = this.folders[firstEntry];
-          this.activeFolder = folderName;
-          this.saveActiveFolder();
-          this.updateFolder();
-          bus.publish('folder.added', null);
+          this.updateFolders();
+          this.activeFolderChange(folderName);
+          this.updateFolderList();
+          queue.publish('bookmark.folder.added', null);
+        } else {
+          queue.publish('bookmark.folder.add.error', 'Duplicate Folder Name');
         }
-      }
-
-      folderChange(folderName) {
-        this.folder = this.getFolder(folderName);
-        this.activeFolder = folderName;
-        this.updateFolder();
       }
 
       folderDelete(folderName) {
         let idx = this.getFolderIdx(folderName);
         this.folders.splice(idx, 1);
-        bus.publish('folder.list.update', this.getFolderList());
-        this.resetFolder();
+        if (this.folders.length === 0) {
+          this.folderAdd('Default');
+        }
+        this.updateFolders();
+        let firstFolderName = this.folders[firstEntry].name;
+        this.activeFolderChange(firstFolderName);
+        this.updateFolderList();
       }
 
       folderDown(folderName) {
         let index = this.folders.findIndex((folder) => folder.name === folderName);
         if (index !== this.folders.length - 1 && index !== -1) {
           this.reorderFolders(index, index + 1);
-          bus.publish('folder.list.update', this.getFolderList());
+          this.updateFolders();
+          this.updateFolderList();
         }
       }
 
       folderImport(pkgStr) {
         let bookmarkPkg = this.getBookmarkPkg(pkgStr);
         if (!bookmarkPkg) {
-          bus.publish('bookmark-import.message', 'Invalid JSON string');
+          queue.publish('bookmark-import.message', 'Invalid JSON string');
         } else {
           let status = this.validatePkg(bookmarkPkg);
           if (status === 'OK') {
@@ -7111,17 +7198,30 @@
           if (status === 'OK') {
             this.importPkg(bookmarkPkg);
           } else {
-            bus.publish('bookmark-import.message', status);
+            queue.publish('bookmark-import.message', status);
           }
         }
       }
 
+      folderNameIsValid(folderName) {
+        return this.folders.some((folder) => {
+          return folder.name === folderName;
+        });
+      }
+
       folderRename(namePkg) {
-        let oldFolder = this.getFolder(namePkg.old);
-        oldFolder.name = namePkg.new;
-        this.activeFolder = namePkg.new;
-        this.saveActiveFolder();
-        this.updateFolder();
+        if (namePkg.old === namePkg.new) {
+          queue.publish('bookmark.folder.rename.error', 'Duplicate Folder Name');
+        } else {
+          let oldFolder = this.getFolder(namePkg.old);
+          oldFolder.name = namePkg.new;
+          this.updateFolders();
+          this.updateFolderList();
+          if (this.activeFolderName === namePkg.old) {
+            this.activeFolderChange(namePkg.new);
+          }
+          queue.publish('bookmark.folder.renamed', null);
+        }
       }
 
       foldersAreValid(folders) {
@@ -7163,7 +7263,8 @@
         let index = this.folders.findIndex((folder) => folder.name === folderName);
         if (index !== 0 && index !== -1) {
           this.reorderFolders(index, index - 1);
-          bus.publish('folder.list.update', this.getFolderList());
+          this.updateFolders();
+          this.updateFolderList();
         }
       }
 
@@ -7208,8 +7309,9 @@
             targetFolder.bookmarks = [verseIdx, ...bookmarks];
           }
         }
-        this.updateFolder();
-        bus.publish('bookmark-import.message', 'Import successful.');
+        this.updateFolders();
+        this.updateFolderList();
+        queue.publish('bookmark-import.message', 'Import successful.');
       }
 
       initialize() {
@@ -7217,31 +7319,22 @@
         this.subscribe();
       }
 
-      modeChange(strongMode) {
-        this.strongMode = strongMode;
-        this.saveMode();
-        bus.publish('bookmark.strong-mode.update', this.strongMode);
-      }
-
-      modeToogle() {
-        this.modeChange(!this.strongMode);
-      }
-
       move(movePkg) {
         let toFolder = this.getFolder(movePkg.to);
         toFolder.bookmarks = [movePkg.verseIdx, ...toFolder.bookmarks];
 
-        let bookmarks = this.folder.bookmarks;
+        let bookmarks = this.activeFolder.bookmarks;
         let index = bookmarks.indexOf(movePkg.verseIdx);
         if (index !== -1) {
           bookmarks.splice(index, 1);
-          this.updateFolder();
+          this.updateFolders();
+          this.updateActiveFolder(this.activeFolderName);
         }
       }
 
       async moveCopyChange(verseIdx) {
         this.moveCopyVerseObj = await tomeDb.verses.get(verseIdx);
-        bus.publish('bookmark.move-copy.update', this.moveCopyVerseObj);
+        queue.publish('bookmark.move-copy.update', this.moveCopyVerseObj);
       }
 
       moveCopyListChange(verseIdx) {
@@ -7249,56 +7342,46 @@
           (folder) => !folder.bookmarks.some((element) => element === verseIdx)
         );
         let moveCopyList = foldersNotFoundIn.map((folder) => folder.name);
-        bus.publish('bookmark-move-copy.list.update', moveCopyList);
+        queue.publish('bookmark-move-copy.list.update', moveCopyList);
       }
 
       reorderBookmarks(fromIdx, toIdx) {
-        let bookmarks = this.folder.bookmarks;
+        let bookmarks = this.activeFolder.bookmarks;
         bookmarks.splice(
           toIdx, 0, bookmarks.splice(fromIdx, 1)[firstEntry]
         );
-        this.updateFolder();
       }
 
       reorderFolders(fromIdx, toIdx) {
         this.folders.splice(
           toIdx, 0, this.folders.splice(fromIdx, 1)[firstEntry]
         );
-        this.updateFolder();
-        this.updateFolderList();
-      }
-
-      resetFolder() {
-        if (this.folders.length === 0) {
-          this.folderAdd('Default');
-        }
-        let firstFolder = this.folders[firstEntry].name;
-        this.folderChange(firstFolder);
       }
 
       restore() {
-        this.restoreFolders();
-        this.restoreActiveFolder();
-        this.restoreMode();
         this.restoreTask();
+        this.restoreFolders();
+        this.restoreActiveFolderName();
+        this.restoreMode();
       }
 
-      restoreActiveFolder() {
-        let defaultFolder = 'Default';
-        let activeFolder = localStorage.getItem(`${appPrefix}-activeFolder`);
-        if (!activeFolder) {
-          activeFolder = defaultFolder;
+      restoreActiveFolderName() {
+        let defaultFolderName = 'Default';
+        let activeFolderName =
+          localStorage.getItem(`${appPrefix}-activeFolderName`);
+        if (!activeFolderName) {
+          activeFolderName = defaultFolderName;
         } else {
           try {
-            activeFolder = JSON.parse(activeFolder);
+            activeFolderName = JSON.parse(activeFolderName);
           } catch (error) {
-            activeFolder = defaultFolder;
+            activeFolderName = defaultFolderName;
           }
-          if (!this.activeFolderIsValid(activeFolder)) {
-            activeFolder = defaultFolder;
+          if (!this.folderNameIsValid(activeFolderName)) {
+            activeFolderName = defaultFolderName;
           }
         }
-        this.changeActiveFolder(activeFolder);
+        this.activeFolderChange(activeFolderName);
       }
 
       restoreFolders() {
@@ -7317,6 +7400,8 @@
           }
         }
         this.folders = folders;
+        this.updateFolders();
+        this.updateFolderList();
       }
 
       restoreMode() {
@@ -7334,7 +7419,7 @@
             strongMode = defaultMode;
           }
         }
-        this.modeChange(strongMode);
+        this.strongModeChange(strongMode);
       }
 
       restoreTask() {
@@ -7359,9 +7444,9 @@
         this.taskChange(bookmarkTask);
       }
 
-      saveActiveFolder() {
-        localStorage.setItem(`${appPrefix}-activeFolder`,
-          JSON.stringify(this.activeFolder));
+      saveActiveFolderName() {
+        localStorage.setItem(`${appPrefix}-activeFolderName`,
+          JSON.stringify(this.activeFolderName));
       }
 
       saveBookmarkTask() {
@@ -7371,118 +7456,135 @@
 
       saveFolders() {
         localStorage.setItem(`${appPrefix}-folders`, JSON.stringify(this.folders));
-        bus.publish('folders.update', this.folders);
       }
 
-      saveMode() {
+      saveStrongMode() {
         localStorage.setItem(`${appPrefix}-bookmarkStrongMode`,
           JSON.stringify(this.strongMode));
       }
 
       sort(sorter) {
-        let bookmarks = this.folder.bookmarks;
+        let bookmarks = this.activeFolder.bookmarks;
         if (bookmarks.length !== 0) {
           bookmarks.sort(sorter);
-          this.updateFolder();
+          this.updateFolders();
+          this.updateActiveFolder(this.activeFolderName);
         }
       }
 
       sortInvert() {
-        let bookmarks = this.folder.bookmarks;
+        let bookmarks = this.activeFolder.bookmarks;
         bookmarks.reverse();
-        this.updateFolder();
+        this.updateFolders();
+        this.updateActiveFolder(this.activeFolderName);
+      }
+
+      strongModeChange(strongMode) {
+        this.strongMode = strongMode;
+        this.saveStrongMode();
+        queue.publish('bookmark.strong-mode.update', this.strongMode);
+      }
+
+      strongModeToogle() {
+        this.strongModeChange(!this.strongMode);
       }
 
       subscribe() {
-        bus.subscribe('bookmark.add', (verseIdx) => {
+        queue.subscribe('bookmark.active-folder.change', (folderName) => {
+          this.activeFolderChange(folderName);
+        });
+        queue.subscribe('bookmark.add', (verseIdx) => {
           this.add(verseIdx);
         });
-        bus.subscribe('bookmark.copy', (copyPkg) => {
+        queue.subscribe('bookmark.copy', (copyPkg) => {
           this.copy(copyPkg);
         });
-        bus.subscribe('bookmark.delete', (verseIdx) => {
+        queue.subscribe('bookmark.delete', (verseIdx) => {
           this.delete(verseIdx);
         });
-        bus.subscribe('bookmark.down', (verseIdx) => {
+        queue.subscribe('bookmark.down', (verseIdx) => {
           this.down(verseIdx);
         });
-        bus.subscribe('bookmark.move', (movePkg) => {
+        queue.subscribe('bookmark.folder.add', (folderName) => {
+          this.folderAdd(folderName);
+        });
+        queue.subscribe('bookmark.folder.delete', (folderName) => {
+          this.folderDelete(folderName);
+        });
+        queue.subscribe('bookmark.folder.down', (folderName) => {
+          this.folderDown(folderName);
+        });
+        queue.subscribe('bookmark.pkg.import', (pkgStr) => {
+          this.folderImport(pkgStr);
+        });
+        queue.subscribe('bookmark.folder.rename', (namePkg) => {
+          this.folderRename(namePkg);
+        });
+        queue.subscribe('bookmark.folder.up', (folderName) => {
+          this.folderUp(folderName);
+        });
+        queue.subscribe('bookmark.move', (movePkg) => {
           this.move(movePkg);
         });
-        bus.subscribe('bookmark.restore', () => {
+        queue.subscribe('bookmark.move-copy.change', async (verseIdx) => {
+          await this.moveCopyChange(verseIdx);
+        });
+        queue.subscribe('bookmark.restore', () => {
           this.restore();
         });
-        bus.subscribe('bookmark.sort-ascend', () => {
+        queue.subscribe('bookmark.sort-ascend', () => {
           this.sort(numSortAscend);
         });
-        bus.subscribe('bookmark.sort-invert', () => {
+        queue.subscribe('bookmark.sort-invert', () => {
           this.sortInvert();
         });
-        bus.subscribe('bookmark.strong-mode.toggle', () => {
-          this.modeToogle();
+        queue.subscribe('bookmark.strong-mode.toggle', () => {
+          this.strongModeToogle();
         });
-        bus.subscribe('bookmark.task.change', (bookmarkTask) => {
+        queue.subscribe('bookmark.task.change', (bookmarkTask) => {
           this.taskChange(bookmarkTask);
         });
-        bus.subscribe('bookmark.up', (verseIdx) => {
+        queue.subscribe('bookmark.up', (verseIdx) => {
           this.up(verseIdx);
         });
 
-        bus.subscribe('folder.add', (folderName) => {
-          this.folderAdd(folderName);
-        });
-        bus.subscribe('folder.change', (folderName) => {
-          this.folderChange(folderName);
-        });
-        bus.subscribe('folder.delete', (folderName) => {
-          this.folderDelete(folderName);
-        });
-        bus.subscribe('folder.down', (folderName) => {
-          this.folderDown(folderName);
-        });
-        bus.subscribe('folder.import', (pkgStr) => {
-          this.folderImport(pkgStr);
-        });
-        bus.subscribe('folder.rename', (namePkg) => {
-          this.folderRename(namePkg);
-        });
-        bus.subscribe('folder.up', (folderName) => {
-          this.folderUp(folderName);
-        });
-
-        bus.subscribe('move-copy.list.change', (verseIdx) => {
+        queue.subscribe('bookmark-move-copy.list.change', (verseIdx) => {
           this.moveCopyListChange(verseIdx);
-        });
-
-        bus.subscribe('bookmark.move-copy.change', async (verseIdx) => {
-          await this.moveCopyChange(verseIdx);
         });
       }
 
       taskChange(bookmarkTask) {
         this.bookmarkTask = bookmarkTask;
         this.saveBookmarkTask();
-        bus.publish('bookmark.task.update', this.bookmarkTask);
+        queue.publish('bookmark.task.update', this.bookmarkTask);
       }
 
       up(verseIdx) {
-        let bookmarks = this.folder.bookmarks;
+        let bookmarks = this.activeFolder.bookmarks;
         let index = bookmarks.indexOf(verseIdx);
         if (index !== 0 && index !== -1) {
           this.reorderBookmarks(index, index - 1);
+          this.updateFolders();
+          this.updateActiveFolder();
         }
       }
 
-      updateFolder() {
-        this.saveFolders();
-        this.saveActiveFolder();
-        bus.publish('folder.update', this.folder);
-        bus.publish('folder.list.update', this.getFolderList());
+      updateActiveFolder() {
+        this.activeFolder = this.getFolder(this.activeFolderName);
+        queue.publish('bookmark.active-folder.update', this.activeFolder);
+      }
+
+      updateActiveFolderName() {
+        this.saveActiveFolderName();
       }
 
       updateFolderList() {
+        queue.publish('bookmark.folder-list.update', this.getFolderList());
+      }
+
+      updateFolders() {
         this.saveFolders();
-        bus.publish('folder.list.update', this.getFolderList());
+        queue.publish('bookmark.folders.update', this.folders);
       }
 
       validatePkg(bookmarkPkg) {
@@ -7601,11 +7703,11 @@
       }
 
       delete(verseIdx) {
-        bus.publish('bookmark-list.delete', verseIdx);
+        queue.publish('bookmark-list.delete', verseIdx);
       }
 
       down(verseIdx) {
-        bus.publish('bookmark-list.down', verseIdx);
+        queue.publish('bookmark-list.down', verseIdx);
       }
 
       getElements() {
@@ -7649,9 +7751,9 @@
           if (target.classList.contains('btn-entry')) {
             let verseIdx = parseInt(target.dataset.verseIdx);
             if (this.strongMode) {
-              bus.publish('bookmark-list.strong-select', verseIdx);
+              queue.publish('bookmark-list.strong-select', verseIdx);
             } else {
-              bus.publish('bookmark-list.select', verseIdx);
+              queue.publish('bookmark-list.select', verseIdx);
             }
           } else if (target.classList.contains('btn-icon--menu')) {
             let ref = target.previousSibling;
@@ -7664,17 +7766,8 @@
         this.showActionMenu(target);
       }
 
-      modeUpdate(strongMode) {
-        this.strongMode = strongMode;
-        if (this.strongMode) {
-          this.btnStrongMode.classList.add('btn-icon--active');
-        } else {
-          this.btnStrongMode.classList.remove('btn-icon--active');
-        }
-      }
-
       moveCopy(verseIdx) {
-        bus.publish('bookmark-move-copy', verseIdx);
+        queue.publish('bookmark-move-copy', verseIdx);
       }
 
       panesUpdate(panes) {
@@ -7700,23 +7793,31 @@
         this.actionMenu.classList.remove('action-menu--hide');
       }
 
+      strongModeUpdate(strongMode) {
+        this.strongMode = strongMode;
+        if (this.strongMode) {
+          this.btnStrongMode.classList.add('btn-icon--active');
+        } else {
+          this.btnStrongMode.classList.remove('btn-icon--active');
+        }
+      }
+
       subscribe() {
-        bus.subscribe('bookmark-list.hide', () => {
+        queue.subscribe('bookmark-list.hide', () => {
           this.hide();
         });
-        bus.subscribe('bookmark-list.show', () => {
+        queue.subscribe('bookmark-list.show', () => {
           this.show();
         });
 
-        bus.subscribe('bookmark.strong-mode.update', (strongMode) => {
-          this.modeUpdate(strongMode);
+        queue.subscribe('bookmark.active-folder.update', (activeFolder) => {
+          this.updateActiveFolder(activeFolder);
+        });
+        queue.subscribe('bookmark.strong-mode.update', (strongMode) => {
+          this.strongModeUpdate(strongMode);
         });
 
-        bus.subscribe('folder.update', (folder) => {
-          this.updateFolder(folder);
-        });
-
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
       }
@@ -7726,29 +7827,29 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBack) {
-            bus.publish('bookmark.back', null);
+            queue.publish('bookmark.back', null);
           } else if (target === this.btnSortAscend) {
-            bus.publish('bookmark-list.sort-ascend', null);
+            queue.publish('bookmark-list.sort-ascend', null);
           } else if (target === this.btnSortInvert) {
-            bus.publish('bookmark-list.sort-invert', null);
+            queue.publish('bookmark-list.sort-invert', null);
           } else if (target === this.btnStrongMode) {
-            bus.publish('bookmark.strong-mode.click', null);
+            queue.publish('bookmark.strong-mode.click', null);
           } else if (target === this.btnBookmarkFolder) {
-            bus.publish('bookmark-folder', null);
+            queue.publish('bookmark-folder', null);
           }
         }
       }
 
       up(verseIdx) {
-        bus.publish('bookmark-list.up', verseIdx);
+        queue.publish('bookmark-list.up', verseIdx);
       }
 
       updateBanner() {
-        this.banner.innerHTML = `${this.folder.name}`;
+        this.banner.innerHTML = `${this.activeFolder.name}`;
       }
 
-      updateFolder(folder) {
-        this.folder = folder;
+      updateActiveFolder(activeFolder) {
+        this.activeFolder = activeFolder;
         this.updateBanner();
         this.updateList();
       }
@@ -7756,12 +7857,12 @@
       updateList() {
         this.scrollToTop();
         removeAllChildren(this.list);
-        if (this.folder.bookmarks.length === 0) {
+        if (this.activeFolder.bookmarks.length === 0) {
           this.empty.classList.remove('empty--hide');
         } else {
           this.empty.classList.add('empty--hide');
           let fragment = document.createDocumentFragment();
-          for (let verseIdx of this.folder.bookmarks) {
+          for (let verseIdx of this.activeFolder.bookmarks) {
             let ref = this.buildEntry(verseIdx);
             fragment.appendChild(ref);
           }
@@ -7866,7 +7967,7 @@
           to: folderName,
           verseIdx: this.verseIdx
         };
-        bus.publish('bookmark-move-copy.copy', copyPkg);
+        queue.publish('bookmark-move-copy.copy', copyPkg);
       }
 
       folderUpdate(bookmarksFolder) {
@@ -7922,14 +8023,14 @@
           to: folderName,
           verseIdx: this.verseIdx
         };
-        bus.publish('bookmark-move-copy.move', movePkg);
+        queue.publish('bookmark-move-copy.move', movePkg);
       }
 
       moveCopyUpdate(verseObj) {
         this.moveCopyVerseObj = verseObj;
         this.verseIdx = this.moveCopyVerseObj.k;
         this.verse = this.moveCopyVerseObj.v;
-        bus.publish('bookmark-move-copy.ready', null);
+        queue.publish('bookmark-move-copy.ready', null);
       }
 
       scrollToTop() {
@@ -7949,21 +8050,21 @@
       }
 
       subscribe() {
-        bus.subscribe('folder.update', (bookmarksFolder) => {
+        queue.subscribe('bookmark.active-folder.update', (bookmarksFolder) => {
           this.folderUpdate(bookmarksFolder);
         });
 
-        bus.subscribe('bookmark-move-copy.hide', () => {
+        queue.subscribe('bookmark-move-copy.hide', () => {
           this.hide();
         });
-        bus.subscribe('bookmark-move-copy.list.update', (moveCopyList) => {
+        queue.subscribe('bookmark-move-copy.list.update', (moveCopyList) => {
           this.listUpdate(moveCopyList);
         });
-        bus.subscribe('bookmark-move-copy.show', () => {
+        queue.subscribe('bookmark-move-copy.show', () => {
           this.show();
         });
 
-        bus.subscribe('bookmark.move-copy.update', (verseObj) => {
+        queue.subscribe('bookmark.move-copy.update', (verseObj) => {
           this.moveCopyUpdate(verseObj);
         });
       }
@@ -7973,7 +8074,7 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBookmarkFolder) {
-            bus.publish('bookmark-folder', null);
+            queue.publish('bookmark-folder', null);
           }
         }
       }
@@ -8097,11 +8198,16 @@
       }
 
       delete(folderName) {
-        bus.publish('bookmark-folder.delete', folderName);
+        queue.publish('bookmark-folder.delete', folderName);
       }
 
       down(folderName) {
-        bus.publish('bookmark-folder.down', folderName);
+        queue.publish('bookmark-folder.down', folderName);
+      }
+
+      folderListUpdate(folderList) {
+        this.folderList = folderList;
+        this.updateList();
       }
 
       getElements() {
@@ -8138,17 +8244,12 @@
         if (target) {
           if (target.classList.contains('btn-entry')) {
             let folderName = target.textContent;
-            bus.publish('bookmark-folder.select', folderName);
+            queue.publish('bookmark-folder.select', folderName);
           } else if (target.classList.contains('btn-icon--menu')) {
             let entry = target.previousSibling;
             this.menuClick(entry);
           }
         }
-      }
-
-      listUpdate(folderList) {
-        this.folderList = folderList;
-        this.updateList();
       }
 
       menuClick(target) {
@@ -8164,7 +8265,7 @@
       }
 
       rename(folderName) {
-        bus.publish('bookmark-folder-rename', folderName);
+        queue.publish('bookmark-folder-rename', folderName);
       }
 
       scrollToTop() {
@@ -8183,18 +8284,18 @@
       }
 
       subscribe() {
-        bus.subscribe('bookmark-folder.hide', () => {
+        queue.subscribe('bookmark-folder.hide', () => {
           this.hide();
         });
-        bus.subscribe('bookmark-folder.show', () => {
+        queue.subscribe('bookmark-folder.show', () => {
           this.show();
         });
 
-        bus.subscribe('folder.list.update', (folderList) => {
-          this.listUpdate(folderList);
+        queue.subscribe('bookmark.folder-list.update', (folderList) => {
+          this.folderListUpdate(folderList);
         });
 
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
       }
@@ -8204,21 +8305,21 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBack) {
-            bus.publish('bookmark.back', null);
+            queue.publish('bookmark.back', null);
           } else if (target === this.btnBookmarkList) {
-            bus.publish('bookmark-list', null);
+            queue.publish('bookmark-list', null);
           } else if (target === this.btnBookmarkFolderAdd) {
-            bus.publish('bookmark-folder-add', null);
+            queue.publish('bookmark-folder-add', null);
           } else if (target === this.btnExport) {
-            bus.publish('bookmark-export', null);
+            queue.publish('bookmark-export', null);
           } else if (target === this.btnImport) {
-            bus.publish('bookmark-import', null);
+            queue.publish('bookmark-import', null);
           }
         }
       }
 
       up(folderName) {
-        bus.publish('bookmark-folder.up', folderName);
+        queue.publish('bookmark-folder.up', folderName);
       }
 
       updateList() {
@@ -8275,6 +8376,11 @@
         this.scroll = templateScroll('bookmark-folder-add');
         this.dialog = templateDivDialog('bookmark-folder-add', dialogToolset);
         this.scroll.appendChild(this.dialog);
+
+        this.message = templateElement('div', 'message',
+          'bookmark-folder-add', null, null);
+        this.scroll.appendChild(this.message);
+
         this.page.appendChild(this.scroll);
 
         this.toolbarLower = templateToolbarLower(lowerToolSet$6);
@@ -8290,6 +8396,11 @@
         if (target === this.btnSave) {
           this.saveClick();
         }
+      }
+
+      error(message) {
+        this.message.textContent = message;
+        this.message.classList.remove('message--hide');
       }
 
       getElements() {
@@ -8321,22 +8432,27 @@
       saveClick() {
         let name = this.inputName.value;
         if (name) {
-          bus.publish('bookmark-folder-add.save', name);
+          queue.publish('bookmark-folder-add.save', name);
         }
       }
 
       show() {
         this.page.classList.remove('page--hide');
+        this.message.classList.add('message--hide');
         this.inputName.value = '';
         this.inputName.focus();
       }
 
       subscribe() {
-        bus.subscribe('bookmark-folder-add.hide', () => {
+        queue.subscribe('bookmark-folder-add.hide', () => {
           this.hide();
         });
-        bus.subscribe('bookmark-folder-add.show', () => {
+        queue.subscribe('bookmark-folder-add.show', () => {
           this.show();
+        });
+
+        queue.subscribe('bookmark.folder.add.error', (message) => {
+          this.error(message);
         });
       }
 
@@ -8345,7 +8461,7 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBookmarkFolder) {
-            bus.publish('bookmark-folder', null);
+            queue.publish('bookmark-folder', null);
           }
         }
       }
@@ -8400,7 +8516,7 @@
       }
 
       deleteClick() {
-        bus.publish('bookmark-folder-delete.confirm', this.folderName);
+        queue.publish('bookmark-folder-delete.confirm', this.folderName);
       }
 
       dialogClick(event) {
@@ -8444,14 +8560,14 @@
       }
 
       subscribe() {
-        bus.subscribe('bookmark-folder-delete.hide', () => {
+        queue.subscribe('bookmark-folder-delete.hide', () => {
           this.hide();
         });
-        bus.subscribe('bookmark-folder-delete.show', () => {
+        queue.subscribe('bookmark-folder-delete.show', () => {
           this.show();
         });
 
-        bus.subscribe('folder.to.delete', (folderName) => {
+        queue.subscribe('folder.to.delete', (folderName) => {
           this.folderToDelete(folderName);
         });
       }
@@ -8461,7 +8577,7 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBookmarkFolder) {
-            bus.publish('bookmark-folder', null);
+            queue.publish('bookmark-folder', null);
           }
         }
       }
@@ -8514,6 +8630,11 @@
         this.scroll = templateScroll('bookmark-folder-rename');
         this.dialog = templateDivDialog('bookmark-folder-rename', dialogToolset$2);
         this.scroll.appendChild(this.dialog);
+
+        this.message = templateElement('div', 'message',
+          'bookmark-folder-rename', null, null);
+        this.scroll.appendChild(this.message);
+
         this.page.appendChild(this.scroll);
 
         this.toolbarLower = templateToolbarLower(lowerToolSet$8);
@@ -8529,6 +8650,11 @@
         if (target === this.btnSave) {
           this.saveClick();
         }
+      }
+
+      error(message) {
+        this.message.textContent = message;
+        this.message.classList.remove('message--hide');
       }
 
       folderToRename(folderName) {
@@ -8565,14 +8691,14 @@
       saveClick() {
         let name = this.inputName.value;
         if (name) {
-          this.inputName.value = '';
           this.namePkg.new = name;
-          bus.publish('bookmark-folder-rename.save', this.namePkg);
+          queue.publish('bookmark-folder-rename.save', this.namePkg);
         }
       }
 
       show() {
         this.page.classList.remove('page--hide');
+        this.message.classList.add('message--hide');
         this.namePkg = {
           old: this.folderName
         };
@@ -8581,14 +8707,18 @@
       }
 
       subscribe() {
-        bus.subscribe('bookmark-folder-rename.hide', () => {
+        queue.subscribe('bookmark-folder-rename.hide', () => {
           this.hide();
         });
-        bus.subscribe('bookmark-folder-rename.show', (folderName) => {
+        queue.subscribe('bookmark-folder-rename.show', (folderName) => {
           this.show(folderName);
         });
 
-        bus.subscribe('folder.to.rename', (folderName) => {
+        queue.subscribe('bookmark.folder.rename.error', (message) => {
+          this.error(message);
+        });
+
+        queue.subscribe('folder.to.rename', (folderName) => {
           this.folderToRename(folderName);
         });
       }
@@ -8598,7 +8728,7 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBookmarkFolder) {
-            bus.publish('bookmark-folder', null);
+            queue.publish('bookmark-folder', null);
           }
         }
       }
@@ -8637,7 +8767,7 @@
         let bookmarkPkg = {};
         bookmarkPkg.tome = tomeName;
         bookmarkPkg.folders = this.folders;
-        return JSON.stringify(bookmarkPkg, null, 2);
+        return JSON.stringify(bookmarkPkg, null);
       }
 
       buildPage() {
@@ -8686,14 +8816,14 @@
       }
 
       subscribe() {
-        bus.subscribe('bookmark-export.hide', () => {
+        queue.subscribe('bookmark-export.hide', () => {
           this.hide();
         });
-        bus.subscribe('bookmark-export.show', () => {
+        queue.subscribe('bookmark-export.show', () => {
           this.show();
         });
 
-        bus.subscribe('folders.update', (folders) => {
+        queue.subscribe('bookmark.folders.update', (folders) => {
           this.foldersUpdate(folders);
         });
       }
@@ -8703,7 +8833,7 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBookmarkFolder) {
-            bus.publish('bookmark-folder', null);
+            queue.publish('bookmark-folder', null);
           }
         }
       }
@@ -8790,7 +8920,7 @@
         this.message.textContent = '';
         let pkgStr = this.textarea.value;
         if (pkgStr) {
-          bus.publish('bookmark-import.import', pkgStr);
+          queue.publish('bookmark-import.import', pkgStr);
         }
       }
 
@@ -8813,13 +8943,13 @@
       }
 
       subscribe() {
-        bus.subscribe('bookmark-import.hide', () => {
+        queue.subscribe('bookmark-import.hide', () => {
           this.hide();
         });
-        bus.subscribe('bookmark-import.message', (message) => {
+        queue.subscribe('bookmark-import.message', (message) => {
           this.error(message);
         });
-        bus.subscribe('bookmark-import.show', () => {
+        queue.subscribe('bookmark-import.show', () => {
           this.show();
         });
       }
@@ -8829,7 +8959,7 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBookmarkFolder) {
-            bus.publish('bookmark-folder', null);
+            queue.publish('bookmark-folder', null);
           }
         }
       }
@@ -8843,88 +8973,91 @@
       }
 
       back() {
-        bus.publish('sidebar.change', 'none');
+        queue.publish('sidebar.change', 'none');
       }
 
       chapterIdxUpdate() {
         if (this.selectVerseIdx) {
           if (this.panes === 1 && this.sidebar !== 'none') {
-            bus.publish('sidebar.select', 'none');
+            queue.publish('sidebar.select', 'none');
           }
-          bus.publish('read.scroll-to-verse', this.selectVerseIdx);
+          queue.publish('read.scroll-to-verse', this.selectVerseIdx);
           this.selectVerseIdx = null;
         }
       }
 
-      export() {
-        bus.publish('bookmark.task.change', 'bookmark-export');
+      export () {
+        queue.publish('bookmark.task.change', 'bookmark-export');
       }
 
       folder() {
-        bus.publish('bookmark.task.change', 'bookmark-folder');
+        queue.publish('bookmark.task.change', 'bookmark-folder');
       }
 
       folderAdd() {
-        bus.publish('bookmark.task.change', 'bookmark-folder-add');
+        queue.publish('bookmark.task.change', 'bookmark-folder-add');
       }
 
       folderAdded() {
-        bus.publish('bookmark.task.change', 'bookmark-list');
+        queue.publish('bookmark.task.change', 'bookmark-list');
       }
 
       folderAddSave(name) {
-        bus.publish('folder.add', name);
+        queue.publish('bookmark.folder.add', name);
       }
 
       folderDelete(folderName) {
-        bus.publish('folder.to.delete', folderName);
-        bus.publish('bookmark.task.change', 'bookmark-folder-delete');
+        queue.publish('folder.to.delete', folderName);
+        queue.publish('bookmark.task.change', 'bookmark-folder-delete');
       }
 
       folderDeleteConfirm(folderName) {
-        bus.publish('folder.delete', folderName);
-        bus.publish('bookmark.task.change', 'bookmark-folder');
+        queue.publish('bookmark.folder.delete', folderName);
+        queue.publish('bookmark.task.change', 'bookmark-folder');
       }
 
       folderDown(folderName) {
-        bus.publish('folder.down', folderName);
+        queue.publish('bookmark.folder.down', folderName);
       }
 
       folderRename(folderName) {
-        bus.publish('folder.to.rename', folderName);
-        bus.publish('bookmark.task.change', 'bookmark-folder-rename');
+        queue.publish('folder.to.rename', folderName);
+        queue.publish('bookmark.task.change', 'bookmark-folder-rename');
+      }
+
+      folderRenamed() {
+        queue.publish('bookmark.task.change', 'bookmark-folder');
       }
 
       folderRenameSave(namePkg) {
-        bus.publish('folder.rename', namePkg);
-        bus.publish('bookmark.task.change', 'bookmark-folder');
+        queue.publish('bookmark.folder.rename', namePkg);
       }
 
       folderSelect(folderName) {
-        bus.publish('folder.change', folderName);
-        bus.publish('bookmark.task.change', 'bookmark-list');
+        queue.publish('bookmark.active-folder.change', folderName);
+        queue.publish('bookmark.task.change', 'bookmark-list');
       }
 
       folderUp(folderName) {
-        bus.publish('folder.up', folderName);
+        queue.publish('bookmark.folder.up', folderName);
       }
 
       gotoBookmark(verseIdx) {
         this.selectVerseIdx = verseIdx;
         let chapterIdx = chapterIdxByVerseIdx(verseIdx);
-        bus.publish('chapterIdx.change', chapterIdx);
+        queue.publish('chapterIdx.change', chapterIdx);
       }
 
       hide() {
-        bus.publish(`${this.bookmarkTask}.hide`, null);
+        queue.publish(`${this.bookmarkTask}.hide`, null);
       }
 
       import() {
-        bus.publish('bookmark.task.change', 'bookmark-import');
+        queue.publish('bookmark.task.change', 'bookmark-import');
       }
 
       importImport(pkgStr) {
-        bus.publish('folder.import', pkgStr);
+        queue.publish('bookmark.pkg.import', pkgStr);
       }
 
       initialize() {
@@ -8932,15 +9065,15 @@
       }
 
       list() {
-        bus.publish('bookmark.task.change', 'bookmark-list');
+        queue.publish('bookmark.task.change', 'bookmark-list');
       }
 
       listDelete(verseIdx) {
-        bus.publish('bookmark.delete', verseIdx);
+        queue.publish('bookmark.delete', verseIdx);
       }
 
       listDown(verseIdx) {
-        bus.publish('bookmark.down', verseIdx);
+        queue.publish('bookmark.down', verseIdx);
       }
 
       listSelect(verseIdx) {
@@ -8948,36 +9081,36 @@
       }
 
       listSortAscend() {
-        bus.publish('bookmark.sort-ascend', null);
+        queue.publish('bookmark.sort-ascend', null);
       }
 
       listSortInvert() {
-        bus.publish('bookmark.sort-invert', null);
+        queue.publish('bookmark.sort-invert', null);
       }
 
       listUp(verseIdx) {
-        bus.publish('bookmark.up', verseIdx);
+        queue.publish('bookmark.up', verseIdx);
       }
 
       modeToggle() {
-        bus.publish('bookmark.strong-mode.toggle', null);
+        queue.publish('bookmark.strong-mode.toggle', null);
       }
 
       moveCopy(verseIdx) {
-        bus.publish('move-copy.list.change', verseIdx);
-        bus.publish('bookmark.move-copy.change', verseIdx);
+        queue.publish('bookmark-move-copy.list.change', verseIdx);
+        queue.publish('bookmark.move-copy.change', verseIdx);
       }
 
       moveCopyCopy(copyPkg) {
-        bus.publish('bookmark.copy', copyPkg);
+        queue.publish('bookmark.copy', copyPkg);
       }
 
       moveCopyMove(movePkg) {
-        bus.publish('bookmark.move', movePkg);
+        queue.publish('bookmark.move', movePkg);
       }
 
       moveCopyReady() {
-        bus.publish('bookmark.task.change', 'bookmark-move-copy');
+        queue.publish('bookmark.task.change', 'bookmark-move-copy');
       }
 
       panesUpdate(panes) {
@@ -8985,7 +9118,7 @@
       }
 
       show() {
-        bus.publish(`${this.bookmarkTask}.show`, null);
+        queue.publish(`${this.bookmarkTask}.show`, null);
       }
 
       sidebarUpdate(sidebar) {
@@ -8993,139 +9126,153 @@
       }
 
       strongSelect(verseIdx) {
-        bus.publish('strong.verse.change', verseIdx);
-        bus.publish('strong.task.change', 'strong-verse');
-        bus.publish('sidebar.change', 'strong');
+        this.strongSelectPending = true;
+        queue.publish('strong.verse.change', verseIdx);
+      }
+
+      strongVerseUpdate() {
+        if (this.strongSelectPending) {
+          this.strongSelectPending = false;
+          queue.publish('sidebar.change', 'strong');
+        }
       }
 
       subscribe() {
-        bus.subscribe('bookmark-export', () => {
+        queue.subscribe('bookmark-export', () => {
           this.export();
         });
 
-        bus.subscribe('bookmark-folder', () => {
+        queue.subscribe('bookmark-folder', () => {
           this.folder();
         });
-        bus.subscribe('bookmark-folder.delete', (folderName) => {
+        queue.subscribe('bookmark-folder.delete', (folderName) => {
           this.folderDelete(folderName);
         });
-        bus.subscribe('bookmark-folder.down', (folderName) => {
+        queue.subscribe('bookmark-folder.down', (folderName) => {
           this.folderDown(folderName);
         });
-        bus.subscribe('bookmark-folder.select', (folderName) => {
+        queue.subscribe('bookmark-folder.select', (folderName) => {
           this.folderSelect(folderName);
         });
-        bus.subscribe('bookmark-folder.up', (folderName) => {
+        queue.subscribe('bookmark-folder.up', (folderName) => {
           this.folderUp(folderName);
         });
 
-        bus.subscribe('bookmark-folder-add', () => {
+        queue.subscribe('bookmark-folder-add', () => {
           this.folderAdd();
         });
-        bus.subscribe('bookmark-folder-add.save', (name) => {
+        queue.subscribe('bookmark-folder-add.save', (name) => {
           this.folderAddSave(name);
         });
 
-        bus.subscribe('bookmark-folder-delete.confirm', (folderName) => {
+        queue.subscribe('bookmark-folder-delete.confirm', (folderName) => {
           this.folderDeleteConfirm(folderName);
         });
 
-        bus.subscribe('bookmark-folder-rename', (folderName) => {
+        queue.subscribe('bookmark-folder-rename', (folderName) => {
           this.folderRename(folderName);
         });
-        bus.subscribe('bookmark-folder-rename.save', (namePkg) => {
+        queue.subscribe('bookmark-folder-rename.save', (namePkg) => {
           this.folderRenameSave(namePkg);
         });
 
-        bus.subscribe('bookmark-import', () => {
+        queue.subscribe('bookmark-import', () => {
           this.import();
         });
-        bus.subscribe('bookmark-import.import', (pkgStr) => {
+        queue.subscribe('bookmark-import.import', (pkgStr) => {
           this.importImport(pkgStr);
         });
 
-        bus.subscribe('bookmark-list', () => {
+        queue.subscribe('bookmark-list', () => {
           this.list();
         });
-        bus.subscribe('bookmark-list.delete', (verseIdx) => {
+        queue.subscribe('bookmark-list.delete', (verseIdx) => {
           this.listDelete(verseIdx);
         });
-        bus.subscribe('bookmark-list.down', (verseIdx) => {
+        queue.subscribe('bookmark-list.down', (verseIdx) => {
           this.listDown(verseIdx);
         });
-        bus.subscribe('bookmark-list.select', (verseIdx) => {
+        queue.subscribe('bookmark-list.select', (verseIdx) => {
           this.listSelect(verseIdx);
         });
-        bus.subscribe('bookmark-list.sort-ascend', () => {
+        queue.subscribe('bookmark-list.sort-ascend', () => {
           this.listSortAscend();
         });
-        bus.subscribe('bookmark-list.sort-invert', () => {
+        queue.subscribe('bookmark-list.sort-invert', () => {
           this.listSortInvert();
         });
-        bus.subscribe('bookmark-list.strong-select', (verseIdx) => {
+        queue.subscribe('bookmark-list.strong-select', (verseIdx) => {
           this.strongSelect(verseIdx);
         });
-        bus.subscribe('bookmark-list.up', (verseIdx) => {
+        queue.subscribe('bookmark-list.up', (verseIdx) => {
           this.listUp(verseIdx);
         });
 
-        bus.subscribe('bookmark-move-copy', (verseIdx) => {
+        queue.subscribe('bookmark-move-copy', (verseIdx) => {
           this.moveCopy(verseIdx);
         });
-        bus.subscribe('bookmark-move-copy.copy', (copyPkg) => {
+        queue.subscribe('bookmark-move-copy.copy', (copyPkg) => {
           this.moveCopyCopy(copyPkg);
         });
-        bus.subscribe('bookmark-move-copy.move', (movePkg) => {
+        queue.subscribe('bookmark-move-copy.move', (movePkg) => {
           this.moveCopyMove(movePkg);
         });
-        bus.subscribe('bookmark-move-copy.ready', () => {
+        queue.subscribe('bookmark-move-copy.ready', () => {
           this.moveCopyReady();
         });
 
-        bus.subscribe('bookmark.back', () => {
+        queue.subscribe('bookmark.back', () => {
           this.back();
         });
-        bus.subscribe('bookmark.copy', () => {
+        queue.subscribe('bookmark.copy', () => {
           this.list();
         });
-        bus.subscribe('bookmark.hide', () => {
+        queue.subscribe('bookmark.folder.added', () => {
+          this.folderAdded();
+        });
+        queue.subscribe('bookmark.folder.renamed', () => {
+          this.folderRenamed();
+        });
+        queue.subscribe('bookmark.hide', () => {
           this.hide();
         });
-        bus.subscribe('bookmark.move', () => {
+        queue.subscribe('bookmark.move', () => {
           this.list();
         });
-        bus.subscribe('bookmark.show', () => {
+        queue.subscribe('bookmark.show', () => {
           this.show();
         });
-        bus.subscribe('bookmark.strong-mode.click', () => {
+        queue.subscribe('bookmark.strong-mode.click', () => {
           this.modeToggle();
         });
-        bus.subscribe('bookmark.task.update', (bookmarkTask) => {
+        queue.subscribe('bookmark.task.update', (bookmarkTask) => {
           this.taskUpdate(bookmarkTask);
         });
 
-        bus.subscribe('chapterIdx.update', () => {
+        queue.subscribe('chapterIdx.update', () => {
           this.chapterIdxUpdate();
         });
 
-        bus.subscribe('folder.added', () => {
-          this.folderAdded();
-        });
-
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
 
-        bus.subscribe('sidebar.update', (sidebar) => {
+        queue.subscribe('sidebar.update', (sidebar) => {
           this.sidebarUpdate(sidebar);
+        });
+
+        queue.subscribe('strong.verse.update', () => {
+          this.strongVerseUpdate();
         });
       }
 
       taskUpdate(bookmarkTask) {
         if (this.sidebar === 'bookmark') {
-          bus.publish(`${this.bookmarkTask}.hide`, null);
-          this.bookmarkTask = bookmarkTask;
-          bus.publish(`${this.bookmarkTask}.show`, null);
+          if (this.bookmarkTask !== bookmarkTask) {
+            queue.publish(`${this.bookmarkTask}.hide`, null);
+            this.bookmarkTask = bookmarkTask;
+            queue.publish(`${this.bookmarkTask}.show`, null);
+          }
         } else {
           this.bookmarkTask = bookmarkTask;
         }
@@ -9442,6 +9589,7 @@
 
     }
 
+    const searchResultReroute = ['search-filter', 'search-history'];
     const validTasks$2 = ['search-result', 'search-lookup', 'search-filter',
       'search-history'
     ];
@@ -9466,7 +9614,7 @@
       filterChange(searchFilter) {
         this.searchFilter = searchFilter;
         this.saveFilter();
-        bus.publish('search.filter.update', this.searchFilter);
+        queue.publish('search.filter.update', this.searchFilter);
       }
 
       filterIsValid(searchFilter) {
@@ -9482,7 +9630,7 @@
       historyChange(searchHistory) {
         this.searchHistory = searchHistory;
         this.saveHistory();
-        bus.publish('search.history.update', this.searchHistory);
+        queue.publish('search.history.update', this.searchHistory);
       }
 
       historyClear() {
@@ -9525,8 +9673,8 @@
 
       modeChange(strongMode) {
         this.strongMode = strongMode;
-        this.saveMode();
-        bus.publish('search.strong-mode.update', this.strongMode);
+        this.saveStrongMode();
+        queue.publish('search.strong-mode.update', this.strongMode);
       }
 
       modeToogle() {
@@ -9544,16 +9692,16 @@
           } else if (rig.wordStatus !== 'OK') {
             message = rig.wordStatus;
           }
-          bus.publish('search.query.error', message);
+          queue.publish('search.query.error', message);
         } else {
           this.rig = rig;
           this.searchQuery = searchQuery;
           this.saveQuery();
           this.addHistory();
           await this.updateSearchVerses();
-          bus.publish('search.query.update', this.searchQuery);
-          bus.publish('rig.update', this.rig);
+          queue.publish('rig.update', this.rig);
           this.resetFilter();
+          queue.publish('search.query.update', this.searchQuery);
         }
       }
 
@@ -9568,11 +9716,11 @@
       }
 
       async restore() {
+        this.restoreTask();
         this.restoreHistory();
         await this.restoreQuery();
         this.restoreFilter();
         this.restoreMode();
-        this.restoreTask();
       }
 
       restoreFilter() {
@@ -9659,7 +9807,9 @@
         } else {
           searchTask = JSON.parse(searchTask);
         }
-        if (!validTasks$2.includes(searchTask)) {
+        if (searchResultReroute.includes(searchTask)) {
+          searchTask = 'search-result';
+        } else if (!validTasks$2.includes(searchTask)) {
           searchTask = defaultTask;
         }
         this.taskChange(searchTask);
@@ -9675,7 +9825,7 @@
           JSON.stringify(this.searchHistory));
       }
 
-      saveMode() {
+      saveStrongMode() {
         localStorage.setItem(`${appPrefix}-searchStrongMode`,
           JSON.stringify(this.strongMode));
       }
@@ -9691,34 +9841,34 @@
       }
 
       subscribe() {
-        bus.subscribe('search.filter.change', (filter) => {
+        queue.subscribe('search.filter.change', (filter) => {
           this.filterChange(filter);
         });
 
-        bus.subscribe('search.history.clear', () => {
+        queue.subscribe('search.history.clear', () => {
           this.historyClear();
         });
-        bus.subscribe('search.history.delete', (query) => {
+        queue.subscribe('search.history.delete', (query) => {
           this.historyDelete(query);
         });
-        bus.subscribe('search.history.down', (query) => {
+        queue.subscribe('search.history.down', (query) => {
           this.historyDown(query);
         });
-        bus.subscribe('search.history.up', (query) => {
+        queue.subscribe('search.history.up', (query) => {
           this.historyUp(query);
         });
 
-        bus.subscribe('search.query.change', async (query) => {
+        queue.subscribe('search.query.change', async (query) => {
           await this.queryChange(query);
         });
 
-        bus.subscribe('search.restore', async () => {
+        queue.subscribe('search.restore', async () => {
           await this.restore();
         });
-        bus.subscribe('search.strong-mode.toggle', () => {
+        queue.subscribe('search.strong-mode.toggle', () => {
           this.modeToogle();
         });
-        bus.subscribe('search.task.change', (searchTask) => {
+        queue.subscribe('search.task.change', (searchTask) => {
           this.taskChange(searchTask);
         });
       }
@@ -9726,7 +9876,7 @@
       taskChange(searchTask) {
         this.searchTask = searchTask;
         this.saveTask();
-        bus.publish('search.task.update', this.searchTask);
+        queue.publish('search.task.update', this.searchTask);
       }
 
       tomeFilter() {
@@ -9738,13 +9888,13 @@
 
       updateHistory() {
         this.saveHistory();
-        bus.publish('search.history.update', this.searchHistory);
+        queue.publish('search.history.update', this.searchHistory);
       }
 
       async updateSearchVerses() {
         this.searchVerseObjs = await tomeDb.verses.bulkGet(
           this.rig.tomeBin[tomeBinVerses]);
-        bus.publish('search.verses.update', this.searchVerseObjs);
+        queue.publish('search.verses.update', this.searchVerseObjs);
       }
 
     }
@@ -9956,9 +10106,9 @@
         let btn = target.closest('button');
         let verseIdx = parseInt(btn.dataset.verseIdx);
         if (this.strongMode) {
-          bus.publish('search-result.strong-select', verseIdx);
+          queue.publish('search-result.strong-select', verseIdx);
         } else {
-          bus.publish('search-result.read-select', verseIdx);
+          queue.publish('search-result.read-select', verseIdx);
         }
       }
 
@@ -10027,36 +10177,36 @@
       }
 
       subscribe() {
-        bus.subscribe('font.update', (font) => {
+        queue.subscribe('font.update', (font) => {
           this.fontUpdate(font);
         });
 
-        bus.subscribe('font-size.update', (fontSize) => {
+        queue.subscribe('font-size.update', (fontSize) => {
           this.fontSizeUpdate(fontSize);
         });
 
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
 
-        bus.subscribe('rig.update', (rig) => {
+        queue.subscribe('rig.update', (rig) => {
           this.rigUpdate(rig);
         });
 
-        bus.subscribe('search-result.hide', () => {
+        queue.subscribe('search-result.hide', () => {
           this.hide();
         });
-        bus.subscribe('search-result.show', () => {
+        queue.subscribe('search-result.show', () => {
           this.show();
         });
 
-        bus.subscribe('search.filter.update', (searchFilter) => {
+        queue.subscribe('search.filter.update', (searchFilter) => {
           this.filterUpdate(searchFilter);
         });
-        bus.subscribe('search.strong-mode.update', (strongMode) => {
+        queue.subscribe('search.strong-mode.update', (strongMode) => {
           this.modeUpdate(strongMode);
         });
-        bus.subscribe('search.verses.update', (searchVerseObjs) => {
+        queue.subscribe('search.verses.update', (searchVerseObjs) => {
           this.versesUpdate(searchVerseObjs);
         });
       }
@@ -10066,15 +10216,15 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBack) {
-            bus.publish('search.back', null);
+            queue.publish('search.back', null);
           } else if (target === this.btnFilter) {
-            bus.publish('search-filter', null);
+            queue.publish('search-filter', null);
           } else if (target === this.btnHistory) {
-            bus.publish('search-history', null);
+            queue.publish('search-history', null);
           } else if (target === this.btnStrongMode) {
-            bus.publish('search.strong-mode.click', null);
+            queue.publish('search.strong-mode.click', null);
           } else if (target === this.btnSearchLookup) {
-            bus.publish('search-lookup', null);
+            queue.publish('search-lookup', null);
           }
         }
       }
@@ -10226,7 +10376,7 @@
           bookIdx: bookIdx,
           chapterIdx: chapterIdx
         };
-        bus.publish('search-filter.select', searchFilter);
+        queue.publish('search-filter.select', searchFilter);
       }
 
       filterUpdate(searchFilter) {
@@ -10294,18 +10444,18 @@
       }
 
       subscribe() {
-        bus.subscribe('rig.update', (rig) => {
+        queue.subscribe('rig.update', (rig) => {
           this.rigUpdate(rig);
         });
 
-        bus.subscribe('search-filter.hide', () => {
+        queue.subscribe('search-filter.hide', () => {
           this.hide();
         });
-        bus.subscribe('search-filter.show', () => {
+        queue.subscribe('search-filter.show', () => {
           this.show();
         });
 
-        bus.subscribe('search.filter.update', (filter) => {
+        queue.subscribe('search.filter.update', (filter) => {
           this.filterUpdate(filter);
         });
       }
@@ -10315,7 +10465,7 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnSearchResult) {
-            bus.publish('search-result', null);
+            queue.publish('search-result', null);
           }
         }
       }
@@ -10473,16 +10623,16 @@
         event.preventDefault();
         let target = event.target;
         if (target === this.btnClear) {
-          bus.publish('search-history.clear', null);
+          queue.publish('search-history.clear', null);
         }
       }
 
       delete(query) {
-        bus.publish('search-history.delete', query);
+        queue.publish('search-history.delete', query);
       }
 
       down(query) {
-        bus.publish('search-history.down', query);
+        queue.publish('search-history.down', query);
       }
 
       getElements() {
@@ -10518,7 +10668,7 @@
         if (target) {
           if (target.classList.contains('btn-entry--history')) {
             let query = target.textContent;
-            bus.publish('search-history.select', query);
+            queue.publish('search-history.select', query);
           } else if (target.classList.contains('btn-icon--menu')) {
             let entry = target.previousSibling;
             this.btnMenuClick(entry);
@@ -10542,14 +10692,14 @@
       }
 
       subscribe() {
-        bus.subscribe('search-history.hide', () => {
+        queue.subscribe('search-history.hide', () => {
           this.hide();
         });
-        bus.subscribe('search-history.show', () => {
+        queue.subscribe('search-history.show', () => {
           this.show();
         });
 
-        bus.subscribe('search.history.update', (history) => {
+        queue.subscribe('search.history.update', (history) => {
           this.historyUpdate(history);
         });
       }
@@ -10559,13 +10709,13 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnResult) {
-            bus.publish('search-result', null);
+            queue.publish('search-result', null);
           }
         }
       }
 
       up(query) {
-        bus.publish('search-history.up', query);
+        queue.publish('search-history.up', query);
       }
 
       updateList() {
@@ -10694,7 +10844,7 @@
 
       searchClick() {
         let query = this.inputQuery.value;
-        bus.publish('search-lookup.search', query);
+        queue.publish('search-lookup.search', query);
       }
 
       show() {
@@ -10706,17 +10856,17 @@
       }
 
       subscribe() {
-        bus.subscribe('search.query.error', (message) => {
+        queue.subscribe('search.query.error', (message) => {
           this.error(message);
         });
-        bus.subscribe('search-lookup.hide', () => {
+        queue.subscribe('search-lookup.hide', () => {
           this.hide();
         });
-        bus.subscribe('search-lookup.show', () => {
+        queue.subscribe('search-lookup.show', () => {
           this.show();
         });
 
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
       }
@@ -10726,9 +10876,9 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBack) {
-            bus.publish('search.back', null);
+            queue.publish('search.back', null);
           } else if (target === this.btnResult) {
-            bus.publish('search-result', null);
+            queue.publish('search-result', null);
           }
         }
       }
@@ -10742,56 +10892,55 @@
       }
 
       back() {
-        bus.publish('sidebar.change', 'none');
+        queue.publish('sidebar.change', 'none');
       }
 
       chapterIdxUpdate() {
         if (this.selectVerseIdx) {
           if (this.panes === 1 && this.sidebar !== 'none') {
-            bus.publish('sidebar.select', 'none');
+            queue.publish('sidebar.select', 'none');
           }
-          bus.publish('read.scroll-to-verse', this.selectVerseIdx);
+          queue.publish('read.scroll-to-verse', this.selectVerseIdx);
           this.selectVerseIdx = null;
         }
       }
 
       filter() {
-        bus.publish('search.task.change', 'search-filter');
+        queue.publish('search.task.change', 'search-filter');
       }
 
       filterSelect(searchFilter) {
-        bus.publish('search.filter.change', searchFilter);
-        bus.publish('search.task.change', 'search-result');
+        queue.publish('search.filter.change', searchFilter);
+        queue.publish('search.task.change', 'search-result');
       }
 
       hide() {
-        bus.publish(`${this.searchTask}.hide`, null);
+        queue.publish(`${this.searchTask}.hide`, null);
       }
 
       history() {
-        bus.publish('search.task.change', 'search-history');
+        queue.publish('search.task.change', 'search-history');
       }
 
       historyClear() {
-        bus.publish('search.history.clear', null);
+        queue.publish('search.history.clear', null);
       }
 
       historyDelete(query) {
-        bus.publish('search.history.delete', query);
+        queue.publish('search.history.delete', query);
       }
 
       historyDown(query) {
-        bus.publish('search.history.down', query);
+        queue.publish('search.history.down', query);
       }
 
       historySelect(query) {
-        this.query = query;
-        bus.publish('search.query.change', this.query);
-        bus.publish('search.task.change', 'search-result');
+        queue.publish('search.query.change', query);
+        queue.publish('search.task.change', 'search-result');
       }
 
       historyUp(query) {
-        bus.publish('search.history.up', query);
+        queue.publish('search.history.up', query);
       }
 
       initialize() {
@@ -10799,42 +10948,47 @@
       }
 
       lookup() {
-        bus.publish('search.task.change', 'search-lookup');
+        queue.publish('search.task.change', 'search-lookup');
       }
 
       lookupCancel() {
-        bus.publish('search.task.change', 'search-result');
+        queue.publish('search.task.change', 'search-result');
       }
 
       lookupSearch(query) {
-        bus.publish('search.query.change', query);
+        queue.publish('search.query.change', query);
       }
 
       modeToggle() {
-        bus.publish('search.strong-mode.toggle', null);
+        queue.publish('search.strong-mode.toggle', null);
       }
 
       panesUpdate(panes) {
         this.panes = panes;
       }
 
-      queryUpdate(query) {
-        this.query = query;
-        bus.publish('search.task.change', 'search-result');
+      queryChange() {
+        this.queryChangePending = true;
+      }
+
+      queryUpdate() {
+        if (this.queryChangePending) {
+          queue.publish('search.task.change', 'search-result');
+        }
       }
 
       readSelect(verseIdx) {
         this.selectVerseIdx = verseIdx;
         let chapterIdx = chapterIdxByVerseIdx(verseIdx);
-        bus.publish('chapterIdx.change', chapterIdx);
+        queue.publish('chapterIdx.change', chapterIdx);
       }
 
       result() {
-        bus.publish('search.task.change', 'search-result');
+        queue.publish('search.task.change', 'search-result');
       }
 
       show() {
-        bus.publish(`${this.searchTask}.show`, null);
+        queue.publish(`${this.searchTask}.show`, null);
       }
 
       sidebarUpdate(sidebar) {
@@ -10842,95 +10996,110 @@
       }
 
       strongSelect(verseIdx) {
-        bus.publish('strong.verse.change', verseIdx);
-        bus.publish('strong.task.change', 'strong-verse');
-        bus.publish('sidebar.change', 'strong');
+        this.strongSelectPending = true;
+        queue.publish('strong.verse.change', verseIdx);
+      }
+
+      strongVerseUpdate() {
+        if (this.strongSelectPending) {
+          this.strongSelectPending = false;
+          queue.publish('sidebar.change', 'strong');
+        }
       }
 
       subscribe() {
-        bus.subscribe('chapterIdx.update', () => {
+        queue.subscribe('chapterIdx.update', () => {
           this.chapterIdxUpdate();
         });
 
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
 
-        bus.subscribe('search-filter', () => {
+        queue.subscribe('search-filter', () => {
           this.filter();
         });
-        bus.subscribe('search-filter.select', (searchFilter) => {
+        queue.subscribe('search-filter.select', (searchFilter) => {
           this.filterSelect(searchFilter);
         });
 
-        bus.subscribe('search-history', () => {
+        queue.subscribe('search-history', () => {
           this.history();
         });
-        bus.subscribe('search-history.clear', () => {
+        queue.subscribe('search-history.clear', () => {
           this.historyClear();
         });
-        bus.subscribe('search-history.delete', (query) => {
+        queue.subscribe('search-history.delete', (query) => {
           this.historyDelete(query);
         });
-        bus.subscribe('search-history.down', (query) => {
+        queue.subscribe('search-history.down', (query) => {
           this.historyDown(query);
         });
-        bus.subscribe('search-history.select', (query) => {
+        queue.subscribe('search-history.select', (query) => {
           this.historySelect(query);
         });
-        bus.subscribe('search-history.up', (query) => {
+        queue.subscribe('search-history.up', (query) => {
           this.historyUp(query);
         });
 
-        bus.subscribe('search-lookup', () => {
+        queue.subscribe('search-lookup', () => {
           this.lookup();
         });
-        bus.subscribe('search-lookup.cancel', () => {
+        queue.subscribe('search-lookup.cancel', () => {
           this.lookupCancel();
         });
-        bus.subscribe('search-lookup.search', (query) => {
+        queue.subscribe('search-lookup.search', (query) => {
           this.lookupSearch(query);
         });
 
-        bus.subscribe('search-result', () => {
+        queue.subscribe('search-result', () => {
           this.result();
         });
-        bus.subscribe('search-result.read-select', (verseIdx) => {
+        queue.subscribe('search-result.read-select', (verseIdx) => {
           this.readSelect(verseIdx);
         });
-        bus.subscribe('search-result.strong-select', (verseIdx) => {
+        queue.subscribe('search-result.strong-select', (verseIdx) => {
           this.strongSelect(verseIdx);
         });
 
-        bus.subscribe('search.back', () => {
+        queue.subscribe('search.back', () => {
           this.back();
         });
-        bus.subscribe('search.hide', () => {
+        queue.subscribe('search.hide', () => {
           this.hide();
         });
-        bus.subscribe('search.query.update', (query) => {
-          this.queryUpdate(query);
+        queue.subscribe('search.query.change', () => {
+          this.queryChange();
         });
-        bus.subscribe('search.show', () => {
+        queue.subscribe('search.query.update', () => {
+          this.queryUpdate();
+        });
+        queue.subscribe('search.show', () => {
           this.show();
         });
-        bus.subscribe('search.strong-mode.click', () => {
+        queue.subscribe('search.strong-mode.click', () => {
           this.modeToggle();
         });
-        bus.subscribe('search.task.update', (searchTask) => {
+        queue.subscribe('search.task.update', (searchTask) => {
           this.taskUpdate(searchTask);
         });
 
-        bus.subscribe('sidebar.update', (sidebar) => {
+        queue.subscribe('sidebar.update', (sidebar) => {
           this.sidebarUpdate(sidebar);
+        });
+
+        queue.subscribe('strong.verse.update', () => {
+          this.strongVerseUpdate();
         });
       }
 
       taskUpdate(searchTask) {
         if (this.sidebar === 'search') {
-          bus.publish(`${this.searchTask}.hide`, null);
-          this.searchTask = searchTask;
-          bus.publish(`${this.searchTask}.show`, null);
+          if (this.searchTask !== searchTask) {
+            queue.publish(`${this.searchTask}.hide`, null);
+            this.searchTask = searchTask;
+            queue.publish(`${this.searchTask}.show`, null);
+          }
         } else {
           this.searchTask = searchTask;
         }
@@ -10969,17 +11138,16 @@
 
       async defChange(strongDef) {
         if (!strongNums.includes(strongDef)) {
-          bus.publish('strong.def.error', 'Invalid Strong Number');
+          queue.publish('strong.def.error', 'Invalid Strong Number');
         } else {
           this.strongDef = strongDef;
           this.saveDef();
           this.addHistory();
           this.strongIdx = this.strongHistory.indexOf(this.strongDef);
           this.strongDefObj = await strongDb.defs.get(this.strongDef);
-          this.strongWordObj = await strongDb.words.get(this.strongDef);
-          this.updateNum();
-          bus.publish('strong.def.update', this.strongDefObj);
+          await this.updateWordObj();
           await this.wordFirst();
+          queue.publish('strong.def.update', this.strongDefObj);
         }
       }
 
@@ -10989,16 +11157,15 @@
         this.addSubHistory();
         this.strongIdx = this.strongHistory.indexOf(this.strongDef);
         this.strongDefObj = await strongDb.defs.get(this.strongDef);
-        this.strongWordObj = await strongDb.words.get(this.strongDef);
-        this.updateNum();
-        bus.publish('strong.def.update', this.strongDefObj);
+        await this.updateWordObj();
         await this.wordFirst();
+        queue.publish('strong.def.update', this.strongDefObj);
       }
 
       filterChange(strongFilter) {
         this.strongFilter = strongFilter;
         this.saveFilter();
-        bus.publish('strong.filter.update', this.strongFilter);
+        queue.publish('strong.filter.update', this.strongFilter);
       }
 
       filterIsValid(filter) {
@@ -11019,7 +11186,7 @@
       historyChange(strongHistory) {
         this.strongHistory = strongHistory;
         this.saveHistory();
-        bus.publish('strong.history.update', this.strongHistory);
+        queue.publish('strong.history.update', this.strongHistory);
       }
 
       historyClear() {
@@ -11062,7 +11229,7 @@
       modeChange(strongMode) {
         this.strongMode = strongMode;
         this.saveMode();
-        bus.publish('strong.strong-mode.update', this.strongMode);
+        queue.publish('strong.strong-mode.update', this.strongMode);
       }
 
       modeToogle() {
@@ -11075,6 +11242,7 @@
       }
 
       async restore() {
+        this.restoreTask();
         this.restoreHistory();
         await this.restoreDef();
         this.strongIdx = this.strongHistory.findIndex(x => x === this.strongDef);
@@ -11082,7 +11250,6 @@
         this.restoreFilter();
         await this.restoreVerseIdx();
         this.restoreMode();
-        this.restoreTask();
       }
 
       async restoreDef() {
@@ -11255,7 +11422,7 @@
         if (this.strongIdx < 0) {
           this.strongIdx = this.strongHistory.length - 1;
         }
-        await this.defChange(this.strongHistory[this.strongIdx]);
+        queue.publish('strong.def.change', this.strongHistory[this.strongIdx]);
       }
 
       async strongPrev() {
@@ -11263,54 +11430,54 @@
         if (this.strongIdx >= this.strongHistory.length) {
           this.strongIdx = 0;
         }
-        await this.defChange(this.strongHistory[this.strongIdx]);
+        queue.publish('strong.def.change', this.strongHistory[this.strongIdx]);
       }
 
       subscribe() {
-        bus.subscribe('strong.def.change', async (strongDef) => {
+        queue.subscribe('strong.def.change', async (strongDef) => {
           await this.defChange(strongDef);
         });
-        bus.subscribe('strong.def.sub-change', async (strongDef) => {
+        queue.subscribe('strong.def.sub-change', async (strongDef) => {
           await this.defSubChange(strongDef);
         });
 
-        bus.subscribe('strong.filter.change', (strongFilter) => {
+        queue.subscribe('strong.filter.change', (strongFilter) => {
           this.filterChange(strongFilter);
         });
 
-        bus.subscribe('strong.history.clear', () => {
+        queue.subscribe('strong.history.clear', () => {
           this.historyClear();
         });
-        bus.subscribe('strong.history.delete', (strongDef) => {
+        queue.subscribe('strong.history.delete', (strongDef) => {
           this.historyDelete(strongDef);
         });
-        bus.subscribe('strong.history.down', (strongDef) => {
+        queue.subscribe('strong.history.down', (strongDef) => {
           this.historyDown(strongDef);
         });
-        bus.subscribe('strong.history.up', (strongDef) => {
+        queue.subscribe('strong.history.up', (strongDef) => {
           this.historyUp(strongDef);
         });
 
-        bus.subscribe('strong.next', async () => {
+        queue.subscribe('strong.next', async () => {
           await this.strongNext();
         });
-        bus.subscribe('strong.prev', async () => {
+        queue.subscribe('strong.prev', async () => {
           await this.strongPrev();
         });
 
-        bus.subscribe('strong.restore', async () => {
+        queue.subscribe('strong.restore', async () => {
           await this.restore();
         });
-        bus.subscribe('strong.strong-mode.toggle', () => {
+        queue.subscribe('strong.strong-mode.toggle', () => {
           this.modeToogle();
         });
-        bus.subscribe('strong.task.change', (strongTask) => {
+        queue.subscribe('strong.task.change', (strongTask) => {
           this.taskChange(strongTask);
         });
-        bus.subscribe('strong.verse.change', async (verseIdx) => {
+        queue.subscribe('strong.verse.change', async (verseIdx) => {
           await this.verseIdxChange(verseIdx);
         });
-        bus.subscribe('strong.word.change', async (strongWord) => {
+        queue.subscribe('strong.word.change', async (strongWord) => {
           await this.wordChange(strongWord);
         });
       }
@@ -11318,7 +11485,7 @@
       taskChange(strongTask) {
         this.strongTask = strongTask;
         this.saveTask();
-        bus.publish('strong.task.update', this.strongTask);
+        queue.publish('strong.task.update', this.strongTask);
       }
 
       tomeFilter() {
@@ -11330,52 +11497,77 @@
 
       updateHistory() {
         this.saveHistory();
-        bus.publish('strong.history.update', this.strongHistory);
-      }
-
-      updateNum() {
-        this.words = this.strongWordObj.v;
-        bus.publish('strong.wordObj.update', this.strongWordObj);
+        queue.publish('strong.history.update', this.strongHistory);
       }
 
       async updateWordMaps() {
-        let verses = this.wordTomeBin[tomeBinVerses];
-        this.wordMapObjs = await strongDb.maps.bulkGet(verses);
-        bus.publish('strong.wordMap.update', this.wordMapObjs);
+        if (this.words.length) {
+          let verses = this.wordTomeBin[tomeBinVerses];
+          this.wordMapObjs = await strongDb.maps.bulkGet(verses);
+          queue.publish('strong.wordMap.update', this.wordMapObjs);
+        } else {
+          this.wordMapObjs = [];
+          queue.publish('strong.wordMap.update', this.wordMapObjs);
+        }
+      }
+
+      async updateWordObj() {
+        this.strongWordObj = await strongDb.words.get(this.strongDef);
+        this.words = this.strongWordObj.v;
+        queue.publish('strong.wordObj.update', this.strongWordObj);
       }
 
       async updateWordVerses() {
-        let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
-        this.wordTomeBin = word[wordTomeBin];
-        bus.publish('strong.wordTomeBin.update', this.wordTomeBin);
-        let verses = this.wordTomeBin[tomeBinVerses];
-        this.wordVerseObjs = await tomeDb.verses.bulkGet(verses);
-        bus.publish('strong.wordVerse.update', this.wordVerseObjs);
+        if (this.words.length) {
+          let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
+          this.wordTomeBin = word[wordTomeBin];
+          queue.publish('strong.wordTomeBin.update', this.wordTomeBin);
+          let verses = this.wordTomeBin[tomeBinVerses];
+          this.wordVerseObjs = await tomeDb.verses.bulkGet(verses);
+          queue.publish('strong.wordVerse.update', this.wordVerseObjs);
+        } else {
+          this.wordTomeBin = [];
+          queue.publish('strong.wordTomeBin.update', this.wordTomeBin);
+          this.wordVerseObjs = [];
+          queue.publish('strong.wordVerse.update', this.wordVerseObjs);
+        }
       }
 
       async verseIdxChange(verseIdx) {
         this.strongVerseIdx = verseIdx;
         this.saveVerseIdx();
         this.strongMapObj = await strongDb.maps.get(this.strongVerseIdx);
-        bus.publish('strong.map.update', this.strongMapObj);
+        queue.publish('strong.map.update', this.strongMapObj);
         this.strongVerseObj = await tomeDb.verses.get(this.strongVerseIdx);
-        bus.publish('strong.verse.update', this.strongVerseObj);
+        queue.publish('strong.verse.update', this.strongVerseObj);
       }
 
       async wordChange(strongWord) {
         this.strongWord = strongWord;
         this.saveWord();
-        let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
-        this.wordTomeBin = word[wordTomeBin];
-        await this.updateWordVerses();
-        await this.updateWordMaps();
-        this.filterReset();
-        bus.publish('strong.word.update', this.strongWord);
+        if (this.words.length) {
+          let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
+          this.wordTomeBin = word[wordTomeBin];
+          await this.updateWordVerses();
+          await this.updateWordMaps();
+          this.filterReset();
+          queue.publish('strong.word.update', this.strongWord);
+        } else {
+          this.wordTomeBin = [];
+          await this.updateWordVerses();
+          await this.updateWordMaps();
+          this.filterReset();
+          queue.publish('strong.word.update', this.strongWord);
+        }
       }
 
       async wordFirst() {
-        let firstKjvWord = this.words[firstWord][wordKjvWord];
-        await this.wordChange(firstKjvWord);
+        if (this.words.length) {
+          let firstKjvWord = this.words[firstWord][wordKjvWord];
+          await this.wordChange(firstKjvWord);
+        } else {
+          await this.wordChange(null);
+        }
       }
 
     }
@@ -11487,7 +11679,7 @@
 
       defClick(btn) {
         let strongDef = btn.dataset.strongDef;
-        bus.publish('strong-def.select', strongDef);
+        queue.publish('strong-def.select', strongDef);
       }
 
       defUpdate(strongDefObj) {
@@ -11496,6 +11688,7 @@
         this.def = this.strongDefObj.v;
         this.updateBanner();
         this.updateList();
+        this.updateActiveWord();
       }
 
       getElements() {
@@ -11554,24 +11747,24 @@
       }
 
       subscribe() {
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
 
-        bus.subscribe('strong-def.hide', () => {
+        queue.subscribe('strong-def.hide', () => {
           this.hide();
         });
-        bus.subscribe('strong-def.show', () => {
+        queue.subscribe('strong-def.show', () => {
           this.show();
         });
 
-        bus.subscribe('strong.def.update', (strongDefObj) => {
+        queue.subscribe('strong.def.update', (strongDefObj) => {
           this.defUpdate(strongDefObj);
         });
-        bus.subscribe('strong.word.update', (strongWord) => {
+        queue.subscribe('strong.word.update', (strongWord) => {
           this.wordUpdate(strongWord);
         });
-        bus.subscribe('strong.wordObj.update', (strongWordObj) => {
+        queue.subscribe('strong.wordObj.update', (strongWordObj) => {
           this.wordObjUpdate(strongWordObj);
         });
       }
@@ -11581,15 +11774,15 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBack) {
-            bus.publish('strong.back', null);
+            queue.publish('strong.back', null);
           } else if (target === this.btnLookup) {
-            bus.publish('strong-lookup', null);
+            queue.publish('strong-lookup', null);
           } else if (target === this.btnHistory) {
-            bus.publish('strong-history', null);
+            queue.publish('strong-history', null);
           } else if (target === this.btnVerse) {
-            bus.publish('strong-verse', null);
+            queue.publish('strong-verse', null);
           } else if (target === this.btnResult) {
-            bus.publish('strong-result', null);
+            queue.publish('strong-result', null);
           }
         }
       }
@@ -11599,9 +11792,9 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnPrev) {
-            bus.publish('strong-def.prev.strong', 1);
+            queue.publish('strong-def.prev.strong', 1);
           } else if (target === this.btnNext) {
-            bus.publish('strong-def.next.strong', 2);
+            queue.publish('strong-def.next.strong', 2);
           }
         }
       }
@@ -11638,7 +11831,7 @@
 
       wordClick(btn) {
         let word = btn.dataset.word;
-        bus.publish('strong-def.word.select', word);
+        queue.publish('strong-def.word.select', word);
       }
 
       wordObjUpdate(strongWordObj) {
@@ -11784,7 +11977,7 @@
           bookIdx: bookIdx,
           chapterIdx: chapterIdx
         };
-        bus.publish('strong-filter.select', strongFilter);
+        queue.publish('strong-filter.select', strongFilter);
       }
 
       filterUpdate(strongFilter) {
@@ -11847,23 +12040,23 @@
       }
 
       subscribe() {
-        bus.subscribe('strong-filter.hide', () => {
+        queue.subscribe('strong-filter.hide', () => {
           this.hide();
         });
-        bus.subscribe('strong-filter.show', () => {
+        queue.subscribe('strong-filter.show', () => {
           this.show();
         });
 
-        bus.subscribe('strong.def.update', (strongDefObj) => {
+        queue.subscribe('strong.def.update', (strongDefObj) => {
           this.defUpdate(strongDefObj);
         });
-        bus.subscribe('strong.filter.update', (strongFilter) => {
+        queue.subscribe('strong.filter.update', (strongFilter) => {
           this.filterUpdate(strongFilter);
         });
-        bus.subscribe('strong.word.update', (strongWord) => {
+        queue.subscribe('strong.word.update', (strongWord) => {
           this.wordUpdate(strongWord);
         });
-        bus.subscribe('strong.wordTomeBin.update', (strongWordTomeBin) => {
+        queue.subscribe('strong.wordTomeBin.update', (strongWordTomeBin) => {
           this.wordTomeBinUpdate(strongWordTomeBin);
         });
       }
@@ -11873,7 +12066,7 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnResult) {
-            bus.publish('strong-result', null);
+            queue.publish('strong-result', null);
           }
         }
       }
@@ -12042,16 +12235,16 @@
         event.preventDefault();
         let target = event.target;
         if (target === this.btnClear) {
-          bus.publish('strong-history.clear', null);
+          queue.publish('strong-history.clear', null);
         }
       }
 
       delete(strongDef) {
-        bus.publish('strong-history.delete', strongDef);
+        queue.publish('strong-history.delete', strongDef);
       }
 
       down(strongDef) {
-        bus.publish('strong-history.down', strongDef);
+        queue.publish('strong-history.down', strongDef);
       }
 
       getElements() {
@@ -12087,7 +12280,7 @@
         if (target) {
           if (target.classList.contains('btn-entry--history')) {
             let strongDef = target.dataset.def;
-            bus.publish('strong-history.select', strongDef);
+            queue.publish('strong-history.select', strongDef);
           } else if (target.classList.contains('btn-icon--menu')) {
             let entry = target.previousSibling;
             this.menuClick(entry);
@@ -12115,14 +12308,14 @@
       }
 
       subscribe() {
-        bus.subscribe('strong-history.hide', () => {
+        queue.subscribe('strong-history.hide', () => {
           this.hide();
         });
-        bus.subscribe('strong-history.show', () => {
+        queue.subscribe('strong-history.show', () => {
           this.show();
         });
 
-        bus.subscribe('strong.history.update', (strongHistory) => {
+        queue.subscribe('strong.history.update', (strongHistory) => {
           this.historyUpdate(strongHistory);
         });
       }
@@ -12132,13 +12325,13 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnDef) {
-            bus.publish('strong-def', null);
+            queue.publish('strong-def', null);
           }
         }
       }
 
       up(strongDef) {
-        bus.publish('strong-history.up', strongDef);
+        queue.publish('strong-history.up', strongDef);
       }
 
       updateList() {
@@ -12232,7 +12425,7 @@
       findClick() {
         let strongNum = this.inputStrongNum.value;
         if (strongNum) {
-          bus.publish('strong-lookup.find', strongNum.toUpperCase());
+          queue.publish('strong-lookup.find', strongNum.toUpperCase());
         }
       }
 
@@ -12272,14 +12465,14 @@
       }
 
       subscribe() {
-        bus.subscribe('strong-lookup.hide', () => {
+        queue.subscribe('strong-lookup.hide', () => {
           this.hide();
         });
-        bus.subscribe('strong-lookup.show', () => {
+        queue.subscribe('strong-lookup.show', () => {
           this.show();
         });
 
-        bus.subscribe('strong.def.error', (message) => {
+        queue.subscribe('strong.def.error', (message) => {
           this.error(message);
         });
       }
@@ -12289,7 +12482,7 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnDef) {
-            bus.publish('strong-def', null);
+            queue.publish('strong-def', null);
           }
         }
       }
@@ -12348,33 +12541,40 @@
       }
 
       applyFilter() {
-        let tomeBin = this.strongWordTomeBin;
-        let bookIdx = this.strongFilter.bookIdx;
-        let chapterIdx = this.strongFilter.chapterIdx;
-        if (bookIdx === -1 && chapterIdx === -1) {
-          this.filteredVerses = tomeBin[tomeBinVerses];
-          this.wordCount = tomeBin[tomeBinWordCount];
-          this.verseCount = tomeBin[tomeBinVerseCount];
-          this.citation = tomeName;
-        } else {
-          let books = tomeBin[tomeBinBooks];
-          let bookBin = this.findBin(books, bookIdx);
-          if (chapterIdx === -1) {
-            this.filteredVerses = tomeBin[tomeBinVerses]
-              .slice(bookBin[bookBinSliceStart], bookBin[bookBinSliceEnd]);
-            this.wordCount = bookBin[bookBinWordCount];
-            this.verseCount = bookBin[bookBinVerseCount];
-            this.citation = tomeBooks[bookIdx][bookLongName];
+        if (this.strongWordTomeBin.length) {
+          let tomeBin = this.strongWordTomeBin;
+          let bookIdx = this.strongFilter.bookIdx;
+          let chapterIdx = this.strongFilter.chapterIdx;
+          if (bookIdx === -1 && chapterIdx === -1) {
+            this.filteredVerses = tomeBin[tomeBinVerses];
+            this.wordCount = tomeBin[tomeBinWordCount];
+            this.verseCount = tomeBin[tomeBinVerseCount];
+            this.citation = tomeName;
           } else {
-            let chapters = bookBin[bookBinChapters];
-            let chapterBin = this.findBin(chapters, chapterIdx);
-            this.filteredVerses = tomeBin[tomeBinVerses]
-              .slice(chapterBin[chapterBinSliceStart],
-                chapterBin[chapterBinSliceEnd]);
-            this.wordCount = chapterBin[chapterBinWordCount];
-            this.verseCount = chapterBin[chapterBinVerseCount];
-            this.citation = tomeChapters[chapterIdx][chapterName];
+            let books = tomeBin[tomeBinBooks];
+            let bookBin = this.findBin(books, bookIdx);
+            if (chapterIdx === -1) {
+              this.filteredVerses = tomeBin[tomeBinVerses]
+                .slice(bookBin[bookBinSliceStart], bookBin[bookBinSliceEnd]);
+              this.wordCount = bookBin[bookBinWordCount];
+              this.verseCount = bookBin[bookBinVerseCount];
+              this.citation = tomeBooks[bookIdx][bookLongName];
+            } else {
+              let chapters = bookBin[bookBinChapters];
+              let chapterBin = this.findBin(chapters, chapterIdx);
+              this.filteredVerses = tomeBin[tomeBinVerses]
+                .slice(chapterBin[chapterBinSliceStart],
+                  chapterBin[chapterBinSliceEnd]);
+              this.wordCount = chapterBin[chapterBinWordCount];
+              this.verseCount = chapterBin[chapterBinVerseCount];
+              this.citation = tomeChapters[chapterIdx][chapterName];
+            }
           }
+        } else {
+          this.filteredVerses = [];
+          this.wordCount = null;
+          this.verseCount = null;
+          this.citation = null;
         }
       }
 
@@ -12461,12 +12661,19 @@
       defUpdate(strongDefObj) {
         this.strongDefObj = strongDefObj;
         this.strongDef = this.strongDefObj.k;
+        this.updateBanner();
+        this.updateList();
+      }
+
+      filterChange() {
+        this.filterChangePending = true;
       }
 
       filterUpdate(strongFilter) {
         this.strongFilter = strongFilter;
-        if (this.strongWord) {
-          this.applyFilter();
+        this.applyFilter();
+        if (this.filterChangePending) {
+          this.filterChangePending = false;
           this.updateBanner();
           this.updateList();
         }
@@ -12527,9 +12734,9 @@
           if (btn.classList.contains('btn-result')) {
             let verseIdx = parseInt(btn.dataset.verseIdx);
             if (this.strongMode) {
-              bus.publish('strong-result.strong-select', verseIdx);
+              queue.publish('strong-result.strong-select', verseIdx);
             } else {
-              bus.publish('strong-result.read-select', verseIdx);
+              queue.publish('strong-result.read-select', verseIdx);
             }
           }
         }
@@ -12595,44 +12802,50 @@
       }
 
       subscribe() {
-        bus.subscribe('font.update', (font) => {
+        queue.subscribe('font.update', (font) => {
           this.fontUpdate(font);
         });
 
-        bus.subscribe('font-size.update', (fontSize) => {
+        queue.subscribe('font-size.update', (fontSize) => {
           this.fontSizeUpdate(fontSize);
         });
 
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
 
-        bus.subscribe('strong-result.hide', () => {
+        queue.subscribe('strong-result.hide', () => {
           this.hide();
         });
-        bus.subscribe('strong-result.show', () => {
+        queue.subscribe('strong-result.show', () => {
           this.show();
         });
 
-        bus.subscribe('strong.def.update', (strongDefObj) => {
+        queue.subscribe('strong.def.update', (strongDefObj) => {
           this.defUpdate(strongDefObj);
         });
-        bus.subscribe('strong.filter.update', (strongFilter) => {
+        queue.subscribe('strong.filter.change', () => {
+          this.filterChange();
+        });
+        queue.subscribe('strong.filter.update', (strongFilter) => {
           this.filterUpdate(strongFilter);
         });
-        bus.subscribe('strong.strong-mode.update', (strongMode) => {
+        queue.subscribe('strong.strong-mode.update', (strongMode) => {
           this.modeUpdate(strongMode);
         });
-        bus.subscribe('strong.word.update', (strongWord) => {
+        queue.subscribe('strong.word.change', () => {
+          this.wordChange();
+        });
+        queue.subscribe('strong.word.update', (strongWord) => {
           this.wordUpdate(strongWord);
         });
-        bus.subscribe('strong.wordTomeBin.update', (wordTomeBin) => {
+        queue.subscribe('strong.wordTomeBin.update', (wordTomeBin) => {
           this.wordTomeBinUpdate(wordTomeBin);
         });
-        bus.subscribe('strong.wordMap.update', (wordMapObjs) => {
+        queue.subscribe('strong.wordMap.update', (wordMapObjs) => {
           this.wordMapUpdate(wordMapObjs);
         });
-        bus.subscribe('strong.wordVerse.update', (wordVerseObjs) => {
+        queue.subscribe('strong.wordVerse.update', (wordVerseObjs) => {
           this.wordVerseUpdate(wordVerseObjs);
         });
       }
@@ -12642,23 +12855,27 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBack) {
-            bus.publish('strong.back', null);
+            queue.publish('strong.back', null);
           } else if (target === this.btnFilter) {
-            bus.publish('strong-filter', null);
+            queue.publish('strong-filter', null);
           } else if (target === this.btnStrongMode) {
-            bus.publish('strong.strong-mode.click', null);
+            queue.publish('strong.strong-mode.click', null);
           } else if (target === this.btnStrongDef) {
-            bus.publish('strong-def', null);
+            queue.publish('strong-def', null);
           } else if (target === this.btnStrongVerse) {
-            bus.publish('strong-verse', null);
+            queue.publish('strong-verse', null);
           }
         }
       }
 
       updateBanner() {
-        this.banner.innerHTML = `${this.citation} ` +
-          `(${this.wordCount}/${this.verseCount})<br>` +
-          `${this.strongDef} ${this.strongWord}`;
+        if (this.citation) {
+          this.banner.innerHTML = `${this.citation} ` +
+            `(${this.wordCount}/${this.verseCount})<br>` +
+            `${this.strongDef} ${this.strongWord}`;
+        } else {
+          this.banner.innerHTML = this.strongDef;
+        }
       }
 
       updateList() {
@@ -12667,6 +12884,10 @@
         this.loadIdx = 0;
         this.loadedVerses = 0;
         this.loadVerses();
+      }
+
+      wordChange() {
+        this.wordChangePending = true;
       }
 
       wordMapUpdate(wordMapObjs) {
@@ -12683,6 +12904,11 @@
 
       wordUpdate(strongWord) {
         this.strongWord = strongWord;
+        if (this.wordChangePending) {
+          this.wordChangePending = false;
+          this.updateBanner();
+          this.updateList();
+        }
       }
 
     }
@@ -12781,7 +13007,7 @@
         let target = event.target;
         if (target.classList.contains('btn-strong')) {
           let strongDef = target.dataset.strongDef;
-          bus.publish('strong-verse.select', strongDef);
+          queue.publish('strong-verse.select', strongDef);
         }
       }
 
@@ -12807,21 +13033,21 @@
       }
 
       subscribe() {
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
 
-        bus.subscribe('strong-verse.hide', () => {
+        queue.subscribe('strong-verse.hide', () => {
           this.hide();
         });
-        bus.subscribe('strong-verse.show', () => {
+        queue.subscribe('strong-verse.show', () => {
           this.show();
         });
 
-        bus.subscribe('strong.map.update', (strongMapObj) => {
+        queue.subscribe('strong.map.update', (strongMapObj) => {
           this.mapUpdate(strongMapObj);
         });
-        bus.subscribe('strong.verse.update', (strongVerseObj) => {
+        queue.subscribe('strong.verse.update', (strongVerseObj) => {
           this.verseUpdate(strongVerseObj);
         });
       }
@@ -12831,11 +13057,11 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBack) {
-            bus.publish('strong.back', null);
+            queue.publish('strong.back', null);
           } else if (target === this.btnStrongDef) {
-            bus.publish('strong-def', null);
+            queue.publish('strong-def', null);
           } else if (target === this.btnResult) {
-            bus.publish('strong-result', null);
+            queue.publish('strong-result', null);
           }
         }
       }
@@ -12873,67 +13099,80 @@
       }
 
       back() {
-        bus.publish('sidebar.change', 'none');
+        queue.publish('sidebar.change', 'none');
       }
 
       chapterIdxUpdate() {
         if (this.selectVerseIdx) {
           if (this.panes === 1 && this.sidebar !== 'none') {
-            bus.publish('sidebar.select', 'none');
+            queue.publish('sidebar.select', 'none');
           }
-          bus.publish('read.scroll-to-verse', this.selectVerseIdx);
+          queue.publish('read.scroll-to-verse', this.selectVerseIdx);
           this.selectVerseIdx = null;
         }
       }
 
       def() {
-        bus.publish('strong.task.change', 'strong-def');
+        queue.publish('strong.task.change', 'strong-def');
       }
 
       defSelect(strongDef) {
-        bus.publish('strong.def.sub-change', strongDef);
+        queue.publish('strong.def.sub-change', strongDef);
+      }
+
+      defChange() {
+        this.defChangePending = true;
       }
 
       defUpdate() {
-        bus.publish('strong.task.change', 'strong-def');
+        if (this.defChangePending) {
+          this.defChangePending = false;
+          queue.publish('strong.task.change', 'strong-def');
+        }
       }
 
       filter() {
-        bus.publish('strong.task.change', 'strong-filter');
+        queue.publish('strong.task.change', 'strong-filter');
       }
 
       filterSelect(strongFilter) {
-        bus.publish('strong.filter.change', strongFilter);
-        bus.publish('strong.task.change', 'strong-result');
+        this.filterSelectPending = true;
+        queue.publish('strong.filter.change', strongFilter);
+      }
+
+      filterUpdate() {
+        if (this.filterSelectPending) {
+          this.filterSelectPending = false;
+          queue.publish('strong.task.change', 'strong-result');
+        }
       }
 
       hide() {
-        bus.publish(`${this.strongTask}.hide`, null);
+        queue.publish(`${this.strongTask}.hide`, null);
       }
 
       history() {
-        bus.publish('strong.task.change', 'strong-history');
+        queue.publish('strong.task.change', 'strong-history');
       }
 
       historyClear() {
-        bus.publish('strong.history.clear', null);
+        queue.publish('strong.history.clear', null);
       }
 
       historyDelete(strongDef) {
-        bus.publish('strong.history.delete', strongDef);
+        queue.publish('strong.history.delete', strongDef);
       }
 
       historyDown(strongDef) {
-        bus.publish('strong.history.down', strongDef);
+        queue.publish('strong.history.down', strongDef);
       }
 
       historySelect(strongDef) {
-        bus.publish('strong.def.change', strongDef);
-        bus.publish('strong.task.change', 'strong-def');
+        queue.publish('strong.def.change', strongDef);
       }
 
       historyUp(strongDef) {
-        bus.publish('strong.history.up', strongDef);
+        queue.publish('strong.history.up', strongDef);
       }
 
       initialize() {
@@ -12941,19 +13180,19 @@
       }
 
       lookup() {
-        bus.publish('strong.task.change', 'strong-lookup');
+        queue.publish('strong.task.change', 'strong-lookup');
       }
 
       lookupFind(strongNum) {
-        bus.publish('strong.def.change', strongNum);
+        queue.publish('strong.def.change', strongNum);
       }
 
       modeToggle() {
-        bus.publish('strong.strong-mode.toggle', null);
+        queue.publish('strong.strong-mode.toggle', null);
       }
 
       nextStrong() {
-        bus.publish('strong.next', null);
+        queue.publish('strong.next', null);
       }
 
       panesUpdate(panes) {
@@ -12961,17 +13200,17 @@
       }
 
       prevStrong() {
-        bus.publish('strong.prev', null);
+        queue.publish('strong.prev', null);
       }
 
       readSelect(verseIdx) {
         this.selectVerseIdx = verseIdx;
         let chapterIdx = chapterIdxByVerseIdx(verseIdx);
-        bus.publish('chapterIdx.change', chapterIdx);
+        queue.publish('chapterIdx.change', chapterIdx);
       }
 
       show() {
-        bus.publish(`${this.strongTask}.show`, null);
+        queue.publish(`${this.strongTask}.show`, null);
       }
 
       sidebarUpdate(sidebar) {
@@ -12979,135 +13218,168 @@
       }
 
       search() {
-        bus.publish('strong.task.change', 'strong-result');
+        queue.publish('strong.task.change', 'strong-result');
       }
 
       strongSelect(verseIdx) {
-        bus.publish('strong.verse.change', verseIdx);
-        bus.publish('strong.task.change', 'strong-verse');
+        queue.publish('strong.verse.change', verseIdx);
       }
 
       subscribe() {
-        bus.subscribe('chapterIdx.update', () => {
+        queue.subscribe('chapterIdx.update', () => {
           this.chapterIdxUpdate();
         });
 
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
 
-        bus.subscribe('sidebar.update', (sidebar) => {
+        queue.subscribe('sidebar.update', (sidebar) => {
           this.sidebarUpdate(sidebar);
         });
 
-        bus.subscribe('strong-def', () => {
+        queue.subscribe('strong-def', () => {
           this.def();
         });
-        bus.subscribe('strong-def.next.strong',
+        queue.subscribe('strong-def.next.strong',
           () => { this.nextStrong(); }
         );
-        bus.subscribe('strong-def.prev.strong',
+        queue.subscribe('strong-def.prev.strong',
           () => { this.prevStrong(); }
         );
-        bus.subscribe('strong-def.select', (strongDef) => {
+        queue.subscribe('strong-def.select', (strongDef) => {
           this.defSelect(strongDef);
         });
-        bus.subscribe('strong-def.word.select', (strongWord) => {
+        queue.subscribe('strong-def.word.select', (strongWord) => {
           this.wordSelect(strongWord);
         });
 
-        bus.subscribe('strong-filter', () => {
+        queue.subscribe('strong-filter', () => {
           this.filter();
         });
-        bus.subscribe('strong-filter.select', (strongFilter) => {
+        queue.subscribe('strong-filter.select', (strongFilter) => {
           this.filterSelect(strongFilter);
         });
 
-        bus.subscribe('strong-history', () => {
+        queue.subscribe('strong-history', () => {
           this.history();
         });
-        bus.subscribe('strong-history.clear', () => {
+        queue.subscribe('strong-history.clear', () => {
           this.historyClear();
         });
-        bus.subscribe('strong-history.delete', (strongDef) => {
+        queue.subscribe('strong-history.delete', (strongDef) => {
           this.historyDelete(strongDef);
         });
-        bus.subscribe('strong-history.down', (strongDef) => {
+        queue.subscribe('strong-history.down', (strongDef) => {
           this.historyDown(strongDef);
         });
-        bus.subscribe('strong-history.select', (strongDef) => {
+        queue.subscribe('strong-history.select', (strongDef) => {
           this.historySelect(strongDef);
         });
-        bus.subscribe('strong-history.up', (strongDef) => {
+        queue.subscribe('strong-history.up', (strongDef) => {
           this.historyUp(strongDef);
         });
 
-        bus.subscribe('strong-lookup', () => {
+        queue.subscribe('strong-lookup', () => {
           this.lookup();
         });
-        bus.subscribe('strong-lookup.find', (strongNum) => {
+        queue.subscribe('strong-lookup.find', (strongNum) => {
           this.lookupFind(strongNum);
         });
 
-        bus.subscribe('strong-result', () => {
+        queue.subscribe('strong-result', () => {
           this.search();
         });
-        bus.subscribe('strong-result.read-select', (verseIdx) => {
+        queue.subscribe('strong-result.read-select', (verseIdx) => {
           this.readSelect(verseIdx);
         });
-        bus.subscribe('strong-result.strong-select', (verseIdx) => {
+        queue.subscribe('strong-result.strong-select', (verseIdx) => {
           this.strongSelect(verseIdx);
         });
 
-        bus.subscribe('strong-verse', () => {
+        queue.subscribe('strong-verse', () => {
           this.verse();
         });
-        bus.subscribe('strong-verse.select', (strongDef) => {
+        queue.subscribe('strong-verse.select', (strongDef) => {
           this.verseSelect(strongDef);
         });
 
-        bus.subscribe('strong.back', () => {
+        queue.subscribe('strong.back', () => {
           this.back();
         });
-        bus.subscribe('strong.def.update', () => {
+        queue.subscribe('strong.def.change', () => {
+          this.defChange();
+        });
+        queue.subscribe('strong.def.update', () => {
           this.defUpdate();
         });
-        bus.subscribe('strong.hide', () => {
+        queue.subscribe('strong.filter.update', () => {
+          this.filterUpdate();
+        });
+        queue.subscribe('strong.hide', () => {
           this.hide();
         });
-        bus.subscribe('strong.show', () => {
+        queue.subscribe('strong.show', () => {
           this.show();
         });
-        bus.subscribe('strong.strong-mode.click', () => {
+        queue.subscribe('strong.strong-mode.click', () => {
           this.modeToggle();
         });
-        bus.subscribe('strong.task.update', (strongTask) => {
+        queue.subscribe('strong.task.update', (strongTask) => {
           this.taskUpdate(strongTask);
+        });
+        queue.subscribe('strong.verse.change', () => {
+          this.verseChange();
+        });
+        queue.subscribe('strong.verse.update', () => {
+          this.verseUpdate();
+        });
+        queue.subscribe('strong.word.update', () => {
+          this.wordUpdate();
         });
       }
 
       taskUpdate(strongTask) {
         if (this.sidebar === 'strong') {
-          bus.publish(`${this.strongTask}.hide`, null);
-          this.strongTask = strongTask;
-          bus.publish(`${this.strongTask}.show`, null);
+          if (this.strongTask !== strongTask) {
+            queue.publish(`${this.strongTask}.hide`, null);
+            this.strongTask = strongTask;
+            queue.publish(`${this.strongTask}.show`, null);
+          }
         } else {
           this.strongTask = strongTask;
         }
       }
 
       verse() {
-        bus.publish('strong.task.change', 'strong-verse');
+        queue.publish('strong.task.change', 'strong-verse');
+      }
+
+      verseChange() {
+        this.verseChangePending = true;
       }
 
       verseSelect(strongDef) {
-        bus.publish('strong.def.change', strongDef);
-        bus.publish('strong.task.change', 'strong-def');
+        queue.publish('strong.def.change', strongDef);
+      }
+
+      verseUpdate() {
+        if (this.verseChangePending) {
+          this.verseChangePending = false;
+          queue.publish('strong.task.change', 'strong-verse');
+        }
       }
 
       wordSelect(strongWord) {
-        bus.publish('strong.word.change', strongWord);
-        bus.publish('strong.task.change', 'strong-result');
+        this.wordSelectPending = true;
+        queue.publish('strong.word.change', strongWord);
+      }
+
+      wordUpdate() {
+        if (this.wordSelectPending) {
+          this.wordSelectPending = false;
+          queue.publish('strong.task.change', 'strong-result');
+        }
       }
 
     }
@@ -13129,7 +13401,7 @@
       fontChange(font) {
         this.font = font;
         this.saveFont();
-        bus.publish('font.update', this.font);
+        queue.publish('font.update', this.font);
       }
 
       fontIsValid(font) {
@@ -13148,7 +13420,7 @@
       fontSizeChange(fontSize) {
         this.fontSize = fontSize;
         this.saveFontSize();
-        bus.publish('font-size.update', this.fontSize);
+        queue.publish('font-size.update', this.fontSize);
       }
 
       initialize() {
@@ -13181,7 +13453,7 @@
           fontName: 'Playfair Display',
           fontClass: 'font--playfair-display'
         });
-        bus.publish('fonts.update', this.fonts);
+        queue.publish('fonts.update', this.fonts);
       }
 
       initializeThemes() {
@@ -13214,7 +13486,7 @@
           themeName: 'Amethyst',
           themeClass: 'theme--amethyst'
         });
-        bus.publish('themes.update', this.themes);
+        queue.publish('themes.update', this.themes);
       }
 
       restore() {
@@ -13292,19 +13564,19 @@
       }
 
       subscribe() {
-        bus.subscribe('font.change', (font) => {
+        queue.subscribe('font.change', (font) => {
           this.fontChange(font);
         });
 
-        bus.subscribe('font-size.change', (fontSize) => {
+        queue.subscribe('font-size.change', (fontSize) => {
           this.fontSizeChange(fontSize);
         });
 
-        bus.subscribe('setting.restore', () => {
+        queue.subscribe('setting.restore', () => {
           this.restore();
         });
 
-        bus.subscribe('theme.change', (theme) => {
+        queue.subscribe('theme.change', (theme) => {
           this.themeChange(theme);
         });
       }
@@ -13312,7 +13584,7 @@
       themeChange(theme) {
         this.theme = theme;
         this.saveTheme();
-        bus.publish('theme.update', this.theme);
+        queue.publish('theme.update', this.theme);
       }
 
       themeIsValid(theme) {
@@ -13441,9 +13713,9 @@
         let btn = target.closest('button');
         if (btn) {
           if (btn === this.btnPrevFont) {
-            bus.publish('setting.font-prev', null);
+            queue.publish('setting.font-prev', null);
           } else if (btn === this.btnNextFont) {
-            bus.publish('setting.font-next', null);
+            queue.publish('setting.font-next', null);
           }
         }
       }
@@ -13452,7 +13724,7 @@
         let btn = target.closest('button');
         if (btn.classList.contains('btn-font-size')) {
           let dataSize = btn.dataset.size;
-          bus.publish('setting.font-size', dataSize);
+          queue.publish('setting.font-size', dataSize);
         }
       }
 
@@ -13526,26 +13798,26 @@
       }
 
       subscribe() {
-        bus.subscribe('font.update', (font) => {
+        queue.subscribe('font.update', (font) => {
           this.fontUpdate(font);
         });
 
-        bus.subscribe('font-size.update', (fontSize) => {
+        queue.subscribe('font-size.update', (fontSize) => {
           this.fontSizeUpdate(fontSize);
         });
 
-        bus.subscribe('setting.hide', () => {
+        queue.subscribe('setting.hide', () => {
           this.hide();
         });
-        bus.subscribe('setting.show', () => {
+        queue.subscribe('setting.show', () => {
           this.show();
         });
 
-        bus.subscribe('theme.update', (theme) => {
+        queue.subscribe('theme.update', (theme) => {
           this.themeUpdate(theme);
         });
 
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
       }
@@ -13554,9 +13826,9 @@
         let btn = target.closest('button');
         if (btn) {
           if (btn === this.btnPrevTheme) {
-            bus.publish('setting.theme-prev', null);
+            queue.publish('setting.theme-prev', null);
           } else if (btn === this.btnNextTheme) {
-            bus.publish('setting.theme-next', null);
+            queue.publish('setting.theme-next', null);
           }
         }
       }
@@ -13572,7 +13844,7 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBack) {
-            bus.publish('setting.back', null);
+            queue.publish('setting.back', null);
           }
         }
       }
@@ -13623,21 +13895,21 @@
       }
 
       back() {
-        bus.publish('sidebar.change', 'none');
+        queue.publish('sidebar.change', 'none');
       }
 
       fontNext() {
         this.getNextFontIdx();
-        bus.publish('font.change', this.fonts[this.fontIdx]);
+        queue.publish('font.change', this.fonts[this.fontIdx]);
       }
 
       fontPrev() {
         this.getPrevFontIdx();
-        bus.publish('font.change', this.fonts[this.fontIdx]);
+        queue.publish('font.change', this.fonts[this.fontIdx]);
       }
 
       fontSize(fontSize) {
-        bus.publish('font-size.change', fontSize);
+        queue.publish('font-size.change', fontSize);
       }
 
       fontUpdate(font) {
@@ -13675,51 +13947,51 @@
       }
 
       subscribe() {
-        bus.subscribe('font.update', (font) => {
+        queue.subscribe('font.update', (font) => {
           this.fontUpdate(font);
         });
 
-        bus.subscribe('fonts.update', (fonts) => {
+        queue.subscribe('fonts.update', (fonts) => {
           this.fontsUpdate(fonts);
         });
 
-        bus.subscribe('setting.back', () => {
+        queue.subscribe('setting.back', () => {
           this.back();
         });
-        bus.subscribe('setting.font-next', () => {
+        queue.subscribe('setting.font-next', () => {
           this.fontNext();
         });
-        bus.subscribe('setting.font-prev', () => {
+        queue.subscribe('setting.font-prev', () => {
           this.fontPrev();
         });
-        bus.subscribe('setting.font-size', (fontSize) => {
+        queue.subscribe('setting.font-size', (fontSize) => {
           this.fontSize(fontSize);
         });
 
-        bus.subscribe('setting.theme-next', () => {
+        queue.subscribe('setting.theme-next', () => {
           this.themeNext();
         });
-        bus.subscribe('setting.theme-prev', () => {
+        queue.subscribe('setting.theme-prev', () => {
           this.themePrev();
         });
 
-        bus.subscribe('theme.update', (theme) => {
+        queue.subscribe('theme.update', (theme) => {
           this.themeUpdate(theme);
         });
 
-        bus.subscribe('themes.update', (themes) => {
+        queue.subscribe('themes.update', (themes) => {
           this.themesUpdate(themes);
         });
       }
 
       themeNext() {
         this.getNextThemeIdx();
-        bus.publish('theme.change', this.themes[this.themeIdx]);
+        queue.publish('theme.change', this.themes[this.themeIdx]);
       }
 
       themePrev() {
         this.getPrevThemeIdx();
-        bus.publish('theme.change', this.themes[this.themeIdx]);
+        queue.publish('theme.change', this.themes[this.themeIdx]);
       }
 
       themeUpdate(theme) {
@@ -13802,13 +14074,13 @@
       }
 
       subscribe() {
-        bus.subscribe('help.restore', () => {
+        queue.subscribe('help.restore', () => {
           this.restore();
         });
-        bus.subscribe('help.task.change', (helpTask) => {
+        queue.subscribe('help.task.change', (helpTask) => {
           this.taskChange(helpTask);
         });
-        bus.subscribe('help.topic.change', (helpTopic) => {
+        queue.subscribe('help.topic.change', (helpTopic) => {
           this.topicChange(helpTopic);
         });
       }
@@ -13816,13 +14088,13 @@
       taskChange(helpTask) {
         this.helpTask = helpTask;
         this.saveHelpTask();
-        bus.publish('help.task.update', this.helpTask);
+        queue.publish('help.task.update', this.helpTask);
       }
 
       topicChange(helpTopic) {
         this.helpTopic = helpTopic;
         this.saveHelpTopic();
-        bus.publish('help.topic.update', this.helpTopic);
+        queue.publish('help.topic.update', this.helpTopic);
       }
 
     }
@@ -13930,7 +14202,7 @@
         if (target) {
           if (target.classList.contains('btn-topic')) {
             let helpTopic = target.dataset.topic;
-            bus.publish('help-topic.select', helpTopic);
+            queue.publish('help-topic.select', helpTopic);
           }
         }
       }
@@ -13940,14 +14212,14 @@
       }
 
       subscribe() {
-        bus.subscribe('help-topic.show', () => {
+        queue.subscribe('help-topic.show', () => {
           this.show();
         });
-        bus.subscribe('help-topic.hide', () => {
+        queue.subscribe('help-topic.hide', () => {
           this.hide();
         });
 
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
       }
@@ -13957,9 +14229,9 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBack) {
-            bus.publish('help.back', null);
+            queue.publish('help.back', null);
           } else if (target === this.btnHelpRead) {
-            bus.publish('help-read', null);
+            queue.publish('help-read', null);
           }
         }
       }
@@ -14034,18 +14306,18 @@
       }
 
       subscribe() {
-        bus.subscribe('help-read.show', () => {
+        queue.subscribe('help-read.show', () => {
           this.show();
         });
-        bus.subscribe('help-read.hide', () => {
+        queue.subscribe('help-read.hide', () => {
           this.hide();
         });
 
-        bus.subscribe('help.topic.update', (helpTopic) => {
+        queue.subscribe('help.topic.update', (helpTopic) => {
           this.topicUpdate(helpTopic);
         });
 
-        bus.subscribe('panes.update', (panes) => {
+        queue.subscribe('panes.update', (panes) => {
           this.panesUpdate(panes);
         });
       }
@@ -14055,9 +14327,9 @@
         let target = event.target.closest('button');
         if (target) {
           if (target === this.btnBack) {
-            bus.publish('help.back', null);
+            queue.publish('help.back', null);
           } else if (target === this.btnHelpTopic) {
-            bus.publish('help-topic', null);
+            queue.publish('help-topic', null);
           }
         }
       }
@@ -14094,11 +14366,11 @@
       }
 
       back() {
-        bus.publish('sidebar.change', 'none');
+        queue.publish('sidebar.change', 'none');
       }
 
       hide() {
-        bus.publish(`${this.helpTask}.hide`, null);
+        queue.publish(`${this.helpTask}.hide`, null);
       }
 
       initialize() {
@@ -14106,11 +14378,11 @@
       }
 
       read() {
-        bus.publish('help.task.change', 'help-read');
+        queue.publish('help.task.change', 'help-read');
       }
 
       show() {
-        bus.publish(`${this.helpTask}.show`, null);
+        queue.publish(`${this.helpTask}.show`, null);
       }
 
       sidebarUpdate(sidebar) {
@@ -14118,52 +14390,54 @@
       }
 
       subscribe() {
-        bus.subscribe('help-read', () => {
+        queue.subscribe('help-read', () => {
           this.read();
         });
 
-        bus.subscribe('help-topic', (helpTopic) => {
+        queue.subscribe('help-topic', (helpTopic) => {
           this.topic(helpTopic);
         });
-        bus.subscribe('help-topic.select', (helpTopic) => {
+        queue.subscribe('help-topic.select', (helpTopic) => {
           this.topicSelect(helpTopic);
         });
 
-        bus.subscribe('help.back', () => {
+        queue.subscribe('help.back', () => {
           this.back();
         });
-        bus.subscribe('help.hide', () => {
+        queue.subscribe('help.hide', () => {
           this.hide();
         });
-        bus.subscribe('help.show', () => {
+        queue.subscribe('help.show', () => {
           this.show();
         });
-        bus.subscribe('help.task.update', (helpTask) => {
+        queue.subscribe('help.task.update', (helpTask) => {
           this.taskUpdate(helpTask);
         });
 
-        bus.subscribe('sidebar.update', (sidebar) => {
+        queue.subscribe('sidebar.update', (sidebar) => {
           this.sidebarUpdate(sidebar);
         });
       }
 
       taskUpdate(helpTask) {
         if (this.sidebar === 'help') {
-          bus.publish(`${this.helpTask}.hide`, null);
-          this.helpTask = helpTask;
-          bus.publish(`${this.helpTask}.show`, null);
+          if (this.helpTask !== helpTask) {
+            queue.publish(`${this.helpTask}.hide`, null);
+            this.helpTask = helpTask;
+            queue.publish(`${this.helpTask}.show`, null);
+          }
         } else {
           this.helpTask = helpTask;
         }
       }
 
       topic() {
-        bus.publish('help.task.change', 'help-topic');
+        queue.publish('help.task.change', 'help-topic');
       }
 
       topicSelect(helpTopic) {
-        bus.publish('help.topic.change', helpTopic);
-        bus.publish('help.task.change', 'help-read');
+        queue.publish('help.topic.change', helpTopic);
+        queue.publish('help.task.change', 'help-read');
       }
 
     }
@@ -14185,16 +14459,15 @@
       await initializeTome(progress$2);
       await initializeStrong(progress$2);
 
-      let readModel = new ReadModel();
       let readView = new ReadView();
       let readController = new ReadController();
+      let readModel = new ReadModel();
 
-      let navigatorModel = new NavigatorModel();
       let navigatorBookView = new NavigatorBookView();
       let navigatorChapterView = new NavigatorChapterView();
       let navigatorController = new NavigatorController();
+      let navigatorModel = new NavigatorModel();
 
-      let bookmarkModel = new BookmarkModel();
       let bookmarkListView = new BookmarkListView();
       let bookmarkMoveCopyView = new BookmarkMoveCopyView();
       let bookmarkFolderView = new BookmarkFolderView();
@@ -14204,15 +14477,15 @@
       let bookmarkExportview = new BookmarkExportview();
       let bookmarkImportView = new BookmarkImportView();
       let bookmarkController = new BookmarkController();
+      let bookmarkModel = new BookmarkModel();
 
-      let searchModel = new SearchModel();
       let searchResultView = new SearchResultView();
       let searchFilterView = new SearchFilterView();
       let searchHistoryView = new SearchHistoryView();
       let searchLookupView = new SearchLookupView();
       let searchController = new SearchController();
+      let searchModel = new SearchModel();
 
-      let strongModel = new StrongModel();
       let strongDefView = new StrongDefView();
       let strongFilterView = new StrongFilterView();
       let strongHistoryView = new StrongHistoryView();
@@ -14220,15 +14493,16 @@
       let strongSearchView = new StrongResultView();
       let strongVerseView = new StrongVerseView();
       let strongController = new StrongController();
+      let strongModel = new StrongModel();
 
-      let settingModel = new SettingModel();
       let settingView = new SettingView();
       let settingController = new SettingController();
+      let settingModel = new SettingModel();
 
-      let helpModel = new HelpModel();
       let helpReadView = new HelpReadView();
       let helpTopicView = new HelpTopicView();
       let helpController = new HelpController();
+      let helpModel = new HelpModel();
 
       load.classList.add('load--hide');
       document.documentElement.classList.add(APP_FONT);

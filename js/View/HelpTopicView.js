@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 
 import {
   templateElement,
@@ -113,7 +113,7 @@ class HelpTopicView {
     if (target) {
       if (target.classList.contains('btn-topic')) {
         let helpTopic = target.dataset.topic;
-        bus.publish('help-topic.select', helpTopic);
+        queue.publish('help-topic.select', helpTopic);
       }
     }
   }
@@ -123,14 +123,14 @@ class HelpTopicView {
   }
 
   subscribe() {
-    bus.subscribe('help-topic.show', () => {
+    queue.subscribe('help-topic.show', () => {
       this.show();
     });
-    bus.subscribe('help-topic.hide', () => {
+    queue.subscribe('help-topic.hide', () => {
       this.hide();
     });
 
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
   }
@@ -140,9 +140,9 @@ class HelpTopicView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBack) {
-        bus.publish('help.back', null);
+        queue.publish('help.back', null);
       } else if (target === this.btnHelpRead) {
-        bus.publish('help-read', null);
+        queue.publish('help-read', null);
       }
     }
   }

@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import {
   templateBtnIcon,
   templateElement,
@@ -121,9 +121,9 @@ class SettingView {
     let btn = target.closest('button');
     if (btn) {
       if (btn === this.btnPrevFont) {
-        bus.publish('setting.font-prev', null);
+        queue.publish('setting.font-prev', null);
       } else if (btn === this.btnNextFont) {
-        bus.publish('setting.font-next', null);
+        queue.publish('setting.font-next', null);
       }
     }
   }
@@ -132,7 +132,7 @@ class SettingView {
     let btn = target.closest('button');
     if (btn.classList.contains('btn-font-size')) {
       let dataSize = btn.dataset.size;
-      bus.publish('setting.font-size', dataSize);
+      queue.publish('setting.font-size', dataSize);
     }
   }
 
@@ -206,26 +206,26 @@ class SettingView {
   }
 
   subscribe() {
-    bus.subscribe('font.update', (font) => {
+    queue.subscribe('font.update', (font) => {
       this.fontUpdate(font);
     });
 
-    bus.subscribe('font-size.update', (fontSize) => {
+    queue.subscribe('font-size.update', (fontSize) => {
       this.fontSizeUpdate(fontSize);
     });
 
-    bus.subscribe('setting.hide', () => {
+    queue.subscribe('setting.hide', () => {
       this.hide();
     });
-    bus.subscribe('setting.show', () => {
+    queue.subscribe('setting.show', () => {
       this.show();
     });
 
-    bus.subscribe('theme.update', (theme) => {
+    queue.subscribe('theme.update', (theme) => {
       this.themeUpdate(theme);
     });
 
-    bus.subscribe('panes.update', (panes) => {
+    queue.subscribe('panes.update', (panes) => {
       this.panesUpdate(panes);
     });
   }
@@ -234,9 +234,9 @@ class SettingView {
     let btn = target.closest('button');
     if (btn) {
       if (btn === this.btnPrevTheme) {
-        bus.publish('setting.theme-prev', null);
+        queue.publish('setting.theme-prev', null);
       } else if (btn === this.btnNextTheme) {
-        bus.publish('setting.theme-next', null);
+        queue.publish('setting.theme-next', null);
       }
     }
   }
@@ -252,7 +252,7 @@ class SettingView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnBack) {
-        bus.publish('setting.back', null);
+        queue.publish('setting.back', null);
       }
     }
   }

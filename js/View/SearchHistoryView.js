@@ -1,6 +1,6 @@
 'use strict';
 
-import { bus } from '../EventBus.js';
+import { queue } from '../CommandQueue.js';
 import {
   templateActionMenu,
   templateBtnIcon,
@@ -122,16 +122,16 @@ class SearchHistoryView {
     event.preventDefault();
     let target = event.target;
     if (target === this.btnClear) {
-      bus.publish('search-history.clear', null);
+      queue.publish('search-history.clear', null);
     }
   }
 
   delete(query) {
-    bus.publish('search-history.delete', query);
+    queue.publish('search-history.delete', query);
   }
 
   down(query) {
-    bus.publish('search-history.down', query);
+    queue.publish('search-history.down', query);
   }
 
   getElements() {
@@ -167,7 +167,7 @@ class SearchHistoryView {
     if (target) {
       if (target.classList.contains('btn-entry--history')) {
         let query = target.textContent;
-        bus.publish('search-history.select', query);
+        queue.publish('search-history.select', query);
       } else if (target.classList.contains('btn-icon--menu')) {
         let entry = target.previousSibling;
         this.btnMenuClick(entry);
@@ -191,14 +191,14 @@ class SearchHistoryView {
   }
 
   subscribe() {
-    bus.subscribe('search-history.hide', () => {
+    queue.subscribe('search-history.hide', () => {
       this.hide();
     });
-    bus.subscribe('search-history.show', () => {
+    queue.subscribe('search-history.show', () => {
       this.show();
     });
 
-    bus.subscribe('search.history.update', (history) => {
+    queue.subscribe('search.history.update', (history) => {
       this.historyUpdate(history);
     });
   }
@@ -208,13 +208,13 @@ class SearchHistoryView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnResult) {
-        bus.publish('search-result', null);
+        queue.publish('search-result', null);
       }
     }
   }
 
   up(query) {
-    bus.publish('search-history.up', query);
+    queue.publish('search-history.up', query);
   }
 
   updateList() {
