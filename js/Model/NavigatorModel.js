@@ -17,7 +17,7 @@ import {
 
 const validTasks = ['navigator-book', 'navigator-chapter'];
 
-const IDX_GENESIS_1 = 0;
+const CHAPTER_IDX_GENESIS_1 = 0;
 
 class NavigatorModel {
 
@@ -35,7 +35,9 @@ class NavigatorModel {
     this.saveChapterIdx();
     await this.updateVerses();
     let bookIdx = tomeChapters[this.chapterIdx][chapterBookIdx];
-    this.bookIdxChange(bookIdx);
+    if (this.bookIdx !== bookIdx) {
+      this.bookIdxChange(bookIdx);
+    }
     queue.publish('chapterIdx.update', this.chapterIdx);
   }
 
@@ -65,7 +67,7 @@ class NavigatorModel {
   }
 
   async restoreChapterIdx() {
-    let defaultIdx = IDX_GENESIS_1;
+    let defaultIdx = CHAPTER_IDX_GENESIS_1;
     let chapterIdx = localStorage.getItem(`${appPrefix}-chapterIdx`);
     if (!chapterIdx) {
       chapterIdx = defaultIdx;
@@ -75,7 +77,7 @@ class NavigatorModel {
       } catch (error) {
         chapterIdx = defaultIdx;
       }
-      if (!tomeChapters.includes(chapterIdx)) {
+      if (!tomeChapters[chapterIdx]) {
         chapterIdx = defaultIdx;
       }
     }

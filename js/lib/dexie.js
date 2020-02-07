@@ -4298,4 +4298,3 @@ DexiePromise.rejectionMapper = mapError;
 setDebug(debug, dexieStackFrameFilter);
 
 export default Dexie;
-//# sourceMappingURL=dexie.mjs.map

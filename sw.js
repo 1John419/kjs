@@ -2,7 +2,7 @@ let appPrefix = 'kjs';
 
 let appCaches = [
   {
-    name: 'kjs-core-20200201.01',
+    name: 'kjs-core-20200207.01',
     urls: [
       './',
       './bundle.js',
@@ -16,25 +16,25 @@ let appCaches = [
     ]
   },
   {
-    name: 'kjs-css-20200201.01',
+    name: 'kjs-css-20200207.01',
     urls: [
       './css/kjs.css',
       './css/font.css'
     ]
   },
   {
-    name: 'kjs-font-20200201.01',
+    name: 'kjs-font-20200207.01',
     urls: [
       './font/lato-v16-latin-regular.woff2',
       './font/merriweather-v21-latin-regular.woff2',
       './font/open-sans-v17-latin-regular.woff2',
-      './font/playfair-display-v18-latin-regular.woff2',
-      './font/roboto-slab-v10-latin-regular.woff2',
+      './font/playfair-display-v20-latin-regular.woff2',
+      './font/roboto-slab-v11-latin-regular.woff2',
       './font/roboto-v20-latin-regular.woff2'
     ]
   },
   {
-    name: 'kjs-help-20200201.01',
+    name: 'kjs-help-20200207.01',
     urls: [
       './help/about.html',
       './help/bookmark.html',

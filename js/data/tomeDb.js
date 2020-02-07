@@ -3,14 +3,12 @@
 import Dexie from '../lib/dexie.js';
 import { LZMA } from '../lib/decompress.js';
 import {
+  chapterLastVerseIdx
+} from './tomeIdx.js';
+import {
   appPrefix,
   dbVersion
 } from '../util.js';
-import {
-  chapterFirstVerseIdx,
-  chapterLastVerseIdx,
-  chapterName
-} from './tomeIdx.js';
 
 const tomeStores = {
   lists: 'k',
@@ -45,9 +43,7 @@ export const chapterIdxByVerseIdx = (verseIdx) => {
 };
 
 export const citationByVerseIdx = (verseIdx) => {
-  let chapter = chapterByVerseIdx(verseIdx);
-  let num = verseIdx - chapter[chapterFirstVerseIdx] + 1;
-  return `${chapter[chapterName]}:${num}`;
+  return tomeCitations[verseIdx];
 };
 
 export const initializeTome = async (cb) => {

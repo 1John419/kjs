@@ -151,7 +151,12 @@ class StrongFilterView {
     return btnFilter;
   }
 
+  defChange() {
+    this.defChangePending = true;
+  }
+
   defUpdate(strongDefObj) {
+    this.defChangePending = false;
     this.strongDefObj = strongDefObj;
     this.strongDef = this.strongDefObj.k;
   }
@@ -168,7 +173,9 @@ class StrongFilterView {
 
   filterUpdate(strongFilter) {
     this.strongFilter = strongFilter;
-    this.updateActiveFilter();
+    if (!this.defChangePending && !this.wordChangePending) {
+      this.updateActiveFilter();
+    }
   }
 
   foldClick(btnFold) {
@@ -233,11 +240,17 @@ class StrongFilterView {
       this.show();
     });
 
+    queue.subscribe('strong.def.change', () => {
+      this.defChange();
+    });
     queue.subscribe('strong.def.update', (strongDefObj) => {
       this.defUpdate(strongDefObj);
     });
     queue.subscribe('strong.filter.update', (strongFilter) => {
       this.filterUpdate(strongFilter);
+    });
+    queue.subscribe('strong.word.change', () => {
+      this.wordChange();
     });
     queue.subscribe('strong.word.update', (strongWord) => {
       this.wordUpdate(strongWord);
@@ -296,6 +309,10 @@ class StrongFilterView {
     this.list.appendChild(list);
   }
 
+  wordChange() {
+    this.wordChangePending = true;
+  }
+
   wordTomeBinUpdate(strongWordTomeBin) {
     this.strongWordTomeBin = strongWordTomeBin;
   }
@@ -305,7 +322,9 @@ class StrongFilterView {
     if (this.strongWord) {
       this.updateBanner();
       this.updateList();
+      this.updateActiveFilter();
     }
+    this.wordChangePending = false;
   }
 
 }

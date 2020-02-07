@@ -31,6 +31,7 @@ class ReadModel {
   restore() {
     this.restoreColumnMode();
     this.restoreStrongMode();
+    this.restoreSidebar();
   }
 
   restoreColumnMode() {
@@ -49,6 +50,26 @@ class ReadModel {
       }
     }
     this.columnModeChange(columnMode);
+  }
+
+  restoreSidebar() {
+    let defaultSidebar = this.panes > 1 ? 'navigator' : 'none';
+    let sidebar = localStorage.getItem(`${appPrefix}-sidebar`);
+    if (!sidebar) {
+      sidebar = defaultSidebar;
+    } else {
+      try {
+        sidebar = JSON.parse(sidebar);
+      } catch (error) {
+        sidebar = defaultSidebar;
+      }
+    }
+    if (this.panes > 1) {
+      sidebar = sidebar === 'none' ? 'navigator' : sidebar;
+    } else if (sidebar !== 'none') {
+      sidebar = 'none';
+    }
+    this.sidebarChange(sidebar);
   }
 
   restoreStrongMode() {
@@ -70,7 +91,8 @@ class ReadModel {
   }
 
   saveColumnMode() {
-    localStorage.setItem(`${appPrefix}-columnMode`, JSON.stringify(this.columnMode));
+    localStorage.setItem(`${appPrefix}-columnMode`,
+      JSON.stringify(this.columnMode));
   }
 
   saveStrongMode() {
@@ -86,26 +108,6 @@ class ReadModel {
     this.sidebar = sidebar;
     this.saveSidebar();
     queue.publish('sidebar.update', this.sidebar);
-  }
-
-  sidebarRestore() {
-    let defaultSidebar = this.panes > 1 ? 'navigator' : 'none';
-    let sidebar = localStorage.getItem(`${appPrefix}-sidebar`);
-    if (!sidebar) {
-      sidebar = defaultSidebar;
-    } else {
-      try {
-        sidebar = JSON.parse(sidebar);
-      } catch (error) {
-        sidebar = defaultSidebar;
-      }
-    }
-    if (this.panes > 1) {
-      sidebar = sidebar === 'none' ? 'navigator' : sidebar;
-    } else if (sidebar !== 'none') {
-      sidebar = 'none';
-    }
-    this.sidebarChange(sidebar);
   }
 
   strongModeChange(strongMode) {
@@ -135,9 +137,6 @@ class ReadModel {
 
     queue.subscribe('sidebar.change', (sidebar) => {
       this.sidebarChange(sidebar);
-    });
-    queue.subscribe('sidebar.restore', () => {
-      this.sidebarRestore();
     });
   }
 

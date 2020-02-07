@@ -90,6 +90,7 @@ class ReadView {
 
   buildPage() {
     this.page = templatePage('read');
+    this.page.classList.remove('page--hide');
 
     this.toolbarUpper = templateToolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);

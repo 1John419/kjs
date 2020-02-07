@@ -23,21 +23,24 @@ class SearchController {
     }
   }
 
-  filter() {
+  filterPane() {
     queue.publish('search.task.change', 'search-filter');
   }
 
   filterSelect(searchFilter) {
+    this.filterSelectPending = true;
     queue.publish('search.filter.change', searchFilter);
-    queue.publish('search.task.change', 'search-result');
+  }
+
+  filterUpdate() {
+    if (this.filterSelectPending) {
+      this.filterSelectPending = false;
+      queue.publish('search.task.change', 'search-result');
+    }
   }
 
   hide() {
     queue.publish(`${this.searchTask}.hide`, null);
-  }
-
-  history() {
-    queue.publish('search.task.change', 'search-history');
   }
 
   historyClear() {
@@ -52,25 +55,36 @@ class SearchController {
     queue.publish('search.history.down', query);
   }
 
+  historyPane() {
+    queue.publish('search.task.change', 'search-history');
+  }
+
   historySelect(query) {
+    this.historySelectPending = true;
     queue.publish('search.query.change', query);
-    queue.publish('search.task.change', 'search-result');
   }
 
   historyUp(query) {
     queue.publish('search.history.up', query);
   }
 
+  historyUpdate() {
+    if (this.historySelectPending) {
+      this.historySelectPending = false;
+      queue.publish('search.task.change', 'search-result');
+    }
+  }
+
   initialize() {
     this.subscribe();
   }
 
-  lookup() {
-    queue.publish('search.task.change', 'search-lookup');
-  }
-
   lookupCancel() {
     queue.publish('search.task.change', 'search-result');
+  }
+
+  lookupPane() {
+    queue.publish('search.task.change', 'search-lookup');
   }
 
   lookupSearch(query) {
@@ -101,7 +115,7 @@ class SearchController {
     queue.publish('chapterIdx.change', chapterIdx);
   }
 
-  result() {
+  resultPane() {
     queue.publish('search.task.change', 'search-result');
   }
 
@@ -135,14 +149,14 @@ class SearchController {
     });
 
     queue.subscribe('search-filter', () => {
-      this.filter();
+      this.filterPane();
     });
     queue.subscribe('search-filter.select', (searchFilter) => {
       this.filterSelect(searchFilter);
     });
 
     queue.subscribe('search-history', () => {
-      this.history();
+      this.historyPane();
     });
     queue.subscribe('search-history.clear', () => {
       this.historyClear();
@@ -161,7 +175,7 @@ class SearchController {
     });
 
     queue.subscribe('search-lookup', () => {
-      this.lookup();
+      this.lookupPane();
     });
     queue.subscribe('search-lookup.cancel', () => {
       this.lookupCancel();
@@ -171,7 +185,7 @@ class SearchController {
     });
 
     queue.subscribe('search-result', () => {
-      this.result();
+      this.resultPane();
     });
     queue.subscribe('search-result.read-select', (verseIdx) => {
       this.readSelect(verseIdx);
@@ -183,8 +197,14 @@ class SearchController {
     queue.subscribe('search.back', () => {
       this.back();
     });
+    queue.subscribe('search.filter.update', () => {
+      this.filterUpdate();
+    });
     queue.subscribe('search.hide', () => {
       this.hide();
+    });
+    queue.subscribe('search.history.update', () => {
+      this.historyUpdate();
     });
     queue.subscribe('search.query.change', () => {
       this.queryChange();

@@ -64,7 +64,6 @@ class ReadController {
     queue.publish('setting.restore', null);
     queue.publish('help.restore', null);
     queue.publish('read.restore', null);
-    queue.publish('sidebar.restore', null);
   }
 
   nextChapter() {
@@ -100,7 +99,6 @@ class ReadController {
         this.sidebar = sidebar;
         queue.publish(`${this.sidebar}.show`, null);
       } else {
-        queue.publish('read.show', null);
         if (this.sidebar && this.sidebar !== 'none') {
           queue.publish(`${this.sidebar}.hide`, null);
         }

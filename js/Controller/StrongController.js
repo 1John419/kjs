@@ -23,16 +23,16 @@ class StrongController {
     }
   }
 
-  def() {
+  defChange() {
+    this.defChangePending = true;
+  }
+
+  defPane() {
     queue.publish('strong.task.change', 'strong-def');
   }
 
   defSelect(strongDef) {
     queue.publish('strong.def.sub-change', strongDef);
-  }
-
-  defChange() {
-    this.defChangePending = true;
   }
 
   defUpdate() {
@@ -42,7 +42,7 @@ class StrongController {
     }
   }
 
-  filter() {
+  filterPane() {
     queue.publish('strong.task.change', 'strong-filter');
   }
 
@@ -62,10 +62,6 @@ class StrongController {
     queue.publish(`${this.strongTask}.hide`, null);
   }
 
-  history() {
-    queue.publish('strong.task.change', 'strong-history');
-  }
-
   historyClear() {
     queue.publish('strong.history.clear', null);
   }
@@ -76,6 +72,10 @@ class StrongController {
 
   historyDown(strongDef) {
     queue.publish('strong.history.down', strongDef);
+  }
+
+  historyPane() {
+    queue.publish('strong.task.change', 'strong-history');
   }
 
   historySelect(strongDef) {
@@ -90,12 +90,12 @@ class StrongController {
     this.subscribe();
   }
 
-  lookup() {
-    queue.publish('strong.task.change', 'strong-lookup');
-  }
-
   lookupFind(strongNum) {
     queue.publish('strong.def.change', strongNum);
+  }
+
+  lookupPane() {
+    queue.publish('strong.task.change', 'strong-lookup');
   }
 
   modeToggle() {
@@ -120,16 +120,16 @@ class StrongController {
     queue.publish('chapterIdx.change', chapterIdx);
   }
 
+  resultPane() {
+    queue.publish('strong.task.change', 'strong-result');
+  }
+
   show() {
     queue.publish(`${this.strongTask}.show`, null);
   }
 
   sidebarUpdate(sidebar) {
     this.sidebar = sidebar;
-  }
-
-  search() {
-    queue.publish('strong.task.change', 'strong-result');
   }
 
   strongSelect(verseIdx) {
@@ -150,7 +150,7 @@ class StrongController {
     });
 
     queue.subscribe('strong-def', () => {
-      this.def();
+      this.defPane();
     });
     queue.subscribe('strong-def.next.strong',
       () => { this.nextStrong(); }
@@ -166,14 +166,14 @@ class StrongController {
     });
 
     queue.subscribe('strong-filter', () => {
-      this.filter();
+      this.filterPane();
     });
     queue.subscribe('strong-filter.select', (strongFilter) => {
       this.filterSelect(strongFilter);
     });
 
     queue.subscribe('strong-history', () => {
-      this.history();
+      this.historyPane();
     });
     queue.subscribe('strong-history.clear', () => {
       this.historyClear();
@@ -192,14 +192,14 @@ class StrongController {
     });
 
     queue.subscribe('strong-lookup', () => {
-      this.lookup();
+      this.lookupPane();
     });
     queue.subscribe('strong-lookup.find', (strongNum) => {
       this.lookupFind(strongNum);
     });
 
     queue.subscribe('strong-result', () => {
-      this.search();
+      this.resultPane();
     });
     queue.subscribe('strong-result.read-select', (verseIdx) => {
       this.readSelect(verseIdx);
@@ -209,7 +209,7 @@ class StrongController {
     });
 
     queue.subscribe('strong-verse', () => {
-      this.verse();
+      this.versePane();
     });
     queue.subscribe('strong-verse.select', (strongDef) => {
       this.verseSelect(strongDef);
@@ -262,12 +262,12 @@ class StrongController {
     }
   }
 
-  verse() {
-    queue.publish('strong.task.change', 'strong-verse');
-  }
-
   verseChange() {
     this.verseChangePending = true;
+  }
+
+  versePane() {
+    queue.publish('strong.task.change', 'strong-verse');
   }
 
   verseSelect(strongDef) {

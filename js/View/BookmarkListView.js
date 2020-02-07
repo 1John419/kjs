@@ -177,7 +177,7 @@ class BookmarkListView {
   }
 
   moveCopy(verseIdx) {
-    queue.publish('bookmark-move-copy', verseIdx);
+    queue.publish('bookmark-list.move-copy', verseIdx);
   }
 
   panesUpdate(panes) {
@@ -243,7 +243,7 @@ class BookmarkListView {
       } else if (target === this.btnSortInvert) {
         queue.publish('bookmark-list.sort-invert', null);
       } else if (target === this.btnStrongMode) {
-        queue.publish('bookmark.strong-mode.click', null);
+        queue.publish('bookmark-list.strong-mode.click', null);
       } else if (target === this.btnBookmarkFolder) {
         queue.publish('bookmark-folder', null);
       }

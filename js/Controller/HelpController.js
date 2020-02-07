@@ -20,7 +20,7 @@ class HelpController {
     this.subscribe();
   }
 
-  read() {
+  readPane() {
     queue.publish('help.task.change', 'help-read');
   }
 
@@ -34,11 +34,11 @@ class HelpController {
 
   subscribe() {
     queue.subscribe('help-read', () => {
-      this.read();
+      this.readPane();
     });
 
     queue.subscribe('help-topic', (helpTopic) => {
-      this.topic(helpTopic);
+      this.topicPane(helpTopic);
     });
     queue.subscribe('help-topic.select', (helpTopic) => {
       this.topicSelect(helpTopic);
@@ -55,6 +55,9 @@ class HelpController {
     });
     queue.subscribe('help.task.update', (helpTask) => {
       this.taskUpdate(helpTask);
+    });
+    queue.subscribe('help.topic.update', () => {
+      this.topicUpdate();
     });
 
     queue.subscribe('sidebar.update', (sidebar) => {
@@ -74,13 +77,20 @@ class HelpController {
     }
   }
 
-  topic() {
+  topicPane() {
     queue.publish('help.task.change', 'help-topic');
   }
 
   topicSelect(helpTopic) {
+    this.topicSelectPending = true;
     queue.publish('help.topic.change', helpTopic);
-    queue.publish('help.task.change', 'help-read');
+  }
+
+  topicUpdate() {
+    if (this.topicSelectPending) {
+      this.topicSelectPending = false;
+      queue.publish('help.task.change', 'help-read');
+    }
   }
 
 }

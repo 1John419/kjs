@@ -17,38 +17,46 @@ class NavigatorController {
     queue.publish('sidebar.change', 'none');
   }
 
-  book() {
+  bookIdxUpdate(bookIdx) {
+    this.lastBookIdx = bookIdx;
+    if (this.bookSelectPending) {
+      this.bookSelectPending = false;
+      let book = tomeBooks[bookIdx];
+      this.chapterCount = book[bookLastChapterIdx] -
+        book[bookFirstChapterIdx] + 1;
+      if (this.panes > 1 || this.chapterCount === 1) {
+        let chapterIdx = tomeBooks[bookIdx][bookFirstChapterIdx];
+        queue.publish('chapterIdx.change', chapterIdx);
+      } else {
+        queue.publish('navigator.task.change', 'navigator-chapter');
+      }
+    }
+  }
+
+  bookPane() {
     queue.publish('navigator.task.change', 'navigator-book');
   }
 
   bookSelect(bookIdx) {
     if (bookIdx !== this.lastBookIdx) {
+      this.bookSelectPending = true;
       queue.publish('bookIdx.change', bookIdx);
     }
-    this.lastBookIdx = bookIdx;
-    let book = tomeBooks[bookIdx];
-    let chapterCount =
-      book[bookLastChapterIdx] - book[bookFirstChapterIdx] + 1;
-    if (this.panes > 1 || chapterCount === 1) {
-      let chapterIdx = tomeBooks[bookIdx][bookFirstChapterIdx];
-      queue.publish('chapterIdx.change', chapterIdx);
-    }
-    if (this.panes === 1 && chapterCount === 1) {
-      queue.publish('sidebar.change', 'none');
-    } else {
-      queue.publish('navigator.task.change', 'navigator-chapter');
-    }
-  }
-
-  chapter() {
-    queue.publish('navigator.task.change', 'navigator-chapter');
   }
 
   chapterIdxUpdate() {
-    if (this.panes === 1 && this.sidebar === 'navigator') {
-      queue.publish('sidebar.select', 'none');
-    }
     queue.publish('read.scroll-to-top');
+    if (this.sidebar === 'navigator') {
+      if (this.panes === 1) {
+        queue.publish('sidebar.change', 'none');
+      } else if (this.navigatorTask !== 'navigator-chapter') {
+        queue.publish('navigator.task.change', 'navigator-chapter');
+      }
+    }
+  }
+
+  chapterPane() {
+    queue.publish('navigator.task.change', 'navigator-chapter');
   }
 
   chapterSelect(chapterIdx) {
@@ -77,19 +85,23 @@ class NavigatorController {
   }
 
   subscribe() {
+    queue.subscribe('bookIdx.update', (bookIdx) => {
+      this.bookIdxUpdate(bookIdx);
+    });
+
     queue.subscribe('chapterIdx.update', () => {
       this.chapterIdxUpdate();
     });
 
     queue.subscribe('navigator-book', () => {
-      this.book();
+      this.bookPane();
     });
     queue.subscribe('navigator-book.select', (bookIdx) => {
       this.bookSelect(bookIdx);
     });
 
     queue.subscribe('navigator-chapter', () => {
-      this.chapter();
+      this.chapterPane();
     });
     queue.subscribe('navigator-chapter.select', (chapterIdx) => {
       this.chapterSelect(chapterIdx);

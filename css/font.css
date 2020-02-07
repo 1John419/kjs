@@ -43,7 +43,7 @@
   font-style: normal;
   font-weight: 400;
   src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'),
-    url('../font/roboto-slab-v10-latin-regular.woff2') format('woff2');
+    url('../font/roboto-slab-v11-latin-regular.woff2') format('woff2');
 }
 
 .font--roboto-slab {
@@ -70,7 +70,7 @@
   font-weight: 400;
   src: local('Playfair Display Regular'), local('PlayfairDisplay-Regular'),
     local('Slabo27px-Regular'),
-    url('../font/playfair-display-v18-latin-regular.woff2') format('woff2');
+    url('../font/playfair-display-v20-latin-regular.woff2') format('woff2');
 }
 
 .font--playfair-display {

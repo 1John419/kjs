@@ -9,6 +9,13 @@ class BookmarkController {
     this.initialize();
   }
 
+  activeFolderUpdate() {
+    if (this.folderSelectPending) {
+      this.folderSelectPending = false;
+      queue.publish('bookmark.task.change', 'bookmark-list');
+    }
+  }
+
   back() {
     queue.publish('sidebar.change', 'none');
   }
@@ -23,29 +30,20 @@ class BookmarkController {
     }
   }
 
-  export () {
+  exportPane() {
     queue.publish('bookmark.task.change', 'bookmark-export');
-  }
-
-  folder() {
-    queue.publish('bookmark.task.change', 'bookmark-folder');
-  }
-
-  folderAdd() {
-    queue.publish('bookmark.task.change', 'bookmark-folder-add');
   }
 
   folderAdded() {
     queue.publish('bookmark.task.change', 'bookmark-list');
   }
 
-  folderAddSave(name) {
-    queue.publish('bookmark.folder.add', name);
+  folderAddPane() {
+    queue.publish('bookmark.task.change', 'bookmark-folder-add');
   }
 
-  folderDelete(folderName) {
-    queue.publish('folder.to.delete', folderName);
-    queue.publish('bookmark.task.change', 'bookmark-folder-delete');
+  folderAddSave(name) {
+    queue.publish('bookmark.folder.add', name);
   }
 
   folderDeleteConfirm(folderName) {
@@ -53,11 +51,20 @@ class BookmarkController {
     queue.publish('bookmark.task.change', 'bookmark-folder');
   }
 
+  folderDeletePane(folderName) {
+    queue.publish('folder.to.delete', folderName);
+    queue.publish('bookmark.task.change', 'bookmark-folder-delete');
+  }
+
   folderDown(folderName) {
     queue.publish('bookmark.folder.down', folderName);
   }
 
-  folderRename(folderName) {
+  folderPane() {
+    queue.publish('bookmark.task.change', 'bookmark-folder');
+  }
+
+  folderRenamePane(folderName) {
     queue.publish('folder.to.rename', folderName);
     queue.publish('bookmark.task.change', 'bookmark-folder-rename');
   }
@@ -71,8 +78,8 @@ class BookmarkController {
   }
 
   folderSelect(folderName) {
+    this.folderSelectPending = true;
     queue.publish('bookmark.active-folder.change', folderName);
-    queue.publish('bookmark.task.change', 'bookmark-list');
   }
 
   folderUp(folderName) {
@@ -89,20 +96,16 @@ class BookmarkController {
     queue.publish(`${this.bookmarkTask}.hide`, null);
   }
 
-  import() {
-    queue.publish('bookmark.task.change', 'bookmark-import');
-  }
-
   importImport(pkgStr) {
     queue.publish('bookmark.pkg.import', pkgStr);
   }
 
-  initialize() {
-    this.subscribe();
+  importPane() {
+    queue.publish('bookmark.task.change', 'bookmark-import');
   }
 
-  list() {
-    queue.publish('bookmark.task.change', 'bookmark-list');
+  initialize() {
+    this.subscribe();
   }
 
   listDelete(verseIdx) {
@@ -111,6 +114,10 @@ class BookmarkController {
 
   listDown(verseIdx) {
     queue.publish('bookmark.down', verseIdx);
+  }
+
+  listPane() {
+    queue.publish('bookmark.task.change', 'bookmark-list');
   }
 
   listSelect(verseIdx) {
@@ -133,17 +140,17 @@ class BookmarkController {
     queue.publish('bookmark.strong-mode.toggle', null);
   }
 
-  moveCopy(verseIdx) {
-    queue.publish('bookmark-move-copy.list.change', verseIdx);
-    queue.publish('bookmark.move-copy.change', verseIdx);
-  }
-
   moveCopyCopy(copyPkg) {
     queue.publish('bookmark.copy', copyPkg);
   }
 
   moveCopyMove(movePkg) {
     queue.publish('bookmark.move', movePkg);
+  }
+
+  moveCopyPane(verseIdx) {
+    queue.publish('bookmark-move-copy.list.change', verseIdx);
+    queue.publish('bookmark.move-copy.change', verseIdx);
   }
 
   moveCopyReady() {
@@ -176,14 +183,14 @@ class BookmarkController {
 
   subscribe() {
     queue.subscribe('bookmark-export', () => {
-      this.export();
+      this.exportPane();
     });
 
     queue.subscribe('bookmark-folder', () => {
-      this.folder();
+      this.folderPane();
     });
     queue.subscribe('bookmark-folder.delete', (folderName) => {
-      this.folderDelete(folderName);
+      this.folderDeletePane(folderName);
     });
     queue.subscribe('bookmark-folder.down', (folderName) => {
       this.folderDown(folderName);
@@ -196,7 +203,7 @@ class BookmarkController {
     });
 
     queue.subscribe('bookmark-folder-add', () => {
-      this.folderAdd();
+      this.folderAddPane();
     });
     queue.subscribe('bookmark-folder-add.save', (name) => {
       this.folderAddSave(name);
@@ -207,27 +214,30 @@ class BookmarkController {
     });
 
     queue.subscribe('bookmark-folder-rename', (folderName) => {
-      this.folderRename(folderName);
+      this.folderRenamePane(folderName);
     });
     queue.subscribe('bookmark-folder-rename.save', (namePkg) => {
       this.folderRenameSave(namePkg);
     });
 
     queue.subscribe('bookmark-import', () => {
-      this.import();
+      this.importPane();
     });
     queue.subscribe('bookmark-import.import', (pkgStr) => {
       this.importImport(pkgStr);
     });
 
     queue.subscribe('bookmark-list', () => {
-      this.list();
+      this.listPane();
     });
     queue.subscribe('bookmark-list.delete', (verseIdx) => {
       this.listDelete(verseIdx);
     });
     queue.subscribe('bookmark-list.down', (verseIdx) => {
       this.listDown(verseIdx);
+    });
+    queue.subscribe('bookmark-list.move-copy', (verseIdx) => {
+      this.moveCopyPane(verseIdx);
     });
     queue.subscribe('bookmark-list.select', (verseIdx) => {
       this.listSelect(verseIdx);
@@ -238,6 +248,9 @@ class BookmarkController {
     queue.subscribe('bookmark-list.sort-invert', () => {
       this.listSortInvert();
     });
+    queue.subscribe('bookmark-list.strong-mode.click', () => {
+      this.modeToggle();
+    });
     queue.subscribe('bookmark-list.strong-select', (verseIdx) => {
       this.strongSelect(verseIdx);
     });
@@ -245,9 +258,6 @@ class BookmarkController {
       this.listUp(verseIdx);
     });
 
-    queue.subscribe('bookmark-move-copy', (verseIdx) => {
-      this.moveCopy(verseIdx);
-    });
     queue.subscribe('bookmark-move-copy.copy', (copyPkg) => {
       this.moveCopyCopy(copyPkg);
     });
@@ -258,11 +268,14 @@ class BookmarkController {
       this.moveCopyReady();
     });
 
+    queue.subscribe('bookmark.active-folder.update', () => {
+      this.activeFolderUpdate();
+    });
     queue.subscribe('bookmark.back', () => {
       this.back();
     });
     queue.subscribe('bookmark.copy', () => {
-      this.list();
+      this.listPane();
     });
     queue.subscribe('bookmark.folder.added', () => {
       this.folderAdded();
@@ -274,13 +287,10 @@ class BookmarkController {
       this.hide();
     });
     queue.subscribe('bookmark.move', () => {
-      this.list();
+      this.listPane();
     });
     queue.subscribe('bookmark.show', () => {
       this.show();
-    });
-    queue.subscribe('bookmark.strong-mode.click', () => {
-      this.modeToggle();
     });
     queue.subscribe('bookmark.task.update', (bookmarkTask) => {
       this.taskUpdate(bookmarkTask);
