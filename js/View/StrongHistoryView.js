@@ -95,7 +95,7 @@ class StrongHistoryView {
 
     this.scroll = templateScroll('strong-history');
     this.empty = templateElement('div', 'empty', 'strong-history', null,
-      'No Strong saved.');
+      'No Strong History.');
     this.scroll.appendChild(this.empty);
 
     this.list = templateElement('div', 'list', 'strong-history', null, null);
@@ -153,7 +153,7 @@ class StrongHistoryView {
 
   historyUpdate(strongHstory) {
     this.history = strongHstory;
-    this.updateList();
+    this.updateHistory();
   }
 
   initialize() {
@@ -223,7 +223,7 @@ class StrongHistoryView {
     queue.publish('strong-history.up', strongDef);
   }
 
-  updateList() {
+  updateHistory() {
     this.scrollToTop();
     removeAllChildren(this.list);
     if (this.history.length === 0) {

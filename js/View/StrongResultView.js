@@ -154,6 +154,10 @@ class StrongResultView {
 
     this.scroll = templateScroll('strong-result');
 
+    this.empty = templateElement('div', 'empty', 'strong-result', null,
+      'No Strong Result.');
+    this.scroll.appendChild(this.empty);
+
     this.list = templateElement('div', 'list', 'strong-result', null, null);
     this.scroll.appendChild(this.list);
 
@@ -217,7 +221,7 @@ class StrongResultView {
     this.strongDefObj = strongDefObj;
     this.strongDef = this.strongDefObj.k;
     this.updateBanner();
-    this.updateList();
+    this.updateResult();
   }
 
   filterChange() {
@@ -229,8 +233,7 @@ class StrongResultView {
     this.applyFilter();
     if (this.filterChangePending) {
       this.filterChangePending = false;
-      this.updateBanner();
-      this.updateList();
+      this.updatePane();
     }
   }
 
@@ -433,9 +436,19 @@ class StrongResultView {
     }
   }
 
-  updateList() {
+  updatePane() {
+    this.updateBanner();
+    this.updateResult();
+  }
+
+  updateResult() {
     this.scrollToTop();
     removeAllChildren(this.list);
+    if (this.verseCount) {
+      this.empty.classList.add('empty--hide');
+    } else {
+      this.empty.classList.remove('empty--hide');
+    }
     this.loadIdx = 0;
     this.loadedVerses = 0;
     this.loadVerses();
@@ -461,8 +474,7 @@ class StrongResultView {
     this.strongWord = strongWord;
     if (this.wordChangePending) {
       this.wordChangePending = false;
-      this.updateBanner();
-      this.updateList();
+      this.updatePane();
     }
   }
 

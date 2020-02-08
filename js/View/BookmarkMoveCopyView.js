@@ -154,7 +154,7 @@ class BookmarkMoveCopyView {
 
   listUpdate(moveCopyList) {
     this.moveCopyList = moveCopyList;
-    this.updateList();
+    this.updateFolders();
   }
 
   menuClick(target) {
@@ -227,7 +227,7 @@ class BookmarkMoveCopyView {
     this.banner.innerHTML = `${ref} <br> Move/Copy to Folder:`;
   }
 
-  updateList() {
+  updateFolders() {
     this.scrollToTop();
     removeAllChildren(this.list);
     if (this.moveCopyList.length === 0) {

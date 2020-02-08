@@ -49,11 +49,7 @@ class StrongModel {
       this.strongDef = strongDef;
       this.saveDef();
       this.addHistory();
-      this.strongIdx = this.strongHistory.indexOf(this.strongDef);
-      this.strongDefObj = await strongDb.defs.get(this.strongDef);
-      await this.updateWordObj();
-      await this.wordFirst();
-      queue.publish('strong.def.update', this.strongDefObj);
+      await this.defUpdate();
     }
   }
 
@@ -61,6 +57,10 @@ class StrongModel {
     this.strongDef = strongDef;
     this.saveDef();
     this.addSubHistory();
+    await this.defUpdate();
+  }
+
+  async defUpdate() {
     this.strongIdx = this.strongHistory.indexOf(this.strongDef);
     this.strongDefObj = await strongDb.defs.get(this.strongDef);
     await this.updateWordObj();
@@ -454,26 +454,23 @@ class StrongModel {
     if (this.words.length) {
       let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
       this.wordTomeBin = word[wordTomeBin];
-      await this.updateWordVerses();
-      await this.updateWordMaps();
-      this.filterReset();
-      queue.publish('strong.word.update', this.strongWord);
     } else {
       this.wordTomeBin = [];
-      await this.updateWordVerses();
-      await this.updateWordMaps();
-      this.filterReset();
-      queue.publish('strong.word.update', this.strongWord);
     }
+    await this.updateWordVerses();
+    await this.updateWordMaps();
+    this.filterReset();
+    queue.publish('strong.word.update', this.strongWord);
   }
 
   async wordFirst() {
+    let firstKjvWord;
     if (this.words.length) {
-      let firstKjvWord = this.words[firstWord][wordKjvWord];
-      await this.wordChange(firstKjvWord);
+      firstKjvWord = this.words[firstWord][wordKjvWord];
     } else {
-      await this.wordChange(null);
+      firstKjvWord = null;
     }
+    await this.wordChange(firstKjvWord);
   }
 
 }

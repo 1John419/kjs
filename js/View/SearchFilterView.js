@@ -215,7 +215,7 @@ class SearchFilterView {
   rigUpdate(rig) {
     this.rig = rig;
     this.updateBanner();
-    this.updateList();
+    this.updateFilters();
   }
 
   scrollToTop() {
@@ -285,7 +285,7 @@ class SearchFilterView {
     this.banner.innerHTML = `${this.rig.query}`;
   }
 
-  updateList() {
+  updateFilters() {
     this.scrollToTop();
     removeAllChildren(this.list);
     if (this.rig.state === 'OK') {

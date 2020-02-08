@@ -184,7 +184,7 @@ class SearchResultView {
       if (this.rig.state === 'OK') {
         this.applyFilter();
         this.updateBanner();
-        this.updateList();
+        this.updateResult();
       }
     }
   }
@@ -373,7 +373,7 @@ class SearchResultView {
       `${this.rig.query}`;
   }
 
-  updateList() {
+  updateResult() {
     this.scrollToTop();
     removeAllChildren(this.list);
     if (this.rig.state === 'OK') {

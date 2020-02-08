@@ -9,7 +9,7 @@ class CommandQueue {
   }
 
   publish(command, data) {
-    console.log(command);
+    // console.log(command);
     if (this.commands[command] && this.commands[command].length >= 1) {
       for (let listener of this.commands[command]) {
         this.queue.push({listener, data});

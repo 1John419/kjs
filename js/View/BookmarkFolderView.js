@@ -117,7 +117,7 @@ class BookmarkFolderView {
 
   folderListUpdate(folderList) {
     this.folderList = folderList;
-    this.updateList();
+    this.updateFolders();
   }
 
   getElements() {
@@ -232,7 +232,7 @@ class BookmarkFolderView {
     queue.publish('bookmark-folder.up', folderName);
   }
 
-  updateList() {
+  updateFolders() {
     this.scrollToTop();
     removeAllChildren(this.list);
     let fragment = document.createDocumentFragment();

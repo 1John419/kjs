@@ -139,7 +139,7 @@ class StrongDefView {
     this.strongDef = this.strongDefObj.k;
     this.def = this.strongDefObj.v;
     this.updateBanner();
-    this.updateList();
+    this.updateDefs();
     this.updateActiveWord();
   }
 
@@ -272,7 +272,7 @@ class StrongDefView {
     }
   }
 
-  updateList() {
+  updateDefs() {
     this.scrollToTop();
     removeAllChildren(this.list);
     let def = this.buildDef();

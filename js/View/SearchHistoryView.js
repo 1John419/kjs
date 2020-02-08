@@ -151,7 +151,7 @@ class SearchHistoryView {
 
   historyUpdate(history) {
     this.history = history;
-    this.updateList();
+    this.updateHistory();
   }
 
   initialize() {
@@ -217,7 +217,7 @@ class SearchHistoryView {
     queue.publish('search-history.up', query);
   }
 
-  updateList() {
+  updateHistory() {
     this.scrollToTop();
     removeAllChildren(this.list);
     if (this.history.length === 0) {

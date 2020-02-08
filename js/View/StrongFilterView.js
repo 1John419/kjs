@@ -126,6 +126,10 @@ class StrongFilterView {
     this.page.appendChild(this.toolbarUpper);
 
     this.scroll = templateScroll('strong-filter');
+
+    this.empty = templateElement('div', 'empty', 'strong-filter', null,
+      'No Strong Filter.');
+    this.scroll.appendChild(this.empty);
     this.list = templateElement('div', 'list', 'strong-filter', null, null);
     this.scroll.appendChild(this.list);
     this.page.appendChild(this.scroll);
@@ -156,9 +160,12 @@ class StrongFilterView {
   }
 
   defUpdate(strongDefObj) {
-    this.defChangePending = false;
     this.strongDefObj = strongDefObj;
     this.strongDef = this.strongDefObj.k;
+    if (this.defChangePending) {
+      this.defChangePending = false;
+      this.updatePane();
+    }
   }
 
   filterClick(btnFilter) {
@@ -173,9 +180,7 @@ class StrongFilterView {
 
   filterUpdate(strongFilter) {
     this.strongFilter = strongFilter;
-    if (!this.defChangePending && !this.wordChangePending) {
-      this.updateActiveFilter();
-    }
+    this.updateActiveFilter();
   }
 
   foldClick(btnFold) {
@@ -284,29 +289,46 @@ class StrongFilterView {
   }
 
   updateActiveFilter() {
-    if (this.btnActiveFilter) {
-      this.btnActiveFilter.classList.remove('btn-filter--active');
-    }
-    let bookIdx = this.strongFilter.bookIdx;
-    let chapterIdx = this.strongFilter.chapterIdx;
-    let query = `.btn-filter[data-book-idx="${bookIdx}"]` +
-      `[data-chapter-idx="${chapterIdx}"]`;
-    let btn = this.list.querySelector(query);
-    if (btn) {
-      this.btnActiveFilter = btn;
-      btn.classList.add('btn-filter--active');
+    if (this.strongWordTomeBin.length) {
+      if (this.btnActiveFilter) {
+        this.btnActiveFilter.classList.remove('btn-filter--active');
+      }
+      let bookIdx = this.strongFilter.bookIdx;
+      let chapterIdx = this.strongFilter.chapterIdx;
+      let query = `.btn-filter[data-book-idx="${bookIdx}"]` +
+        `[data-chapter-idx="${chapterIdx}"]`;
+      let btn = this.list.querySelector(query);
+      if (btn) {
+        this.btnActiveFilter = btn;
+        btn.classList.add('btn-filter--active');
+      }
     }
   }
 
   updateBanner() {
-    this.banner.innerHTML = `${this.strongDef} ${this.strongWord}`;
+    if (this.strongWord) {
+      this.banner.innerHTML = `${this.strongDef} ${this.strongWord}`;
+    } else {
+      this.banner.innerHTML = `${this.strongDef}`;
+    }
   }
 
-  updateList() {
+  updateFilters() {
     this.scrollToTop();
     removeAllChildren(this.list);
-    let list = this.buildFilters();
-    this.list.appendChild(list);
+    if (this.strongWordTomeBin.length) {
+      this.empty.classList.add('empty--hide');
+      let list = this.buildFilters();
+      this.list.appendChild(list);
+    } else {
+      this.empty.classList.remove('empty--hide');
+    }
+  }
+
+  updatePane() {
+    this.updateBanner();
+    this.updateFilters();
+    this.updateActiveFilter();
   }
 
   wordChange() {
@@ -319,12 +341,10 @@ class StrongFilterView {
 
   wordUpdate(strongWord) {
     this.strongWord = strongWord;
-    if (this.strongWord) {
-      this.updateBanner();
-      this.updateList();
-      this.updateActiveFilter();
+    if (this.wordChangePending && this.strongWord) {
+      this.wordChangePending = false;
+      this.updatePane();
     }
-    this.wordChangePending = false;
   }
 
 }

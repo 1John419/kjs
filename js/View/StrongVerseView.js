@@ -178,7 +178,7 @@ class StrongVerseView {
     this.banner.textContent = this.verse[verseCitation];
   }
 
-  updateList() {
+  updateVerse() {
     this.scrollToTop();
     removeAllChildren(this.list);
     let docFragment = document.createDocumentFragment();
@@ -195,7 +195,7 @@ class StrongVerseView {
     this.strongVerse = this.strongVerseObj.k;
     this.verse = this.strongVerseObj.v;
     this.updateBanner();
-    this.updateList();
+    this.updateVerse();
   }
 
 }

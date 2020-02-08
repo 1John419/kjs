@@ -261,10 +261,10 @@ class BookmarkListView {
   updateActiveFolder(activeFolder) {
     this.activeFolder = activeFolder;
     this.updateBanner();
-    this.updateList();
+    this.updateBookmarks();
   }
 
-  updateList() {
+  updateBookmarks() {
     this.scrollToTop();
     removeAllChildren(this.list);
     if (this.activeFolder.bookmarks.length === 0) {
