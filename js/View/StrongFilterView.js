@@ -155,17 +155,10 @@ class StrongFilterView {
     return btnFilter;
   }
 
-  defChange() {
-    this.defChangePending = true;
-  }
-
   defUpdate(strongDefObj) {
     this.strongDefObj = strongDefObj;
     this.strongDef = this.strongDefObj.k;
-    if (this.defChangePending) {
-      this.defChangePending = false;
-      this.updatePane();
-    }
+    this.updatePane();
   }
 
   filterClick(btnFilter) {
@@ -245,9 +238,6 @@ class StrongFilterView {
       this.show();
     });
 
-    queue.subscribe('strong.def.change', () => {
-      this.defChange();
-    });
     queue.subscribe('strong.def.update', (strongDefObj) => {
       this.defUpdate(strongDefObj);
     });
