@@ -5175,6 +5175,25 @@
         };
     }());
 
+    const bookLongName = 0;
+    const bookShortName = 1;
+    const bookLastVerseIdx = 3;
+    const bookFirstChapterIdx = 4;
+    const bookLastChapterIdx = 5;
+
+    const chapterBookIdx = 0;
+    const chapterName = 1;
+    const chapterNum = 2;
+    const chapterFirstVerseIdx = 3;
+    const chapterLastVerseIdx = 4;
+
+    const verseText = 0;
+    const verseCitation = 3;
+    const verseNum = 4;
+
+    const wordVerseIdx = 0;
+    const wordCount = 1;
+
     const appPrefix = 'kjs';
 
     const centerScrollElement = (scrollElement, element) => {
@@ -5220,25 +5239,6 @@
       scrollElement.scrollLeft = x;
     };
 
-    const bookLongName = 0;
-    const bookShortName = 1;
-    const bookLastVerseIdx = 3;
-    const bookFirstChapterIdx = 4;
-    const bookLastChapterIdx = 5;
-
-    const chapterBookIdx = 0;
-    const chapterName = 1;
-    const chapterNum = 2;
-    const chapterFirstVerseIdx = 3;
-    const chapterLastVerseIdx = 4;
-
-    const verseText = 0;
-    const verseCitation = 3;
-    const verseNum = 4;
-
-    const wordVerseIdx = 0;
-    const wordCount = 1;
-
     const tomeStores = {
       lists: 'k',
       verses: 'k',
@@ -5260,11 +5260,6 @@
 
     let progress = null;
 
-    const chapterByVerseIdx = (verseIdx) => {
-      let chapterIdx = chapterIdxByVerseIdx(verseIdx);
-      return tomeChapters[chapterIdx];
-    };
-
     const chapterIdxByVerseIdx = (verseIdx) => {
       let chapterIdx = tomeChapters
         .findIndex(x => x[chapterLastVerseIdx] >= verseIdx);
@@ -5272,9 +5267,7 @@
     };
 
     const citationByVerseIdx = (verseIdx) => {
-      let chapter = chapterByVerseIdx(verseIdx);
-      let num = verseIdx - chapter[chapterFirstVerseIdx] + 1;
-      return `${chapter[chapterName]}:${num}`;
+      return tomeCitations[verseIdx];
     };
 
     const initializeTome = async (cb) => {
@@ -5477,7 +5470,7 @@
       }
 
       publish(command, data) {
-        console.log(command);
+        // console.log(command);
         if (this.commands[command] && this.commands[command].length >= 1) {
           for (let listener of this.commands[command]) {
             this.queue.push({listener, data});
@@ -5536,6 +5529,7 @@
       restore() {
         this.restoreColumnMode();
         this.restoreStrongMode();
+        this.restoreSidebar();
       }
 
       restoreColumnMode() {
@@ -5554,6 +5548,26 @@
           }
         }
         this.columnModeChange(columnMode);
+      }
+
+      restoreSidebar() {
+        let defaultSidebar = this.panes > 1 ? 'navigator' : 'none';
+        let sidebar = localStorage.getItem(`${appPrefix}-sidebar`);
+        if (!sidebar) {
+          sidebar = defaultSidebar;
+        } else {
+          try {
+            sidebar = JSON.parse(sidebar);
+          } catch (error) {
+            sidebar = defaultSidebar;
+          }
+        }
+        if (this.panes > 1) {
+          sidebar = sidebar === 'none' ? 'navigator' : sidebar;
+        } else if (sidebar !== 'none') {
+          sidebar = 'none';
+        }
+        this.sidebarChange(sidebar);
       }
 
       restoreStrongMode() {
@@ -5575,7 +5589,8 @@
       }
 
       saveColumnMode() {
-        localStorage.setItem(`${appPrefix}-columnMode`, JSON.stringify(this.columnMode));
+        localStorage.setItem(`${appPrefix}-columnMode`,
+          JSON.stringify(this.columnMode));
       }
 
       saveStrongMode() {
@@ -5591,26 +5606,6 @@
         this.sidebar = sidebar;
         this.saveSidebar();
         queue.publish('sidebar.update', this.sidebar);
-      }
-
-      sidebarRestore() {
-        let defaultSidebar = this.panes > 1 ? 'navigator' : 'none';
-        let sidebar = localStorage.getItem(`${appPrefix}-sidebar`);
-        if (!sidebar) {
-          sidebar = defaultSidebar;
-        } else {
-          try {
-            sidebar = JSON.parse(sidebar);
-          } catch (error) {
-            sidebar = defaultSidebar;
-          }
-        }
-        if (this.panes > 1) {
-          sidebar = sidebar === 'none' ? 'navigator' : sidebar;
-        } else if (sidebar !== 'none') {
-          sidebar = 'none';
-        }
-        this.sidebarChange(sidebar);
       }
 
       strongModeChange(strongMode) {
@@ -5640,9 +5635,6 @@
 
         queue.subscribe('sidebar.change', (sidebar) => {
           this.sidebarChange(sidebar);
-        });
-        queue.subscribe('sidebar.restore', () => {
-          this.sidebarRestore();
         });
       }
 
@@ -5844,6 +5836,7 @@
 
       buildPage() {
         this.page = templatePage('read');
+        this.page.classList.remove('page--hide');
 
         this.toolbarUpper = templateToolbarUpper(upperToolSet);
         this.page.appendChild(this.toolbarUpper);
@@ -6334,7 +6327,6 @@
         queue.publish('setting.restore', null);
         queue.publish('help.restore', null);
         queue.publish('read.restore', null);
-        queue.publish('sidebar.restore', null);
       }
 
       nextChapter() {
@@ -6370,7 +6362,6 @@
             this.sidebar = sidebar;
             queue.publish(`${this.sidebar}.show`, null);
           } else {
-            queue.publish('read.show', null);
             if (this.sidebar && this.sidebar !== 'none') {
               queue.publish(`${this.sidebar}.hide`, null);
             }
@@ -6459,7 +6450,7 @@
 
     const validTasks = ['navigator-book', 'navigator-chapter'];
 
-    const IDX_GENESIS_1 = 0;
+    const CHAPTER_IDX_GENESIS_1 = 0;
 
     class NavigatorModel {
 
@@ -6477,7 +6468,9 @@
         this.saveChapterIdx();
         await this.updateVerses();
         let bookIdx = tomeChapters[this.chapterIdx][chapterBookIdx];
-        this.bookIdxChange(bookIdx);
+        if (this.bookIdx !== bookIdx) {
+          this.bookIdxChange(bookIdx);
+        }
         queue.publish('chapterIdx.update', this.chapterIdx);
       }
 
@@ -6507,7 +6500,7 @@
       }
 
       async restoreChapterIdx() {
-        let defaultIdx = IDX_GENESIS_1;
+        let defaultIdx = CHAPTER_IDX_GENESIS_1;
         let chapterIdx = localStorage.getItem(`${appPrefix}-chapterIdx`);
         if (!chapterIdx) {
           chapterIdx = defaultIdx;
@@ -6517,7 +6510,7 @@
           } catch (error) {
             chapterIdx = defaultIdx;
           }
-          if (!tomeChapters.includes(chapterIdx)) {
+          if (!tomeChapters[chapterIdx]) {
             chapterIdx = defaultIdx;
           }
         }
@@ -6969,38 +6962,46 @@
         queue.publish('sidebar.change', 'none');
       }
 
-      book() {
+      bookIdxUpdate(bookIdx) {
+        this.lastBookIdx = bookIdx;
+        if (this.bookSelectPending) {
+          this.bookSelectPending = false;
+          let book = tomeBooks[bookIdx];
+          this.chapterCount = book[bookLastChapterIdx] -
+            book[bookFirstChapterIdx] + 1;
+          if (this.panes > 1 || this.chapterCount === 1) {
+            let chapterIdx = tomeBooks[bookIdx][bookFirstChapterIdx];
+            queue.publish('chapterIdx.change', chapterIdx);
+          } else {
+            queue.publish('navigator.task.change', 'navigator-chapter');
+          }
+        }
+      }
+
+      bookPane() {
         queue.publish('navigator.task.change', 'navigator-book');
       }
 
       bookSelect(bookIdx) {
         if (bookIdx !== this.lastBookIdx) {
+          this.bookSelectPending = true;
           queue.publish('bookIdx.change', bookIdx);
         }
-        this.lastBookIdx = bookIdx;
-        let book = tomeBooks[bookIdx];
-        let chapterCount =
-          book[bookLastChapterIdx] - book[bookFirstChapterIdx] + 1;
-        if (this.panes > 1 || chapterCount === 1) {
-          let chapterIdx = tomeBooks[bookIdx][bookFirstChapterIdx];
-          queue.publish('chapterIdx.change', chapterIdx);
-        }
-        if (this.panes === 1 && chapterCount === 1) {
-          queue.publish('sidebar.change', 'none');
-        } else {
-          queue.publish('navigator.task.change', 'navigator-chapter');
-        }
-      }
-
-      chapter() {
-        queue.publish('navigator.task.change', 'navigator-chapter');
       }
 
       chapterIdxUpdate() {
-        if (this.panes === 1 && this.sidebar === 'navigator') {
-          queue.publish('sidebar.select', 'none');
-        }
         queue.publish('read.scroll-to-top');
+        if (this.sidebar === 'navigator') {
+          if (this.panes === 1) {
+            queue.publish('sidebar.change', 'none');
+          } else if (this.navigatorTask !== 'navigator-chapter') {
+            queue.publish('navigator.task.change', 'navigator-chapter');
+          }
+        }
+      }
+
+      chapterPane() {
+        queue.publish('navigator.task.change', 'navigator-chapter');
       }
 
       chapterSelect(chapterIdx) {
@@ -7029,19 +7030,23 @@
       }
 
       subscribe() {
+        queue.subscribe('bookIdx.update', (bookIdx) => {
+          this.bookIdxUpdate(bookIdx);
+        });
+
         queue.subscribe('chapterIdx.update', () => {
           this.chapterIdxUpdate();
         });
 
         queue.subscribe('navigator-book', () => {
-          this.book();
+          this.bookPane();
         });
         queue.subscribe('navigator-book.select', (bookIdx) => {
           this.bookSelect(bookIdx);
         });
 
         queue.subscribe('navigator-chapter', () => {
-          this.chapter();
+          this.chapterPane();
         });
         queue.subscribe('navigator-chapter.select', (chapterIdx) => {
           this.chapterSelect(chapterIdx);
@@ -7767,7 +7772,7 @@
       }
 
       moveCopy(verseIdx) {
-        queue.publish('bookmark-move-copy', verseIdx);
+        queue.publish('bookmark-list.move-copy', verseIdx);
       }
 
       panesUpdate(panes) {
@@ -7833,7 +7838,7 @@
           } else if (target === this.btnSortInvert) {
             queue.publish('bookmark-list.sort-invert', null);
           } else if (target === this.btnStrongMode) {
-            queue.publish('bookmark.strong-mode.click', null);
+            queue.publish('bookmark-list.strong-mode.click', null);
           } else if (target === this.btnBookmarkFolder) {
             queue.publish('bookmark-folder', null);
           }
@@ -7851,10 +7856,10 @@
       updateActiveFolder(activeFolder) {
         this.activeFolder = activeFolder;
         this.updateBanner();
-        this.updateList();
+        this.updateBookmarks();
       }
 
-      updateList() {
+      updateBookmarks() {
         this.scrollToTop();
         removeAllChildren(this.list);
         if (this.activeFolder.bookmarks.length === 0) {
@@ -8011,7 +8016,7 @@
 
       listUpdate(moveCopyList) {
         this.moveCopyList = moveCopyList;
-        this.updateList();
+        this.updateFolders();
       }
 
       menuClick(target) {
@@ -8084,7 +8089,7 @@
         this.banner.innerHTML = `${ref} <br> Move/Copy to Folder:`;
       }
 
-      updateList() {
+      updateFolders() {
         this.scrollToTop();
         removeAllChildren(this.list);
         if (this.moveCopyList.length === 0) {
@@ -8207,7 +8212,7 @@
 
       folderListUpdate(folderList) {
         this.folderList = folderList;
-        this.updateList();
+        this.updateFolders();
       }
 
       getElements() {
@@ -8322,7 +8327,7 @@
         queue.publish('bookmark-folder.up', folderName);
       }
 
-      updateList() {
+      updateFolders() {
         this.scrollToTop();
         removeAllChildren(this.list);
         let fragment = document.createDocumentFragment();
@@ -8972,6 +8977,13 @@
         this.initialize();
       }
 
+      activeFolderUpdate() {
+        if (this.folderSelectPending) {
+          this.folderSelectPending = false;
+          queue.publish('bookmark.task.change', 'bookmark-list');
+        }
+      }
+
       back() {
         queue.publish('sidebar.change', 'none');
       }
@@ -8986,29 +8998,20 @@
         }
       }
 
-      export () {
+      exportPane() {
         queue.publish('bookmark.task.change', 'bookmark-export');
-      }
-
-      folder() {
-        queue.publish('bookmark.task.change', 'bookmark-folder');
-      }
-
-      folderAdd() {
-        queue.publish('bookmark.task.change', 'bookmark-folder-add');
       }
 
       folderAdded() {
         queue.publish('bookmark.task.change', 'bookmark-list');
       }
 
-      folderAddSave(name) {
-        queue.publish('bookmark.folder.add', name);
+      folderAddPane() {
+        queue.publish('bookmark.task.change', 'bookmark-folder-add');
       }
 
-      folderDelete(folderName) {
-        queue.publish('folder.to.delete', folderName);
-        queue.publish('bookmark.task.change', 'bookmark-folder-delete');
+      folderAddSave(name) {
+        queue.publish('bookmark.folder.add', name);
       }
 
       folderDeleteConfirm(folderName) {
@@ -9016,11 +9019,20 @@
         queue.publish('bookmark.task.change', 'bookmark-folder');
       }
 
+      folderDeletePane(folderName) {
+        queue.publish('folder.to.delete', folderName);
+        queue.publish('bookmark.task.change', 'bookmark-folder-delete');
+      }
+
       folderDown(folderName) {
         queue.publish('bookmark.folder.down', folderName);
       }
 
-      folderRename(folderName) {
+      folderPane() {
+        queue.publish('bookmark.task.change', 'bookmark-folder');
+      }
+
+      folderRenamePane(folderName) {
         queue.publish('folder.to.rename', folderName);
         queue.publish('bookmark.task.change', 'bookmark-folder-rename');
       }
@@ -9034,8 +9046,8 @@
       }
 
       folderSelect(folderName) {
+        this.folderSelectPending = true;
         queue.publish('bookmark.active-folder.change', folderName);
-        queue.publish('bookmark.task.change', 'bookmark-list');
       }
 
       folderUp(folderName) {
@@ -9052,20 +9064,16 @@
         queue.publish(`${this.bookmarkTask}.hide`, null);
       }
 
-      import() {
-        queue.publish('bookmark.task.change', 'bookmark-import');
-      }
-
       importImport(pkgStr) {
         queue.publish('bookmark.pkg.import', pkgStr);
       }
 
-      initialize() {
-        this.subscribe();
+      importPane() {
+        queue.publish('bookmark.task.change', 'bookmark-import');
       }
 
-      list() {
-        queue.publish('bookmark.task.change', 'bookmark-list');
+      initialize() {
+        this.subscribe();
       }
 
       listDelete(verseIdx) {
@@ -9074,6 +9082,10 @@
 
       listDown(verseIdx) {
         queue.publish('bookmark.down', verseIdx);
+      }
+
+      listPane() {
+        queue.publish('bookmark.task.change', 'bookmark-list');
       }
 
       listSelect(verseIdx) {
@@ -9096,17 +9108,17 @@
         queue.publish('bookmark.strong-mode.toggle', null);
       }
 
-      moveCopy(verseIdx) {
-        queue.publish('bookmark-move-copy.list.change', verseIdx);
-        queue.publish('bookmark.move-copy.change', verseIdx);
-      }
-
       moveCopyCopy(copyPkg) {
         queue.publish('bookmark.copy', copyPkg);
       }
 
       moveCopyMove(movePkg) {
         queue.publish('bookmark.move', movePkg);
+      }
+
+      moveCopyPane(verseIdx) {
+        queue.publish('bookmark-move-copy.list.change', verseIdx);
+        queue.publish('bookmark.move-copy.change', verseIdx);
       }
 
       moveCopyReady() {
@@ -9139,14 +9151,14 @@
 
       subscribe() {
         queue.subscribe('bookmark-export', () => {
-          this.export();
+          this.exportPane();
         });
 
         queue.subscribe('bookmark-folder', () => {
-          this.folder();
+          this.folderPane();
         });
         queue.subscribe('bookmark-folder.delete', (folderName) => {
-          this.folderDelete(folderName);
+          this.folderDeletePane(folderName);
         });
         queue.subscribe('bookmark-folder.down', (folderName) => {
           this.folderDown(folderName);
@@ -9159,7 +9171,7 @@
         });
 
         queue.subscribe('bookmark-folder-add', () => {
-          this.folderAdd();
+          this.folderAddPane();
         });
         queue.subscribe('bookmark-folder-add.save', (name) => {
           this.folderAddSave(name);
@@ -9170,27 +9182,30 @@
         });
 
         queue.subscribe('bookmark-folder-rename', (folderName) => {
-          this.folderRename(folderName);
+          this.folderRenamePane(folderName);
         });
         queue.subscribe('bookmark-folder-rename.save', (namePkg) => {
           this.folderRenameSave(namePkg);
         });
 
         queue.subscribe('bookmark-import', () => {
-          this.import();
+          this.importPane();
         });
         queue.subscribe('bookmark-import.import', (pkgStr) => {
           this.importImport(pkgStr);
         });
 
         queue.subscribe('bookmark-list', () => {
-          this.list();
+          this.listPane();
         });
         queue.subscribe('bookmark-list.delete', (verseIdx) => {
           this.listDelete(verseIdx);
         });
         queue.subscribe('bookmark-list.down', (verseIdx) => {
           this.listDown(verseIdx);
+        });
+        queue.subscribe('bookmark-list.move-copy', (verseIdx) => {
+          this.moveCopyPane(verseIdx);
         });
         queue.subscribe('bookmark-list.select', (verseIdx) => {
           this.listSelect(verseIdx);
@@ -9201,6 +9216,9 @@
         queue.subscribe('bookmark-list.sort-invert', () => {
           this.listSortInvert();
         });
+        queue.subscribe('bookmark-list.strong-mode.click', () => {
+          this.modeToggle();
+        });
         queue.subscribe('bookmark-list.strong-select', (verseIdx) => {
           this.strongSelect(verseIdx);
         });
@@ -9208,9 +9226,6 @@
           this.listUp(verseIdx);
         });
 
-        queue.subscribe('bookmark-move-copy', (verseIdx) => {
-          this.moveCopy(verseIdx);
-        });
         queue.subscribe('bookmark-move-copy.copy', (copyPkg) => {
           this.moveCopyCopy(copyPkg);
         });
@@ -9221,11 +9236,14 @@
           this.moveCopyReady();
         });
 
+        queue.subscribe('bookmark.active-folder.update', () => {
+          this.activeFolderUpdate();
+        });
         queue.subscribe('bookmark.back', () => {
           this.back();
         });
         queue.subscribe('bookmark.copy', () => {
-          this.list();
+          this.listPane();
         });
         queue.subscribe('bookmark.folder.added', () => {
           this.folderAdded();
@@ -9237,13 +9255,10 @@
           this.hide();
         });
         queue.subscribe('bookmark.move', () => {
-          this.list();
+          this.listPane();
         });
         queue.subscribe('bookmark.show', () => {
           this.show();
-        });
-        queue.subscribe('bookmark.strong-mode.click', () => {
-          this.modeToggle();
         });
         queue.subscribe('bookmark.task.update', (bookmarkTask) => {
           this.taskUpdate(bookmarkTask);
@@ -10046,7 +10061,7 @@
           if (this.rig.state === 'OK') {
             this.applyFilter();
             this.updateBanner();
-            this.updateList();
+            this.updateResult();
           }
         }
       }
@@ -10235,7 +10250,7 @@
           `${this.rig.query}`;
       }
 
-      updateList() {
+      updateResult() {
         this.scrollToTop();
         removeAllChildren(this.list);
         if (this.rig.state === 'OK') {
@@ -10432,7 +10447,7 @@
       rigUpdate(rig) {
         this.rig = rig;
         this.updateBanner();
-        this.updateList();
+        this.updateFilters();
       }
 
       scrollToTop() {
@@ -10502,7 +10517,7 @@
         this.banner.innerHTML = `${this.rig.query}`;
       }
 
-      updateList() {
+      updateFilters() {
         this.scrollToTop();
         removeAllChildren(this.list);
         if (this.rig.state === 'OK') {
@@ -10652,7 +10667,7 @@
 
       historyUpdate(history) {
         this.history = history;
-        this.updateList();
+        this.updateHistory();
       }
 
       initialize() {
@@ -10718,7 +10733,7 @@
         queue.publish('search-history.up', query);
       }
 
-      updateList() {
+      updateHistory() {
         this.scrollToTop();
         removeAllChildren(this.list);
         if (this.history.length === 0) {
@@ -10905,21 +10920,24 @@
         }
       }
 
-      filter() {
+      filterPane() {
         queue.publish('search.task.change', 'search-filter');
       }
 
       filterSelect(searchFilter) {
+        this.filterSelectPending = true;
         queue.publish('search.filter.change', searchFilter);
-        queue.publish('search.task.change', 'search-result');
+      }
+
+      filterUpdate() {
+        if (this.filterSelectPending) {
+          this.filterSelectPending = false;
+          queue.publish('search.task.change', 'search-result');
+        }
       }
 
       hide() {
         queue.publish(`${this.searchTask}.hide`, null);
-      }
-
-      history() {
-        queue.publish('search.task.change', 'search-history');
       }
 
       historyClear() {
@@ -10934,25 +10952,36 @@
         queue.publish('search.history.down', query);
       }
 
+      historyPane() {
+        queue.publish('search.task.change', 'search-history');
+      }
+
       historySelect(query) {
+        this.historySelectPending = true;
         queue.publish('search.query.change', query);
-        queue.publish('search.task.change', 'search-result');
       }
 
       historyUp(query) {
         queue.publish('search.history.up', query);
       }
 
+      historyUpdate() {
+        if (this.historySelectPending) {
+          this.historySelectPending = false;
+          queue.publish('search.task.change', 'search-result');
+        }
+      }
+
       initialize() {
         this.subscribe();
       }
 
-      lookup() {
-        queue.publish('search.task.change', 'search-lookup');
-      }
-
       lookupCancel() {
         queue.publish('search.task.change', 'search-result');
+      }
+
+      lookupPane() {
+        queue.publish('search.task.change', 'search-lookup');
       }
 
       lookupSearch(query) {
@@ -10983,7 +11012,7 @@
         queue.publish('chapterIdx.change', chapterIdx);
       }
 
-      result() {
+      resultPane() {
         queue.publish('search.task.change', 'search-result');
       }
 
@@ -11017,14 +11046,14 @@
         });
 
         queue.subscribe('search-filter', () => {
-          this.filter();
+          this.filterPane();
         });
         queue.subscribe('search-filter.select', (searchFilter) => {
           this.filterSelect(searchFilter);
         });
 
         queue.subscribe('search-history', () => {
-          this.history();
+          this.historyPane();
         });
         queue.subscribe('search-history.clear', () => {
           this.historyClear();
@@ -11043,7 +11072,7 @@
         });
 
         queue.subscribe('search-lookup', () => {
-          this.lookup();
+          this.lookupPane();
         });
         queue.subscribe('search-lookup.cancel', () => {
           this.lookupCancel();
@@ -11053,7 +11082,7 @@
         });
 
         queue.subscribe('search-result', () => {
-          this.result();
+          this.resultPane();
         });
         queue.subscribe('search-result.read-select', (verseIdx) => {
           this.readSelect(verseIdx);
@@ -11065,8 +11094,14 @@
         queue.subscribe('search.back', () => {
           this.back();
         });
+        queue.subscribe('search.filter.update', () => {
+          this.filterUpdate();
+        });
         queue.subscribe('search.hide', () => {
           this.hide();
+        });
+        queue.subscribe('search.history.update', () => {
+          this.historyUpdate();
         });
         queue.subscribe('search.query.change', () => {
           this.queryChange();
@@ -11143,11 +11178,7 @@
           this.strongDef = strongDef;
           this.saveDef();
           this.addHistory();
-          this.strongIdx = this.strongHistory.indexOf(this.strongDef);
-          this.strongDefObj = await strongDb.defs.get(this.strongDef);
-          await this.updateWordObj();
-          await this.wordFirst();
-          queue.publish('strong.def.update', this.strongDefObj);
+          await this.defUpdate();
         }
       }
 
@@ -11155,6 +11186,10 @@
         this.strongDef = strongDef;
         this.saveDef();
         this.addSubHistory();
+        await this.defUpdate();
+      }
+
+      async defUpdate() {
         this.strongIdx = this.strongHistory.indexOf(this.strongDef);
         this.strongDefObj = await strongDb.defs.get(this.strongDef);
         await this.updateWordObj();
@@ -11548,26 +11583,23 @@
         if (this.words.length) {
           let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
           this.wordTomeBin = word[wordTomeBin];
-          await this.updateWordVerses();
-          await this.updateWordMaps();
-          this.filterReset();
-          queue.publish('strong.word.update', this.strongWord);
         } else {
           this.wordTomeBin = [];
-          await this.updateWordVerses();
-          await this.updateWordMaps();
-          this.filterReset();
-          queue.publish('strong.word.update', this.strongWord);
         }
+        await this.updateWordVerses();
+        await this.updateWordMaps();
+        this.filterReset();
+        queue.publish('strong.word.update', this.strongWord);
       }
 
       async wordFirst() {
+        let firstKjvWord;
         if (this.words.length) {
-          let firstKjvWord = this.words[firstWord][wordKjvWord];
-          await this.wordChange(firstKjvWord);
+          firstKjvWord = this.words[firstWord][wordKjvWord];
         } else {
-          await this.wordChange(null);
+          firstKjvWord = null;
         }
+        await this.wordChange(firstKjvWord);
       }
 
     }
@@ -11687,7 +11719,7 @@
         this.strongDef = this.strongDefObj.k;
         this.def = this.strongDefObj.v;
         this.updateBanner();
-        this.updateList();
+        this.updateDefs();
         this.updateActiveWord();
       }
 
@@ -11820,7 +11852,7 @@
         }
       }
 
-      updateList() {
+      updateDefs() {
         this.scrollToTop();
         removeAllChildren(this.list);
         let def = this.buildDef();
@@ -11940,6 +11972,10 @@
         this.page.appendChild(this.toolbarUpper);
 
         this.scroll = templateScroll('strong-filter');
+
+        this.empty = templateElement('div', 'empty', 'strong-filter', null,
+          'No Strong Filter.');
+        this.scroll.appendChild(this.empty);
         this.list = templateElement('div', 'list', 'strong-filter', null, null);
         this.scroll.appendChild(this.list);
         this.page.appendChild(this.scroll);
@@ -11965,9 +12001,17 @@
         return btnFilter;
       }
 
+      defChange() {
+        this.defChangePending = true;
+      }
+
       defUpdate(strongDefObj) {
         this.strongDefObj = strongDefObj;
         this.strongDef = this.strongDefObj.k;
+        if (this.defChangePending) {
+          this.defChangePending = false;
+          this.updatePane();
+        }
       }
 
       filterClick(btnFilter) {
@@ -12047,11 +12091,17 @@
           this.show();
         });
 
+        queue.subscribe('strong.def.change', () => {
+          this.defChange();
+        });
         queue.subscribe('strong.def.update', (strongDefObj) => {
           this.defUpdate(strongDefObj);
         });
         queue.subscribe('strong.filter.update', (strongFilter) => {
           this.filterUpdate(strongFilter);
+        });
+        queue.subscribe('strong.word.change', () => {
+          this.wordChange();
         });
         queue.subscribe('strong.word.update', (strongWord) => {
           this.wordUpdate(strongWord);
@@ -12085,29 +12135,50 @@
       }
 
       updateActiveFilter() {
-        if (this.btnActiveFilter) {
-          this.btnActiveFilter.classList.remove('btn-filter--active');
-        }
-        let bookIdx = this.strongFilter.bookIdx;
-        let chapterIdx = this.strongFilter.chapterIdx;
-        let query = `.btn-filter[data-book-idx="${bookIdx}"]` +
-          `[data-chapter-idx="${chapterIdx}"]`;
-        let btn = this.list.querySelector(query);
-        if (btn) {
-          this.btnActiveFilter = btn;
-          btn.classList.add('btn-filter--active');
+        if (this.strongWordTomeBin.length) {
+          if (this.btnActiveFilter) {
+            this.btnActiveFilter.classList.remove('btn-filter--active');
+          }
+          let bookIdx = this.strongFilter.bookIdx;
+          let chapterIdx = this.strongFilter.chapterIdx;
+          let query = `.btn-filter[data-book-idx="${bookIdx}"]` +
+            `[data-chapter-idx="${chapterIdx}"]`;
+          let btn = this.list.querySelector(query);
+          if (btn) {
+            this.btnActiveFilter = btn;
+            btn.classList.add('btn-filter--active');
+          }
         }
       }
 
       updateBanner() {
-        this.banner.innerHTML = `${this.strongDef} ${this.strongWord}`;
+        if (this.strongWord) {
+          this.banner.innerHTML = `${this.strongDef} ${this.strongWord}`;
+        } else {
+          this.banner.innerHTML = `${this.strongDef}`;
+        }
       }
 
-      updateList() {
+      updateFilters() {
         this.scrollToTop();
         removeAllChildren(this.list);
-        let list = this.buildFilters();
-        this.list.appendChild(list);
+        if (this.strongWordTomeBin.length) {
+          this.empty.classList.add('empty--hide');
+          let list = this.buildFilters();
+          this.list.appendChild(list);
+        } else {
+          this.empty.classList.remove('empty--hide');
+        }
+      }
+
+      updatePane() {
+        this.updateBanner();
+        this.updateFilters();
+        this.updateActiveFilter();
+      }
+
+      wordChange() {
+        this.wordChangePending = true;
       }
 
       wordTomeBinUpdate(strongWordTomeBin) {
@@ -12116,9 +12187,9 @@
 
       wordUpdate(strongWord) {
         this.strongWord = strongWord;
-        if (this.strongWord) {
-          this.updateBanner();
-          this.updateList();
+        if (this.wordChangePending && this.strongWord) {
+          this.wordChangePending = false;
+          this.updatePane();
         }
       }
 
@@ -12206,7 +12277,7 @@
 
         this.scroll = templateScroll('strong-history');
         this.empty = templateElement('div', 'empty', 'strong-history', null,
-          'No Strong saved.');
+          'No Strong History.');
         this.scroll.appendChild(this.empty);
 
         this.list = templateElement('div', 'list', 'strong-history', null, null);
@@ -12264,7 +12335,7 @@
 
       historyUpdate(strongHstory) {
         this.history = strongHstory;
-        this.updateList();
+        this.updateHistory();
       }
 
       initialize() {
@@ -12334,7 +12405,7 @@
         queue.publish('strong-history.up', strongDef);
       }
 
-      updateList() {
+      updateHistory() {
         this.scrollToTop();
         removeAllChildren(this.list);
         if (this.history.length === 0) {
@@ -12599,6 +12670,10 @@
 
         this.scroll = templateScroll('strong-result');
 
+        this.empty = templateElement('div', 'empty', 'strong-result', null,
+          'No Strong Result.');
+        this.scroll.appendChild(this.empty);
+
         this.list = templateElement('div', 'list', 'strong-result', null, null);
         this.scroll.appendChild(this.list);
 
@@ -12662,7 +12737,7 @@
         this.strongDefObj = strongDefObj;
         this.strongDef = this.strongDefObj.k;
         this.updateBanner();
-        this.updateList();
+        this.updateResult();
       }
 
       filterChange() {
@@ -12674,8 +12749,7 @@
         this.applyFilter();
         if (this.filterChangePending) {
           this.filterChangePending = false;
-          this.updateBanner();
-          this.updateList();
+          this.updatePane();
         }
       }
 
@@ -12878,9 +12952,19 @@
         }
       }
 
-      updateList() {
+      updatePane() {
+        this.updateBanner();
+        this.updateResult();
+      }
+
+      updateResult() {
         this.scrollToTop();
         removeAllChildren(this.list);
+        if (this.verseCount) {
+          this.empty.classList.add('empty--hide');
+        } else {
+          this.empty.classList.remove('empty--hide');
+        }
         this.loadIdx = 0;
         this.loadedVerses = 0;
         this.loadVerses();
@@ -12906,8 +12990,7 @@
         this.strongWord = strongWord;
         if (this.wordChangePending) {
           this.wordChangePending = false;
-          this.updateBanner();
-          this.updateList();
+          this.updatePane();
         }
       }
 
@@ -13070,7 +13153,7 @@
         this.banner.textContent = this.verse[verseCitation];
       }
 
-      updateList() {
+      updateVerse() {
         this.scrollToTop();
         removeAllChildren(this.list);
         let docFragment = document.createDocumentFragment();
@@ -13087,7 +13170,7 @@
         this.strongVerse = this.strongVerseObj.k;
         this.verse = this.strongVerseObj.v;
         this.updateBanner();
-        this.updateList();
+        this.updateVerse();
       }
 
     }
@@ -13112,16 +13195,16 @@
         }
       }
 
-      def() {
+      defChange() {
+        this.defChangePending = true;
+      }
+
+      defPane() {
         queue.publish('strong.task.change', 'strong-def');
       }
 
       defSelect(strongDef) {
         queue.publish('strong.def.sub-change', strongDef);
-      }
-
-      defChange() {
-        this.defChangePending = true;
       }
 
       defUpdate() {
@@ -13131,7 +13214,7 @@
         }
       }
 
-      filter() {
+      filterPane() {
         queue.publish('strong.task.change', 'strong-filter');
       }
 
@@ -13151,10 +13234,6 @@
         queue.publish(`${this.strongTask}.hide`, null);
       }
 
-      history() {
-        queue.publish('strong.task.change', 'strong-history');
-      }
-
       historyClear() {
         queue.publish('strong.history.clear', null);
       }
@@ -13165,6 +13244,10 @@
 
       historyDown(strongDef) {
         queue.publish('strong.history.down', strongDef);
+      }
+
+      historyPane() {
+        queue.publish('strong.task.change', 'strong-history');
       }
 
       historySelect(strongDef) {
@@ -13179,12 +13262,12 @@
         this.subscribe();
       }
 
-      lookup() {
-        queue.publish('strong.task.change', 'strong-lookup');
-      }
-
       lookupFind(strongNum) {
         queue.publish('strong.def.change', strongNum);
+      }
+
+      lookupPane() {
+        queue.publish('strong.task.change', 'strong-lookup');
       }
 
       modeToggle() {
@@ -13209,16 +13292,16 @@
         queue.publish('chapterIdx.change', chapterIdx);
       }
 
+      resultPane() {
+        queue.publish('strong.task.change', 'strong-result');
+      }
+
       show() {
         queue.publish(`${this.strongTask}.show`, null);
       }
 
       sidebarUpdate(sidebar) {
         this.sidebar = sidebar;
-      }
-
-      search() {
-        queue.publish('strong.task.change', 'strong-result');
       }
 
       strongSelect(verseIdx) {
@@ -13239,7 +13322,7 @@
         });
 
         queue.subscribe('strong-def', () => {
-          this.def();
+          this.defPane();
         });
         queue.subscribe('strong-def.next.strong',
           () => { this.nextStrong(); }
@@ -13255,14 +13338,14 @@
         });
 
         queue.subscribe('strong-filter', () => {
-          this.filter();
+          this.filterPane();
         });
         queue.subscribe('strong-filter.select', (strongFilter) => {
           this.filterSelect(strongFilter);
         });
 
         queue.subscribe('strong-history', () => {
-          this.history();
+          this.historyPane();
         });
         queue.subscribe('strong-history.clear', () => {
           this.historyClear();
@@ -13281,14 +13364,14 @@
         });
 
         queue.subscribe('strong-lookup', () => {
-          this.lookup();
+          this.lookupPane();
         });
         queue.subscribe('strong-lookup.find', (strongNum) => {
           this.lookupFind(strongNum);
         });
 
         queue.subscribe('strong-result', () => {
-          this.search();
+          this.resultPane();
         });
         queue.subscribe('strong-result.read-select', (verseIdx) => {
           this.readSelect(verseIdx);
@@ -13298,7 +13381,7 @@
         });
 
         queue.subscribe('strong-verse', () => {
-          this.verse();
+          this.versePane();
         });
         queue.subscribe('strong-verse.select', (strongDef) => {
           this.verseSelect(strongDef);
@@ -13351,12 +13434,12 @@
         }
       }
 
-      verse() {
-        queue.publish('strong.task.change', 'strong-verse');
-      }
-
       verseChange() {
         this.verseChangePending = true;
+      }
+
+      versePane() {
+        queue.publish('strong.task.change', 'strong-verse');
       }
 
       verseSelect(strongDef) {
@@ -14377,7 +14460,7 @@
         this.subscribe();
       }
 
-      read() {
+      readPane() {
         queue.publish('help.task.change', 'help-read');
       }
 
@@ -14391,11 +14474,11 @@
 
       subscribe() {
         queue.subscribe('help-read', () => {
-          this.read();
+          this.readPane();
         });
 
         queue.subscribe('help-topic', (helpTopic) => {
-          this.topic(helpTopic);
+          this.topicPane(helpTopic);
         });
         queue.subscribe('help-topic.select', (helpTopic) => {
           this.topicSelect(helpTopic);
@@ -14412,6 +14495,9 @@
         });
         queue.subscribe('help.task.update', (helpTask) => {
           this.taskUpdate(helpTask);
+        });
+        queue.subscribe('help.topic.update', () => {
+          this.topicUpdate();
         });
 
         queue.subscribe('sidebar.update', (sidebar) => {
@@ -14431,13 +14517,20 @@
         }
       }
 
-      topic() {
+      topicPane() {
         queue.publish('help.task.change', 'help-topic');
       }
 
       topicSelect(helpTopic) {
+        this.topicSelectPending = true;
         queue.publish('help.topic.change', helpTopic);
-        queue.publish('help.task.change', 'help-read');
+      }
+
+      topicUpdate() {
+        if (this.topicSelectPending) {
+          this.topicSelectPending = false;
+          queue.publish('help.task.change', 'help-read');
+        }
       }
 
     }
