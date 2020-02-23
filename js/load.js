@@ -56,7 +56,7 @@ let swEvents = () => {
   });
 };
 
-const progress = (msg) => {
+export const progress = (msg) => {
   loadMsg.innerHTML += msg + '<br>';
   loadScroll.scrollTop = loadScroll.scrollHeight;
 };

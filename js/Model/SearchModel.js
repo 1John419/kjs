@@ -1,6 +1,6 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import queue from '../CommandQueue.js';
 import { SearchEngine } from '../SearchEngine.js';
 import { tomeBinVerses } from '../data/binIdx.js';
 import { tomeDb } from '../data/tomeDb.js';

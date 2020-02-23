@@ -9,5 +9,7 @@ Dedicated to our precious Lord and Saviour Jesus Christ.
 
 The application supports Android, Linux, or Windows platforms with the latest version of Google Chrome.
 
+It should also support the latest version of Safari, but has not been extensively tested on Mac/iOS platforms.
+
 ### Download Link
-[kjs](https://1john419.github.io/kjs/)
+[kjs-test](https://1john419.github.io/kjs-test/)

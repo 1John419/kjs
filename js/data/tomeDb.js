@@ -1,14 +1,11 @@
 'use strict';
 
-import Dexie from '../lib/dexie.js';
-import { LZMA } from '../lib/decompress.js';
+import { progress } from '../load.js';
+import { chapterLastVerseIdx } from './tomeIdx.js';
 import {
-  chapterLastVerseIdx
-} from './tomeIdx.js';
-import {
-  appPrefix,
-  dbVersion
-} from '../util.js';
+  fetchJson,
+  versionCheck
+} from './dbUtil.js';
 
 const tomeStores = {
   lists: 'k',
@@ -16,7 +13,7 @@ const tomeStores = {
   words: 'k'
 };
 
-const tomeLzmaUrl = './lzma/tome.kjv.json.lzma';
+const tomeUrl = './json/tome.kjv.json';
 const tomeVersion = 1;
 
 export const tomeName = 'KJV';
@@ -28,8 +25,6 @@ export let tomeCitations = [];
 export let tomeDb = null;
 export let tomeVerseCount = null;
 export let tomeWords = null;
-
-let progress = null;
 
 export const chapterByVerseIdx = (verseIdx) => {
   let chapterIdx = chapterIdxByVerseIdx(verseIdx);
@@ -46,12 +41,11 @@ export const citationByVerseIdx = (verseIdx) => {
   return tomeCitations[verseIdx];
 };
 
-export const initializeTome = async (cb) => {
-  progress = cb ? cb : () => {};
+export const initializeTome = async () => {
   progress('');
   progress('* tome database *');
   progress('');
-  await versionCheck();
+  tomeDb = await versionCheck('tome', tomeStores, tomeVersion);
   await populateTome();
   await loadTomeAcrostics();
   await loadTomeBooks();
@@ -59,6 +53,7 @@ export const initializeTome = async (cb) => {
   await loadTomeCitations();
   await loadTomeWords();
   tomeVerseCount = await tomeDb.verses.count();
+  progress('tome initialized.');
 };
 
 const loadTomeAcrostics = async () => {
@@ -94,20 +89,7 @@ const loadTomeWords = async () => {
 const populateTome = async () => {
   let wordCount = await tomeDb.words.count();
   if (wordCount === 0) {
-    progress('fetching...');
-    let response = await fetch(tomeLzmaUrl);
-
-    progress('buffering...');
-    let buffer = await response.arrayBuffer();
-
-    progress('byte conversion...');
-    let bytes = new Uint8Array(buffer);
-
-    progress('decompressing...');
-    let str = await LZMA.decompress(bytes);
-
-    progress('parsing...');
-    let data = JSON.parse(str);
+    let data = await fetchJson(tomeUrl);
 
     progress('populating lists...');
     await tomeDb.lists.bulkAdd(data.lists);
@@ -118,23 +100,5 @@ const populateTome = async () => {
     progress('population complete.');
   } else {
     progress('tome already populated.');
-  }
-};
-
-const versionCheck = async () => {
-  let currentVersion = dbVersion('tome');
-
-  tomeDb = await new Dexie('tome');
-  await tomeDb.version(1).stores(tomeStores);
-  tomeDb.open();
-
-  if (tomeVersion !== currentVersion) {
-    progress('new version.');
-    for (let store of Object.keys(tomeStores)) {
-      progress(`clearing ${store}...`);
-      await tomeDb.table(store).clear();
-    }
-    localStorage.setItem(`${appPrefix}-tomeVersion`,
-      JSON.stringify(tomeVersion));
   }
 };

@@ -1,6 +1,6 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import queue from '../CommandQueue.js';
 import { appPrefix } from '../util.js';
 
 const validFontSizes = ['font-size--s', 'font-size--m', 'font-size--l',

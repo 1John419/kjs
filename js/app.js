@@ -4,6 +4,7 @@
 
 import { initializeTome } from './data/tomeDb.js';
 import { initializeStrong } from './data/strongDb.js';
+import { progress } from './load.js';
 
 import { ReadModel } from './Model/ReadModel.js';
 import { ReadView } from './View/ReadView.js';
@@ -54,11 +55,6 @@ const APP_FONT = 'font--roboto';
 
 let loadMsg = document.querySelector('.load-msg');
 let loadScroll = document.querySelector('.load-scroll');
-
-const progress = (msg) => {
-  loadMsg.innerHTML += msg + '<br>';
-  loadScroll.scrollTop = loadScroll.scrollHeight;
-};
 
 (async function() {
   let body = document.body;

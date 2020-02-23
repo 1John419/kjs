@@ -1,6 +1,6 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import queue from '../CommandQueue.js';
 
 const SIDEBAR_WIDTH = 320;
 

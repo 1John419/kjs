@@ -1,6 +1,6 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import queue from '../CommandQueue.js';
 import { tomeBooks } from '../data/tomeDb.js';
 import {
   bookLongName,

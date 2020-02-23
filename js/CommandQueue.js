@@ -40,4 +40,4 @@ class CommandQueue {
 
 let queue = new CommandQueue();
 
-export { queue };
+export default queue;
