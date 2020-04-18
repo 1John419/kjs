@@ -594,7 +594,6 @@ textarea {
 
 .super {
   font-size: 0.8em;
-  margin-left: 0.2em;
   vertical-align: super;
 }
 
@@ -796,7 +795,6 @@ textarea {
 
 .verse-acrostic {
   font-weight: bold;
-  margin-right: 0.5rem;
 }
 
 .verse-last {
@@ -810,7 +808,6 @@ textarea {
 
 .verse-ref {
   font-weight: bold;
-  margin-right: 0.5rem;
 }
 
 .verse-text {

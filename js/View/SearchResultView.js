@@ -125,7 +125,7 @@ class SearchResultView {
       if (acrostic) {
         acrosticSpan = document.createElement('span');
         acrosticSpan.classList.add('verse-acrostic');
-        acrosticSpan.textContent = acrostic;
+        acrosticSpan.textContent = acrostic + ' ';
       }
     }
     return acrosticSpan;
@@ -160,7 +160,7 @@ class SearchResultView {
   buildRefSpan(verseObj) {
     let refSpan = document.createElement('span');
     refSpan.classList.add('verse-ref');
-    refSpan.textContent = verseObj.v[verseCitation];
+    refSpan.textContent = verseObj.v[verseCitation] + ' ';
     return refSpan;
   }
 
