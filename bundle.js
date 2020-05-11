@@ -12927,7 +12927,7 @@
 
       this.fontSample = templateElement('div', 'font-sample', null, null, null);
       this.fontSample.innerHTML = '<p class="font-sample-verse">' +
-        '<span class="verse-ref">1 John 4:19</span>' +
+        '<span class="verse-ref">1 John 4:19 </span>' +
         'We love him, because he first loved us.</p>';
       this.scroll.appendChild(this.fontSample);
 
