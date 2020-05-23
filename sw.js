@@ -16,7 +16,7 @@ let appCaches = [
     ]
   },
   {
-    name: 'kjs-css-20200418.01',
+    name: 'kjs-css-20200523.01',
     urls: [
       './css/kjs.css',
       './css/font.css'
@@ -34,7 +34,7 @@ let appCaches = [
     ]
   },
   {
-    name: 'kjs-help-20200511.01',
+    name: 'kjs-help-20200523.01',
     urls: [
       './help/about.html',
       './help/bookmark.html',

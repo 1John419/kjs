@@ -532,6 +532,7 @@ textarea {
   flex: 1 1 auto;
   overflow-y: auto;
   padding: 0.5rem;
+  position: relative;
 }
 
 .scroll--help-read {
