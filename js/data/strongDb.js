@@ -14,7 +14,7 @@ const strongStores = {
 };
 
 const strongUrl = './json/strong.json';
-const strongVersion = 2;
+const strongVersion = 3;
 
 export let strongCitations = {};
 export let strongDb = null;
