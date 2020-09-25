@@ -17,7 +17,6 @@ const strongDefReroute = ['strong-history', 'strong-lookup'];
 const strongResultReroute = ['strong-filter'];
 const validTasks = ['strong-def', 'strong-verse', 'strong-result'];
 
-const firstEntry = 0;
 const firstWord = 0;
 
 const IDX_1_JOHN_4_19 = 30622;
@@ -35,11 +34,35 @@ class StrongModel {
     }
   }
 
-  addSubHistory() {
-    if (this.strongHistory.indexOf(this.strongDef) === -1) {
-      this.strongHistory.splice(this.strongIdx, 0, this.strongDef);
-      this.updateHistory();
+  chainAdd() {
+    this.strongChain.push(this.strongDef);
+    this.updateChain();
+  }
+
+  chainChange(strongChain) {
+    this.strongChain = strongChain;
+    this.updateChain();
+    queue.publish('strong.chain.update', this.strongChain);
+  }
+
+  chainClear() {
+    this.strongChain = [];
+    this.updateChain();
+  }
+
+  chainIsValid(strongChain) {
+    return strongChain.some((x) => {
+      return typeof x === 'string';
+    });
+  }
+
+  chainPrev() {
+    if (this.strongChain.length == 0) {
+      return;
     }
+    let strongDef = this.strongChain.pop();
+    this.updateChain();
+    this.defChange(strongDef);
   }
 
   async defChange(strongDef) {
@@ -51,13 +74,6 @@ class StrongModel {
       this.addHistory();
       await this.defUpdate();
     }
-  }
-
-  async defSubChange(strongDef) {
-    this.strongDef = strongDef;
-    this.saveDef();
-    this.addSubHistory();
-    await this.defUpdate();
   }
 
   async defUpdate() {
@@ -106,26 +122,10 @@ class StrongModel {
     this.updateHistory();
   }
 
-  historyDown(strongDef) {
-    let index = this.strongHistory.indexOf(strongDef);
-    if (index !== (this.strongHistory.length - 1) && index !== -1) {
-      this.reorderHistory(index, index + 1);
-      this.updateHistory();
-    }
-  }
-
   historyIsValid(strongHistory) {
     return strongHistory.some((x) => {
       return typeof x === 'string';
     });
-  }
-
-  historyUp(strongDef) {
-    let index = this.strongHistory.indexOf(strongDef);
-    if (index !== 0 && index !== -1) {
-      this.reorderHistory(index, index - 1);
-      this.updateHistory();
-    }
   }
 
   initialize() {
@@ -142,20 +142,34 @@ class StrongModel {
     this.modeChange(!this.strongMode);
   }
 
-  reorderHistory(fromIdx, toIdx) {
-    this.strongHistory.splice(toIdx, 0,
-      this.strongHistory.splice(fromIdx, 1)[firstEntry]);
-  }
-
   async restore() {
     this.restoreTask();
     this.restoreHistory();
+    this.restoreChain();
     await this.restoreDef();
     this.strongIdx = this.strongHistory.findIndex(x => x === this.strongDef);
     await this.restoreWord();
     this.restoreFilter();
     await this.restoreVerseIdx();
     this.restoreMode();
+  }
+
+  restoreChain() {
+    let defaultChain = [];
+    let strongChain = localStorage.getItem(`${appPrefix}-strongChain`);
+    if (!strongChain) {
+      strongChain = defaultChain;
+    } else {
+      try {
+        strongChain = JSON.parse(strongChain);
+      } catch (error) {
+        strongChain = defaultChain;
+      }
+      if (!this.chainIsValid(strongChain)) {
+        strongChain = defaultChain;
+      }
+    }
+    this.chainChange(strongChain);
   }
 
   async restoreDef() {
@@ -288,6 +302,11 @@ class StrongModel {
     await this.wordChange(strongWord);
   }
 
+  saveChain() {
+    localStorage.setItem(`${appPrefix}-strongChain`,
+      JSON.stringify(this.strongChain));
+  }
+
   saveDef() {
     localStorage.setItem(`${appPrefix}-strongDef`,
       JSON.stringify(this.strongDef));
@@ -323,28 +342,19 @@ class StrongModel {
       JSON.stringify(this.strongWord));
   }
 
-  async strongNext() {
-    this.strongIdx -= 1;
-    if (this.strongIdx < 0) {
-      this.strongIdx = this.strongHistory.length - 1;
-    }
-    queue.publish('strong.def.change', this.strongHistory[this.strongIdx]);
-  }
-
-  async strongPrev() {
-    this.strongIdx += 1;
-    if (this.strongIdx >= this.strongHistory.length) {
-      this.strongIdx = 0;
-    }
-    queue.publish('strong.def.change', this.strongHistory[this.strongIdx]);
-  }
-
   subscribe() {
+    queue.subscribe('strong.chain.add', () => {
+      this.chainAdd();
+    });
+    queue.subscribe('strong.chain.prev', () => {
+      this.chainPrev();
+    });
+    queue.subscribe('strong.chain.clear', () => {
+      this.chainClear();
+    });
+
     queue.subscribe('strong.def.change', async (strongDef) => {
       await this.defChange(strongDef);
-    });
-    queue.subscribe('strong.def.sub-change', async (strongDef) => {
-      await this.defSubChange(strongDef);
     });
 
     queue.subscribe('strong.filter.change', (strongFilter) => {
@@ -356,19 +366,6 @@ class StrongModel {
     });
     queue.subscribe('strong.history.delete', (strongDef) => {
       this.historyDelete(strongDef);
-    });
-    queue.subscribe('strong.history.down', (strongDef) => {
-      this.historyDown(strongDef);
-    });
-    queue.subscribe('strong.history.up', (strongDef) => {
-      this.historyUp(strongDef);
-    });
-
-    queue.subscribe('strong.next', async () => {
-      await this.strongNext();
-    });
-    queue.subscribe('strong.prev', async () => {
-      await this.strongPrev();
     });
 
     queue.subscribe('strong.restore', async () => {
@@ -399,6 +396,11 @@ class StrongModel {
       bookIdx: -1,
       chapterIdx: -1
     };
+  }
+
+  updateChain() {
+    this.saveChain();
+    queue.publish('strong.chain.update', this.strongChain);
   }
 
   updateHistory() {

@@ -45,7 +45,7 @@ class NavigatorController {
   }
 
   chapterIdxUpdate() {
-    queue.publish('read.scroll-to-top');
+    queue.publish('read.scroll-to-top', null);
     if (this.sidebar === 'navigator') {
       if (this.panes === 1) {
         queue.publish('sidebar.change', 'none');

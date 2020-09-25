@@ -32,7 +32,8 @@ class StrongController {
   }
 
   defSelect(strongDef) {
-    queue.publish('strong.def.sub-change', strongDef);
+    queue.publish('strong.chain.add', null);
+    queue.publish('strong.def.change', strongDef);
   }
 
   defUpdate() {
@@ -91,6 +92,7 @@ class StrongController {
   }
 
   lookupFind(strongNum) {
+    queue.publish('strong.chain.clear', null);
     queue.publish('strong.def.change', strongNum);
   }
 
@@ -102,16 +104,12 @@ class StrongController {
     queue.publish('strong.strong-mode.toggle', null);
   }
 
-  nextStrong() {
-    queue.publish('strong.next', null);
-  }
-
   panesUpdate(panes) {
     this.panes = panes;
   }
 
-  prevStrong() {
-    queue.publish('strong.prev', null);
+  prev() {
+    queue.publish('strong.chain.prev', null);
   }
 
   readSelect(verseIdx) {
@@ -152,12 +150,6 @@ class StrongController {
     queue.subscribe('strong-def', () => {
       this.defPane();
     });
-    queue.subscribe('strong-def.next.strong',
-      () => { this.nextStrong(); }
-    );
-    queue.subscribe('strong-def.prev.strong',
-      () => { this.prevStrong(); }
-    );
     queue.subscribe('strong-def.select', (strongDef) => {
       this.defSelect(strongDef);
     });
@@ -230,6 +222,9 @@ class StrongController {
     queue.subscribe('strong.hide', () => {
       this.hide();
     });
+    queue.subscribe('strong.prev', () => {
+      this.prev();
+    });
     queue.subscribe('strong.show', () => {
       this.show();
     });
@@ -271,6 +266,7 @@ class StrongController {
   }
 
   verseSelect(strongDef) {
+    queue.publish('strong.chain.clear', null);
     queue.publish('strong.def.change', strongDef);
   }
 

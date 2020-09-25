@@ -29,13 +29,12 @@ const lowerToolSet = [
   { type: 'btn', icon: 'strong-lookup', label: 'Strong Lookup' },
   { type: 'btn', icon: 'history', label: 'Strong History' },
   { type: 'btn', icon: 'strong-verse', label: 'Strong Verse' },
-  { type: 'btn', icon: 'result', label: 'Strong Result' }
+  { type: 'btn', icon: 'result', label: 'Strong Result' },
+  { type: 'btn', icon: 'prev', label: 'Previous Strong' }
 ];
 
 const upperToolSet = [
-  { type: 'btn', icon: 'prev', label: 'Previous Strong' },
-  { type: 'banner', modifier: 'strong-def', text: 'Strong Definition' },
-  { type: 'btn', icon: 'next', label: 'Next Strong' },
+  { type: 'banner', modifier: 'strong-def', text: 'Strong Definition' }
 ];
 
 class StrongDefView {
@@ -50,9 +49,6 @@ class StrongDefView {
     });
     this.toolbarLower.addEventListener('click', (event) => {
       this.toolbarLowerClick(event);
-    });
-    this.toolbarUpper.addEventListener('click', (event) => {
-      this.toolbarUpperClick(event);
     });
   }
 
@@ -129,6 +125,15 @@ class StrongDefView {
     return strongWords;
   }
 
+  chainUpdate(strongChain) {
+    this.strongChain = strongChain;
+    if (this.strongChain.length) {
+      this.btnPrev.classList.remove('btn-icon--hide');
+    } else {
+      this.btnPrev.classList.add('btn-icon--hide');
+    }
+  }
+
   defClick(btn) {
     let strongDef = btn.dataset.strongDef;
     queue.publish('strong-def.select', strongDef);
@@ -144,9 +149,7 @@ class StrongDefView {
   }
 
   getElements() {
-    this.btnPrev = this.toolbarUpper.querySelector('.btn-icon--prev');
     this.banner = this.toolbarUpper.querySelector('.banner--strong-def');
-    this.btnNext = this.toolbarUpper.querySelector('.btn-icon--next');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
     this.btnLookup = this.toolbarLower.querySelector(
@@ -157,6 +160,7 @@ class StrongDefView {
       '.btn-icon--history');
     this.btnResult = this.toolbarLower.querySelector(
       '.btn-icon--result');
+    this.btnPrev = this.toolbarLower.querySelector('.btn-icon--prev');
   }
 
   hide() {
@@ -210,6 +214,9 @@ class StrongDefView {
       this.show();
     });
 
+    queue.subscribe('strong.chain.update', (strongChain) => {
+      this.chainUpdate(strongChain);
+    });
     queue.subscribe('strong.def.update', (strongDefObj) => {
       this.defUpdate(strongDefObj);
     });
@@ -235,18 +242,8 @@ class StrongDefView {
         queue.publish('strong-verse', null);
       } else if (target === this.btnResult) {
         queue.publish('strong-result', null);
-      }
-    }
-  }
-
-  toolbarUpperClick(event) {
-    event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnPrev) {
-        queue.publish('strong-def.prev.strong', 1);
-      } else if (target === this.btnNext) {
-        queue.publish('strong-def.next.strong', 2);
+      } else if (target === this.btnPrev) {
+        queue.publish('strong.prev', null);
       }
     }
   }

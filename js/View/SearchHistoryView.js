@@ -2,7 +2,6 @@
 
 import queue from '../CommandQueue.js';
 import {
-  templateActionMenu,
   templateBtnIcon,
   templateElement,
   templatePage,
@@ -12,15 +11,9 @@ import {
 } from '../template.js';
 import { removeAllChildren } from '../util.js';
 
-const actionSet = [
-  { icon: 'up', label: 'Up' },
-  { icon: 'down', label: 'Down' },
-  { icon: 'delete', label: 'Delete' },
-  { icon: 'cancel', label: 'Cancel' }
-];
-
 const lowerToolSet = [
-  { type: 'btn', icon: 'result', label: 'Search Result' }
+  { type: 'btn', icon: 'result', label: 'Search Result' },
+  { type: 'btn', icon: 'history-clear', label: 'Clear Hitory' }
 ];
 
 const upperToolSet = [
@@ -33,55 +26,25 @@ class SearchHistoryView {
     this.initialize();
   }
 
-  actionMenuClick(event) {
-    event.preventDefault();
-    let btn = event.target.closest('button');
-    if (btn) {
-      if (btn === this.btnCancel) {
-        this.actionMenu.classList.add('action-menu--hide');
-      } else {
-        let entry = this.activeEntry.querySelector('.btn-entry--history');
-        let query = entry.textContent;
-        if (btn === this.btnDelete) {
-          this.delete(query);
-        } else if (btn === this.btnDown) {
-          this.down(query);
-        } else if (btn === this.btnUp) {
-          this.up(query);
-        }
-        this.actionMenu.classList.add('action-menu--hide');
-      }
-    }
-  }
-
   addListeners() {
-    this.actionMenu.addEventListener('click', (event) => {
-      this.actionMenuClick(event);
-    });
     this.list.addEventListener('click', (event) => {
       this.listClick(event);
-    });
-    this.clear.addEventListener('click', (event) => {
-      this.clearClick(event);
     });
     this.toolbarLower.addEventListener('click', (event) => {
       this.toolbarLowerClick(event);
     });
   }
 
-  btnMenuClick(target) {
-    this.showActionMenu(target);
-  }
-
-  buildEntry(query) {
+  buildEntry(query, idx) {
     let entry = document.createElement('div');
     entry.classList.add('entry', 'entry--history');
     let btnEntry = document.createElement('button');
     btnEntry.classList.add('btn-entry', 'btn-entry--history');
+    btnEntry.dataset.historyIdx = idx;
     btnEntry.textContent = query;
-    let btnMenu = templateBtnIcon('menu', 'Menu');
     entry.appendChild(btnEntry);
-    entry.appendChild(btnMenu);
+    let btnDelete = templateBtnIcon('delete', 'Delete');
+    entry.appendChild(btnDelete);
     return entry;
   }
 
@@ -99,17 +62,7 @@ class SearchHistoryView {
     this.list = templateElement('div', 'list', 'search-history', null, null);
     this.scroll.appendChild(this.list);
 
-    this.actionMenu = templateActionMenu('search-history', actionSet);
-    this.scroll.appendChild(this.actionMenu);
     this.page.appendChild(this.scroll);
-
-    this.clear = templateElement('div', 'clear', 'search', null,
-      null);
-    this.btnClear = document.createElement('button');
-    this.btnClear.classList.add('btn-clear');
-    this.btnClear.textContent = 'Clear History';
-    this.clear.appendChild(this.btnClear);
-    this.scroll.appendChild(this.clear);
 
     this.toolbarLower = templateToolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
@@ -118,16 +71,8 @@ class SearchHistoryView {
     container.appendChild(this.page);
   }
 
-  clearClick(event) {
-    event.preventDefault();
-    let target = event.target;
-    if (target === this.btnClear) {
-      queue.publish('search-history.clear', null);
-    }
-  }
-
-  delete(query) {
-    queue.publish('search-history.delete', query);
+  delete(historyIdx) {
+    queue.publish('search-history.delete', historyIdx);
   }
 
   down(query) {
@@ -135,17 +80,13 @@ class SearchHistoryView {
   }
 
   getElements() {
-    this.btnUp = this.actionMenu.querySelector('.btn-icon--up');
-    this.btnDown = this.actionMenu.querySelector('.btn-icon--down');
-    this.btnDelete = this.actionMenu.querySelector('.btn-icon--delete');
-    this.btnCancel = this.actionMenu.querySelector('.btn-icon--cancel');
-
     this.btnResult = this.toolbarLower.querySelector(
       '.btn-icon--result');
+    this.btnHistoryClear = this.toolbarLower.querySelector(
+      '.btn-icon--history-clear');
   }
 
   hide() {
-    this.actionMenu.classList.add('action-menu--hide');
     this.page.classList.add('page--hide');
   }
 
@@ -168,9 +109,10 @@ class SearchHistoryView {
       if (target.classList.contains('btn-entry--history')) {
         let query = target.textContent;
         queue.publish('search-history.select', query);
-      } else if (target.classList.contains('btn-icon--menu')) {
+      } else if (target.classList.contains('btn-icon--delete')) {
         let entry = target.previousSibling;
-        this.btnMenuClick(entry);
+        let query = entry.textContent;
+        queue.publish('search-history.delete', query);
       }
     }
   }
@@ -181,13 +123,6 @@ class SearchHistoryView {
 
   show() {
     this.page.classList.remove('page--hide');
-  }
-
-  showActionMenu(target) {
-    this.activeEntry = target.closest('div');
-    let top = target.offsetTop;
-    this.actionMenu.style.top = `${top}px`;
-    this.actionMenu.classList.remove('action-menu--hide');
   }
 
   subscribe() {
@@ -209,12 +144,10 @@ class SearchHistoryView {
     if (target) {
       if (target === this.btnResult) {
         queue.publish('search-result', null);
+      } else if (target === this.btnHistoryClear) {
+        queue.publish('search-history.clear', null);
       }
     }
-  }
-
-  up(query) {
-    queue.publish('search-history.up', query);
   }
 
   updateHistory() {
@@ -222,10 +155,8 @@ class SearchHistoryView {
     removeAllChildren(this.list);
     if (this.history.length === 0) {
       this.empty.classList.remove('empty--hide');
-      this.clear.classList.add('clear--hide');
     } else {
       this.empty.classList.add('empty--hide');
-      this.clear.classList.remove('clear--hide');
       let fragment = document.createDocumentFragment();
       for (let query of this.history) {
         let entry = this.buildEntry(query);

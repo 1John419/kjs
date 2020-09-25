@@ -51,10 +51,6 @@ class SearchController {
     queue.publish('search.history.delete', query);
   }
 
-  historyDown(query) {
-    queue.publish('search.history.down', query);
-  }
-
   historyPane() {
     queue.publish('search.task.change', 'search-history');
   }
@@ -62,10 +58,6 @@ class SearchController {
   historySelect(query) {
     this.historySelectPending = true;
     queue.publish('search.query.change', query);
-  }
-
-  historyUp(query) {
-    queue.publish('search.history.up', query);
   }
 
   historyUpdate() {
@@ -164,14 +156,8 @@ class SearchController {
     queue.subscribe('search-history.delete', (query) => {
       this.historyDelete(query);
     });
-    queue.subscribe('search-history.down', (query) => {
-      this.historyDown(query);
-    });
     queue.subscribe('search-history.select', (query) => {
       this.historySelect(query);
-    });
-    queue.subscribe('search-history.up', (query) => {
-      this.historyUp(query);
     });
 
     queue.subscribe('search-lookup', () => {
