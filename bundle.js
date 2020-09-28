@@ -4582,7 +4582,7 @@
   };
 
   const strongUrl = './json/strong.json';
-  const strongVersion = 3;
+  const strongVersion = 4;
 
   let strongCitations = {};
   let strongDb = null;
