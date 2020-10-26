@@ -66,6 +66,10 @@ class ReadController {
     queue.publish('read.restore', null);
   }
 
+  nameModeToggle() {
+    queue.publish('read.name-mode.toggle', null);
+  }
+
   nextChapter() {
     queue.publish('chapter.next', null);
   }
@@ -137,6 +141,10 @@ class ReadController {
     });
     queue.subscribe('read.column-mode.update', (columnMode) => {
       this.columnModeUpdate(columnMode);
+    });
+
+    queue.subscribe('read.name-mode.click', () => {
+      this.nameModeToggle();
     });
 
     queue.subscribe('read.next.chapter', () => {

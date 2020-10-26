@@ -117,10 +117,6 @@ class SearchHistoryView {
     }
   }
 
-  scrollToTop() {
-    this.scroll.scrollTop = 0;
-  }
-
   show() {
     this.page.classList.remove('page--hide');
   }
@@ -151,7 +147,7 @@ class SearchHistoryView {
   }
 
   updateHistory() {
-    this.scrollToTop();
+    let scrollSave = this.scroll.scrollTop;
     removeAllChildren(this.list);
     if (this.history.length === 0) {
       this.empty.classList.remove('empty--hide');
@@ -164,6 +160,7 @@ class SearchHistoryView {
       }
       this.list.appendChild(fragment);
     }
+    this.scroll.scrollTop = scrollSave;
   }
 
 }

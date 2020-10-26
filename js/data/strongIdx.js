@@ -1,3 +1,5 @@
+'use strict';
+
 export const defLemma = 0;
 export const defTranliteration = 1;
 export const defPronunciation = 2;

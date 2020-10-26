@@ -274,6 +274,18 @@ textarea {
   margin-bottom: 1.0rem;
 }
 
+.cell {
+  padding: 0.5em;
+  display: table-cell;
+  width: 50%;
+  box-sizing: border-box;
+  border: 1px solid;
+}
+
+.center {
+  text-align: center;
+}
+
 .clear--hide {
   display: none;
 }
@@ -494,6 +506,10 @@ textarea {
   padding: 0.5rem;
 }
 
+.middle {
+  vertical-align: middle;
+}
+
 .name--font {
   align-self: center;
   background-color: transparent;
@@ -526,6 +542,11 @@ textarea {
 
   --border-radius: 5px;
   --target-size: 45px;
+}
+
+.row {
+  display: table-row;
+  width: 100%;
 }
 
 .scroll {
@@ -598,6 +619,13 @@ textarea {
   vertical-align: super;
 }
 
+.table {
+  border: 1px solid;
+  border-collapse: collapse;
+  display: table;
+  width: 100%;
+}
+
 .theme--amethyst {
   --ui-bg: hsl(290, 60%, 97%);
   --ui-border: hsl(290, 60%, 35%);
@@ -661,6 +689,10 @@ textarea {
   --ui-tool-comp: hsl(10, 100%, 30%);
 }
 
+.title {
+  font-weight: bold;
+}
+
 .toolbar {
   background-color: var(--ui-tool);
   color: var(--ui-fill);
@@ -675,6 +707,21 @@ textarea {
 
 .toolbar--upper {
   border-bottom: 1px solid var(--ui-border);
+}
+
+.toolbar-menu {
+  background-color: var(--ui-tool);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-flow: column-reverse nowrap;
+  left: 270px;
+  position: absolute;
+  bottom: 0;
+}
+
+.toolbar-menu--hide {
+  display: none;
 }
 
 .tree {

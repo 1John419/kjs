@@ -1,3 +1,5 @@
+'use strict';
+
 export const tomeBinWordCount = 0;
 export const tomeBinVerseCount = 1;
 export const tomeBinBooks = 2;

@@ -80,7 +80,7 @@ class BookmarkListView {
     btnRef.textContent = citationByVerseIdx(verseIdx);
     btnRef.dataset.verseIdx = verseIdx;
     entry.appendChild(btnRef);
-    let btnMenu = templateBtnIcon('menu', 'Menu');
+    let btnMenu = templateBtnIcon('h-menu', 'Menu');
     entry.appendChild(btnMenu);
     return entry;
   }
@@ -165,7 +165,7 @@ class BookmarkListView {
         } else {
           queue.publish('bookmark-list.select', verseIdx);
         }
-      } else if (target.classList.contains('btn-icon--menu')) {
+      } else if (target.classList.contains('btn-icon--h-menu')) {
         let ref = target.previousSibling;
         this.menuClick(ref);
       }
@@ -186,10 +186,6 @@ class BookmarkListView {
     } else {
       this.btnBack.classList.add('btn-icon--hide');
     }
-  }
-
-  scrollToTop() {
-    this.scroll.scrollTop = 0;
   }
 
   show() {
@@ -213,6 +209,10 @@ class BookmarkListView {
   }
 
   subscribe() {
+    queue.subscribe('bookmark-folder.select', () => {
+      this.scroll.scrollTop = 0;
+    });
+
     queue.subscribe('bookmark-list.hide', () => {
       this.hide();
     });
@@ -265,7 +265,7 @@ class BookmarkListView {
   }
 
   updateBookmarks() {
-    this.scrollToTop();
+    let scrollSave = this.scroll.scrollTop;
     removeAllChildren(this.list);
     if (this.activeFolder.bookmarks.length === 0) {
       this.empty.classList.remove('empty--hide');
@@ -278,6 +278,7 @@ class BookmarkListView {
       }
       this.list.appendChild(fragment);
     }
+    this.scroll.scrollTop = scrollSave;
   }
 
 }

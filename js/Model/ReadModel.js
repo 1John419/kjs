@@ -23,6 +23,16 @@ class ReadModel {
     this.subscribe();
   }
 
+  nameModeChange(nameMode) {
+    this.nameMode = nameMode;
+    this.saveNameMode();
+    queue.publish('read.name-mode.update', this.nameMode);
+  }
+
+  nameModeToogle() {
+    this.nameModeChange(!this.nameMode);
+  }
+
   panesChange(panes) {
     this.panes = panes;
     queue.publish('panes.update', this.panes);
@@ -31,6 +41,7 @@ class ReadModel {
   restore() {
     this.restoreColumnMode();
     this.restoreStrongMode();
+    this.restoreNameMode();
     this.restoreSidebar();
   }
 
@@ -50,6 +61,24 @@ class ReadModel {
       }
     }
     this.columnModeChange(columnMode);
+  }
+
+  restoreNameMode() {
+    let defaultNameMode = true;
+    let nameMode = localStorage.getItem(`${appPrefix}-readNameMode`);
+    if (!nameMode) {
+      nameMode = defaultNameMode;
+    } else {
+      try {
+        nameMode = JSON.parse(nameMode);
+      } catch (error) {
+        nameMode = defaultNameMode;
+      }
+      if (typeof nameMode !== 'boolean') {
+        nameMode = defaultNameMode;
+      }
+    }
+    this.nameModeChange(nameMode);
   }
 
   restoreSidebar() {
@@ -95,6 +124,11 @@ class ReadModel {
       JSON.stringify(this.columnMode));
   }
 
+  saveNameMode() {
+    localStorage.setItem(`${appPrefix}-readNameMode`,
+      JSON.stringify(this.nameMode));
+  }
+
   saveStrongMode() {
     localStorage.setItem(`${appPrefix}-readStrongMode`,
       JSON.stringify(this.strongMode));
@@ -127,6 +161,9 @@ class ReadModel {
 
     queue.subscribe('read.column-mode.toggle', () => {
       this.columnModeToogle();
+    });
+    queue.subscribe('read.name-mode.toggle', () => {
+      this.nameModeToogle();
     });
     queue.subscribe('read.restore',
       () => { this.restore(); }

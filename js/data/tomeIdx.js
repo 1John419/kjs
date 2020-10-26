@@ -1,3 +1,5 @@
+'use strict';
+
 export const bookLongName = 0;
 export const bookShortName = 1;
 export const bookFirstVerseIdx = 2;

@@ -23,6 +23,7 @@ export const helpTopicList = [
   { topic: 'about', name: 'About' },
   { topic: 'overview', name: 'Overview' },
   { topic: 'read', name: 'Read' },
+  { topic: 'name-mode', name: 'Name Mode' },
   { topic: 'navigator', name: 'Navigator' },
   { topic: 'bookmark', name: 'Bookmark' },
   { topic: 'search', name: 'Search' },

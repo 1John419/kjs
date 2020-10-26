@@ -4688,6 +4688,16 @@
       this.subscribe();
     }
 
+    nameModeChange(nameMode) {
+      this.nameMode = nameMode;
+      this.saveNameMode();
+      queue.publish('read.name-mode.update', this.nameMode);
+    }
+
+    nameModeToogle() {
+      this.nameModeChange(!this.nameMode);
+    }
+
     panesChange(panes) {
       this.panes = panes;
       queue.publish('panes.update', this.panes);
@@ -4696,6 +4706,7 @@
     restore() {
       this.restoreColumnMode();
       this.restoreStrongMode();
+      this.restoreNameMode();
       this.restoreSidebar();
     }
 
@@ -4715,6 +4726,24 @@
         }
       }
       this.columnModeChange(columnMode);
+    }
+
+    restoreNameMode() {
+      let defaultNameMode = true;
+      let nameMode = localStorage.getItem(`${appPrefix}-readNameMode`);
+      if (!nameMode) {
+        nameMode = defaultNameMode;
+      } else {
+        try {
+          nameMode = JSON.parse(nameMode);
+        } catch (error) {
+          nameMode = defaultNameMode;
+        }
+        if (typeof nameMode !== 'boolean') {
+          nameMode = defaultNameMode;
+        }
+      }
+      this.nameModeChange(nameMode);
     }
 
     restoreSidebar() {
@@ -4760,6 +4789,11 @@
         JSON.stringify(this.columnMode));
     }
 
+    saveNameMode() {
+      localStorage.setItem(`${appPrefix}-readNameMode`,
+        JSON.stringify(this.nameMode));
+    }
+
     saveStrongMode() {
       localStorage.setItem(`${appPrefix}-readStrongMode`,
         JSON.stringify(this.strongMode));
@@ -4793,6 +4827,9 @@
       queue.subscribe('read.column-mode.toggle', () => {
         this.columnModeToogle();
       });
+      queue.subscribe('read.name-mode.toggle', () => {
+        this.nameModeToogle();
+      });
       queue.subscribe('read.restore',
         () => { this.restore(); }
       );
@@ -4806,6 +4843,98 @@
     }
 
   }
+
+  const nameSub = {
+    H136: [
+      ['God', 'Adonai'],
+      ['the LORD', 'Adonai'],
+      ['LORD', 'Adonai'],
+      ['the Lord\'s', 'Adonai\'s'],
+      ['The Lord', 'Adonai'],
+      ['the Lord', 'Adonai'],
+      ['Lord', 'Adonai'],
+      ['my lord', 'Adonai'],
+    ],
+    H410: [
+      ['God\'s', 'El\'s'],
+      ['a God', 'an El'],
+      ['God', 'El'],
+      ['gods', 'elohim'],
+      ['a god', 'an el'],
+      ['god', 'el'],
+    ],
+    H426: [
+      ['a God', 'an Elah'],
+      ['God', 'Elah'],
+      ['gods', 'elah'],
+      ['god', 'elah'],
+    ],
+    H430: [
+      ['angels', 'elohim'],
+      ['GOD', 'Elohim'],
+      ['God\'s', 'Elohim\'s'],
+      ['Gods', 'Elohim'],
+      ['a God', 'an Elohim'],
+      ['God', 'Elohim'],
+      ['goddess', 'elohim'],
+      ['a godly', 'an elohim'],
+      ['gods', 'elohim'],
+      ['a god', 'an elohim'],
+      ['god', 'elohim'],
+    ],
+    H433: [
+      ['God\'s', 'Eloah\'s'],
+      ['a God', 'an Eloah'],
+      ['God', 'Eloah'],
+      ['a god', 'an eloah'],
+      ['god', 'eloah'],
+    ],
+    H3050: [
+      ['JAH', 'Yah'],
+      ['The LORD', 'Yah'],
+      ['the LORD', 'Yah'],
+      ['LORD', 'Yah'],
+    ],
+    H3068: [
+      ['GOD', 'Yahweh'],
+      ['JEHOVAH', 'YAHWEH'],
+      ['The LORD\'S', 'Yahweh\'s'],
+      ['the LORD\'S', 'Yahweh\'s'],
+      ['THE LORD', 'YAHWEH'],
+      ['The LORD', 'Yahweh'],
+      ['the LORD', 'Yahweh'],
+      ['LORD', 'Yahweh'],
+      ['the Lord', 'Yahweh'],
+      ['Lord', 'Yahweh'],
+    ],
+    H3069: [
+      ['GOD', 'Yahweh'],
+      ['the LORD', 'Yahweh'],
+    ],
+    H5945: [
+      ['the Highest', 'Elyon'],
+      ['and the highest', 'Elyon'],
+      ['the most High', 'Elyon'],
+      ['most High', 'Elyon'],
+      ['the most high', 'Elyon'],
+      ['most high', 'Elyon'],
+      ['and the high', 'and Elyon'],
+    ],
+    H5946: [
+      ['the most High', 'Elyon'],
+    ],
+    H6635: [
+      ['of hosts', 'Tzevaot'],
+    ],
+    H7706: [
+      ['the Almighty', 'Shaddai'],
+      ['Almighty', 'Shaddai'],
+    ]
+  };
+
+  const elElyon = [354, 355, 356, 358, 14770, 15148];
+
+  const elShaddai = [398, 20638];
 
   const svgNS = 'http://www.w3.org/2000/svg';
   const xlinkNS = 'http://www.w3.org/1999/xlink';
@@ -4920,6 +5049,17 @@
     return toolbarLower;
   };
 
+  const templateToolbarMenu = (modifier, actionSet) => {
+    let toolbarMenu = templateElement(
+      'div', 'toolbar-menu', modifier, null, null);
+    toolbarMenu.classList.add('toolbar-menu--hide');
+    for (let btn of actionSet) {
+      let element = templateBtnIcon(btn.icon, btn.label);
+      toolbarMenu.appendChild(element);
+    }
+    return toolbarMenu;
+  };
+
   const templateToolbarUpper = (toolSet) => {
     let toolbarUpper = templateToolbar('upper');
     for (let tool of toolSet) {
@@ -4941,10 +5081,12 @@
     { type: 'btn', icon: 'bookmark', label: 'Bookmark' },
     { type: 'btn', icon: 'search', label: 'Search' },
     { type: 'btn', icon: 'strong', label: 'Strong' },
+    { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' },
+    { type: 'btn', icon: 'name-mode', label: 'Name Mode' },
+    { type: 'btn', icon: 'column-mode', label: 'Column Mode' },
     { type: 'btn', icon: 'setting', label: 'Setting' },
     { type: 'btn', icon: 'help', label: 'Help' },
-    { type: 'btn', icon: 'column-mode', label: 'Column Mode' },
-    { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
+    { type: 'btn', icon: 'v-menu', label: 'Toolbar Menu' }
   ];
 
   const upperToolSet = [
@@ -4952,6 +5094,14 @@
     { type: 'banner', modifier: 'read', text: null },
     { type: 'btn', icon: 'next', label: 'Next Chapter' }
   ];
+
+  const menuSet = [
+    { type: 'btn', icon: 'cancel', label: 'Toolbar Menu' },
+    { type: 'btn', icon: 'setting', label: 'Setting' },
+    { type: 'btn', icon: 'help', label: 'Help' },
+  ];
+
+  const matthewChapterIdx = 929;
 
   class ReadView {
 
@@ -4967,6 +5117,9 @@
     addListeners() {
       this.list.addEventListener('click', (event) => {
         this.listClick(event);
+      });
+      this.toolbarMenu.addEventListener('click', (event) => {
+        this.toolbarMenuClick(event);
       });
       this.toolbarLower.addEventListener('click', (event) => {
         this.toolbarLowerClick(event);
@@ -5016,6 +5169,9 @@
       this.toolbarLower = templateToolbarLower(lowerToolSet);
       this.page.appendChild(this.toolbarLower);
 
+      this.toolbarMenu = templateToolbarMenu('read-menu', menuSet);
+      this.page.appendChild(this.toolbarMenu);
+
       let container = document.querySelector('.container');
       container.appendChild(this.page);
     }
@@ -5042,7 +5198,7 @@
 
     buildVerseText(verseObj) {
       let text = templateElement('span', 'verse-text', null, null,
-        verseObj.v[verseText]);
+        this.getVerseText(verseObj));
       return text;
     }
 
@@ -5055,6 +5211,7 @@
 
     chapterIdxUpdate(chapterIdx) {
       this.chapterIdx = chapterIdx;
+      this.setVerseText();
       this.updateBanner();
       this.updateVerses();
       this.refreshVerseBookmarks();
@@ -5064,6 +5221,18 @@
       this.columnMode = columnMode;
       this.updateColumnModeBtn();
       this.updateColumnMode();
+    }
+
+    disableToolbarMenu() {
+      this.btnSetting.classList.remove('btn-icon--hide');
+      this.btnHelp.classList.remove('btn-icon--hide');
+      this.btnMenu.classList.add('btn-icon--hide');
+    }
+
+    enableToolbarMenu() {
+      this.btnSetting.classList.add('btn-icon--hide');
+      this.btnHelp.classList.add('btn-icon--hide');
+      this.btnMenu.classList.remove('btn-icon--hide');
     }
 
     fontSizeUpdate(fontSize) {
@@ -5078,10 +5247,6 @@
       this.lastFont = this.font;
     }
 
-    hide() {
-      this.page.classList.add('page--hide');
-    }
-
     getElements() {
       this.body = document.querySelector('body');
 
@@ -5093,13 +5258,27 @@
       this.btnBookmark = this.toolbarLower.querySelector('.btn-icon--bookmark');
       this.btnSearch = this.toolbarLower.querySelector('.btn-icon--search');
       this.btnStrong = this.toolbarLower.querySelector('.btn-icon--strong');
-      this.btnStrongMode = this.toolbarLower.querySelector('.btn-icon--strong-mode');
       this.btnSetting = this.toolbarLower.querySelector('.btn-icon--setting');
       this.btnHelp = this.toolbarLower.querySelector('.btn-icon--help');
       this.btnColumnMode = this.toolbarLower.querySelector('.btn-icon--column-mode');
       this.columnBtns = [
         this.btnColumnOne, this.btnColumnTwo, this.btnColumnThree
       ];
+      this.btnStrongMode = this.toolbarLower.querySelector('.btn-icon--strong-mode');
+      this.btnNameMode = this.toolbarLower.querySelector('.btn-icon--name-mode');
+      this.btnMenu = this.toolbarLower.querySelector('.btn-icon--v-menu');
+
+      this.btnMenuCancel = this.toolbarMenu.querySelector('.btn-icon--cancel');
+      this.btnMenuSetting = this.toolbarMenu.querySelector('.btn-icon--setting');
+      this.btnMenuHelp = this.toolbarMenu.querySelector('.btn-icon--help');
+    }
+
+    getKjvVerseText(verseObj) {
+      return verseObj.v[verseText];
+    }
+
+    getNameVerseText(verseObj) {
+      return this.nameSub(verseObj);
     }
 
     helpHide() {
@@ -5110,6 +5289,14 @@
 
     helpShow() {
       this.btnHelp.classList.add('btn-icon--active');
+    }
+
+    hide() {
+      this.page.classList.add('page--hide');
+    }
+
+    hideToolbarMenu() {
+      this.toolbarMenu.classList.add('toolbar-menu--hide');
     }
 
     initialize() {
@@ -5131,12 +5318,61 @@
       }
     }
 
+    nameModeUpdate(nameMode) {
+      this.nameMode = nameMode;
+      if (this.nameMode) {
+        this.btnNameMode.classList.add('btn-icon--active');
+      } else {
+        this.btnNameMode.classList.remove('btn-icon--active');
+      }
+      this.setVerseText();
+      if (this.verseObjs && this.chapterIdx < matthewChapterIdx) {
+        this.updateVerses();
+        this.refreshVerseBookmarks();
+      }
+    }
+
+    nameSub(verseObj) {
+      let verseIdx = verseObj.k;
+      let rawWords = verseObj.v[verseText].split(' ');
+      let fragments = [];
+      let maps = this.mapObjs.find(x => x.k === verseIdx).v;
+      for (let map of maps) {
+        let fragment =
+          rawWords.slice(map[mapSliceStart], map[mapSliceEnd]).join(' ');
+        for (let number of map[mapStrongNums]) {
+          if (number in nameSub) {
+            let subMaps = nameSub[number];
+            for (let subMap of subMaps) {
+              if (fragment.includes(subMap[0])) {
+                fragment = fragment.replaceAll(subMap[0], subMap[1]);
+                break;
+              }
+            }
+          }
+        }
+        fragments.push(fragment);
+      }
+      let revised = fragments.join(' ');
+      if (elElyon.includes(verseIdx)) {
+        revised = revised.replaceAll('Elyon El', 'El Elyon');
+      }
+      if (elShaddai.includes(verseIdx)) {
+        revised = revised.replaceAll('Shaddai El', 'El Shaddai');
+      }
+      return revised;
+    }
+
     navigatorHide() {
       this.btnNavigator.classList.remove('btn-icon--active');
     }
 
     navigatorShow() {
       this.btnNavigator.classList.add('btn-icon--active');
+    }
+
+    navigatorMapsUpdate(mapObjs) {
+      this.mapObjs = mapObjs;
     }
 
     navigatorVersesUpdate(verseObjs) {
@@ -5148,6 +5384,11 @@
         this.btnColumnMode.classList.add('btn-icon--hide');
       } else {
         this.btnColumnMode.classList.remove('btn-icon--hide');
+      }
+      if (this.page.offsetWidth < 360) {
+        this.enableToolbarMenu();
+      } else {
+        this.disableToolbarMenu();
       }
     }
 
@@ -5202,8 +5443,20 @@
       this.btnSetting.classList.add('btn-icon--active');
     }
 
+    setVerseText() {
+      if (this.nameMode && this.chapterIdx < matthewChapterIdx) {
+        this.getVerseText = this.getNameVerseText;
+      } else {
+        this.getVerseText = this.getKjvVerseText;
+      }
+    }
+
     show() {
       this.page.classList.remove('page--hide');
+    }
+
+    showToolbarMenu() {
+      this.toolbarMenu.classList.remove('toolbar-menu--hide');
     }
 
     sidebarUpdate(sidebar) {
@@ -5265,6 +5518,9 @@
       queue.subscribe('navigator.show', () => {
         this.navigatorShow();
       });
+      queue.subscribe('navigator.maps.update', (mapObjs) => {
+        this.navigatorMapsUpdate(mapObjs);
+      });
       queue.subscribe('navigator.verses.update', (verseObjs) => {
         this.navigatorVersesUpdate(verseObjs);
       });
@@ -5278,6 +5534,9 @@
       });
       queue.subscribe('read.hide', () => {
         this.hide();
+      });
+      queue.subscribe('read.name-mode.update', (nameMode) => {
+        this.nameModeUpdate(nameMode);
       });
       queue.subscribe('read.scroll-to-top', () => {
         this.scrollToTop();
@@ -5327,6 +5586,7 @@
       let target = event.target.closest('button');
       if (target) {
         if (target === this.btnStrongMode ||
+          target === this.btnNameMode ||
           target === this.btnColumnMode ||
           !target.classList.contains('btn-icon--active')
         ) {
@@ -5346,8 +5606,27 @@
             queue.publish('read.column-mode.click', null);
           } else if (target === this.btnStrongMode) {
             queue.publish('read.strong-mode.click', null);
+          } else if (target === this.btnNameMode) {
+            queue.publish('read.name-mode.click', null);
+          } else if (target === this.btnMenu) {
+            this.showToolbarMenu();
           }
         }
+      }
+    }
+
+    toolbarMenuClick(event) {
+      event.preventDefault();
+      let btn = event.target.closest('button');
+      if (btn === this.btnCancel) {
+        this.hideToolbarMenu();
+      } else {
+        if (btn === this.btnMenuSetting) {
+          queue.publish('sidebar.select', 'setting');
+        } else if (btn === this.btnMenuHelp) {
+          queue.publish('sidebar.select', 'help');
+        }
+        this.hideToolbarMenu();
       }
     }
 
@@ -5496,6 +5775,10 @@
       queue.publish('read.restore', null);
     }
 
+    nameModeToggle() {
+      queue.publish('read.name-mode.toggle', null);
+    }
+
     nextChapter() {
       queue.publish('chapter.next', null);
     }
@@ -5569,6 +5852,10 @@
         this.columnModeUpdate(columnMode);
       });
 
+      queue.subscribe('read.name-mode.click', () => {
+        this.nameModeToggle();
+      });
+
       queue.subscribe('read.next.chapter', () => {
         this.nextChapter();
       });
@@ -5634,6 +5921,7 @@
       this.chapterIdx = chapterIdx;
       this.saveChapterIdx();
       await this.updateVerses();
+      await this.updateMaps();
       let bookIdx = tomeChapters[this.chapterIdx][chapterBookIdx];
       if (this.bookIdx !== bookIdx) {
         this.bookIdxChange(bookIdx);
@@ -5740,6 +6028,14 @@
       this.navigatorTask = navigatorTask;
       this.saveNavigatorTask();
       queue.publish('navigator.task.update', this.navigatorTask);
+    }
+
+    async updateMaps() {
+      let chapter = tomeChapters[this.chapterIdx];
+      let keys = range(chapter[chapterFirstVerseIdx],
+        chapter[chapterLastVerseIdx] + 1);
+      this.mapObjs = await strongDb.maps.bulkGet(keys);
+      queue.publish('navigator.maps.update', this.mapObjs);
     }
 
     async updateVerses() {
@@ -6280,7 +6576,7 @@
     add(verseIdx) {
       let bookmarks = this.activeFolder.bookmarks;
       if (bookmarks.indexOf(verseIdx) === -1) {
-        this.activeFolder.bookmarks = [verseIdx, ...bookmarks];
+        this.activeFolder.bookmarks.push(verseIdx);
         this.updateFolders();
         this.updateActiveFolder();
       }
@@ -6288,7 +6584,7 @@
 
     copy(copyPkg) {
       let toFolder = this.getFolder(copyPkg.to);
-      toFolder.bookmarks = [copyPkg.verseIdx, ...toFolder.bookmarks];
+      toFolder.bookmarks.push(copyPkg.verseIdx);
       this.updateFolders();
     }
 
@@ -6327,7 +6623,7 @@
       let newFolder = this.getFolder(folderName);
       if (!newFolder) {
         newFolder = this.createFolder(folderName);
-        this.folders = [newFolder, ...this.folders];
+        this.folders.push(newFolder);
         this.updateFolders();
         this.activeFolderChange(folderName);
         this.updateFolderList();
@@ -6471,14 +6767,14 @@
         let targetFolder = this.getFolder(folder.name);
         if (!targetFolder) {
           targetFolder = this.createFolder(folder.name);
-          this.folders = [targetFolder, ...this.folders];
+          this.folders.push(targetFolder);
         }
         for (let verseIdx of folder.bookmarks) {
           let bookmarks = targetFolder.bookmarks;
           if (bookmarks.indexOf(verseIdx) !== -1) {
             continue;
           }
-          targetFolder.bookmarks = [verseIdx, ...bookmarks];
+          targetFolder.bookmarks.push(verseIdx);
         }
       }
       this.updateFolders();
@@ -6493,7 +6789,7 @@
 
     move(movePkg) {
       let toFolder = this.getFolder(movePkg.to);
-      toFolder.bookmarks = [movePkg.verseIdx, ...toFolder.bookmarks];
+      toFolder.bookmarks.push(movePkg.verseIdx);
 
       let bookmarks = this.activeFolder.bookmarks;
       let index = bookmarks.indexOf(movePkg.verseIdx);
@@ -6842,7 +7138,7 @@
       btnRef.textContent = citationByVerseIdx(verseIdx);
       btnRef.dataset.verseIdx = verseIdx;
       entry.appendChild(btnRef);
-      let btnMenu = templateBtnIcon('menu', 'Menu');
+      let btnMenu = templateBtnIcon('h-menu', 'Menu');
       entry.appendChild(btnMenu);
       return entry;
     }
@@ -6927,7 +7223,7 @@
           } else {
             queue.publish('bookmark-list.select', verseIdx);
           }
-        } else if (target.classList.contains('btn-icon--menu')) {
+        } else if (target.classList.contains('btn-icon--h-menu')) {
           let ref = target.previousSibling;
           this.menuClick(ref);
         }
@@ -6948,10 +7244,6 @@
       } else {
         this.btnBack.classList.add('btn-icon--hide');
       }
-    }
-
-    scrollToTop() {
-      this.scroll.scrollTop = 0;
     }
 
     show() {
@@ -6975,6 +7267,10 @@
     }
 
     subscribe() {
+      queue.subscribe('bookmark-folder.select', () => {
+        this.scroll.scrollTop = 0;
+      });
+
       queue.subscribe('bookmark-list.hide', () => {
         this.hide();
       });
@@ -7027,7 +7323,7 @@
     }
 
     updateBookmarks() {
-      this.scrollToTop();
+      let scrollSave = this.scroll.scrollTop;
       removeAllChildren(this.list);
       if (this.activeFolder.bookmarks.length === 0) {
         this.empty.classList.remove('empty--hide');
@@ -7040,6 +7336,7 @@
         }
         this.list.appendChild(fragment);
       }
+      this.scroll.scrollTop = scrollSave;
     }
 
   }
@@ -7101,7 +7398,7 @@
       let btnEntry = document.createElement('button');
       btnEntry.classList.add('btn-entry', 'btn-entry--bookmark-move-copy');
       btnEntry.textContent = folderName;
-      let btnMenu = templateBtnIcon('menu', 'Menu');
+      let btnMenu = templateBtnIcon('h-menu', 'Menu');
       entry.appendChild(btnEntry);
       entry.appendChild(btnMenu);
       return entry;
@@ -7174,7 +7471,7 @@
       event.preventDefault();
       let target = event.target.closest('button');
       if (target) {
-        if (target.classList.contains('btn-icon--menu')) {
+        if (target.classList.contains('btn-icon--h-menu')) {
           let entry = target.previousSibling;
           this.menuClick(entry);
         }
@@ -7203,10 +7500,6 @@
       this.verseIdx = this.moveCopyVerseObj.k;
       this.verse = this.moveCopyVerseObj.v;
       queue.publish('bookmark-move-copy.ready', null);
-    }
-
-    scrollToTop() {
-      this.scroll.scrollTop = 0;
     }
 
     show() {
@@ -7257,7 +7550,7 @@
     }
 
     updateFolders() {
-      this.scrollToTop();
+      let scrollSave = this.scroll.scrollTop;
       removeAllChildren(this.list);
       if (this.moveCopyList.length === 0) {
         this.empty.classList.remove('empty--hide');
@@ -7270,6 +7563,7 @@
         }
         this.list.appendChild(fragment);
       }
+      this.scroll.scrollTop = scrollSave;
     }
 
   }
@@ -7341,7 +7635,7 @@
       let btnEntry = document.createElement('button');
       btnEntry.classList.add('btn-entry', 'btn-entry--folder');
       btnEntry.textContent = folderName;
-      let btnMenu = templateBtnIcon('menu', 'Menu');
+      let btnMenu = templateBtnIcon('h-menu', 'Menu');
       entry.appendChild(btnEntry);
       entry.appendChild(btnMenu);
       return entry;
@@ -7417,7 +7711,7 @@
         if (target.classList.contains('btn-entry')) {
           let folderName = target.textContent;
           queue.publish('bookmark-folder.select', folderName);
-        } else if (target.classList.contains('btn-icon--menu')) {
+        } else if (target.classList.contains('btn-icon--h-menu')) {
           let entry = target.previousSibling;
           this.menuClick(entry);
         }
@@ -7438,10 +7732,6 @@
 
     rename(folderName) {
       queue.publish('bookmark-folder-rename', folderName);
-    }
-
-    scrollToTop() {
-      this.scroll.scrollTop = 0;
     }
 
     show() {
@@ -7495,7 +7785,7 @@
     }
 
     updateFolders() {
-      this.scrollToTop();
+      let scrollSave = this.scroll.scrollTop;
       removeAllChildren(this.list);
       let fragment = document.createDocumentFragment();
       for (let folderName of this.folderList) {
@@ -7503,6 +7793,7 @@
         fragment.appendChild(entry);
       }
       this.list.appendChild(fragment);
+      this.scroll.scrollTop = scrollSave;
     }
 
   }
@@ -8778,8 +9069,6 @@
 
   const DEFAULT_QUERY = 'day of the lord';
 
-  const firstEntry$1 = 0;
-
   class SearchModel {
 
     constructor() {
@@ -8788,7 +9077,7 @@
 
     addHistory() {
       if (this.searchHistory.indexOf(this.searchQuery) === -1) {
-        this.searchHistory = [this.searchQuery, ...this.searchHistory];
+        this.searchHistory.push(this.searchQuery);
         this.updateHistory();
       }
     }
@@ -8826,26 +9115,10 @@
       this.updateHistory();
     }
 
-    historyDown(str) {
-      let index = this.searchHistory.indexOf(str);
-      if (index !== (this.searchHistory.length - 1) && index !== -1) {
-        this.reorderHistory(index, index + 1);
-        this.updateHistory();
-      }
-    }
-
     historyIsValid(searchHistory) {
       return searchHistory.some((x) => {
         return typeof x === 'string';
       });
-    }
-
-    historyUp(str) {
-      let index = this.searchHistory.indexOf(str);
-      if (index !== 0 && index !== -1) {
-        this.reorderHistory(index, index - 1);
-        this.updateHistory();
-      }
     }
 
     initialize() {
@@ -8885,11 +9158,6 @@
         this.resetFilter();
         queue.publish('search.query.update', this.searchQuery);
       }
-    }
-
-    reorderHistory(fromIdx, toIdx) {
-      this.searchHistory.splice(toIdx, 0,
-        this.searchHistory.splice(fromIdx, 1)[firstEntry$1]);
     }
 
     resetFilter() {
@@ -9032,12 +9300,6 @@
       });
       queue.subscribe('search.history.delete', (query) => {
         this.historyDelete(query);
-      });
-      queue.subscribe('search.history.down', (query) => {
-        this.historyDown(query);
-      });
-      queue.subscribe('search.history.up', (query) => {
-        this.historyUp(query);
       });
 
       queue.subscribe('search.query.change', async (query) => {
@@ -9801,10 +10063,6 @@
       }
     }
 
-    scrollToTop() {
-      this.scroll.scrollTop = 0;
-    }
-
     show() {
       this.page.classList.remove('page--hide');
     }
@@ -9835,7 +10093,7 @@
     }
 
     updateHistory() {
-      this.scrollToTop();
+      let scrollSave = this.scroll.scrollTop;
       removeAllChildren(this.list);
       if (this.history.length === 0) {
         this.empty.classList.remove('empty--hide');
@@ -9848,6 +10106,7 @@
         }
         this.list.appendChild(fragment);
       }
+      this.scroll.scrollTop = scrollSave;
     }
 
   }
@@ -10243,7 +10502,7 @@
 
     addHistory() {
       if (this.strongHistory.indexOf(this.strongDef) === -1) {
-        this.strongHistory = [this.strongDef, ...this.strongHistory];
+        this.strongHistory.push(this.strongDef);
         this.updateHistory();
       }
     }
@@ -11375,10 +11634,6 @@
       }
     }
 
-    scrollToTop() {
-      this.scroll.scrollTop = 0;
-    }
-
     show() {
       this.page.classList.remove('page--hide');
     }
@@ -11409,7 +11664,7 @@
     }
 
     updateHistory() {
-      this.scrollToTop();
+      let scrollSave = this.scroll.scrollTop;
       removeAllChildren(this.list);
       if (this.history.length === 0) {
         this.empty.classList.remove('empty--hide');
@@ -11422,6 +11677,7 @@
         }
         this.list.appendChild(fragment);
       }
+      this.scroll.scrollTop = scrollSave;
     }
 
   }
@@ -12070,11 +12326,6 @@
         '.btn-icon--result');
     }
 
-    getVerseWords() {
-      let clean_verse = this.verse[verseText].replace(/[,.?;:!()-]/g, '');
-      this.verseWords = clean_verse.split(' ');
-    }
-
     hide() {
       this.page.classList.add('page--hide');
     }
@@ -12158,7 +12409,7 @@
       this.scrollToTop();
       removeAllChildren(this.list);
       let docFragment = document.createDocumentFragment();
-      this.getVerseWords();
+      this.verseWords = this.verse[verseText].split(' ');
       for (let map of this.maps) {
         let strongMap = this.buildStrongFragment(map);
         docFragment.appendChild(strongMap);
@@ -13091,8 +13342,8 @@
   }
 
   const validTasks$4 = ['help-read', 'help-topic'];
-  const validTopics = ['about', 'bookmark', 'help', 'navigator', 'overview',
-    'read', 'search', 'setting', 'strong', 'thats-my-king'];
+  const validTopics = ['about', 'bookmark', 'help', 'name-mode', 'navigator',
+    'overview', 'read', 'search', 'setting', 'strong', 'thats-my-king'];
 
   class HelpModel {
 
@@ -13192,6 +13443,7 @@
     { topic: 'about', name: 'About' },
     { topic: 'overview', name: 'Overview' },
     { topic: 'read', name: 'Read' },
+    { topic: 'name-mode', name: 'Name Mode' },
     { topic: 'navigator', name: 'Navigator' },
     { topic: 'bookmark', name: 'Bookmark' },
     { topic: 'search', name: 'Search' },

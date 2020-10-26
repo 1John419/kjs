@@ -4,8 +4,8 @@ import queue from '../CommandQueue.js';
 import { appPrefix } from '../util.js';
 
 const validTasks = ['help-read', 'help-topic'];
-const validTopics = ['about', 'bookmark', 'help', 'navigator', 'overview',
-  'read', 'search', 'setting', 'strong', 'thats-my-king'];
+const validTopics = ['about', 'bookmark', 'help', 'name-mode', 'navigator',
+  'overview', 'read', 'search', 'setting', 'strong', 'thats-my-king'];
 
 class HelpModel {
 

@@ -72,7 +72,7 @@ class BookmarkMoveCopyView {
     let btnEntry = document.createElement('button');
     btnEntry.classList.add('btn-entry', 'btn-entry--bookmark-move-copy');
     btnEntry.textContent = folderName;
-    let btnMenu = templateBtnIcon('menu', 'Menu');
+    let btnMenu = templateBtnIcon('h-menu', 'Menu');
     entry.appendChild(btnEntry);
     entry.appendChild(btnMenu);
     return entry;
@@ -145,7 +145,7 @@ class BookmarkMoveCopyView {
     event.preventDefault();
     let target = event.target.closest('button');
     if (target) {
-      if (target.classList.contains('btn-icon--menu')) {
+      if (target.classList.contains('btn-icon--h-menu')) {
         let entry = target.previousSibling;
         this.menuClick(entry);
       }
@@ -174,10 +174,6 @@ class BookmarkMoveCopyView {
     this.verseIdx = this.moveCopyVerseObj.k;
     this.verse = this.moveCopyVerseObj.v;
     queue.publish('bookmark-move-copy.ready', null);
-  }
-
-  scrollToTop() {
-    this.scroll.scrollTop = 0;
   }
 
   show() {
@@ -228,7 +224,7 @@ class BookmarkMoveCopyView {
   }
 
   updateFolders() {
-    this.scrollToTop();
+    let scrollSave = this.scroll.scrollTop;
     removeAllChildren(this.list);
     if (this.moveCopyList.length === 0) {
       this.empty.classList.remove('empty--hide');
@@ -241,6 +237,7 @@ class BookmarkMoveCopyView {
       }
       this.list.appendChild(fragment);
     }
+    this.scroll.scrollTop = scrollSave;
   }
 
 }

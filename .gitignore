@@ -1,4 +1,6 @@
+/.gitignore
 /.vscode
 /ref
 /dookie.html
 /dookie.js
+/debug.log

@@ -94,11 +94,6 @@ class StrongVerseView {
       '.btn-icon--result');
   }
 
-  getVerseWords() {
-    let clean_verse = this.verse[verseText].replace(/[,.?;:!()-]/g, '');
-    this.verseWords = clean_verse.split(' ');
-  }
-
   hide() {
     this.page.classList.add('page--hide');
   }
@@ -182,7 +177,7 @@ class StrongVerseView {
     this.scrollToTop();
     removeAllChildren(this.list);
     let docFragment = document.createDocumentFragment();
-    this.getVerseWords();
+    this.verseWords = this.verse[verseText].split(' ');
     for (let map of this.maps) {
       let strongMap = this.buildStrongFragment(map);
       docFragment.appendChild(strongMap);

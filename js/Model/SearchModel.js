@@ -13,8 +13,6 @@ const validTasks = ['search-result', 'search-lookup', 'search-filter',
 
 const DEFAULT_QUERY = 'day of the lord';
 
-const firstEntry = 0;
-
 class SearchModel {
 
   constructor() {
@@ -23,7 +21,7 @@ class SearchModel {
 
   addHistory() {
     if (this.searchHistory.indexOf(this.searchQuery) === -1) {
-      this.searchHistory = [this.searchQuery, ...this.searchHistory];
+      this.searchHistory.push(this.searchQuery);
       this.updateHistory();
     }
   }
@@ -61,26 +59,10 @@ class SearchModel {
     this.updateHistory();
   }
 
-  historyDown(str) {
-    let index = this.searchHistory.indexOf(str);
-    if (index !== (this.searchHistory.length - 1) && index !== -1) {
-      this.reorderHistory(index, index + 1);
-      this.updateHistory();
-    }
-  }
-
   historyIsValid(searchHistory) {
     return searchHistory.some((x) => {
       return typeof x === 'string';
     });
-  }
-
-  historyUp(str) {
-    let index = this.searchHistory.indexOf(str);
-    if (index !== 0 && index !== -1) {
-      this.reorderHistory(index, index - 1);
-      this.updateHistory();
-    }
   }
 
   initialize() {
@@ -120,11 +102,6 @@ class SearchModel {
       this.resetFilter();
       queue.publish('search.query.update', this.searchQuery);
     }
-  }
-
-  reorderHistory(fromIdx, toIdx) {
-    this.searchHistory.splice(toIdx, 0,
-      this.searchHistory.splice(fromIdx, 1)[firstEntry]);
   }
 
   resetFilter() {
@@ -267,12 +244,6 @@ class SearchModel {
     });
     queue.subscribe('search.history.delete', (query) => {
       this.historyDelete(query);
-    });
-    queue.subscribe('search.history.down', (query) => {
-      this.historyDown(query);
-    });
-    queue.subscribe('search.history.up', (query) => {
-      this.historyUp(query);
     });
 
     queue.subscribe('search.query.change', async (query) => {

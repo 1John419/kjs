@@ -113,6 +113,17 @@ export const templateToolbarLower = (toolSet) => {
   return toolbarLower;
 };
 
+export const templateToolbarMenu = (modifier, actionSet) => {
+  let toolbarMenu = templateElement(
+    'div', 'toolbar-menu', modifier, null, null);
+  toolbarMenu.classList.add('toolbar-menu--hide');
+  for (let btn of actionSet) {
+    let element = templateBtnIcon(btn.icon, btn.label);
+    toolbarMenu.appendChild(element);
+  }
+  return toolbarMenu;
+};
+
 export const templateToolbarUpper = (toolSet) => {
   let toolbarUpper = templateToolbar('upper');
   for (let tool of toolSet) {

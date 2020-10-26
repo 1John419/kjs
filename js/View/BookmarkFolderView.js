@@ -79,7 +79,7 @@ class BookmarkFolderView {
     let btnEntry = document.createElement('button');
     btnEntry.classList.add('btn-entry', 'btn-entry--folder');
     btnEntry.textContent = folderName;
-    let btnMenu = templateBtnIcon('menu', 'Menu');
+    let btnMenu = templateBtnIcon('h-menu', 'Menu');
     entry.appendChild(btnEntry);
     entry.appendChild(btnMenu);
     return entry;
@@ -155,7 +155,7 @@ class BookmarkFolderView {
       if (target.classList.contains('btn-entry')) {
         let folderName = target.textContent;
         queue.publish('bookmark-folder.select', folderName);
-      } else if (target.classList.contains('btn-icon--menu')) {
+      } else if (target.classList.contains('btn-icon--h-menu')) {
         let entry = target.previousSibling;
         this.menuClick(entry);
       }
@@ -176,10 +176,6 @@ class BookmarkFolderView {
 
   rename(folderName) {
     queue.publish('bookmark-folder-rename', folderName);
-  }
-
-  scrollToTop() {
-    this.scroll.scrollTop = 0;
   }
 
   show() {
@@ -233,7 +229,7 @@ class BookmarkFolderView {
   }
 
   updateFolders() {
-    this.scrollToTop();
+    let scrollSave = this.scroll.scrollTop;
     removeAllChildren(this.list);
     let fragment = document.createDocumentFragment();
     for (let folderName of this.folderList) {
@@ -241,6 +237,7 @@ class BookmarkFolderView {
       fragment.appendChild(entry);
     }
     this.list.appendChild(fragment);
+    this.scroll.scrollTop = scrollSave;
   }
 
 }

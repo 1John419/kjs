@@ -33,7 +33,7 @@ class BookmarkModel {
   add(verseIdx) {
     let bookmarks = this.activeFolder.bookmarks;
     if (bookmarks.indexOf(verseIdx) === -1) {
-      this.activeFolder.bookmarks = [verseIdx, ...bookmarks];
+      this.activeFolder.bookmarks.push(verseIdx);
       this.updateFolders();
       this.updateActiveFolder();
     }
@@ -41,7 +41,7 @@ class BookmarkModel {
 
   copy(copyPkg) {
     let toFolder = this.getFolder(copyPkg.to);
-    toFolder.bookmarks = [copyPkg.verseIdx, ...toFolder.bookmarks];
+    toFolder.bookmarks.push(copyPkg.verseIdx);
     this.updateFolders();
   }
 
@@ -80,7 +80,7 @@ class BookmarkModel {
     let newFolder = this.getFolder(folderName);
     if (!newFolder) {
       newFolder = this.createFolder(folderName);
-      this.folders = [newFolder, ...this.folders];
+      this.folders.push(newFolder);
       this.updateFolders();
       this.activeFolderChange(folderName);
       this.updateFolderList();
@@ -224,14 +224,14 @@ class BookmarkModel {
       let targetFolder = this.getFolder(folder.name);
       if (!targetFolder) {
         targetFolder = this.createFolder(folder.name);
-        this.folders = [targetFolder, ...this.folders];
+        this.folders.push(targetFolder);
       }
       for (let verseIdx of folder.bookmarks) {
         let bookmarks = targetFolder.bookmarks;
         if (bookmarks.indexOf(verseIdx) !== -1) {
           continue;
         }
-        targetFolder.bookmarks = [verseIdx, ...bookmarks];
+        targetFolder.bookmarks.push(verseIdx);
       }
     }
     this.updateFolders();
@@ -246,7 +246,7 @@ class BookmarkModel {
 
   move(movePkg) {
     let toFolder = this.getFolder(movePkg.to);
-    toFolder.bookmarks = [movePkg.verseIdx, ...toFolder.bookmarks];
+    toFolder.bookmarks.push(movePkg.verseIdx);
 
     let bookmarks = this.activeFolder.bookmarks;
     let index = bookmarks.indexOf(movePkg.verseIdx);

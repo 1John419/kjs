@@ -6,6 +6,9 @@ import {
   tomeDb
 } from '../data/tomeDb.js';
 import {
+  strongDb
+} from '../data/strongDb.js';
+import {
   chapterBookIdx,
   chapterFirstVerseIdx,
   chapterLastVerseIdx
@@ -34,6 +37,7 @@ class NavigatorModel {
     this.chapterIdx = chapterIdx;
     this.saveChapterIdx();
     await this.updateVerses();
+    await this.updateMaps();
     let bookIdx = tomeChapters[this.chapterIdx][chapterBookIdx];
     if (this.bookIdx !== bookIdx) {
       this.bookIdxChange(bookIdx);
@@ -140,6 +144,14 @@ class NavigatorModel {
     this.navigatorTask = navigatorTask;
     this.saveNavigatorTask();
     queue.publish('navigator.task.update', this.navigatorTask);
+  }
+
+  async updateMaps() {
+    let chapter = tomeChapters[this.chapterIdx];
+    let keys = range(chapter[chapterFirstVerseIdx],
+      chapter[chapterLastVerseIdx] + 1);
+    this.mapObjs = await strongDb.maps.bulkGet(keys);
+    queue.publish('navigator.maps.update', this.mapObjs);
   }
 
   async updateVerses() {

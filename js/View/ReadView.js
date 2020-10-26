@@ -11,8 +11,19 @@ import {
   verseText
 } from '../data/tomeIdx.js';
 import {
+  mapSliceEnd,
+  mapSliceStart,
+  mapStrongNums
+} from '../data/strongIdx.js';
+import {
+  elElyon,
+  elShaddai,
+  nameSub
+} from '../data/name.js';
+import {
   templateElement,
   templateToolbarLower,
+  templateToolbarMenu,
   templatePage,
   templateScroll,
   templateToolbarUpper
@@ -28,10 +39,12 @@ const lowerToolSet = [
   { type: 'btn', icon: 'bookmark', label: 'Bookmark' },
   { type: 'btn', icon: 'search', label: 'Search' },
   { type: 'btn', icon: 'strong', label: 'Strong' },
+  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' },
+  { type: 'btn', icon: 'name-mode', label: 'Name Mode' },
+  { type: 'btn', icon: 'column-mode', label: 'Column Mode' },
   { type: 'btn', icon: 'setting', label: 'Setting' },
   { type: 'btn', icon: 'help', label: 'Help' },
-  { type: 'btn', icon: 'column-mode', label: 'Column Mode' },
-  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
+  { type: 'btn', icon: 'v-menu', label: 'Toolbar Menu' }
 ];
 
 const upperToolSet = [
@@ -39,6 +52,14 @@ const upperToolSet = [
   { type: 'banner', modifier: 'read', text: null },
   { type: 'btn', icon: 'next', label: 'Next Chapter' }
 ];
+
+const menuSet = [
+  { type: 'btn', icon: 'cancel', label: 'Toolbar Menu' },
+  { type: 'btn', icon: 'setting', label: 'Setting' },
+  { type: 'btn', icon: 'help', label: 'Help' },
+];
+
+const matthewChapterIdx = 929;
 
 class ReadView {
 
@@ -54,6 +75,9 @@ class ReadView {
   addListeners() {
     this.list.addEventListener('click', (event) => {
       this.listClick(event);
+    });
+    this.toolbarMenu.addEventListener('click', (event) => {
+      this.toolbarMenuClick(event);
     });
     this.toolbarLower.addEventListener('click', (event) => {
       this.toolbarLowerClick(event);
@@ -103,6 +127,9 @@ class ReadView {
     this.toolbarLower = templateToolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
+    this.toolbarMenu = templateToolbarMenu('read-menu', menuSet);
+    this.page.appendChild(this.toolbarMenu);
+
     let container = document.querySelector('.container');
     container.appendChild(this.page);
   }
@@ -129,7 +156,7 @@ class ReadView {
 
   buildVerseText(verseObj) {
     let text = templateElement('span', 'verse-text', null, null,
-      verseObj.v[verseText]);
+      this.getVerseText(verseObj));
     return text;
   }
 
@@ -142,6 +169,7 @@ class ReadView {
 
   chapterIdxUpdate(chapterIdx) {
     this.chapterIdx = chapterIdx;
+    this.setVerseText();
     this.updateBanner();
     this.updateVerses();
     this.refreshVerseBookmarks();
@@ -151,6 +179,18 @@ class ReadView {
     this.columnMode = columnMode;
     this.updateColumnModeBtn();
     this.updateColumnMode();
+  }
+
+  disableToolbarMenu() {
+    this.btnSetting.classList.remove('btn-icon--hide');
+    this.btnHelp.classList.remove('btn-icon--hide');
+    this.btnMenu.classList.add('btn-icon--hide');
+  }
+
+  enableToolbarMenu() {
+    this.btnSetting.classList.add('btn-icon--hide');
+    this.btnHelp.classList.add('btn-icon--hide');
+    this.btnMenu.classList.remove('btn-icon--hide');
   }
 
   fontSizeUpdate(fontSize) {
@@ -165,10 +205,6 @@ class ReadView {
     this.lastFont = this.font;
   }
 
-  hide() {
-    this.page.classList.add('page--hide');
-  }
-
   getElements() {
     this.body = document.querySelector('body');
 
@@ -180,13 +216,27 @@ class ReadView {
     this.btnBookmark = this.toolbarLower.querySelector('.btn-icon--bookmark');
     this.btnSearch = this.toolbarLower.querySelector('.btn-icon--search');
     this.btnStrong = this.toolbarLower.querySelector('.btn-icon--strong');
-    this.btnStrongMode = this.toolbarLower.querySelector('.btn-icon--strong-mode');
     this.btnSetting = this.toolbarLower.querySelector('.btn-icon--setting');
     this.btnHelp = this.toolbarLower.querySelector('.btn-icon--help');
     this.btnColumnMode = this.toolbarLower.querySelector('.btn-icon--column-mode');
     this.columnBtns = [
       this.btnColumnOne, this.btnColumnTwo, this.btnColumnThree
     ];
+    this.btnStrongMode = this.toolbarLower.querySelector('.btn-icon--strong-mode');
+    this.btnNameMode = this.toolbarLower.querySelector('.btn-icon--name-mode');
+    this.btnMenu = this.toolbarLower.querySelector('.btn-icon--v-menu');
+
+    this.btnMenuCancel = this.toolbarMenu.querySelector('.btn-icon--cancel');
+    this.btnMenuSetting = this.toolbarMenu.querySelector('.btn-icon--setting');
+    this.btnMenuHelp = this.toolbarMenu.querySelector('.btn-icon--help');
+  }
+
+  getKjvVerseText(verseObj) {
+    return verseObj.v[verseText];
+  }
+
+  getNameVerseText(verseObj) {
+    return this.nameSub(verseObj);
   }
 
   helpHide() {
@@ -197,6 +247,14 @@ class ReadView {
 
   helpShow() {
     this.btnHelp.classList.add('btn-icon--active');
+  }
+
+  hide() {
+    this.page.classList.add('page--hide');
+  }
+
+  hideToolbarMenu() {
+    this.toolbarMenu.classList.add('toolbar-menu--hide');
   }
 
   initialize() {
@@ -218,12 +276,61 @@ class ReadView {
     }
   }
 
+  nameModeUpdate(nameMode) {
+    this.nameMode = nameMode;
+    if (this.nameMode) {
+      this.btnNameMode.classList.add('btn-icon--active');
+    } else {
+      this.btnNameMode.classList.remove('btn-icon--active');
+    }
+    this.setVerseText();
+    if (this.verseObjs && this.chapterIdx < matthewChapterIdx) {
+      this.updateVerses();
+      this.refreshVerseBookmarks();
+    }
+  }
+
+  nameSub(verseObj) {
+    let verseIdx = verseObj.k;
+    let rawWords = verseObj.v[verseText].split(' ');
+    let fragments = [];
+    let maps = this.mapObjs.find(x => x.k === verseIdx).v;
+    for (let map of maps) {
+      let fragment =
+        rawWords.slice(map[mapSliceStart], map[mapSliceEnd]).join(' ');
+      for (let number of map[mapStrongNums]) {
+        if (number in nameSub) {
+          let subMaps = nameSub[number];
+          for (let subMap of subMaps) {
+            if (fragment.includes(subMap[0])) {
+              fragment = fragment.replaceAll(subMap[0], subMap[1]);
+              break;
+            }
+          }
+        }
+      }
+      fragments.push(fragment);
+    }
+    let revised = fragments.join(' ');
+    if (elElyon.includes(verseIdx)) {
+      revised = revised.replaceAll('Elyon El', 'El Elyon');
+    }
+    if (elShaddai.includes(verseIdx)) {
+      revised = revised.replaceAll('Shaddai El', 'El Shaddai');
+    }
+    return revised;
+  }
+
   navigatorHide() {
     this.btnNavigator.classList.remove('btn-icon--active');
   }
 
   navigatorShow() {
     this.btnNavigator.classList.add('btn-icon--active');
+  }
+
+  navigatorMapsUpdate(mapObjs) {
+    this.mapObjs = mapObjs;
   }
 
   navigatorVersesUpdate(verseObjs) {
@@ -235,6 +342,11 @@ class ReadView {
       this.btnColumnMode.classList.add('btn-icon--hide');
     } else {
       this.btnColumnMode.classList.remove('btn-icon--hide');
+    }
+    if (this.page.offsetWidth < 360) {
+      this.enableToolbarMenu();
+    } else {
+      this.disableToolbarMenu();
     }
   }
 
@@ -289,8 +401,20 @@ class ReadView {
     this.btnSetting.classList.add('btn-icon--active');
   }
 
+  setVerseText() {
+    if (this.nameMode && this.chapterIdx < matthewChapterIdx) {
+      this.getVerseText = this.getNameVerseText;
+    } else {
+      this.getVerseText = this.getKjvVerseText;
+    }
+  }
+
   show() {
     this.page.classList.remove('page--hide');
+  }
+
+  showToolbarMenu() {
+    this.toolbarMenu.classList.remove('toolbar-menu--hide');
   }
 
   sidebarUpdate(sidebar) {
@@ -352,6 +476,9 @@ class ReadView {
     queue.subscribe('navigator.show', () => {
       this.navigatorShow();
     });
+    queue.subscribe('navigator.maps.update', (mapObjs) => {
+      this.navigatorMapsUpdate(mapObjs);
+    });
     queue.subscribe('navigator.verses.update', (verseObjs) => {
       this.navigatorVersesUpdate(verseObjs);
     });
@@ -365,6 +492,9 @@ class ReadView {
     });
     queue.subscribe('read.hide', () => {
       this.hide();
+    });
+    queue.subscribe('read.name-mode.update', (nameMode) => {
+      this.nameModeUpdate(nameMode);
     });
     queue.subscribe('read.scroll-to-top', () => {
       this.scrollToTop();
@@ -414,6 +544,7 @@ class ReadView {
     let target = event.target.closest('button');
     if (target) {
       if (target === this.btnStrongMode ||
+        target === this.btnNameMode ||
         target === this.btnColumnMode ||
         !target.classList.contains('btn-icon--active')
       ) {
@@ -433,8 +564,27 @@ class ReadView {
           queue.publish('read.column-mode.click', null);
         } else if (target === this.btnStrongMode) {
           queue.publish('read.strong-mode.click', null);
+        } else if (target === this.btnNameMode) {
+          queue.publish('read.name-mode.click', null);
+        } else if (target === this.btnMenu) {
+          this.showToolbarMenu();
         }
       }
+    }
+  }
+
+  toolbarMenuClick(event) {
+    event.preventDefault();
+    let btn = event.target.closest('button');
+    if (btn === this.btnCancel) {
+      this.hideToolbarMenu();
+    } else {
+      if (btn === this.btnMenuSetting) {
+        queue.publish('sidebar.select', 'setting');
+      } else if (btn === this.btnMenuHelp) {
+        queue.publish('sidebar.select', 'help');
+      }
+      this.hideToolbarMenu();
     }
   }
 
