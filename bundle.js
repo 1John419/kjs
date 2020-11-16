@@ -7888,6 +7888,7 @@
 
     inputKeyDown(event) {
       if (event.key === 'Enter') {
+        this.inputName.blur();
         this.saveClick();
       }
     }
@@ -8147,6 +8148,7 @@
 
     inputKeyDown(event) {
       if (event.key === 'Enter') {
+        this.inputName.blur();
         this.saveClick();
       }
     }
@@ -10203,6 +10205,7 @@
 
     inputKeyDown(event) {
       if (event.key === 'Enter') {
+        this.inputQuery.blur();
         this.searchClick();
       }
     }
@@ -11780,6 +11783,7 @@
 
     inputKeyDown(event) {
       if (event.key === 'Enter') {
+        this.inputStrongNum.blur();
         this.findClick();
       }
     }

@@ -103,6 +103,7 @@ class SearchLookupView {
 
   inputKeyDown(event) {
     if (event.key === 'Enter') {
+      this.inputQuery.blur();
       this.searchClick();
     }
   }

@@ -109,6 +109,7 @@ class StrongLookupView {
 
   inputKeyDown(event) {
     if (event.key === 'Enter') {
+      this.inputStrongNum.blur();
       this.findClick();
     }
   }

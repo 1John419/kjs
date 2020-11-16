@@ -107,6 +107,7 @@ class BookmarkFolderRenameView {
 
   inputKeyDown(event) {
     if (event.key === 'Enter') {
+      this.inputName.blur();
       this.saveClick();
     }
   }
