@@ -18,7 +18,8 @@ import {
 import {
   elElyon,
   elShaddai,
-  nameSub
+  nameSub,
+  yahweh
 } from '../data/name.js';
 import {
   templateElement,
@@ -317,6 +318,9 @@ class ReadView {
     }
     if (elShaddai.includes(verseIdx)) {
       revised = revised.replaceAll('Shaddai El', 'El Shaddai');
+    }
+    if (yahweh.includes(verseIdx)) {
+      revised = revised.replaceAll('the Yahweh', 'Yahweh');
     }
     return revised;
   }
