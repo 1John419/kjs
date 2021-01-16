@@ -4582,7 +4582,7 @@
   };
 
   const strongUrl = './json/strong.json';
-  const strongVersion = 4;
+  const strongVersion = 5;
 
   let strongCitations = {};
   let strongDb = null;
@@ -4935,6 +4935,8 @@
   const elElyon = [354, 355, 356, 358, 14770, 15148];
 
   const elShaddai = [398, 20638];
+
+  const yahweh = [5110, 14389, 15510, 16173];
 
   const svgNS = 'http://www.w3.org/2000/svg';
   const xlinkNS = 'http://www.w3.org/1999/xlink';
@@ -5359,6 +5361,9 @@
       }
       if (elShaddai.includes(verseIdx)) {
         revised = revised.replaceAll('Shaddai El', 'El Shaddai');
+      }
+      if (yahweh.includes(verseIdx)) {
+        revised = revised.replaceAll('the Yahweh', 'Yahweh');
       }
       return revised;
     }
