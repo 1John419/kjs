@@ -14,4 +14,4 @@ The application supports Android, Linux, or Windows platforms with the latest ve
 It should also support the latest version of Safari, but has not been extensively tested on Mac/iOS platforms.
 
 ### Download Link
-[kjs](https://1john419.github.io/kjs/)
+[kjs](https://bit.ly/kjs-app/)
