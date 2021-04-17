@@ -17,6 +17,6 @@ It should also support the latest version of Safari, but has not been extensivel
 [KJS](https://www.youtube.com/watch?v=u00U_wYkg0U)
 
 ### Download Link
-[kjs](https://1john419.github.io/kjs/)
+[kjs](https://bit.ly/kjs-app/)
 
 ![qr code](images/qr-177.png)
