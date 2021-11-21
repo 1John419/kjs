@@ -33,7 +33,7 @@ class BookmarkModel {
   add(verseIdx) {
     let bookmarks = this.activeFolder.bookmarks;
     if (bookmarks.indexOf(verseIdx) === -1) {
-      this.activeFolder.bookmarks.push(verseIdx);
+      this.activeFolder.bookmarks = [verseIdx, ...bookmarks];
       this.updateFolders();
       this.updateActiveFolder();
     }

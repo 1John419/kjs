@@ -2,7 +2,7 @@ let appPrefix = 'kjs';
 
 let appCaches = [
   {
-    name: 'kjs-core-20210116.01',
+    name: 'kjs-core-20211121.01',
     urls: [
       './',
       './bundle.js',
@@ -16,25 +16,27 @@ let appCaches = [
     ]
   },
   {
-    name: 'kjs-css-20201026.01',
+    name: 'kjs-css-20211121.01',
     urls: [
       './css/kjs.css',
       './css/font.css'
     ]
   },
   {
-    name: 'kjs-font-20200207.01',
+    name: 'kjs-font-20211121.01',
     urls: [
-      './font/lato-v16-latin-regular.woff2',
-      './font/merriweather-v21-latin-regular.woff2',
-      './font/open-sans-v17-latin-regular.woff2',
-      './font/playfair-display-v20-latin-regular.woff2',
-      './font/roboto-slab-v11-latin-regular.woff2',
-      './font/roboto-v20-latin-regular.woff2'
+      './font/gfs-didot-v10-greek-regular.woff2',
+      './font/lato-v20-latin-regular.woff2',
+      './font/merriweather-v25-latin-regular.woff2',
+      './font/noto-serif-hebrew-v9-hebrew-regular.woff2',
+      './font/open-sans-v27-latin-regular.woff2',
+      './font/playfair-display-v25-latin-regular.woff2',
+      './font/roboto-slab-v16-latin-regular.woff2',
+      './font/roboto-v29-latin-regular.woff2'
     ]
   },
   {
-    name: 'kjs-help-20210116.01',
+    name: 'kjs-help-20211121.01',
     urls: [
       './help/about.html',
       './help/bookmark.html',
@@ -49,7 +51,7 @@ let appCaches = [
     ]
   },
   {
-    name: 'kjs-json-20210116.01',
+    name: 'kjs-json-20211121.01',
     urls: [
       './json/strong.json',
       './json/tome.kjv.json'

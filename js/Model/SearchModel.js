@@ -21,7 +21,7 @@ class SearchModel {
 
   addHistory() {
     if (this.searchHistory.indexOf(this.searchQuery) === -1) {
-      this.searchHistory.push(this.searchQuery);
+      this.searchHistory = [this.searchQuery, ...this.searchHistory];
       this.updateHistory();
     }
   }

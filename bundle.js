@@ -292,11 +292,11 @@
       return rv;
   }
   var concat = [].concat;
-  function flatten(a) {
+  function flatten$1(a) {
       return concat.apply([], a);
   }
   var intrinsicTypeNames = "Boolean,String,Date,RegExp,Blob,File,FileList,ArrayBuffer,DataView,Uint8ClampedArray,ImageData,Map,Set"
-      .split(',').concat(flatten([8, 16, 32, 64].map(function (num) { return ["Int", "Uint", "Float"].map(function (t) { return t + num + "Array"; }); }))).filter(function (t) { return _global[t]; });
+      .split(',').concat(flatten$1([8, 16, 32, 64].map(function (num) { return ["Int", "Uint", "Float"].map(function (t) { return t + num + "Array"; }); }))).filter(function (t) { return _global[t]; });
   var intrinsicTypes = intrinsicTypeNames.map(function (t) { return _global[t]; });
   var intrinsicTypeNameSet = arrayToObject(intrinsicTypeNames, function (x) { return [x, true]; });
   function deepClone(any) {
@@ -2157,7 +2157,7 @@
                   return ctx.table.core.count({ trans: trans, query: { index: primaryKey, range: coreRange } }).then(function (count) {
                       return ctx.table.core.mutate({ trans: trans, type: 'deleteRange', range: coreRange })
                           .then(function (_a) {
-                          var failures = _a.failures, lastResult = _a.lastResult, results = _a.results, numFailures = _a.numFailures;
+                          var failures = _a.failures; _a.lastResult; _a.results; var numFailures = _a.numFailures;
                           if (numFailures)
                               throw new ModifyError("Could not delete some values", Object.keys(failures).map(function (pos) { return failures[pos]; }), count - numFailures);
                           return count - numFailures;
@@ -3728,7 +3728,7 @@
       while (--i)
           args[i - 1] = arguments[i];
       scopeFunc = args.pop();
-      var tables = flatten(args);
+      var tables = flatten$1(args);
       return [mode, tables, scopeFunc];
   }
   function enterTransactionScope(db, mode, storeNames, parentTransaction, scopeFunc) {
@@ -4582,7 +4582,7 @@
   };
 
   const strongUrl = './json/strong.json';
-  const strongVersion = 5;
+  const strongVersion = 6;
 
   let strongCitations = {};
   let strongDb = null;
@@ -5078,7 +5078,7 @@
     return toolbarUpper;
   };
 
-  const lowerToolSet = [
+  const lowerToolSet$n = [
     { type: 'btn', icon: 'navigator', label: 'Navigator' },
     { type: 'btn', icon: 'bookmark', label: 'Bookmark' },
     { type: 'btn', icon: 'search', label: 'Search' },
@@ -5091,7 +5091,7 @@
     { type: 'btn', icon: 'v-menu', label: 'Toolbar Menu' }
   ];
 
-  const upperToolSet = [
+  const upperToolSet$n = [
     { type: 'btn', icon: 'prev', label: 'Previous Chapter' },
     { type: 'banner', modifier: 'read', text: null },
     { type: 'btn', icon: 'next', label: 'Next Chapter' }
@@ -5160,7 +5160,7 @@
       this.page = templatePage('read');
       this.page.classList.remove('page--hide');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$n);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('read');
@@ -5168,7 +5168,7 @@
       this.scroll.appendChild(this.list);
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$n);
       this.page.appendChild(this.toolbarLower);
 
       this.toolbarMenu = templateToolbarMenu('read-menu', menuSet);
@@ -5907,7 +5907,7 @@
 
   }
 
-  const validTasks = ['navigator-book', 'navigator-chapter'];
+  const validTasks$4 = ['navigator-book', 'navigator-chapter'];
 
   const CHAPTER_IDX_GENESIS_1 = 0;
 
@@ -5989,7 +5989,7 @@
           navigatorTask = defaultTask;
         }
       }
-      if (!validTasks.includes(navigatorTask)) {
+      if (!validTasks$4.includes(navigatorTask)) {
         navigatorTask = defaultTask;
       }
       this.taskChange(navigatorTask);
@@ -6056,12 +6056,12 @@
   const greekFirstIdx = 39;
   const indices = [...Array(66).keys()];
 
-  const lowerToolSet$1 = [
+  const lowerToolSet$m = [
     { type: 'btn', icon: 'back', label: 'Back' },
     { type: 'btn', icon: 'navigator-chapter', label: 'Chapter' }
   ];
 
-  const upperToolSet$1 = [
+  const upperToolSet$m = [
     { type: 'banner', modifier: 'navigator-book', text: 'Book' }
   ];
 
@@ -6139,7 +6139,7 @@
     buildPage() {
       this.page = templatePage('navigator-book');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$1);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$m);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('navigator-book');
@@ -6147,7 +6147,7 @@
       this.scroll.appendChild(this.list);
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$1);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$m);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -6230,12 +6230,12 @@
 
   }
 
-  const lowerToolSet$2 = [
+  const lowerToolSet$l = [
     { type: 'btn', icon: 'back', label: 'Back' },
     { type: 'btn', icon: 'navigator-book', label: 'Book' }
   ];
 
-  const upperToolSet$2 = [
+  const upperToolSet$l = [
     { type: 'banner', modifier: 'navigator-chapter', text: null }
   ];
 
@@ -6278,7 +6278,7 @@
     buildPage() {
       this.page = templatePage('navigator-chapter');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$2);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$l);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('navigator-chapter');
@@ -6286,7 +6286,7 @@
       this.scroll.appendChild(this.list);
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$2);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$l);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -6562,7 +6562,7 @@
     'bookmark-folder-rename', 'bookmark-export', 'bookmark-import'
   ];
   const bookmarkListReroute = ['bookmark-move-copy'];
-  const validTasks$1 = ['bookmark-list', 'bookmark-folder'];
+  const validTasks$3 = ['bookmark-list', 'bookmark-folder'];
 
   const firstEntry = 0;
 
@@ -6581,7 +6581,7 @@
     add(verseIdx) {
       let bookmarks = this.activeFolder.bookmarks;
       if (bookmarks.indexOf(verseIdx) === -1) {
-        this.activeFolder.bookmarks.push(verseIdx);
+        this.activeFolder.bookmarks = [verseIdx, ...bookmarks];
         this.updateFolders();
         this.updateActiveFolder();
       }
@@ -6910,7 +6910,7 @@
           bookmarkTask = 'bookmark-list';
         } else if (bookmarkFolderReroute.includes(bookmarkTask)) {
           bookmarkTask = 'bookmark-folder';
-        } else if (!validTasks$1.includes(bookmarkTask)) {
+        } else if (!validTasks$3.includes(bookmarkTask)) {
           bookmarkTask = defaultTask;
         }
       }
@@ -7076,7 +7076,7 @@
     }
   }
 
-  const actionSet = [
+  const actionSet$2 = [
     { icon: 'up', label: 'Up' },
     { icon: 'down', label: 'Down' },
     { icon: 'move-copy', label: 'Move/Copy' },
@@ -7084,7 +7084,7 @@
     { icon: 'cancel', label: 'Cancel' }
   ];
 
-  const lowerToolSet$3 = [
+  const lowerToolSet$k = [
     { type: 'btn', icon: 'back', label: 'Back' },
     { type: 'btn', icon: 'sort-ascend', label: 'Sort Ascending' },
     { type: 'btn', icon: 'sort-invert', label: 'Sort Invert' },
@@ -7092,7 +7092,7 @@
     { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
   ];
 
-  const upperToolSet$3 = [
+  const upperToolSet$k = [
     { type: 'banner', modifier: 'bookmark-list', text: null },
   ];
 
@@ -7151,7 +7151,7 @@
     buildPage() {
       this.page = templatePage('bookmark-list');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$3);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$k);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('bookmark-list');
@@ -7163,12 +7163,12 @@
       this.list = templateElement('div', 'list', 'bookmark-list', null, null);
       this.scroll.appendChild(this.list);
 
-      this.actionMenu = templateActionMenu('bookmark-list', actionSet);
+      this.actionMenu = templateActionMenu('bookmark-list', actionSet$2);
       this.scroll.appendChild(this.actionMenu);
 
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$3);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$k);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -7352,11 +7352,11 @@
     { icon: 'cancel', label: 'Cancel' }
   ];
 
-  const lowerToolSet$4 = [
+  const lowerToolSet$j = [
     { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' },
   ];
 
-  const upperToolSet$4 = [
+  const upperToolSet$j = [
     { type: 'banner', modifier: 'bookmark-move-copy', text: null }
   ];
 
@@ -7412,7 +7412,7 @@
     buildPage() {
       this.page = templatePage('bookmark-move-copy');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$4);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$j);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('bookmark-move-copy');
@@ -7429,7 +7429,7 @@
       this.scroll.appendChild(this.actionMenu);
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$4);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$j);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -7573,7 +7573,7 @@
 
   }
 
-  const actionSet$2 = [
+  const actionSet = [
     { icon: 'up', label: 'Up' },
     { icon: 'down', label: 'Down' },
     { icon: 'rename', label: 'Rename' },
@@ -7581,7 +7581,7 @@
     { icon: 'cancel', label: 'Cancel' }
   ];
 
-  const lowerToolSet$5 = [
+  const lowerToolSet$i = [
     { type: 'btn', icon: 'back', label: 'Back' },
     { type: 'btn', icon: 'bookmark-folder-add', label: 'Bookmark Folder Add' },
     { type: 'btn', icon: 'import', label: 'Import' },
@@ -7589,7 +7589,7 @@
     { type: 'btn', icon: 'bookmark-list', label: 'Bookmark List' }
   ];
 
-  const upperToolSet$5 = [
+  const upperToolSet$i = [
     { type: 'banner', modifier: 'bookmark-folder', text: 'Bookmark Folder' }
   ];
 
@@ -7649,7 +7649,7 @@
     buildPage() {
       this.page = templatePage('bookmark-folder');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$5);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$i);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('bookmark-folder');
@@ -7657,11 +7657,11 @@
       this.list = templateElement('div', 'list', 'bookmark-folder', null, null);
       this.scroll.appendChild(this.list);
 
-      this.actionMenu = templateActionMenu('bookmark-folder', actionSet$2);
+      this.actionMenu = templateActionMenu('bookmark-folder', actionSet);
       this.scroll.appendChild(this.actionMenu);
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$5);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$i);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -7803,17 +7803,17 @@
 
   }
 
-  const dialogToolset = [
+  const dialogToolset$6 = [
     { type: 'label', text: 'Name' },
     { type: 'input', label: 'Name' },
     { type: 'btn', id: 'save', label: 'Save' }
   ];
 
-  const lowerToolSet$6 = [
+  const lowerToolSet$h = [
     { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' }
   ];
 
-  const upperToolSet$6 = [
+  const upperToolSet$h = [
     { type: 'banner', modifier: 'bookmark-folder-add', text: 'Folder Add' }
   ];
 
@@ -7838,11 +7838,11 @@
     buildPage() {
       this.page = templatePage('bookmark-folder-add');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$6);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$h);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('bookmark-folder-add');
-      this.dialog = templateDivDialog('bookmark-folder-add', dialogToolset);
+      this.dialog = templateDivDialog('bookmark-folder-add', dialogToolset$6);
       this.scroll.appendChild(this.dialog);
 
       this.message = templateElement('div', 'message',
@@ -7851,7 +7851,7 @@
 
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$6);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$h);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -7937,16 +7937,16 @@
 
   }
 
-  const dialogToolset$1 = [
+  const dialogToolset$5 = [
     { type: 'label', text: null },
     { type: 'btn', id: 'delete', label: 'Delete' }
   ];
 
-  const lowerToolSet$7 = [
+  const lowerToolSet$g = [
     { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' }
   ];
 
-  const upperToolSet$7 = [
+  const upperToolSet$g = [
     { type: 'banner', modifier: 'bookmark-folder-delete',
       text: 'Folder Delete' }
   ];
@@ -7969,15 +7969,15 @@
     buildPage() {
       this.page = templatePage('bookmark-folder-delete');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$7);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$g);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('bookmark-folder-delete');
-      this.dialog = templateDivDialog('bookmark-folder-delete', dialogToolset$1);
+      this.dialog = templateDivDialog('bookmark-folder-delete', dialogToolset$5);
       this.scroll.appendChild(this.dialog);
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$7);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$g);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -8057,17 +8057,17 @@
 
   }
 
-  const dialogToolset$2 = [
+  const dialogToolset$4 = [
     { type: 'label', text: 'Folder Name' },
     { type: 'input', label: 'Name' },
     { type: 'btn', id: 'save', label: 'Save' }
   ];
 
-  const lowerToolSet$8 = [
+  const lowerToolSet$f = [
     { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' }
   ];
 
-  const upperToolSet$8 = [
+  const upperToolSet$f = [
     { type: 'banner', modifier: 'bookmark-folder-rename',
       text: 'Folder Rename'}
   ];
@@ -8093,11 +8093,11 @@
     buildPage() {
       this.page = templatePage('bookmark-folder-rename');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$8);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$f);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('bookmark-folder-rename');
-      this.dialog = templateDivDialog('bookmark-folder-rename', dialogToolset$2);
+      this.dialog = templateDivDialog('bookmark-folder-rename', dialogToolset$4);
       this.scroll.appendChild(this.dialog);
 
       this.message = templateElement('div', 'message',
@@ -8106,7 +8106,7 @@
 
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$8);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$f);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -8213,11 +8213,11 @@
     { type: 'textarea', label: 'Bookmark Package' },
   ];
 
-  const lowerToolSet$9 = [
+  const lowerToolSet$e = [
     { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' }
   ];
 
-  const upperToolSet$9 = [
+  const upperToolSet$e = [
     { type: 'banner', modifier: 'bookmark-export', text: 'Bookmark Export' }
   ];
 
@@ -8243,7 +8243,7 @@
     buildPage() {
       this.page = templatePage('bookmark-export');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$9);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$e);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('bookmark-export');
@@ -8251,7 +8251,7 @@
       this.scroll.appendChild(this.dialog);
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$9);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$e);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -8310,17 +8310,17 @@
 
   }
 
-  const dialogToolset$4 = [
+  const dialogToolset$2 = [
     { type: 'label', text: 'Paste Bookmark Package Here:' },
     { type: 'textarea', label: 'Bookmark Package' },
     { type: 'btn', id: 'import', label: 'Import' }
   ];
 
-  const lowerToolSet$a = [
+  const lowerToolSet$d = [
     { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' }
   ];
 
-  const upperToolSet$a = [
+  const upperToolSet$d = [
     { type: 'banner', modifier: 'bookmark-import', text: 'Bookmark Import' }
   ];
 
@@ -8342,11 +8342,11 @@
     buildPage() {
       this.page = templatePage('bookmark-import');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$a);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$d);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('bookmark-import');
-      this.dialog = templateDivDialog('bookmark-import', dialogToolset$4);
+      this.dialog = templateDivDialog('bookmark-import', dialogToolset$2);
       this.scroll.appendChild(this.dialog);
 
       this.message = templateElement('div', 'message', 'bookmark-import', null,
@@ -8354,7 +8354,7 @@
       this.scroll.appendChild(this.message);
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$a);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$d);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -8781,10 +8781,10 @@
   const numSort = (a, b) => a - b;
 
   // Credit: http://eddmann.com/posts/cartesian-product-in-javascript/
-  const flatten$1 = (arr) => [].concat.apply([], arr);
+  const flatten = (arr) => [].concat.apply([], arr);
   const product = (sets) =>
     sets.reduce((acc, set) =>
-      flatten$1(acc.map((x) => set.map((y) => [...x, y]))), [
+      flatten(acc.map((x) => set.map((y) => [...x, y]))), [
       []
     ]);
 
@@ -9084,7 +9084,7 @@
 
     addHistory() {
       if (this.searchHistory.indexOf(this.searchQuery) === -1) {
-        this.searchHistory.push(this.searchQuery);
+        this.searchHistory = [this.searchQuery, ...this.searchHistory];
         this.updateHistory();
       }
     }
@@ -9350,7 +9350,7 @@
 
   }
 
-  const lowerToolSet$b = [
+  const lowerToolSet$c = [
     { type: 'btn', icon: 'back', label: 'Back' },
     { type: 'btn', icon: 'search-lookup', label: 'Search Lookup' },
     { type: 'btn', icon: 'filter', label: 'Search Filter' },
@@ -9358,12 +9358,12 @@
     { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
   ];
 
-  const upperToolSet$b = [
+  const upperToolSet$c = [
     { type: 'banner', modifier: 'search-result', text: null }
   ];
 
-  const binIdx = 0;
-  const loadIncrement = 50;
+  const binIdx$1 = 0;
+  const loadIncrement$1 = 50;
 
   class SearchResultView {
 
@@ -9447,7 +9447,7 @@
     buildPage() {
       this.page = templatePage('search-result');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$b);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$c);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('search-result');
@@ -9463,7 +9463,7 @@
 
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$b);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$c);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -9504,7 +9504,7 @@
 
     findBin(bins, idx) {
       return bins.find((bin) => {
-        return bin[binIdx] === idx;
+        return bin[binIdx$1] === idx;
       });
     }
 
@@ -9573,11 +9573,11 @@
 
     loadVerses() {
       let verses;
-      if (this.verseCount <= loadIncrement) {
+      if (this.verseCount <= loadIncrement$1) {
         verses = this.filteredVerses;
         this.loadIdx = this.verseCount;
       } else {
-        let sliceEnd = Math.min(this.loadIdx + loadIncrement, this.verseCount);
+        let sliceEnd = Math.min(this.loadIdx + loadIncrement$1, this.verseCount);
         verses = this.filteredVerses.slice(this.loadIdx, sliceEnd);
         this.loadIdx = sliceEnd;
       }
@@ -9702,11 +9702,11 @@
 
   }
 
-  const lowerToolSet$c = [
+  const lowerToolSet$b = [
     { type: 'btn', icon: 'result', label: 'Search Result' }
   ];
 
-  const upperToolSet$c = [
+  const upperToolSet$b = [
     { type: 'banner', modifier: 'search-filter', text: null }
   ];
 
@@ -9791,7 +9791,7 @@
     buildPage() {
       this.page = templatePage('search-filter');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$c);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$b);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('search-filter');
@@ -9799,7 +9799,7 @@
       this.scroll.appendChild(this.list);
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$c);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$b);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -9964,12 +9964,12 @@
 
   }
 
-  const lowerToolSet$d = [
+  const lowerToolSet$a = [
     { type: 'btn', icon: 'result', label: 'Search Result' },
     { type: 'btn', icon: 'history-clear', label: 'Clear Hitory' }
   ];
 
-  const upperToolSet$d = [
+  const upperToolSet$a = [
     { type: 'banner', modifier: 'search-history', text: 'Search History' }
   ];
 
@@ -10004,7 +10004,7 @@
     buildPage() {
       this.page = templatePage('search-history');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$d);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$a);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('search-history');
@@ -10017,7 +10017,7 @@
 
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$d);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$a);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -10118,18 +10118,18 @@
 
   }
 
-  const dialogToolset$5 = [
+  const dialogToolset$1 = [
     { type: 'label', text: 'Query' },
     { type: 'input', label: 'Query' },
     { type: 'btn', id: 'search', label: 'Search' }
   ];
 
-  const lowerToolSet$e = [
+  const lowerToolSet$9 = [
     { type: 'btn', icon: 'back', label: 'Back' },
     { type: 'btn', icon: 'result', label: 'Search Result' }
   ];
 
-  const upperToolSet$e = [
+  const upperToolSet$9 = [
     { type: 'banner', modifier: 'search-lookup', text: 'Search Lookup' }
   ];
 
@@ -10154,11 +10154,11 @@
     buildPage() {
       this.page = templatePage('search-lookup');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$e);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$9);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('search-lookup');
-      this.dialog = templateDivDialog('search-lookup', dialogToolset$5);
+      this.dialog = templateDivDialog('search-lookup', dialogToolset$1);
       this.scroll.appendChild(this.dialog);
 
       this.message = templateElement('div', 'message',
@@ -10167,7 +10167,7 @@
 
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$e);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$9);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -10496,7 +10496,7 @@
 
   const strongDefReroute = ['strong-history', 'strong-lookup'];
   const strongResultReroute = ['strong-filter'];
-  const validTasks$3 = ['strong-def', 'strong-verse', 'strong-result'];
+  const validTasks$1 = ['strong-def', 'strong-verse', 'strong-result'];
 
   const firstWord = 0;
 
@@ -10510,7 +10510,7 @@
 
     addHistory() {
       if (this.strongHistory.indexOf(this.strongDef) === -1) {
-        this.strongHistory.push(this.strongDef);
+        this.strongHistory = [this.strongDef, ...this.strongHistory];
         this.updateHistory();
       }
     }
@@ -10740,7 +10740,7 @@
           strongTask = 'strong-def';
         } else if (strongResultReroute.includes(strongTask)) {
           strongTask = 'strong-result';
-        } else if (!validTasks$3.includes(strongTask)) {
+        } else if (!validTasks$1.includes(strongTask)) {
           strongTask = defaultTask;
         }
       }
@@ -10958,7 +10958,7 @@
 
   }
 
-  const lowerToolSet$f = [
+  const lowerToolSet$8 = [
     { type: 'btn', icon: 'back', label: 'Back' },
     { type: 'btn', icon: 'strong-lookup', label: 'Strong Lookup' },
     { type: 'btn', icon: 'history', label: 'Strong History' },
@@ -10967,7 +10967,7 @@
     { type: 'btn', icon: 'prev', label: 'Previous Strong' }
   ];
 
-  const upperToolSet$f = [
+  const upperToolSet$8 = [
     { type: 'banner', modifier: 'strong-def', text: 'Strong Definition' }
   ];
 
@@ -10990,6 +10990,11 @@
       let fragment = document.createDocumentFragment();
       let lemma = templateElement('div', 'strong-def', 'lemma', '',
         this.def[defLemma].normalize('NFC'));
+      if (this.strongDef.startsWith('H')) {
+        lemma.classList.add('font--hebrew');
+      } else {
+        lemma.classList.add('font--greek');
+      }
       let xlit = templateElement('div', 'strong-def', 'xlit', '',
         this.def[defTranliteration].normalize('NFC'));
       let pron = templateElement('div', 'strong-def', 'pron', '',
@@ -11029,7 +11034,7 @@
     buildPage() {
       this.page = templatePage('strong-def');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$f);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$8);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('strong-def');
@@ -11037,7 +11042,7 @@
       this.scroll.appendChild(this.list);
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$f);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$8);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -11231,11 +11236,11 @@
 
   }
 
-  const lowerToolSet$g = [
+  const lowerToolSet$7 = [
     { type: 'btn', icon: 'result', label: 'Strong Result' }
   ];
 
-  const upperToolSet$g = [
+  const upperToolSet$7 = [
     { type: 'banner', modifier: 'strong-filter', text: 'Strong Filter' }
   ];
 
@@ -11319,7 +11324,7 @@
     buildPage() {
       this.page = templatePage('strong-filter');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$g);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$7);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('strong-filter');
@@ -11331,7 +11336,7 @@
       this.scroll.appendChild(this.list);
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$g);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$7);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -11536,12 +11541,12 @@
 
   }
 
-  const lowerToolSet$h = [
+  const lowerToolSet$6 = [
     { type: 'btn', icon: 'strong-def', label: 'Strong Definition' },
     { type: 'btn', icon: 'history-clear', label: 'Clear Hitory' }
   ];
 
-  const upperToolSet$h = [
+  const upperToolSet$6 = [
     { type: 'banner', modifier: 'strong-history', text: 'Strong History' }
   ];
 
@@ -11580,7 +11585,7 @@
     buildPage() {
       this.page = templatePage('strong-history');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$h);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$6);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('strong-history');
@@ -11593,7 +11598,7 @@
 
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$h);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$6);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -11690,17 +11695,17 @@
 
   }
 
-  const dialogToolset$6 = [
+  const dialogToolset = [
     { type: 'label', text: 'Strong Number' },
     { type: 'input', label: 'Strong Number' },
     { type: 'btn', id: 'find', label: 'Find' }
   ];
 
-  const lowerToolSet$i = [
+  const lowerToolSet$5 = [
     { type: 'btn', icon: 'strong-def', label: 'Strong Definition' }
   ];
 
-  const upperToolSet$i = [
+  const upperToolSet$5 = [
     { type: 'banner', modifier: 'strong-lookup', text: 'Strong Lookup' },
   ];
 
@@ -11725,11 +11730,11 @@
     buildPage() {
       this.page = templatePage('strong-lookup');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$i);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$5);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('strong-lookup');
-      this.dialog = templateDivDialog('strong-lookup', dialogToolset$6);
+      this.dialog = templateDivDialog('strong-lookup', dialogToolset);
       this.scroll.appendChild(this.dialog);
 
       this.message = templateElement('div', 'message',
@@ -11738,7 +11743,7 @@
 
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$i);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$5);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -11826,7 +11831,7 @@
 
   }
 
-  const lowerToolSet$j = [
+  const lowerToolSet$4 = [
     { type: 'btn', icon: 'back', label: 'Back' },
     { type: 'btn', icon: 'filter', label: 'Strong Filter' },
     { type: 'btn', icon: 'strong-verse', label: 'Strong Verse' },
@@ -11834,12 +11839,12 @@
     { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
   ];
 
-  const upperToolSet$j = [
+  const upperToolSet$4 = [
     { type: 'banner', modifier: 'strong-result', text: 'Strong Search' }
   ];
 
-  const binIdx$1 = 0;
-  const loadIncrement$1 = 50;
+  const binIdx = 0;
+  const loadIncrement = 50;
 
   class StrongResultView {
 
@@ -11931,7 +11936,7 @@
     buildPage() {
       this.page = templatePage('strong-result');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$j);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$4);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('strong-result');
@@ -11952,7 +11957,7 @@
 
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$j);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$4);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -12021,7 +12026,7 @@
 
     findBin(bins, idx) {
       return bins.find((bin) => {
-        return bin[binIdx$1] === idx;
+        return bin[binIdx] === idx;
       });
     }
 
@@ -12092,11 +12097,11 @@
 
     loadVerses() {
       let verses;
-      if (this.verseCount <= loadIncrement$1) {
+      if (this.verseCount <= loadIncrement) {
         verses = this.filteredVerses;
         this.loadIdx = this.verseCount;
       } else {
-        let sliceEnd = Math.min(this.loadIdx + loadIncrement$1, this.verseCount);
+        let sliceEnd = Math.min(this.loadIdx + loadIncrement, this.verseCount);
         verses = this.filteredVerses.slice(this.loadIdx, sliceEnd);
         this.loadIdx = sliceEnd;
       }
@@ -12262,13 +12267,13 @@
 
   }
 
-  const lowerToolSet$k = [
+  const lowerToolSet$3 = [
     { type: 'btn', icon: 'back', label: 'Back' },
     { type: 'btn', icon: 'strong-def', label: 'Strong Definition' },
     { type: 'btn', icon: 'result', label: 'Strong Search' }
   ];
 
-  const upperToolSet$k = [
+  const upperToolSet$3 = [
     { type: 'banner', modifier: 'strong-verse', text: 'Strong Verse' }
   ];
 
@@ -12290,7 +12295,7 @@
     buildPage() {
       this.page = templatePage('strong-verse');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$k);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$3);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('strong-verse');
@@ -12298,7 +12303,7 @@
       this.scroll.appendChild(this.list);
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$k);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$3);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -12942,11 +12947,11 @@
 
   }
 
-  const lowerToolSet$l = [
+  const lowerToolSet$2 = [
     { type: 'btn', icon: 'back', label: 'Back' }
   ];
 
-  const upperToolSet$l = [
+  const upperToolSet$2 = [
     { type: 'banner', modifier: 'setting', text: 'Setting' }
   ];
 
@@ -13020,7 +13025,7 @@
     buildPage() {
       this.page = templatePage('setting');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$l);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$2);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('setting');
@@ -13042,7 +13047,7 @@
 
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$l);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$2);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -13350,7 +13355,7 @@
 
   }
 
-  const validTasks$4 = ['help-read', 'help-topic'];
+  const validTasks = ['help-read', 'help-topic'];
   const validTopics = ['about', 'bookmark', 'help', 'name-mode', 'navigator',
     'overview', 'read', 'search', 'setting', 'strong', 'thats-my-king'];
 
@@ -13380,7 +13385,7 @@
         } catch (error) {
           helpTask = defaultTask;
         }
-        if (!validTasks$4.includes(helpTask)) {
+        if (!validTasks.includes(helpTask)) {
           helpTask = defaultTask;
         }
       }
@@ -13439,12 +13444,12 @@
 
   }
 
-  const lowerToolSet$m = [
+  const lowerToolSet$1 = [
     { type: 'btn', icon: 'back', label: 'Back' },
     { type: 'btn', icon: 'help-read', label: 'Help Read' }
   ];
 
-  const upperToolSet$m = [
+  const upperToolSet$1 = [
     { type: 'banner', modifier: 'topic', text: 'Topic' }
   ];
 
@@ -13497,7 +13502,7 @@
     buildPage() {
       this.page = templatePage('help-topic');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$m);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet$1);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('help-topic');
@@ -13506,7 +13511,7 @@
 
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$m);
+      this.toolbarLower = templateToolbarLower(lowerToolSet$1);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -13579,12 +13584,12 @@
 
   }
 
-  const lowerToolSet$n = [
+  const lowerToolSet = [
     { type: 'btn', icon: 'back', label: 'Back' },
     { type: 'btn', icon: 'help-topic', label: 'Help Topic' }
   ];
 
-  const upperToolSet$n = [
+  const upperToolSet = [
     { type: 'banner', modifier: 'help-read', text: null },
   ];
 
@@ -13603,13 +13608,13 @@
     buildPage() {
       this.page = templatePage('help-read');
 
-      this.toolbarUpper = templateToolbarUpper(upperToolSet$n);
+      this.toolbarUpper = templateToolbarUpper(upperToolSet);
       this.page.appendChild(this.toolbarUpper);
 
       this.scroll = templateScroll('help-read');
       this.page.appendChild(this.scroll);
 
-      this.toolbarLower = templateToolbarLower(lowerToolSet$n);
+      this.toolbarLower = templateToolbarLower(lowerToolSet);
       this.page.appendChild(this.toolbarLower);
 
       let container = document.querySelector('.container');
@@ -13795,8 +13800,8 @@
 
   const APP_FONT = 'font--roboto';
 
-  let loadMsg$1 = document.querySelector('.load-msg');
-  let loadScroll$1 = document.querySelector('.load-scroll');
+  document.querySelector('.load-msg');
+  document.querySelector('.load-scroll');
 
   (async function() {
     let body = document.body;
@@ -13805,50 +13810,50 @@
     await initializeTome();
     await initializeStrong();
 
-    let readView = new ReadView();
+    new ReadView();
     let readController = new ReadController();
-    let readModel = new ReadModel();
+    new ReadModel();
 
-    let navigatorBookView = new NavigatorBookView();
-    let navigatorChapterView = new NavigatorChapterView();
-    let navigatorController = new NavigatorController();
-    let navigatorModel = new NavigatorModel();
+    new NavigatorBookView();
+    new NavigatorChapterView();
+    new NavigatorController();
+    new NavigatorModel();
 
-    let bookmarkListView = new BookmarkListView();
-    let bookmarkMoveCopyView = new BookmarkMoveCopyView();
-    let bookmarkFolderView = new BookmarkFolderView();
-    let bookmarkFolderAddView = new BookmarkFolderAddView();
-    let bookmarkFolderDeleteView = new BookmarkFolderDeleteView();
-    let bookmarkFolderRenameView = new BookmarkFolderRenameView();
-    let bookmarkExportview = new BookmarkExportview();
-    let bookmarkImportView = new BookmarkImportView();
-    let bookmarkController = new BookmarkController();
-    let bookmarkModel = new BookmarkModel();
+    new BookmarkListView();
+    new BookmarkMoveCopyView();
+    new BookmarkFolderView();
+    new BookmarkFolderAddView();
+    new BookmarkFolderDeleteView();
+    new BookmarkFolderRenameView();
+    new BookmarkExportview();
+    new BookmarkImportView();
+    new BookmarkController();
+    new BookmarkModel();
 
-    let searchResultView = new SearchResultView();
-    let searchFilterView = new SearchFilterView();
-    let searchHistoryView = new SearchHistoryView();
-    let searchLookupView = new SearchLookupView();
-    let searchController = new SearchController();
-    let searchModel = new SearchModel();
+    new SearchResultView();
+    new SearchFilterView();
+    new SearchHistoryView();
+    new SearchLookupView();
+    new SearchController();
+    new SearchModel();
 
-    let strongDefView = new StrongDefView();
-    let strongFilterView = new StrongFilterView();
-    let strongHistoryView = new StrongHistoryView();
-    let strongLookupView = new StrongLookupView();
-    let strongSearchView = new StrongResultView();
-    let strongVerseView = new StrongVerseView();
-    let strongController = new StrongController();
-    let strongModel = new StrongModel();
+    new StrongDefView();
+    new StrongFilterView();
+    new StrongHistoryView();
+    new StrongLookupView();
+    new StrongResultView();
+    new StrongVerseView();
+    new StrongController();
+    new StrongModel();
 
-    let settingView = new SettingView();
-    let settingController = new SettingController();
-    let settingModel = new SettingModel();
+    new SettingView();
+    new SettingController();
+    new SettingModel();
 
-    let helpReadView = new HelpReadView();
-    let helpTopicView = new HelpTopicView();
-    let helpController = new HelpController();
-    let helpModel = new HelpModel();
+    new HelpReadView();
+    new HelpTopicView();
+    new HelpController();
+    new HelpModel();
 
     load.classList.add('load--hide');
     document.documentElement.classList.add(APP_FONT);
@@ -13859,4 +13864,4 @@
 
   })();
 
-}());
+})();

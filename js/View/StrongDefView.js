@@ -56,6 +56,11 @@ class StrongDefView {
     let fragment = document.createDocumentFragment();
     let lemma = templateElement('div', 'strong-def', 'lemma', '',
       this.def[defLemma].normalize('NFC'));
+    if (this.strongDef.startsWith('H')) {
+      lemma.classList.add('font--hebrew');
+    } else {
+      lemma.classList.add('font--greek');
+    }
     let xlit = templateElement('div', 'strong-def', 'xlit', '',
       this.def[defTranliteration].normalize('NFC'));
     let pron = templateElement('div', 'strong-def', 'pron', '',

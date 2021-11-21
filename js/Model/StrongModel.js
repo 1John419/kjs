@@ -29,7 +29,7 @@ class StrongModel {
 
   addHistory() {
     if (this.strongHistory.indexOf(this.strongDef) === -1) {
-      this.strongHistory.push(this.strongDef);
+      this.strongHistory = [this.strongDef, ...this.strongHistory];
       this.updateHistory();
     }
   }
