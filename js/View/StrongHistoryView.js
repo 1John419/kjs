@@ -48,7 +48,7 @@ class StrongHistoryView {
     btnEntry.textContent = `${strongDef} ${first.normalize('NFC')}`;
     btnEntry.dataset.def = strongDef;
     entry.appendChild(btnEntry);
-    let btnDelete = templateBtnIcon('delete', 'Delete');
+    let btnDelete = templateBtnIcon('delete', 'delete', 'Delete');
     entry.appendChild(btnDelete);
     return entry;
   }

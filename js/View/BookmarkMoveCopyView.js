@@ -72,7 +72,7 @@ class BookmarkMoveCopyView {
     let btnEntry = document.createElement('button');
     btnEntry.classList.add('btn-entry', 'btn-entry--bookmark-move-copy');
     btnEntry.textContent = folderName;
-    let btnMenu = templateBtnIcon('h-menu', 'Menu');
+    let btnMenu = templateBtnIcon('h-menu', 'h-menu', 'Menu');
     entry.appendChild(btnEntry);
     entry.appendChild(btnMenu);
     return entry;

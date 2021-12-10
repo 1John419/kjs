@@ -43,7 +43,7 @@ class SearchHistoryView {
     btnEntry.dataset.historyIdx = idx;
     btnEntry.textContent = query;
     entry.appendChild(btnEntry);
-    let btnDelete = templateBtnIcon('delete', 'Delete');
+    let btnDelete = templateBtnIcon('delete', 'delete', 'Delete');
     entry.appendChild(btnDelete);
     return entry;
   }

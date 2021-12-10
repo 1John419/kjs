@@ -35,6 +35,26 @@ const templateBtnFontSize = (size, label) => {
   return btnFontSize;
 };
 
+const templateBtnThemeType = (type, label) => {
+  let btnThemeType = templateElement(
+    'button', 'btn-theme-type', null, label, null);
+  btnThemeType.textContent = label;
+  btnThemeType.classList.add(`theme-type--${type}`);
+  btnThemeType.dataset.type = `${type}`;
+  return btnThemeType;
+};
+
+const templateSettingFont = (modifier, name) => {
+  let divSetting = templateElement(
+    'div', 'setting', modifier, null, null);
+  let heading = templateElement(
+    'h1', 'header', modifier, null, name);
+  divSetting.appendChild(heading);
+  let divCarousel = templateSettingCarousel('font', "Font");
+  divSetting.appendChild(divCarousel);
+  return divSetting;
+};
+
 const templateSettingFontSize = (modifier, name) => {
   let divSetting = templateElement(
     'div', 'setting', modifier, null, null);
@@ -52,20 +72,32 @@ const templateSettingFontSize = (modifier, name) => {
 };
 
 const templateSettingCarousel = (modifier, name) => {
+  let divCarousel = templateElement(
+    'div', 'carousel', modifier, null, null);
+  let btnPrev = templateBtnIcon('prev', 'prev', `Previous ${name}`);
+  let divName = templateElement(
+    'div', 'name', modifier, null, null);
+  let btnNext = templateBtnIcon('next', 'next', `Next ${name}`);
+  divCarousel.appendChild(btnPrev);
+  divCarousel.appendChild(divName);
+  divCarousel.appendChild(btnNext);
+  return divCarousel;
+};
+
+const templateSettingTheme = (modifier, name) => {
   let divSetting = templateElement(
     'div', 'setting', modifier, null, null);
   let heading = templateElement(
     'h1', 'header', modifier, null, name);
   divSetting.appendChild(heading);
-  let divCarousel = templateElement(
-    'div', 'carousel', modifier, null, null);
-  let btnPrev = templateBtnIcon('prev', `Previous ${name}`);
-  let divName = templateElement(
-    'div', 'name', modifier, null, null);
-  let btnNext = templateBtnIcon('next', `Next ${name}`);
-  divCarousel.appendChild(btnPrev);
-  divCarousel.appendChild(divName);
-  divCarousel.appendChild(btnNext);
+  let divSelector = templateElement(
+    'div', 'selector', 'theme-type', null, null);
+  let btnDark = templateBtnThemeType('dark', 'Dark');
+  divSelector.appendChild(btnDark);
+  let btnLite = templateBtnThemeType('lite', 'Lite');
+  divSelector.appendChild(btnLite);
+  divSetting.appendChild(divSelector);
+  let divCarousel = templateSettingCarousel('theme', 'Theme');
   divSetting.appendChild(divCarousel);
   return divSetting;
 };
@@ -99,13 +131,13 @@ class SettingView {
       'We love him, because he first loved us.</p>';
     this.scroll.appendChild(this.fontSample);
 
-    this.divSettingFont = templateSettingCarousel('font', 'Font');
+    this.divSettingFont = templateSettingFont('font', 'Font');
     this.scroll.appendChild(this.divSettingFont);
 
     this.divSettingFontSize = templateSettingFontSize('font-size', 'Font Size');
     this.scroll.appendChild(this.divSettingFontSize);
 
-    this.divSettingTheme = templateSettingCarousel('theme', 'Theme');
+    this.divSettingTheme = templateSettingTheme('theme', 'Theme');
     this.scroll.appendChild(this.divSettingTheme);
 
     this.page.appendChild(this.scroll);
@@ -157,7 +189,10 @@ class SettingView {
     this.btnNextFont = this.divCarouselFont.querySelector('.btn-icon--next');
 
     this.divSelectorFontSize = this.divSettingFontSize.querySelector('.selector--font-size');
-
+    
+    this.divSelectorThemeType = this.divSettingTheme.querySelector('.selector--theme-type');
+    this.btnDarkTheme = this.divSelectorThemeType.querySelector('.theme-type--dark');
+    this.btnLiteTheme = this.divSelectorThemeType.querySelector('.theme-type--lite');
     this.divCarouselTheme = this.divSettingTheme.querySelector(
       '.carousel--theme');
     this.btnPrevTheme = this.divCarouselTheme.querySelector('.btn-icon--prev');
@@ -196,6 +231,8 @@ class SettingView {
       this.fontClick(target);
     } else if (this.divSelectorFontSize.contains(target)) {
       this.fontSizeClick(target);
+    } else if (this.divSelectorThemeType.contains(target)) {
+      this.themeTypeClick(target);
     } else if (this.divCarouselTheme.contains(target)) {
       this.themeClick(target);
     }
@@ -241,9 +278,21 @@ class SettingView {
     }
   }
 
+  themeTypeClick(target) {
+    let btn = target.closest('button');
+    if (btn) {
+      if (btn === this.btnDarkTheme) {
+        queue.publish('setting.theme-dark', null);
+      } else if (btn === this.btnLiteTheme) {
+        queue.publish('setting.theme-lite', null);
+      }
+    }
+  }
+
   themeUpdate(theme) {
     this.theme = theme;
     this.updateThemeName();
+    this.updateThemeType();
     this.lastTheme = this.theme;
   }
 
@@ -292,6 +341,16 @@ class SettingView {
 
   updateThemeName() {
     this.divNameTheme.innerText = this.theme.themeName;
+  }
+
+  updateThemeType() {
+    if (this.activeThemeTypeBtn) {
+      this.activeThemeTypeBtn.classList.remove('btn-theme-type--active');
+    }
+    this.activeThemeTypeBtn = this.divSelectorThemeType.querySelector(
+      `button[data-type="${this.theme.themeType}"]`
+    );
+    this.activeThemeTypeBtn.classList.add('btn-theme-type--active');
   }
 
 }

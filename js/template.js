@@ -8,20 +8,20 @@ export const templateActionMenu = (modifier, actionSet) => {
     'div', 'action-menu', modifier, null, null);
   actionMenu.classList.add('action-menu--hide');
   for (let btn of actionSet) {
-    let element = templateBtnIcon(btn.icon, btn.label);
+    let element = templateBtnIcon(btn.icon, btn.icon, btn.label);
     actionMenu.appendChild(element);
   }
   return actionMenu;
 };
 
-export const templateBtnIcon = (svgId, label) => {
+export const templateBtnIcon = (svgId, modifier, label) => {
   let svgTag = document.createElementNS(svgNS, 'svg');
   svgTag.classList.add('icon-svg');
   let useTag = document.createElementNS(svgNS, 'use');
   useTag.setAttributeNS(xlinkNS, 'xlink:href', `icons.svg#${svgId}`);
   svgTag.appendChild(useTag);
   let btnIcon = templateElement(
-    'button', 'btn-icon', svgId, label, null);
+    'button', 'btn-icon', modifier, label, null);
   btnIcon.appendChild(svgTag);
   return btnIcon;
 };
@@ -103,7 +103,7 @@ export const templateToolbarLower = (toolSet) => {
   for (let tool of toolSet) {
     let element;
     if (tool.type === 'btn') {
-      element = templateBtnIcon(tool.icon, tool.label);
+      element = templateBtnIcon(tool.icon, tool.icon, tool.label);
       toolbarLower.appendChild(element);
     } else if (tool.type === 'input') {
       element = templateInput('input', tool.modifier, tool.label);
@@ -118,7 +118,7 @@ export const templateToolbarMenu = (modifier, actionSet) => {
     'div', 'toolbar-menu', modifier, null, null);
   toolbarMenu.classList.add('toolbar-menu--hide');
   for (let btn of actionSet) {
-    let element = templateBtnIcon(btn.icon, btn.label);
+    let element = templateBtnIcon(btn.icon, btn.icon, btn.label);
     toolbarMenu.appendChild(element);
   }
   return toolbarMenu;
@@ -129,7 +129,7 @@ export const templateToolbarUpper = (toolSet) => {
   for (let tool of toolSet) {
     let element;
     if (tool.type === 'btn') {
-      element = templateBtnIcon(tool.icon, tool.label);
+      element = templateBtnIcon(tool.icon, tool.icon, tool.label);
       toolbarUpper.appendChild(element);
     } else if (tool.type === 'banner') {
       element = templateElement(

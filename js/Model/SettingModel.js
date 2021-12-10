@@ -9,7 +9,7 @@ const validFontSizes = ['font-size--s', 'font-size--m', 'font-size--l',
 
 const fontDefault = 0;
 const fontSizeDefault = 1;
-const themeDefault = 1;
+const themeDefault = 9;
 
 class SettingModel {
 
@@ -78,34 +78,76 @@ class SettingModel {
   initializeThemes() {
     this.themes = [];
     this.themes.push({
+      themeType: 'dark',
       themeName: 'Jasper',
-      themeClass: 'theme--jasper'
+      themeClass: 'theme--jasper-dark'
     });
     this.themes.push({
-      themeName: 'Sapphire',
-      themeClass: 'theme--sapphire'
+      themeType: 'lite',
+      themeName: 'Jasper',
+      themeClass: 'theme--jasper-lite'
     });
     this.themes.push({
-      themeName: 'Chalcedony',
-      themeClass: 'theme--chalcedony'
-    });
-    this.themes.push({
-      themeName: 'Emerald',
-      themeClass: 'theme--emerald'
-    });
-    this.themes.push({
+      themeType: 'dark',
       themeName: 'Beryl',
-      themeClass: 'theme--beryl'
+      themeClass: 'theme--beryl-dark'
     });
     this.themes.push({
+      themeType: 'lite',
+      themeName: 'Beryl',
+      themeClass: 'theme--beryl-lite'
+    });
+    this.themes.push({
+      themeType: 'dark',
+      themeName: 'Emerald',
+      themeClass: 'theme--emerald-dark'
+    });
+    this.themes.push({
+      themeType: 'lite',
+      themeName: 'Emerald',
+      themeClass: 'theme--emerald-lite'
+    });
+    this.themes.push({
+      themeType: 'dark',
       themeName: 'Topaz',
-      themeClass: 'theme--topaz'
+      themeClass: 'theme--topaz-dark'
     });
     this.themes.push({
-      themeName: 'Amethyst',
-      themeClass: 'theme--amethyst'
+      themeType: 'lite',
+      themeName: 'Topaz',
+      themeClass: 'theme--topaz-lite'
     });
-    queue.publish('themes.update', this.themes);
+    this.themes.push({
+      themeType: 'dark',
+      themeName: 'Sapphire',
+      themeClass: 'theme--sapphire-dark'
+    });
+    this.themes.push({
+      themeType: 'lite',
+      themeName: 'Sapphire',
+      themeClass: 'theme--sapphire-lite'
+    });
+    this.themes.push({
+      themeType: 'dark',
+      themeName: 'Amethyst',
+      themeClass: 'theme--amethyst-dark'
+    });
+    this.themes.push({
+      themeType: 'lite',
+      themeName: 'Amethyst',
+      themeClass: 'theme--amethyst-lite'
+    });
+    this.themes.push({
+      themeType: 'dark',
+      themeName: 'Chalcedony',
+      themeClass: 'theme--chalcedony-dark'
+    });
+    this.themes.push({
+      themeType: 'lite',
+      themeName: 'Chalcedony',
+      themeClass: 'theme--chalcedony-lite'
+    });
+        queue.publish('themes.update', this.themes);
   }
 
   restore() {
@@ -210,7 +252,8 @@ class SettingModel {
     let result;
     try {
       result = this.themes.some((validTheme) => {
-        return validTheme.themeName === theme.themeName &&
+        return validTheme.themeType === theme.themeType &&
+          validTheme.themeName === theme.themeName &&
           validTheme.themeClass === theme.themeClass;
       });
     } catch (error) {

@@ -80,7 +80,7 @@ class BookmarkListView {
     btnRef.textContent = citationByVerseIdx(verseIdx);
     btnRef.dataset.verseIdx = verseIdx;
     entry.appendChild(btnRef);
-    let btnMenu = templateBtnIcon('h-menu', 'Menu');
+    let btnMenu = templateBtnIcon('h-menu', 'h-menu', 'Menu');
     entry.appendChild(btnMenu);
     return entry;
   }

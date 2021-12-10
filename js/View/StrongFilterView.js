@@ -66,11 +66,11 @@ class StrongFilterView {
     let bookFilter = document.createElement('div');
     bookFilter.classList.add('filter', 'filter--book');
 
-    let btnUnfold = templateBtnIcon('next', 'Unfold Book');
+    let btnUnfold = templateBtnIcon('next', 'filter-next', 'Unfold Book');
     btnUnfold.dataset.bookIdx = bookIdx;
     bookFilter.appendChild(btnUnfold);
 
-    let btnFold = templateBtnIcon('down', 'Fold Book');
+    let btnFold = templateBtnIcon('down', 'filter-down', 'Fold Book');
     btnFold.classList.add('btn-icon--hide');
     btnFold.dataset.bookIdx = bookIdx;
     bookFilter.appendChild(btnFold);
@@ -214,9 +214,9 @@ class StrongFilterView {
     if (target) {
       if (target.classList.contains('btn-filter')) {
         this.filterClick(target);
-      } else if (target.classList.contains('btn-icon--down')) {
+      } else if (target.classList.contains('btn-icon--filter-down')) {
         this.foldClick(target);
-      } else if (target.classList.contains('btn-icon--next')) {
+      } else if (target.classList.contains('btn-icon--filter-next')) {
         this.unfoldClick(target);
       }
     }

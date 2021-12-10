@@ -4946,20 +4946,20 @@
       'div', 'action-menu', modifier, null, null);
     actionMenu.classList.add('action-menu--hide');
     for (let btn of actionSet) {
-      let element = templateBtnIcon(btn.icon, btn.label);
+      let element = templateBtnIcon(btn.icon, btn.icon, btn.label);
       actionMenu.appendChild(element);
     }
     return actionMenu;
   };
 
-  const templateBtnIcon = (svgId, label) => {
+  const templateBtnIcon = (svgId, modifier, label) => {
     let svgTag = document.createElementNS(svgNS, 'svg');
     svgTag.classList.add('icon-svg');
     let useTag = document.createElementNS(svgNS, 'use');
     useTag.setAttributeNS(xlinkNS, 'xlink:href', `icons.svg#${svgId}`);
     svgTag.appendChild(useTag);
     let btnIcon = templateElement(
-      'button', 'btn-icon', svgId, label, null);
+      'button', 'btn-icon', modifier, label, null);
     btnIcon.appendChild(svgTag);
     return btnIcon;
   };
@@ -5041,7 +5041,7 @@
     for (let tool of toolSet) {
       let element;
       if (tool.type === 'btn') {
-        element = templateBtnIcon(tool.icon, tool.label);
+        element = templateBtnIcon(tool.icon, tool.icon, tool.label);
         toolbarLower.appendChild(element);
       } else if (tool.type === 'input') {
         element = templateInput('input', tool.modifier, tool.label);
@@ -5056,7 +5056,7 @@
       'div', 'toolbar-menu', modifier, null, null);
     toolbarMenu.classList.add('toolbar-menu--hide');
     for (let btn of actionSet) {
-      let element = templateBtnIcon(btn.icon, btn.label);
+      let element = templateBtnIcon(btn.icon, btn.icon, btn.label);
       toolbarMenu.appendChild(element);
     }
     return toolbarMenu;
@@ -5067,7 +5067,7 @@
     for (let tool of toolSet) {
       let element;
       if (tool.type === 'btn') {
-        element = templateBtnIcon(tool.icon, tool.label);
+        element = templateBtnIcon(tool.icon, tool.icon, tool.label);
         toolbarUpper.appendChild(element);
       } else if (tool.type === 'banner') {
         element = templateElement(
@@ -7143,7 +7143,7 @@
       btnRef.textContent = citationByVerseIdx(verseIdx);
       btnRef.dataset.verseIdx = verseIdx;
       entry.appendChild(btnRef);
-      let btnMenu = templateBtnIcon('h-menu', 'Menu');
+      let btnMenu = templateBtnIcon('h-menu', 'h-menu', 'Menu');
       entry.appendChild(btnMenu);
       return entry;
     }
@@ -7403,7 +7403,7 @@
       let btnEntry = document.createElement('button');
       btnEntry.classList.add('btn-entry', 'btn-entry--bookmark-move-copy');
       btnEntry.textContent = folderName;
-      let btnMenu = templateBtnIcon('h-menu', 'Menu');
+      let btnMenu = templateBtnIcon('h-menu', 'h-menu', 'Menu');
       entry.appendChild(btnEntry);
       entry.appendChild(btnMenu);
       return entry;
@@ -7640,7 +7640,7 @@
       let btnEntry = document.createElement('button');
       btnEntry.classList.add('btn-entry', 'btn-entry--folder');
       btnEntry.textContent = folderName;
-      let btnMenu = templateBtnIcon('h-menu', 'Menu');
+      let btnMenu = templateBtnIcon('h-menu', 'h-menu', 'Menu');
       entry.appendChild(btnEntry);
       entry.appendChild(btnMenu);
       return entry;
@@ -9734,11 +9734,11 @@
       let bookFilter = document.createElement('div');
       bookFilter.classList.add('filter', 'filter--book');
 
-      let btnUnfold = templateBtnIcon('next', 'Unfold Book');
+      let btnUnfold = templateBtnIcon('next', 'filter-next', 'Unfold Book');
       btnUnfold.dataset.bookIdx = bookIdx;
       bookFilter.appendChild(btnUnfold);
 
-      let btnFold = templateBtnIcon('down', 'Fold Book');
+      let btnFold = templateBtnIcon('down', 'filter-down', 'Fold Book');
       btnFold.classList.add('btn-icon--hide');
       btnFold.dataset.bookIdx = bookIdx;
       bookFilter.appendChild(btnFold);
@@ -9872,9 +9872,9 @@
       if (target) {
         if (target.classList.contains('btn-filter')) {
           this.filterClick(target);
-        } else if (target.classList.contains('btn-icon--down')) {
+        } else if (target.classList.contains('btn-icon--filter-down')) {
           this.foldClick(target);
-        } else if (target.classList.contains('btn-icon--next')) {
+        } else if (target.classList.contains('btn-icon--filter-next')) {
           this.unfoldClick(target);
         }
       }
@@ -9996,7 +9996,7 @@
       btnEntry.dataset.historyIdx = idx;
       btnEntry.textContent = query;
       entry.appendChild(btnEntry);
-      let btnDelete = templateBtnIcon('delete', 'Delete');
+      let btnDelete = templateBtnIcon('delete', 'delete', 'Delete');
       entry.appendChild(btnDelete);
       return entry;
     }
@@ -11268,11 +11268,11 @@
       let bookFilter = document.createElement('div');
       bookFilter.classList.add('filter', 'filter--book');
 
-      let btnUnfold = templateBtnIcon('next', 'Unfold Book');
+      let btnUnfold = templateBtnIcon('next', 'filter-next', 'Unfold Book');
       btnUnfold.dataset.bookIdx = bookIdx;
       bookFilter.appendChild(btnUnfold);
 
-      let btnFold = templateBtnIcon('down', 'Fold Book');
+      let btnFold = templateBtnIcon('down', 'filter-down', 'Fold Book');
       btnFold.classList.add('btn-icon--hide');
       btnFold.dataset.bookIdx = bookIdx;
       bookFilter.appendChild(btnFold);
@@ -11416,9 +11416,9 @@
       if (target) {
         if (target.classList.contains('btn-filter')) {
           this.filterClick(target);
-        } else if (target.classList.contains('btn-icon--down')) {
+        } else if (target.classList.contains('btn-icon--filter-down')) {
           this.foldClick(target);
-        } else if (target.classList.contains('btn-icon--next')) {
+        } else if (target.classList.contains('btn-icon--filter-next')) {
           this.unfoldClick(target);
         }
       }
@@ -11577,7 +11577,7 @@
       btnEntry.textContent = `${strongDef} ${first.normalize('NFC')}`;
       btnEntry.dataset.def = strongDef;
       entry.appendChild(btnEntry);
-      let btnDelete = templateBtnIcon('delete', 'Delete');
+      let btnDelete = templateBtnIcon('delete', 'delete', 'Delete');
       entry.appendChild(btnDelete);
       return entry;
     }
@@ -12735,7 +12735,7 @@
 
   const fontDefault = 0;
   const fontSizeDefault = 1;
-  const themeDefault = 1;
+  const themeDefault = 9;
 
   class SettingModel {
 
@@ -12804,34 +12804,76 @@
     initializeThemes() {
       this.themes = [];
       this.themes.push({
+        themeType: 'dark',
         themeName: 'Jasper',
-        themeClass: 'theme--jasper'
+        themeClass: 'theme--jasper-dark'
       });
       this.themes.push({
-        themeName: 'Sapphire',
-        themeClass: 'theme--sapphire'
+        themeType: 'lite',
+        themeName: 'Jasper',
+        themeClass: 'theme--jasper-lite'
       });
       this.themes.push({
-        themeName: 'Chalcedony',
-        themeClass: 'theme--chalcedony'
-      });
-      this.themes.push({
-        themeName: 'Emerald',
-        themeClass: 'theme--emerald'
-      });
-      this.themes.push({
+        themeType: 'dark',
         themeName: 'Beryl',
-        themeClass: 'theme--beryl'
+        themeClass: 'theme--beryl-dark'
       });
       this.themes.push({
+        themeType: 'lite',
+        themeName: 'Beryl',
+        themeClass: 'theme--beryl-lite'
+      });
+      this.themes.push({
+        themeType: 'dark',
+        themeName: 'Emerald',
+        themeClass: 'theme--emerald-dark'
+      });
+      this.themes.push({
+        themeType: 'lite',
+        themeName: 'Emerald',
+        themeClass: 'theme--emerald-lite'
+      });
+      this.themes.push({
+        themeType: 'dark',
         themeName: 'Topaz',
-        themeClass: 'theme--topaz'
+        themeClass: 'theme--topaz-dark'
       });
       this.themes.push({
-        themeName: 'Amethyst',
-        themeClass: 'theme--amethyst'
+        themeType: 'lite',
+        themeName: 'Topaz',
+        themeClass: 'theme--topaz-lite'
       });
-      queue.publish('themes.update', this.themes);
+      this.themes.push({
+        themeType: 'dark',
+        themeName: 'Sapphire',
+        themeClass: 'theme--sapphire-dark'
+      });
+      this.themes.push({
+        themeType: 'lite',
+        themeName: 'Sapphire',
+        themeClass: 'theme--sapphire-lite'
+      });
+      this.themes.push({
+        themeType: 'dark',
+        themeName: 'Amethyst',
+        themeClass: 'theme--amethyst-dark'
+      });
+      this.themes.push({
+        themeType: 'lite',
+        themeName: 'Amethyst',
+        themeClass: 'theme--amethyst-lite'
+      });
+      this.themes.push({
+        themeType: 'dark',
+        themeName: 'Chalcedony',
+        themeClass: 'theme--chalcedony-dark'
+      });
+      this.themes.push({
+        themeType: 'lite',
+        themeName: 'Chalcedony',
+        themeClass: 'theme--chalcedony-lite'
+      });
+          queue.publish('themes.update', this.themes);
     }
 
     restore() {
@@ -12936,7 +12978,8 @@
       let result;
       try {
         result = this.themes.some((validTheme) => {
-          return validTheme.themeName === theme.themeName &&
+          return validTheme.themeType === theme.themeType &&
+            validTheme.themeName === theme.themeName &&
             validTheme.themeClass === theme.themeClass;
         });
       } catch (error) {
@@ -12972,6 +13015,26 @@
     return btnFontSize;
   };
 
+  const templateBtnThemeType = (type, label) => {
+    let btnThemeType = templateElement(
+      'button', 'btn-theme-type', null, label, null);
+    btnThemeType.textContent = label;
+    btnThemeType.classList.add(`theme-type--${type}`);
+    btnThemeType.dataset.type = `${type}`;
+    return btnThemeType;
+  };
+
+  const templateSettingFont = (modifier, name) => {
+    let divSetting = templateElement(
+      'div', 'setting', modifier, null, null);
+    let heading = templateElement(
+      'h1', 'header', modifier, null, name);
+    divSetting.appendChild(heading);
+    let divCarousel = templateSettingCarousel('font', "Font");
+    divSetting.appendChild(divCarousel);
+    return divSetting;
+  };
+
   const templateSettingFontSize = (modifier, name) => {
     let divSetting = templateElement(
       'div', 'setting', modifier, null, null);
@@ -12989,20 +13052,32 @@
   };
 
   const templateSettingCarousel = (modifier, name) => {
+    let divCarousel = templateElement(
+      'div', 'carousel', modifier, null, null);
+    let btnPrev = templateBtnIcon('prev', 'prev', `Previous ${name}`);
+    let divName = templateElement(
+      'div', 'name', modifier, null, null);
+    let btnNext = templateBtnIcon('next', 'next', `Next ${name}`);
+    divCarousel.appendChild(btnPrev);
+    divCarousel.appendChild(divName);
+    divCarousel.appendChild(btnNext);
+    return divCarousel;
+  };
+
+  const templateSettingTheme = (modifier, name) => {
     let divSetting = templateElement(
       'div', 'setting', modifier, null, null);
     let heading = templateElement(
       'h1', 'header', modifier, null, name);
     divSetting.appendChild(heading);
-    let divCarousel = templateElement(
-      'div', 'carousel', modifier, null, null);
-    let btnPrev = templateBtnIcon('prev', `Previous ${name}`);
-    let divName = templateElement(
-      'div', 'name', modifier, null, null);
-    let btnNext = templateBtnIcon('next', `Next ${name}`);
-    divCarousel.appendChild(btnPrev);
-    divCarousel.appendChild(divName);
-    divCarousel.appendChild(btnNext);
+    let divSelector = templateElement(
+      'div', 'selector', 'theme-type', null, null);
+    let btnDark = templateBtnThemeType('dark', 'Dark');
+    divSelector.appendChild(btnDark);
+    let btnLite = templateBtnThemeType('lite', 'Lite');
+    divSelector.appendChild(btnLite);
+    divSetting.appendChild(divSelector);
+    let divCarousel = templateSettingCarousel('theme', 'Theme');
     divSetting.appendChild(divCarousel);
     return divSetting;
   };
@@ -13036,13 +13111,13 @@
         'We love him, because he first loved us.</p>';
       this.scroll.appendChild(this.fontSample);
 
-      this.divSettingFont = templateSettingCarousel('font', 'Font');
+      this.divSettingFont = templateSettingFont('font', 'Font');
       this.scroll.appendChild(this.divSettingFont);
 
       this.divSettingFontSize = templateSettingFontSize('font-size', 'Font Size');
       this.scroll.appendChild(this.divSettingFontSize);
 
-      this.divSettingTheme = templateSettingCarousel('theme', 'Theme');
+      this.divSettingTheme = templateSettingTheme('theme', 'Theme');
       this.scroll.appendChild(this.divSettingTheme);
 
       this.page.appendChild(this.scroll);
@@ -13094,7 +13169,10 @@
       this.btnNextFont = this.divCarouselFont.querySelector('.btn-icon--next');
 
       this.divSelectorFontSize = this.divSettingFontSize.querySelector('.selector--font-size');
-
+      
+      this.divSelectorThemeType = this.divSettingTheme.querySelector('.selector--theme-type');
+      this.btnDarkTheme = this.divSelectorThemeType.querySelector('.theme-type--dark');
+      this.btnLiteTheme = this.divSelectorThemeType.querySelector('.theme-type--lite');
       this.divCarouselTheme = this.divSettingTheme.querySelector(
         '.carousel--theme');
       this.btnPrevTheme = this.divCarouselTheme.querySelector('.btn-icon--prev');
@@ -13133,6 +13211,8 @@
         this.fontClick(target);
       } else if (this.divSelectorFontSize.contains(target)) {
         this.fontSizeClick(target);
+      } else if (this.divSelectorThemeType.contains(target)) {
+        this.themeTypeClick(target);
       } else if (this.divCarouselTheme.contains(target)) {
         this.themeClick(target);
       }
@@ -13178,9 +13258,21 @@
       }
     }
 
+    themeTypeClick(target) {
+      let btn = target.closest('button');
+      if (btn) {
+        if (btn === this.btnDarkTheme) {
+          queue.publish('setting.theme-dark', null);
+        } else if (btn === this.btnLiteTheme) {
+          queue.publish('setting.theme-lite', null);
+        }
+      }
+    }
+
     themeUpdate(theme) {
       this.theme = theme;
       this.updateThemeName();
+      this.updateThemeType();
       this.lastTheme = this.theme;
     }
 
@@ -13231,6 +13323,16 @@
       this.divNameTheme.innerText = this.theme.themeName;
     }
 
+    updateThemeType() {
+      if (this.activeThemeTypeBtn) {
+        this.activeThemeTypeBtn.classList.remove('btn-theme-type--active');
+      }
+      this.activeThemeTypeBtn = this.divSelectorThemeType.querySelector(
+        `button[data-type="${this.theme.themeType}"]`
+      );
+      this.activeThemeTypeBtn.classList.add('btn-theme-type--active');
+    }
+
   }
 
   class SettingController {
@@ -13279,12 +13381,42 @@
       this.fontIdx = this.fontIdx === 0 ? this.maxFontIdx : this.fontIdx -= 1;
     }
 
+    getDarkThemeIdx() {
+      if (this.themes[this.themeIdx] === 'dark') {
+        return this.themeIdx;
+      }
+      this.themeIdx = this.themes.findIndex((theme) => {
+        return theme.themeType === 'dark' &&
+          theme.themeName === this.theme.themeName;
+      });
+    }
+
+    getLiteThemeIdx() {
+      if (this.themes[this.themeIdx] === 'lite') {
+        return this.themeIdx;
+      }
+      this.themeIdx = this.themes.findIndex((theme) => {
+        return theme.themeType === 'lite' &&
+          theme.themeName === this.theme.themeName;
+      });
+    }
+
     getNextThemeIdx() {
-      this.themeIdx = this.themeIdx === this.maxThemeIdx ? 0 : this.themeIdx += 1;
+      let nameIdx = this.themeNames.findIndex(x => x === this.theme.themeName);
+      let nextNameIdx = nameIdx === this.maxThemeNamesIdx ? 0 : nameIdx += 1;
+      this.themeIdx = this.themes.findIndex((theme) => {
+        return theme.themeType === this.theme.themeType &&
+          theme.themeName === this.themeNames[nextNameIdx];
+      });
     }
 
     getPrevThemeIdx() {
-      this.themeIdx = this.themeIdx === 0 ? this.maxThemeIdx : this.themeIdx -= 1;
+      let nameIdx = this.themeNames.findIndex(x => x === this.theme.themeName);
+      let nextNameIdx = nameIdx === 0 ? this.maxThemeNamesIdx : nameIdx -= 1;
+      this.themeIdx = this.themes.findIndex((theme) => {
+        return theme.themeType === this.theme.themeType &&
+          theme.themeName === this.themeNames[nextNameIdx];
+      });
     }
 
     initialize() {
@@ -13320,6 +13452,13 @@
         this.themePrev();
       });
 
+      queue.subscribe('setting.theme-dark', () => {
+        this.themeDark();
+      });
+      queue.subscribe('setting.theme-lite', () => {
+        this.themeLite();
+      });
+
       queue.subscribe('theme.update', (theme) => {
         this.themeUpdate(theme);
       });
@@ -13327,6 +13466,24 @@
       queue.subscribe('themes.update', (themes) => {
         this.themesUpdate(themes);
       });
+    }
+
+    themeDark() {
+      let idxNow = this.themeIdx;
+      this.getDarkThemeIdx();
+      if (idxNow === this.themeIdx) {
+        return;
+      }
+      queue.publish('theme.change', this.themes[this.themeIdx]);
+    }
+
+    themeLite() {
+      let idxNow = this.themeIdx;
+      this.getLiteThemeIdx();
+      if (idxNow === this.themeIdx) {
+        return;
+      }
+      queue.publish('theme.change', this.themes[this.themeIdx]);
     }
 
     themeNext() {
@@ -13343,6 +13500,12 @@
       this.theme = theme;
       if (!this.themeIdx) {
         this.themeIdx = this.themes.findIndex((theme) => {
+          return theme.themeType === this.theme.themeType &&
+            theme.themeName === this.theme.themeName;
+        });
+      }
+      if (!this.themeNameIdx) {
+        this.themeNameIdx = this.themeNames.findIndex((theme) => {
           return theme.themeName === this.theme.themeName;
         });
       }
@@ -13350,7 +13513,9 @@
 
     themesUpdate(themes) {
       this.themes = themes;
-      this.maxThemeIdx = this.themes.length - 1;
+      this.maxThemesIdx = this.themes.length - 1;
+      this.themeNames = [...new Set(this.themes.map(x => x.themeName))];
+      this.maxThemeNamesIdx = this.themeNames.length - 1;
     }
 
   }

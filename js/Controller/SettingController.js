@@ -48,12 +48,42 @@ class SettingController {
     this.fontIdx = this.fontIdx === 0 ? this.maxFontIdx : this.fontIdx -= 1;
   }
 
+  getDarkThemeIdx() {
+    if (this.themes[this.themeIdx] === 'dark') {
+      return this.themeIdx;
+    }
+    this.themeIdx = this.themes.findIndex((theme) => {
+      return theme.themeType === 'dark' &&
+        theme.themeName === this.theme.themeName;
+    });
+  }
+
+  getLiteThemeIdx() {
+    if (this.themes[this.themeIdx] === 'lite') {
+      return this.themeIdx;
+    }
+    this.themeIdx = this.themes.findIndex((theme) => {
+      return theme.themeType === 'lite' &&
+        theme.themeName === this.theme.themeName;
+    });
+  }
+
   getNextThemeIdx() {
-    this.themeIdx = this.themeIdx === this.maxThemeIdx ? 0 : this.themeIdx += 1;
+    let nameIdx = this.themeNames.findIndex(x => x === this.theme.themeName);
+    let nextNameIdx = nameIdx === this.maxThemeNamesIdx ? 0 : nameIdx += 1;
+    this.themeIdx = this.themes.findIndex((theme) => {
+      return theme.themeType === this.theme.themeType &&
+        theme.themeName === this.themeNames[nextNameIdx];
+    });
   }
 
   getPrevThemeIdx() {
-    this.themeIdx = this.themeIdx === 0 ? this.maxThemeIdx : this.themeIdx -= 1;
+    let nameIdx = this.themeNames.findIndex(x => x === this.theme.themeName);
+    let nextNameIdx = nameIdx === 0 ? this.maxThemeNamesIdx : nameIdx -= 1;
+    this.themeIdx = this.themes.findIndex((theme) => {
+      return theme.themeType === this.theme.themeType &&
+        theme.themeName === this.themeNames[nextNameIdx];
+    });
   }
 
   initialize() {
@@ -89,6 +119,13 @@ class SettingController {
       this.themePrev();
     });
 
+    queue.subscribe('setting.theme-dark', () => {
+      this.themeDark();
+    });
+    queue.subscribe('setting.theme-lite', () => {
+      this.themeLite();
+    });
+
     queue.subscribe('theme.update', (theme) => {
       this.themeUpdate(theme);
     });
@@ -96,6 +133,24 @@ class SettingController {
     queue.subscribe('themes.update', (themes) => {
       this.themesUpdate(themes);
     });
+  }
+
+  themeDark() {
+    let idxNow = this.themeIdx;
+    this.getDarkThemeIdx();
+    if (idxNow === this.themeIdx) {
+      return;
+    }
+    queue.publish('theme.change', this.themes[this.themeIdx]);
+  }
+
+  themeLite() {
+    let idxNow = this.themeIdx;
+    this.getLiteThemeIdx();
+    if (idxNow === this.themeIdx) {
+      return;
+    }
+    queue.publish('theme.change', this.themes[this.themeIdx]);
   }
 
   themeNext() {
@@ -112,6 +167,12 @@ class SettingController {
     this.theme = theme;
     if (!this.themeIdx) {
       this.themeIdx = this.themes.findIndex((theme) => {
+        return theme.themeType === this.theme.themeType &&
+          theme.themeName === this.theme.themeName;
+      });
+    }
+    if (!this.themeNameIdx) {
+      this.themeNameIdx = this.themeNames.findIndex((theme) => {
         return theme.themeName === this.theme.themeName;
       });
     }
@@ -119,7 +180,9 @@ class SettingController {
 
   themesUpdate(themes) {
     this.themes = themes;
-    this.maxThemeIdx = this.themes.length - 1;
+    this.maxThemesIdx = this.themes.length - 1;
+    this.themeNames = [...new Set(this.themes.map(x => x.themeName))];
+    this.maxThemeNamesIdx = this.themeNames.length - 1;
   }
 
 }
