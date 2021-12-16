@@ -4941,6 +4941,23 @@
   const svgNS = 'http://www.w3.org/2000/svg';
   const xlinkNS = 'http://www.w3.org/1999/xlink';
 
+  const templateAcrostic = (verseObj) => {
+    let acrosticSpan = undefined;
+    if (tomeAcrostics) {
+      let acrostic = tomeAcrostics[verseObj.k];
+      if (acrostic) {
+        let glyph = acrostic.slice(0, 1);
+        let xlit = acrostic.slice(1);
+        let glyphSpan = templateElement('span', 'font--hebrew', null, '', glyph);
+        let xlitSpan = templateElement('span', 'font--bold', null, '', xlit + ' ');
+        acrosticSpan = document.createDocumentFragment();
+        acrosticSpan.appendChild(glyphSpan);
+        acrosticSpan.appendChild(xlitSpan);
+      }
+    }
+    return acrosticSpan;
+  };
+
   const templateActionMenu = (modifier, actionSet) => {
     let actionMenu = templateElement(
       'div', 'action-menu', modifier, null, null);
@@ -5144,18 +5161,6 @@
       this.btnBookmark.classList.add('btn-icon--active');
     }
 
-    buildAcrosticSpan(verseIdx) {
-      let acrosticSpan = undefined;
-      if (tomeAcrostics) {
-        let acrostic = tomeAcrostics[verseIdx];
-        if (acrostic) {
-          acrosticSpan = templateElement(
-            'span', 'verse-acrostic', null, null, acrostic + ' ');
-        }
-      }
-      return acrosticSpan;
-    }
-
     buildPage() {
       this.page = templatePage('read');
       this.page.classList.remove('page--hide');
@@ -5183,7 +5188,7 @@
       verse.dataset.verseIdx = verseObj.k;
       let verseNum = this.buildVerseNum(verseObj);
       verse.appendChild(verseNum);
-      let acrostic = this.buildAcrosticSpan(verseObj.k);
+      let acrostic = templateAcrostic(verseObj);
       if (acrostic) {
         verse.appendChild(acrostic);
       }
@@ -9389,7 +9394,7 @@
       btn.dataset.verseIdx = verseObj.k;
       let searchText = document.createElement('span');
       searchText.classList.add('span-result-text');
-      let acrostic = this.buildAcrosticSpan(verseObj);
+      let acrostic = templateAcrostic(verseObj);
       let ref = this.buildRefSpan(verseObj);
       let text = document.createTextNode(verseObj.v[verseText]);
       searchText.appendChild(ref);
@@ -9431,19 +9436,6 @@
       }
     }
 
-    buildAcrosticSpan(verseObj) {
-      let acrosticSpan = undefined;
-      if (tomeAcrostics) {
-        let acrostic = tomeAcrostics[verseObj.k];
-        if (acrostic) {
-          acrosticSpan = document.createElement('span');
-          acrosticSpan.classList.add('verse-acrostic');
-          acrosticSpan.textContent = acrostic + ' ';
-        }
-      }
-      return acrosticSpan;
-    }
-
     buildPage() {
       this.page = templatePage('search-result');
 
@@ -9472,7 +9464,7 @@
 
     buildRefSpan(verseObj) {
       let refSpan = document.createElement('span');
-      refSpan.classList.add('verse-ref');
+      refSpan.classList.add('font--bold');
       refSpan.textContent = verseObj.v[verseCitation] + ' ';
       return refSpan;
     }
@@ -11870,7 +11862,7 @@
       btn.dataset.verseIdx = verseObj.k;
       let resultText = document.createElement('span');
       resultText.classList.add('span-search-text');
-      let acrostic = this.buildAcrosticSpan(verseObj);
+      let acrostic = templateAcrostic(verseObj);
       let ref = this.buildRefSpan(verseObj);
       resultText.appendChild(ref);
       if (acrostic) {
@@ -11920,19 +11912,6 @@
       }
     }
 
-    buildAcrosticSpan(verseObj) {
-      let acrosticSpan = undefined;
-      if (tomeAcrostics) {
-        let acrostic = tomeAcrostics[verseObj.k];
-        if (acrostic) {
-          acrosticSpan = document.createElement('span');
-          acrosticSpan.classList.add('verse-acrostic');
-          acrosticSpan.textContent = acrostic + ' ';
-        }
-      }
-      return acrosticSpan;
-    }
-
     buildPage() {
       this.page = templatePage('strong-result');
 
@@ -11966,7 +11945,7 @@
 
     buildRefSpan(verseObj) {
       let refSpan = document.createElement('span');
-      refSpan.classList.add('verse-ref');
+      refSpan.classList.add('font--bold');
       refSpan.textContent = verseObj.v[verseCitation] + ' ';
       return refSpan;
     }
@@ -13107,7 +13086,7 @@
 
       this.fontSample = templateElement('div', 'font-sample', null, null, null);
       this.fontSample.innerHTML = '<p class="font-sample-verse">' +
-        '<span class="verse-ref">1 John 4:19 </span>' +
+        '<span class="font--bold">1 John 4:19 </span>' +
         'We love him, because he first loved us.</p>';
       this.scroll.appendChild(this.fontSample);
 

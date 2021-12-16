@@ -3,6 +3,27 @@
 const svgNS = 'http://www.w3.org/2000/svg';
 const xlinkNS = 'http://www.w3.org/1999/xlink';
 
+import {
+  tomeAcrostics,
+} from './data/tomeDb.js';
+
+export const templateAcrostic = (verseObj) => {
+  let acrosticSpan = undefined;
+  if (tomeAcrostics) {
+    let acrostic = tomeAcrostics[verseObj.k];
+    if (acrostic) {
+      let glyph = acrostic.slice(0, 1);
+      let xlit = acrostic.slice(1);
+      let glyphSpan = templateElement('span', 'font--hebrew', null, '', glyph);
+      let xlitSpan = templateElement('span', 'font--bold', null, '', xlit + ' ');
+      acrosticSpan = document.createDocumentFragment();
+      acrosticSpan.appendChild(glyphSpan);
+      acrosticSpan.appendChild(xlitSpan);
+    }
+  }
+  return acrosticSpan;
+};
+
 export const templateActionMenu = (modifier, actionSet) => {
   let actionMenu = templateElement(
     'div', 'action-menu', modifier, null, null);

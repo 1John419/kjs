@@ -22,7 +22,6 @@ import {
   mapStrongNums
 } from '../data/strongIdx.js';
 import {
-  tomeAcrostics,
   tomeBooks,
   tomeChapters,
   tomeName
@@ -34,6 +33,7 @@ import {
   verseText
 } from '../data/tomeIdx.js';
 import {
+  templateAcrostic,
   templateElement,
   templatePage,
   templateScroll,
@@ -83,7 +83,7 @@ class StrongResultView {
     btn.dataset.verseIdx = verseObj.k;
     let resultText = document.createElement('span');
     resultText.classList.add('span-search-text');
-    let acrostic = this.buildAcrosticSpan(verseObj);
+    let acrostic = templateAcrostic(verseObj);
     let ref = this.buildRefSpan(verseObj);
     resultText.appendChild(ref);
     if (acrostic) {
@@ -133,19 +133,6 @@ class StrongResultView {
     }
   }
 
-  buildAcrosticSpan(verseObj) {
-    let acrosticSpan = undefined;
-    if (tomeAcrostics) {
-      let acrostic = tomeAcrostics[verseObj.k];
-      if (acrostic) {
-        acrosticSpan = document.createElement('span');
-        acrosticSpan.classList.add('verse-acrostic');
-        acrosticSpan.textContent = acrostic + ' ';
-      }
-    }
-    return acrosticSpan;
-  }
-
   buildPage() {
     this.page = templatePage('strong-result');
 
@@ -179,7 +166,7 @@ class StrongResultView {
 
   buildRefSpan(verseObj) {
     let refSpan = document.createElement('span');
-    refSpan.classList.add('verse-ref');
+    refSpan.classList.add('font--bold');
     refSpan.textContent = verseObj.v[verseCitation] + ' ';
     return refSpan;
   }

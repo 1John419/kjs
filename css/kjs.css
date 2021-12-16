@@ -397,6 +397,10 @@ textarea {
   color: var(--ui-base-fg);
 }
 
+.font--bold {
+  font-weight: bold;
+}
+
 .icon-description {
   flex: 1 1 auto;
   align-self: center;
@@ -915,10 +919,6 @@ textarea {
   margin-top: 12.5px;
 }
 
-.verse-acrostic {
-  font-weight: bold;
-}
-
 .verse-last {
   height: 1px;
   width: 328px;
@@ -926,10 +926,6 @@ textarea {
 
 .verse-num {
   margin-right: 0.5em;
-}
-
-.verse-ref {
-  font-weight: bold;
 }
 
 .verse-text {

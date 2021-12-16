@@ -17,7 +17,6 @@ import {
   tomeBinWordCount
 } from '../data/binIdx.js';
 import {
-  tomeAcrostics,
   tomeBooks,
   tomeChapters,
   tomeName
@@ -29,6 +28,7 @@ import {
   verseText
 } from '../data/tomeIdx.js';
 import {
+  templateAcrostic,
   templateElement,
   templatePage,
   templateScroll,
@@ -76,7 +76,7 @@ class SearchResultView {
     btn.dataset.verseIdx = verseObj.k;
     let searchText = document.createElement('span');
     searchText.classList.add('span-result-text');
-    let acrostic = this.buildAcrosticSpan(verseObj);
+    let acrostic = templateAcrostic(verseObj);
     let ref = this.buildRefSpan(verseObj);
     let text = document.createTextNode(verseObj.v[verseText]);
     searchText.appendChild(ref);
@@ -118,19 +118,6 @@ class SearchResultView {
     }
   }
 
-  buildAcrosticSpan(verseObj) {
-    let acrosticSpan = undefined;
-    if (tomeAcrostics) {
-      let acrostic = tomeAcrostics[verseObj.k];
-      if (acrostic) {
-        acrosticSpan = document.createElement('span');
-        acrosticSpan.classList.add('verse-acrostic');
-        acrosticSpan.textContent = acrostic + ' ';
-      }
-    }
-    return acrosticSpan;
-  }
-
   buildPage() {
     this.page = templatePage('search-result');
 
@@ -159,7 +146,7 @@ class SearchResultView {
 
   buildRefSpan(verseObj) {
     let refSpan = document.createElement('span');
-    refSpan.classList.add('verse-ref');
+    refSpan.classList.add('font--bold');
     refSpan.textContent = verseObj.v[verseCitation] + ' ';
     return refSpan;
   }

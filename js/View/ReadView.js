@@ -2,7 +2,6 @@
 
 import queue from '../CommandQueue.js';
 import {
-  tomeAcrostics,
   tomeChapters
 } from '../data/tomeDb.js';
 import {
@@ -22,6 +21,7 @@ import {
   yahweh
 } from '../data/name.js';
 import {
+  templateAcrostic,
   templateElement,
   templateToolbarLower,
   templateToolbarMenu,
@@ -101,18 +101,6 @@ class ReadView {
     this.btnBookmark.classList.add('btn-icon--active');
   }
 
-  buildAcrosticSpan(verseIdx) {
-    let acrosticSpan = undefined;
-    if (tomeAcrostics) {
-      let acrostic = tomeAcrostics[verseIdx];
-      if (acrostic) {
-        acrosticSpan = templateElement(
-          'span', 'verse-acrostic', null, null, acrostic + ' ');
-      }
-    }
-    return acrosticSpan;
-  }
-
   buildPage() {
     this.page = templatePage('read');
     this.page.classList.remove('page--hide');
@@ -140,7 +128,7 @@ class ReadView {
     verse.dataset.verseIdx = verseObj.k;
     let verseNum = this.buildVerseNum(verseObj);
     verse.appendChild(verseNum);
-    let acrostic = this.buildAcrosticSpan(verseObj.k);
+    let acrostic = templateAcrostic(verseObj);
     if (acrostic) {
       verse.appendChild(acrostic);
     }
