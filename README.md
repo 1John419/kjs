@@ -9,9 +9,9 @@ ALL the power belongs to My King! The glory is all His.
 
 "Heaven and earth shall pass away, but my words shall not pass away."
 
-The application supports Android, Linux, or Windows platforms with the latest version of Google Chrome.
+The application supports Android, Linux, or Windows platforms with the latest version of a Chromium-based browser.
 
-It should also support the latest version of Safari, but has not been extensively tested on Mac/iOS platforms.
+It should also support the latest version of the Safari browser, but has not been extensively tested on Mac/iOS platforms.
 
 ### Download Link
-[kjs](https://bit.ly/kjs-app/)
+[kjs](https://1john419.github.io/kjs/)

@@ -1,6 +1,6 @@
 'use strict';
 
-import Dexie from '../lib/dexie.js';
+import Dexie from '../lib/dexie.min.mjs';
 import { progress } from '../load.js';
 import { appPrefix } from '../util.js';
 
