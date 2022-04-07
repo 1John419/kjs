@@ -152,14 +152,6 @@ class NavigatorBookView {
     this.page.classList.remove('page--hide');
   }
 
-  panesUpdate(panes) {
-    if (panes === 1) {
-      this.btnBack.classList.remove('btn-icon--hide');
-    } else {
-      this.btnBack.classList.add('btn-icon--hide');
-    }
-  }
-
   subscribe() {
     queue.subscribe('bookIdx.update', (bookIdx) => {
       this.bookIdxUpdate(bookIdx);
@@ -170,10 +162,6 @@ class NavigatorBookView {
     });
     queue.subscribe('navigator-book.show', () => {
       this.show();
-    });
-
-    queue.subscribe('panes.update', (panes) => {
-      this.panesUpdate(panes);
     });
   }
 

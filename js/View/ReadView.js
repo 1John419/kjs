@@ -86,9 +86,6 @@ class ReadView {
     this.toolbarUpper.addEventListener('click', (event) => {
       this.toolbarUpperClick(event);
     });
-    window.addEventListener('resize', (event) => {
-      this.windowResize(event);
-    });
   }
 
   bookmarkHide() {
@@ -170,18 +167,6 @@ class ReadView {
     this.updateColumnMode();
   }
 
-  disableToolbarMenu() {
-    this.btnSetting.classList.remove('btn-icon--hide');
-    this.btnHelp.classList.remove('btn-icon--hide');
-    this.btnMenu.classList.add('btn-icon--hide');
-  }
-
-  enableToolbarMenu() {
-    this.btnSetting.classList.add('btn-icon--hide');
-    this.btnHelp.classList.add('btn-icon--hide');
-    this.btnMenu.classList.remove('btn-icon--hide');
-  }
-
   fontSizeUpdate(fontSize) {
     this.fontSize = fontSize;
     this.updateFontSize();
@@ -208,16 +193,13 @@ class ReadView {
     this.btnSetting = this.toolbarLower.querySelector('.btn-icon--setting');
     this.btnHelp = this.toolbarLower.querySelector('.btn-icon--help');
     this.btnColumnMode = this.toolbarLower.querySelector('.btn-icon--column-mode');
-    this.columnBtns = [
-      this.btnColumnOne, this.btnColumnTwo, this.btnColumnThree
-    ];
     this.btnStrongMode = this.toolbarLower.querySelector('.btn-icon--strong-mode');
     this.btnNameMode = this.toolbarLower.querySelector('.btn-icon--name-mode');
     this.btnMenu = this.toolbarLower.querySelector('.btn-icon--v-menu');
 
-    this.btnMenuCancel = this.toolbarMenu.querySelector('.btn-icon--cancel');
-    this.btnMenuSetting = this.toolbarMenu.querySelector('.btn-icon--setting');
-    this.btnMenuHelp = this.toolbarMenu.querySelector('.btn-icon--help');
+    this.btnMenuCancel = this.toolbarMenu.querySelector('.btn-icon--read-menu-cancel');
+    this.btnMenuSetting = this.toolbarMenu.querySelector('.btn-icon--read-menu-setting');
+    this.btnMenuHelp = this.toolbarMenu.querySelector('.btn-icon--read-menu-help');
   }
 
   getKjvVerseText(verseObj) {
@@ -327,19 +309,6 @@ class ReadView {
 
   navigatorVersesUpdate(verseObjs) {
     this.verseObjs = verseObjs;
-  }
-
-  panesUpdate(panes) {
-    if (panes < 3) {
-      this.btnColumnMode.classList.add('btn-icon--hide');
-    } else {
-      this.btnColumnMode.classList.remove('btn-icon--hide');
-    }
-    if (this.page.offsetWidth < 360) {
-      this.enableToolbarMenu();
-    } else {
-      this.disableToolbarMenu();
-    }
   }
 
   refreshBookmarks(element) {
@@ -473,10 +442,6 @@ class ReadView {
     });
     queue.subscribe('navigator.verses.update', (verseObjs) => {
       this.navigatorVersesUpdate(verseObjs);
-    });
-
-    queue.subscribe('panes.update', (panes) => {
-      this.panesUpdate(panes);
     });
 
     queue.subscribe('read.column-mode.update', (columnMode) => {
@@ -639,8 +604,6 @@ class ReadView {
       let verse = this.buildVerse(verseObj);
       fragment.appendChild(verse);
     }
-    let lastVerse = templateElement('div', 'verse-last', null, null, null);
-    fragment.appendChild(lastVerse);
     this.list.appendChild(fragment);
   }
 
@@ -653,10 +616,6 @@ class ReadView {
     } else {
       queue.publish('read.bookmark.add', verseIdx);
     }
-  }
-
-  windowResize() {
-    queue.publish('window.resize', null);
   }
 
 }

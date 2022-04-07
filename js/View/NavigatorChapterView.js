@@ -133,14 +133,6 @@ class NavigatorChapterView {
     }
   }
 
-  panesUpdate(panes) {
-    if (panes === 1) {
-      this.btnBack.classList.remove('btn-icon--hide');
-    } else {
-      this.btnBack.classList.add('btn-icon--hide');
-    }
-  }
-
   scrollToTop() {
     this.scroll.scrollTop = 0;
   }
@@ -163,10 +155,6 @@ class NavigatorChapterView {
     });
     queue.subscribe('navigator-chapter.show', () => {
       this.show();
-    });
-
-    queue.subscribe('panes.update', (panes) => {
-      this.panesUpdate(panes);
     });
   }
 

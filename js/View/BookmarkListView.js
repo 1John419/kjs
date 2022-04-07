@@ -180,14 +180,6 @@ class BookmarkListView {
     queue.publish('bookmark-list.move-copy', verseIdx);
   }
 
-  panesUpdate(panes) {
-    if (panes === 1) {
-      this.btnBack.classList.remove('btn-icon--hide');
-    } else {
-      this.btnBack.classList.add('btn-icon--hide');
-    }
-  }
-
   show() {
     this.page.classList.remove('page--hide');
   }
@@ -225,10 +217,6 @@ class BookmarkListView {
     });
     queue.subscribe('bookmark.strong-mode.update', (strongMode) => {
       this.strongModeUpdate(strongMode);
-    });
-
-    queue.subscribe('panes.update', (panes) => {
-      this.panesUpdate(panes);
     });
   }
 

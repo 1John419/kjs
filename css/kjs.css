@@ -919,11 +919,6 @@ textarea {
   margin-top: 12.5px;
 }
 
-.verse-last {
-  height: 1px;
-  width: 328px;
-}
-
 .verse-num {
   margin-right: 0.5em;
 }
@@ -937,6 +932,52 @@ textarea {
   border-radius: var(--border-radius);
 }
 
+@media screen and (min-width: 320px) and (max-width: 359px) {
+  .btn-icon--help,
+  .btn-icon--setting {
+    display: none;
+  }
+
+  .btn-icon--v-menu {
+    display: block;
+  }
+}
+
+@media screen and (min-width: 360px) and (max-width: 640px) {
+  .btn-icon--help,
+  .btn-icon--setting {
+    display: block;
+  }
+
+  .btn-icon--v-menu {
+    display: none;
+  }
+}
+
+@media screen and (min-width: 640px) and (max-width: 681px) {
+  .btn-icon--back,
+  .btn-icon--help,
+  .btn-icon--setting {
+    display: none;
+  }
+
+  .btn-icon--v-menu {
+    display: block;
+  }
+}
+
+@media screen and (min-width: 681px) {
+  .btn-icon--help,
+  .btn-icon--setting {
+    display: block;
+  }
+
+  .btn-icon--back,
+  .btn-icon--v-menu {
+    display: none;
+  }
+}
+
 @media screen and (min-width: 640px) {
   .page {
     flex: 0 0 320px;
@@ -945,6 +986,16 @@ textarea {
   .page--read {
     border-right: solid 1px var(--ui-base-fg);
     flex: 0 0 calc(100% - 320px);
+  }
+
+  .btn-icon--back {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 959px) {
+  .btn-icon--column-mode {
+    display: none;
   }
 }
 
