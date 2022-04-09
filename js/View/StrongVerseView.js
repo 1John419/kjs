@@ -119,6 +119,14 @@ class StrongVerseView {
     this.maps = this.strongMapObj.v;
   }
 
+  panesUpdate(panes) {
+    if (panes === 1) {
+      this.btnBack.classList.remove('btn-icon--hide');
+    } else {
+      this.btnBack.classList.add('btn-icon--hide');
+    }
+  }
+
   scrollToTop() {
     this.scroll.scrollTop = 0;
   }
@@ -128,6 +136,10 @@ class StrongVerseView {
   }
 
   subscribe() {
+    queue.subscribe('panes.update', (panes) => {
+      this.panesUpdate(panes);
+    });
+
     queue.subscribe('strong-verse.hide', () => {
       this.hide();
     });

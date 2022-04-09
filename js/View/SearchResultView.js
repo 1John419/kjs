@@ -280,6 +280,14 @@ class SearchResultView {
     }
   }
 
+  panesUpdate(panes) {
+    if (panes === 1) {
+      this.btnBack.classList.remove('btn-icon--hide');
+    } else {
+      this.btnBack.classList.add('btn-icon--hide');
+    }
+  }
+
   rigUpdate(rig) {
     this.rig = rig;
     this.query = this.rig.query;
@@ -300,6 +308,10 @@ class SearchResultView {
 
     queue.subscribe('font-size.update', (fontSize) => {
       this.fontSizeUpdate(fontSize);
+    });
+
+    queue.subscribe('panes.update', (panes) => {
+      this.panesUpdate(panes);
     });
 
     queue.subscribe('rig.update', (rig) => {

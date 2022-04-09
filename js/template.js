@@ -139,7 +139,7 @@ export const templateToolbarMenu = (modifier, actionSet) => {
     'div', 'toolbar-menu', modifier, null, null);
   toolbarMenu.classList.add('toolbar-menu--hide');
   for (let btn of actionSet) {
-    let element = templateBtnIcon(btn.icon, `${modifier}-${btn.icon}`, btn.label);
+    let element = templateBtnIcon(btn.icon, btn.icon, btn.label);
     toolbarMenu.appendChild(element);
   }
   return toolbarMenu;

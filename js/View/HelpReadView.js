@@ -66,6 +66,14 @@ class HelpReadView {
     this.subscribe();
   }
 
+  panesUpdate(panes) {
+    if (panes === 1) {
+      this.btnBack.classList.remove('btn-icon--hide');
+    } else {
+      this.btnBack.classList.add('btn-icon--hide');
+    }
+  }
+
   show() {
     this.page.classList.remove('page--hide');
   }
@@ -80,6 +88,10 @@ class HelpReadView {
 
     queue.subscribe('help.topic.update', (helpTopic) => {
       this.topicUpdate(helpTopic);
+    });
+
+    queue.subscribe('panes.update', (panes) => {
+      this.panesUpdate(panes);
     });
   }
 

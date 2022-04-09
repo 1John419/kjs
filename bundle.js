@@ -777,7 +777,7 @@
       'div', 'toolbar-menu', modifier, null, null);
     toolbarMenu.classList.add('toolbar-menu--hide');
     for (let btn of actionSet) {
-      let element = templateBtnIcon(btn.icon, `${modifier}-${btn.icon}`, btn.label);
+      let element = templateBtnIcon(btn.icon, btn.icon, btn.label);
       toolbarMenu.appendChild(element);
     }
     return toolbarMenu;
@@ -849,6 +849,9 @@
       });
       this.toolbarUpper.addEventListener('click', (event) => {
         this.toolbarUpperClick(event);
+      });
+      window.addEventListener('resize', (event) => {
+        this.windowResize(event);
       });
     }
 
@@ -931,6 +934,18 @@
       this.updateColumnMode();
     }
 
+    disableToolbarMenu() {
+      this.btnSetting.classList.remove('btn-icon--hide');
+      this.btnHelp.classList.remove('btn-icon--hide');
+      this.btnMenu.classList.add('btn-icon--hide');
+    }
+
+    enableToolbarMenu() {
+      this.btnSetting.classList.add('btn-icon--hide');
+      this.btnHelp.classList.add('btn-icon--hide');
+      this.btnMenu.classList.remove('btn-icon--hide');
+    }
+
     fontSizeUpdate(fontSize) {
       this.fontSize = fontSize;
       this.updateFontSize();
@@ -957,13 +972,16 @@
       this.btnSetting = this.toolbarLower.querySelector('.btn-icon--setting');
       this.btnHelp = this.toolbarLower.querySelector('.btn-icon--help');
       this.btnColumnMode = this.toolbarLower.querySelector('.btn-icon--column-mode');
+      this.columnBtns = [
+        this.btnColumnOne, this.btnColumnTwo, this.btnColumnThree
+      ];
       this.btnStrongMode = this.toolbarLower.querySelector('.btn-icon--strong-mode');
       this.btnNameMode = this.toolbarLower.querySelector('.btn-icon--name-mode');
       this.btnMenu = this.toolbarLower.querySelector('.btn-icon--v-menu');
 
-      this.btnMenuCancel = this.toolbarMenu.querySelector('.btn-icon--read-menu-cancel');
-      this.btnMenuSetting = this.toolbarMenu.querySelector('.btn-icon--read-menu-setting');
-      this.btnMenuHelp = this.toolbarMenu.querySelector('.btn-icon--read-menu-help');
+      this.btnMenuCancel = this.toolbarMenu.querySelector('.btn-icon--cancel');
+      this.btnMenuSetting = this.toolbarMenu.querySelector('.btn-icon--setting');
+      this.btnMenuHelp = this.toolbarMenu.querySelector('.btn-icon--help');
     }
 
     getKjvVerseText(verseObj) {
@@ -1073,6 +1091,19 @@
 
     navigatorVersesUpdate(verseObjs) {
       this.verseObjs = verseObjs;
+    }
+
+    panesUpdate(panes) {
+      if (panes < 3) {
+        this.btnColumnMode.classList.add('btn-icon--hide');
+      } else {
+        this.btnColumnMode.classList.remove('btn-icon--hide');
+      }
+      if (this.page.offsetWidth < 360) {
+        this.enableToolbarMenu();
+      } else {
+        this.disableToolbarMenu();
+      }
     }
 
     refreshBookmarks(element) {
@@ -1206,6 +1237,10 @@
       });
       queue.subscribe('navigator.verses.update', (verseObjs) => {
         this.navigatorVersesUpdate(verseObjs);
+      });
+
+      queue.subscribe('panes.update', (panes) => {
+        this.panesUpdate(panes);
       });
 
       queue.subscribe('read.column-mode.update', (columnMode) => {
@@ -1368,6 +1403,8 @@
         let verse = this.buildVerse(verseObj);
         fragment.appendChild(verse);
       }
+      let lastVerse = templateElement('div', 'verse-last', null, null, null);
+      fragment.appendChild(lastVerse);
       this.list.appendChild(fragment);
     }
 
@@ -1382,11 +1419,13 @@
       }
     }
 
+    windowResize() {
+      queue.publish('window.resize', null);
+    }
+
   }
 
-  const mqlOnePane = window.matchMedia('screen and (max-width: 639px)');
-  const mqlTwoPanes = window.matchMedia('screen and (min-width: 640px) and (max-width: 959px)');
-  const mqlThreePanes = window.matchMedia('screen and (min-width: 960px)');
+  const SIDEBAR_WIDTH = 320;
 
   class ReadController {
 
@@ -1436,9 +1475,6 @@
       this.subscribe();
       this.sidebar = null;
       this.lastSidebar = null;
-      this.panes = null;
-      this.currentPanes = null;
-      this.PaneListeners();
     }
 
     initializeApp() {
@@ -1461,41 +1497,13 @@
       queue.publish('chapter.next', null);
     }
 
-    PaneListeners() {
-      mqlOnePane.addEventListener('change', (event) => {
-        if (event.matches) {
-          this.panes = 1;
-          this.updatePanes();
-        }
-      });
-      mqlTwoPanes.addEventListener('change',  (event) => {
-        if (event.matches) {
-          this.panes = 2;
-          this.updatePanes();
-        }
-      });
-      mqlThreePanes.addEventListener('change',  (event) => {
-        if (event.matches) {
-          this.panes = 3;
-          this.updatePanes();
-        }
-      });
-    }
-
     prevChapter() {
       queue.publish('chapter.prev', null);
     }
 
     setPanes() {
-      if (mqlOnePane.matches) {
-        this.panes = 1;
-      } else if (mqlTwoPanes.matches) {
-        this.panes = 2;
-      } else if (mqlThreePanes.matches) {
-        this.panes = 3;
-      } else {
-        return;
-      }
+      this.panes = Math.min(Math.floor(window.innerWidth / SIDEBAR_WIDTH), 4);
+      queue.publish('panes.change', this.panes);
     }
 
     sidebarSelect(sidebar) {
@@ -1589,9 +1597,13 @@
         this.strongVerseUpdate();
       });
 
+      queue.subscribe('window.resize', () => {
+        this.updatePanes();
+      });
     }
 
     updatePanes() {
+      this.setPanes();
       if (this.currentPanes !== this.panes) {
         if (this.currentPanes > this.panes) {
           this.decreasePanes();
@@ -1888,6 +1900,14 @@
       this.page.classList.remove('page--hide');
     }
 
+    panesUpdate(panes) {
+      if (panes === 1) {
+        this.btnBack.classList.remove('btn-icon--hide');
+      } else {
+        this.btnBack.classList.add('btn-icon--hide');
+      }
+    }
+
     subscribe() {
       queue.subscribe('bookIdx.update', (bookIdx) => {
         this.bookIdxUpdate(bookIdx);
@@ -1898,6 +1918,10 @@
       });
       queue.subscribe('navigator-book.show', () => {
         this.show();
+      });
+
+      queue.subscribe('panes.update', (panes) => {
+        this.panesUpdate(panes);
       });
     }
 
@@ -2023,6 +2047,14 @@
       }
     }
 
+    panesUpdate(panes) {
+      if (panes === 1) {
+        this.btnBack.classList.remove('btn-icon--hide');
+      } else {
+        this.btnBack.classList.add('btn-icon--hide');
+      }
+    }
+
     scrollToTop() {
       this.scroll.scrollTop = 0;
     }
@@ -2045,6 +2077,10 @@
       });
       queue.subscribe('navigator-chapter.show', () => {
         this.show();
+      });
+
+      queue.subscribe('panes.update', (panes) => {
+        this.panesUpdate(panes);
       });
     }
 
@@ -2916,6 +2952,14 @@
       queue.publish('bookmark-list.move-copy', verseIdx);
     }
 
+    panesUpdate(panes) {
+      if (panes === 1) {
+        this.btnBack.classList.remove('btn-icon--hide');
+      } else {
+        this.btnBack.classList.add('btn-icon--hide');
+      }
+    }
+
     show() {
       this.page.classList.remove('page--hide');
     }
@@ -2953,6 +2997,10 @@
       });
       queue.subscribe('bookmark.strong-mode.update', (strongMode) => {
         this.strongModeUpdate(strongMode);
+      });
+
+      queue.subscribe('panes.update', (panes) => {
+        this.panesUpdate(panes);
       });
     }
 
@@ -3388,6 +3436,14 @@
       this.showActionMenu(target);
     }
 
+    panesUpdate(panes) {
+      if (panes === 1) {
+        this.btnBack.classList.remove('btn-icon--hide');
+      } else {
+        this.btnBack.classList.add('btn-icon--hide');
+      }
+    }
+
     rename(folderName) {
       queue.publish('bookmark-folder-rename', folderName);
     }
@@ -3413,6 +3469,10 @@
 
       queue.subscribe('bookmark.folder-list.update', (folderList) => {
         this.folderListUpdate(folderList);
+      });
+
+      queue.subscribe('panes.update', (panes) => {
+        this.panesUpdate(panes);
       });
     }
 
@@ -5242,6 +5302,14 @@
       }
     }
 
+    panesUpdate(panes) {
+      if (panes === 1) {
+        this.btnBack.classList.remove('btn-icon--hide');
+      } else {
+        this.btnBack.classList.add('btn-icon--hide');
+      }
+    }
+
     rigUpdate(rig) {
       this.rig = rig;
       this.query = this.rig.query;
@@ -5262,6 +5330,10 @@
 
       queue.subscribe('font-size.update', (fontSize) => {
         this.fontSizeUpdate(fontSize);
+      });
+
+      queue.subscribe('panes.update', (panes) => {
+        this.panesUpdate(panes);
       });
 
       queue.subscribe('rig.update', (rig) => {
@@ -5839,6 +5911,14 @@
       }
     }
 
+    panesUpdate(panes) {
+      if (panes === 1) {
+        this.btnBack.classList.remove('btn-icon--hide');
+      } else {
+        this.btnBack.classList.add('btn-icon--hide');
+      }
+    }
+
     searchClick() {
       let query = this.inputQuery.value;
       queue.publish('search-lookup.search', query);
@@ -5861,6 +5941,10 @@
       });
       queue.subscribe('search-lookup.show', () => {
         this.show();
+      });
+
+      queue.subscribe('panes.update', (panes) => {
+        this.panesUpdate(panes);
       });
     }
 
@@ -6737,6 +6821,14 @@
       }
     }
 
+    panesUpdate(panes) {
+      if (panes === 1) {
+        this.btnBack.classList.remove('btn-icon--hide');
+      } else {
+        this.btnBack.classList.add('btn-icon--hide');
+      }
+    }
+
     scrollToTop() {
       this.scroll.scrollTop = 0;
     }
@@ -6746,6 +6838,10 @@
     }
 
     subscribe() {
+      queue.subscribe('panes.update', (panes) => {
+        this.panesUpdate(panes);
+      });
+
       queue.subscribe('strong-def.hide', () => {
         this.hide();
       });
@@ -7717,6 +7813,14 @@
       }
     }
 
+    panesUpdate(panes) {
+      if (panes === 1) {
+        this.btnBack.classList.remove('btn-icon--hide');
+      } else {
+        this.btnBack.classList.add('btn-icon--hide');
+      }
+    }
+
     scrollToTop() {
       this.scroll.scrollTop = 0;
     }
@@ -7732,6 +7836,10 @@
 
       queue.subscribe('font-size.update', (fontSize) => {
         this.fontSizeUpdate(fontSize);
+      });
+
+      queue.subscribe('panes.update', (panes) => {
+        this.panesUpdate(panes);
       });
 
       queue.subscribe('strong-result.hide', () => {
@@ -7940,6 +8048,14 @@
       this.maps = this.strongMapObj.v;
     }
 
+    panesUpdate(panes) {
+      if (panes === 1) {
+        this.btnBack.classList.remove('btn-icon--hide');
+      } else {
+        this.btnBack.classList.add('btn-icon--hide');
+      }
+    }
+
     scrollToTop() {
       this.scroll.scrollTop = 0;
     }
@@ -7949,6 +8065,10 @@
     }
 
     subscribe() {
+      queue.subscribe('panes.update', (panes) => {
+        this.panesUpdate(panes);
+      });
+
       queue.subscribe('strong-verse.hide', () => {
         this.hide();
       });
@@ -8759,6 +8879,14 @@
       this.lastTheme = null;
     }
 
+    panesUpdate(panes) {
+      if (panes === 1) {
+        this.btnBack.classList.remove('btn-icon--hide');
+      } else {
+        this.btnBack.classList.add('btn-icon--hide');
+      }
+    }
+
     scrollClick(event) {
       event.preventDefault();
       let target = event.target;
@@ -8795,6 +8923,10 @@
 
       queue.subscribe('theme.update', (theme) => {
         this.themeUpdate(theme);
+      });
+
+      queue.subscribe('panes.update', (panes) => {
+        this.panesUpdate(panes);
       });
     }
 
@@ -9250,6 +9382,14 @@
       this.subscribe();
     }
 
+    panesUpdate(panes) {
+      if (panes === 1) {
+        this.btnBack.classList.remove('btn-icon--hide');
+      } else {
+        this.btnBack.classList.add('btn-icon--hide');
+      }
+    }
+
     scrollClick(event) {
       event.preventDefault();
       let target = event.target.closest('button');
@@ -9271,6 +9411,10 @@
       });
       queue.subscribe('help-topic.hide', () => {
         this.hide();
+      });
+
+      queue.subscribe('panes.update', (panes) => {
+        this.panesUpdate(panes);
       });
     }
 
@@ -9343,6 +9487,14 @@
       this.subscribe();
     }
 
+    panesUpdate(panes) {
+      if (panes === 1) {
+        this.btnBack.classList.remove('btn-icon--hide');
+      } else {
+        this.btnBack.classList.add('btn-icon--hide');
+      }
+    }
+
     show() {
       this.page.classList.remove('page--hide');
     }
@@ -9357,6 +9509,10 @@
 
       queue.subscribe('help.topic.update', (helpTopic) => {
         this.topicUpdate(helpTopic);
+      });
+
+      queue.subscribe('panes.update', (panes) => {
+        this.panesUpdate(panes);
       });
     }
 

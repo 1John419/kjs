@@ -330,6 +330,14 @@ class StrongResultView {
     }
   }
 
+  panesUpdate(panes) {
+    if (panes === 1) {
+      this.btnBack.classList.remove('btn-icon--hide');
+    } else {
+      this.btnBack.classList.add('btn-icon--hide');
+    }
+  }
+
   scrollToTop() {
     this.scroll.scrollTop = 0;
   }
@@ -345,6 +353,10 @@ class StrongResultView {
 
     queue.subscribe('font-size.update', (fontSize) => {
       this.fontSizeUpdate(fontSize);
+    });
+
+    queue.subscribe('panes.update', (panes) => {
+      this.panesUpdate(panes);
     });
 
     queue.subscribe('strong-result.hide', () => {

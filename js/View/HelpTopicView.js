@@ -100,6 +100,14 @@ class HelpTopicView {
     this.subscribe();
   }
 
+  panesUpdate(panes) {
+    if (panes === 1) {
+      this.btnBack.classList.remove('btn-icon--hide');
+    } else {
+      this.btnBack.classList.add('btn-icon--hide');
+    }
+  }
+
   scrollClick(event) {
     event.preventDefault();
     let target = event.target.closest('button');
@@ -121,6 +129,10 @@ class HelpTopicView {
     });
     queue.subscribe('help-topic.hide', () => {
       this.hide();
+    });
+
+    queue.subscribe('panes.update', (panes) => {
+      this.panesUpdate(panes);
     });
   }
 

@@ -4,10 +4,6 @@ import queue from '../CommandQueue.js';
 
 const SIDEBAR_WIDTH = 320;
 
-const mqlOnePane = window.matchMedia('screen and (max-width: 639px)');
-const mqlTwoPanes = window.matchMedia('screen and (min-width: 640px) and (max-width: 959px)');
-const mqlThreePanes = window.matchMedia('screen and (min-width: 960px)');
-
 class ReadController {
 
   constructor() {
@@ -56,9 +52,6 @@ class ReadController {
     this.subscribe();
     this.sidebar = null;
     this.lastSidebar = null;
-    this.panes = null;
-    this.currentPanes = null;
-    this.PaneListeners();
   }
 
   initializeApp() {
@@ -81,41 +74,13 @@ class ReadController {
     queue.publish('chapter.next', null);
   }
 
-  PaneListeners() {
-    mqlOnePane.addEventListener('change', (event) => {
-      if (event.matches) {
-        this.panes = 1;
-        this.updatePanes();
-      }
-    });
-    mqlTwoPanes.addEventListener('change',  (event) => {
-      if (event.matches) {
-        this.panes = 2;
-        this.updatePanes();
-      }
-    });
-    mqlThreePanes.addEventListener('change',  (event) => {
-      if (event.matches) {
-        this.panes = 3;
-        this.updatePanes();
-      }
-    });
-  }
-
   prevChapter() {
     queue.publish('chapter.prev', null);
   }
 
   setPanes() {
-    if (mqlOnePane.matches) {
-      this.panes = 1;
-    } else if (mqlTwoPanes.matches) {
-      this.panes = 2;
-    } else if (mqlThreePanes.matches) {
-      this.panes = 3;
-    } else {
-      return;
-    }
+    this.panes = Math.min(Math.floor(window.innerWidth / SIDEBAR_WIDTH), 4);
+    queue.publish('panes.change', this.panes);
   }
 
   sidebarSelect(sidebar) {
@@ -209,9 +174,13 @@ class ReadController {
       this.strongVerseUpdate();
     });
 
+    queue.subscribe('window.resize', () => {
+      this.updatePanes();
+    });
   }
 
   updatePanes() {
+    this.setPanes();
     if (this.currentPanes !== this.panes) {
       if (this.currentPanes > this.panes) {
         this.decreasePanes();
