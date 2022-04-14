@@ -2,11 +2,12 @@ let appPrefix = 'kjs';
 
 let appCaches = [
   {
-    name: 'kjs-core-20220302.01',
+    name: 'kjs-core-20220414.01',
     urls: [
       './',
       './bundle.js',
       './favicon.png',
+      './help/about.html',
       './icons.svg',
       './index.html',
       './js/load.js',
@@ -16,7 +17,7 @@ let appCaches = [
     ]
   },
   {
-    name: 'kjs-css-20211216.01',
+    name: 'kjs-css-20220414.01',
     urls: [
       './css/kjs.css',
       './css/font.css'
@@ -36,9 +37,8 @@ let appCaches = [
     ]
   },
   {
-    name: 'kjs-help-20220407.01',
+    name: 'kjs-help-20220414.01',
     urls: [
-      './help/about.html',
       './help/bookmark.html',
       './help/help.html',
       './help/navigator.html',

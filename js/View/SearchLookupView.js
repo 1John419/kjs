@@ -108,14 +108,6 @@ class SearchLookupView {
     }
   }
 
-  panesUpdate(panes) {
-    if (panes === 1) {
-      this.btnBack.classList.remove('btn-icon--hide');
-    } else {
-      this.btnBack.classList.add('btn-icon--hide');
-    }
-  }
-
   searchClick() {
     let query = this.inputQuery.value;
     queue.publish('search-lookup.search', query);
@@ -138,10 +130,6 @@ class SearchLookupView {
     });
     queue.subscribe('search-lookup.show', () => {
       this.show();
-    });
-
-    queue.subscribe('panes.update', (panes) => {
-      this.panesUpdate(panes);
     });
   }
 

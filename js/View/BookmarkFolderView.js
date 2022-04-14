@@ -166,14 +166,6 @@ class BookmarkFolderView {
     this.showActionMenu(target);
   }
 
-  panesUpdate(panes) {
-    if (panes === 1) {
-      this.btnBack.classList.remove('btn-icon--hide');
-    } else {
-      this.btnBack.classList.add('btn-icon--hide');
-    }
-  }
-
   rename(folderName) {
     queue.publish('bookmark-folder-rename', folderName);
   }
@@ -199,10 +191,6 @@ class BookmarkFolderView {
 
     queue.subscribe('bookmark.folder-list.update', (folderList) => {
       this.folderListUpdate(folderList);
-    });
-
-    queue.subscribe('panes.update', (panes) => {
-      this.panesUpdate(panes);
     });
   }
 
