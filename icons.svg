@@ -29,6 +29,9 @@
   <symbol id="down" viewBox="0 0 24 24">
     <path d="M 6,9.665 7.4145,8.25 12.002,12.9195 16.5855,8.25 18,9.665 12.002,15.75 Z"/>
   </symbol>
+  <symbol id="expand-mode" viewBox="0 0 24 24">
+    <path d="m21 13h-2v-8h-8v-2h10zm-18 8h10v-2h-8v-8h-2z"/>
+  </symbol>
   <symbol id="export" viewBox="0 0 24 24">
     <path d="m9 11.25h-4.5v7.5h15v-7.5h-4.5v-1.5h6v10.5h-18v-10.5h6zm-0.75-3 3.75-4.5 3.75 4.5h-3v8.25h-1.5v-8.25z"/>
   </symbol>

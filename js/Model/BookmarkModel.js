@@ -24,18 +24,18 @@ class BookmarkModel {
     this.initialize();
   }
 
-  activeFolderChange(activeFolderName) {
+  async activeFolderChange(activeFolderName) {
     this.activeFolderName = activeFolderName;
     this.updateActiveFolderName();
-    this.updateActiveFolder();
+    await this.updateActiveFolder();
   }
 
-  add(verseIdx) {
+  async add(verseIdx) {
     let bookmarks = this.activeFolder.bookmarks;
     if (bookmarks.indexOf(verseIdx) === -1) {
       this.activeFolder.bookmarks = [verseIdx, ...bookmarks];
       this.updateFolders();
-      this.updateActiveFolder();
+      await this.updateActiveFolder();
     }
   }
 
@@ -56,33 +56,43 @@ class BookmarkModel {
     return [this.createFolder('Default')];
   }
 
-  delete(verseIdx) {
+  async delete(verseIdx) {
     let bookmarks = this.activeFolder.bookmarks;
     let index = bookmarks.indexOf(verseIdx);
     if (index !== -1) {
       bookmarks.splice(index, 1);
       this.updateFolders();
-      this.updateActiveFolder();
+      await this.updateActiveFolder();
     }
   }
 
-  down(verseIdx) {
+  async down(verseIdx) {
     let bookmarks = this.activeFolder.bookmarks;
     let index = bookmarks.indexOf(verseIdx);
     if (index !== bookmarks.length - 1 && index !== -1) {
       this.reorderBookmarks(index, index + 1);
       this.updateFolders();
-      this.updateActiveFolder();
+      await this.updateActiveFolder();
     }
   }
 
-  folderAdd(folderName) {
+  expandModeChange(expandMode) {
+    this.expandMode = expandMode;
+    this.saveExpandMode();
+    queue.publish('bookmark.expand-mode.update', this.expandMode);
+  }
+
+  expandModeToogle() {
+    this.expandModeChange(!this.expandMode);
+  }
+
+  async folderAdd(folderName) {
     let newFolder = this.getFolder(folderName);
     if (!newFolder) {
       newFolder = this.createFolder(folderName);
       this.folders.push(newFolder);
       this.updateFolders();
-      this.activeFolderChange(folderName);
+      await this.activeFolderChange(folderName);
       this.updateFolderList();
       queue.publish('bookmark.folder.added', null);
     } else {
@@ -90,15 +100,15 @@ class BookmarkModel {
     }
   }
 
-  folderDelete(folderName) {
+  async folderDelete(folderName) {
     let idx = this.getFolderIdx(folderName);
     this.folders.splice(idx, 1);
     if (this.folders.length === 0) {
-      this.folderAdd('Default');
+      await this.folderAdd('Default');
     }
     this.updateFolders();
     let firstFolderName = this.folders[firstEntry].name;
-    this.activeFolderChange(firstFolderName);
+    await this.activeFolderChange(firstFolderName);
     this.updateFolderList();
   }
 
@@ -134,7 +144,7 @@ class BookmarkModel {
     });
   }
 
-  folderRename(namePkg) {
+  async folderRename(namePkg) {
     if (namePkg.old === namePkg.new) {
       queue.publish('bookmark.folder.rename.error', 'Duplicate Folder Name');
     } else {
@@ -143,7 +153,7 @@ class BookmarkModel {
       this.updateFolders();
       this.updateFolderList();
       if (this.activeFolderName === namePkg.old) {
-        this.activeFolderChange(namePkg.new);
+        await this.activeFolderChange(namePkg.new);
       }
       queue.publish('bookmark.folder.renamed', null);
     }
@@ -244,7 +254,7 @@ class BookmarkModel {
     this.subscribe();
   }
 
-  move(movePkg) {
+  async move(movePkg) {
     let toFolder = this.getFolder(movePkg.to);
     toFolder.bookmarks.push(movePkg.verseIdx);
 
@@ -253,7 +263,7 @@ class BookmarkModel {
     if (index !== -1) {
       bookmarks.splice(index, 1);
       this.updateFolders();
-      this.updateActiveFolder(this.activeFolderName);
+      await this.updateActiveFolder(this.activeFolderName);
     }
   }
 
@@ -283,14 +293,15 @@ class BookmarkModel {
     );
   }
 
-  restore() {
+  async restore() {
     this.restoreTask();
     this.restoreFolders();
-    this.restoreActiveFolderName();
-    this.restoreMode();
+    await this.restoreActiveFolderName();
+    this.restoreExpandMode();
+    this.restoreStrongMode();
   }
 
-  restoreActiveFolderName() {
+  async restoreActiveFolderName() {
     let defaultFolderName = 'Default';
     let activeFolderName =
       localStorage.getItem(`${appPrefix}-activeFolderName`);
@@ -306,7 +317,25 @@ class BookmarkModel {
         activeFolderName = defaultFolderName;
       }
     }
-    this.activeFolderChange(activeFolderName);
+    await this.activeFolderChange(activeFolderName);
+  }
+
+  restoreExpandMode() {
+    let defaultMode = false;
+    let expandMode = localStorage.getItem(`${appPrefix}-bookmarkExpandMode`);
+    if (!expandMode) {
+      expandMode = defaultMode;
+    } else {
+      try {
+        expandMode = JSON.parse(expandMode);
+      } catch (error) {
+        expandMode = defaultMode;
+      }
+      if (typeof expandMode !== 'boolean') {
+        expandMode = defaultMode;
+      }
+    }
+    this.expandModeChange(expandMode);
   }
 
   restoreFolders() {
@@ -329,7 +358,7 @@ class BookmarkModel {
     this.updateFolderList();
   }
 
-  restoreMode() {
+  restoreStrongMode() {
     let defaultMode = false;
     let strongMode = localStorage.getItem(`${appPrefix}-bookmarkStrongMode`);
     if (!strongMode) {
@@ -379,6 +408,11 @@ class BookmarkModel {
       JSON.stringify(this.bookmarkTask));
   }
 
+  saveExpandMode() {
+    localStorage.setItem(`${appPrefix}-bookmarkExpandMode`,
+      JSON.stringify(this.expandMode));
+  }
+
   saveFolders() {
     localStorage.setItem(`${appPrefix}-folders`, JSON.stringify(this.folders));
   }
@@ -388,20 +422,20 @@ class BookmarkModel {
       JSON.stringify(this.strongMode));
   }
 
-  sort(sorter) {
+  async sort(sorter) {
     let bookmarks = this.activeFolder.bookmarks;
     if (bookmarks.length !== 0) {
       bookmarks.sort(sorter);
       this.updateFolders();
-      this.updateActiveFolder(this.activeFolderName);
+      await this.updateActiveFolder(this.activeFolderName);
     }
   }
 
-  sortInvert() {
+  async sortInvert() {
     let bookmarks = this.activeFolder.bookmarks;
     bookmarks.reverse();
     this.updateFolders();
-    this.updateActiveFolder(this.activeFolderName);
+    await this.updateActiveFolder(this.activeFolderName);
   }
 
   strongModeChange(strongMode) {
@@ -415,53 +449,56 @@ class BookmarkModel {
   }
 
   subscribe() {
-    queue.subscribe('bookmark.active-folder.change', (folderName) => {
-      this.activeFolderChange(folderName);
+    queue.subscribe('bookmark.active-folder.change', async (folderName) => {
+      await this.activeFolderChange(folderName);
     });
-    queue.subscribe('bookmark.add', (verseIdx) => {
-      this.add(verseIdx);
+    queue.subscribe('bookmark.add', async (verseIdx) => {
+      await this.add(verseIdx);
     });
     queue.subscribe('bookmark.copy', (copyPkg) => {
       this.copy(copyPkg);
     });
-    queue.subscribe('bookmark.delete', (verseIdx) => {
-      this.delete(verseIdx);
+    queue.subscribe('bookmark.delete', async (verseIdx) => {
+      await this.delete(verseIdx);
     });
-    queue.subscribe('bookmark.down', (verseIdx) => {
-      this.down(verseIdx);
+    queue.subscribe('bookmark.down', async (verseIdx) => {
+      await this.down(verseIdx);
     });
-    queue.subscribe('bookmark.folder.add', (folderName) => {
-      this.folderAdd(folderName);
+    queue.subscribe('bookmark.expand-mode.toggle', () => {
+      this.expandModeToogle();
     });
-    queue.subscribe('bookmark.folder.delete', (folderName) => {
-      this.folderDelete(folderName);
+    queue.subscribe('bookmark.folder.add', async (folderName) => {
+      await this.folderAdd(folderName);
+    });
+    queue.subscribe('bookmark.folder.delete', async (folderName) => {
+      await this.folderDelete(folderName);
     });
     queue.subscribe('bookmark.folder.down', (folderName) => {
       this.folderDown(folderName);
     });
-    queue.subscribe('bookmark.pkg.import', (pkgStr) => {
-      this.folderImport(pkgStr);
-    });
-    queue.subscribe('bookmark.folder.rename', (namePkg) => {
-      this.folderRename(namePkg);
+    queue.subscribe('bookmark.folder.rename', async (namePkg) => {
+      await this.folderRename(namePkg);
     });
     queue.subscribe('bookmark.folder.up', (folderName) => {
       this.folderUp(folderName);
     });
-    queue.subscribe('bookmark.move', (movePkg) => {
-      this.move(movePkg);
+    queue.subscribe('bookmark.move', async (movePkg) => {
+      await this.move(movePkg);
     });
     queue.subscribe('bookmark.move-copy.change', async (verseIdx) => {
       await this.moveCopyChange(verseIdx);
     });
-    queue.subscribe('bookmark.restore', () => {
-      this.restore();
+    queue.subscribe('bookmark.pkg.import', (pkgStr) => {
+      this.folderImport(pkgStr);
     });
-    queue.subscribe('bookmark.sort-ascend', () => {
-      this.sort(numSortAscend);
+    queue.subscribe('bookmark.restore', async () => {
+      await this.restore();
     });
-    queue.subscribe('bookmark.sort-invert', () => {
-      this.sortInvert();
+    queue.subscribe('bookmark.sort-ascend', async () => {
+      await this.sort(numSortAscend);
+    });
+    queue.subscribe('bookmark.sort-invert', async () => {
+      await this.sortInvert();
     });
     queue.subscribe('bookmark.strong-mode.toggle', () => {
       this.strongModeToogle();
@@ -469,8 +506,8 @@ class BookmarkModel {
     queue.subscribe('bookmark.task.change', (bookmarkTask) => {
       this.taskChange(bookmarkTask);
     });
-    queue.subscribe('bookmark.up', (verseIdx) => {
-      this.up(verseIdx);
+    queue.subscribe('bookmark.up', async (verseIdx) => {
+      await this.up(verseIdx);
     });
 
     queue.subscribe('bookmark-move-copy.list.change', (verseIdx) => {
@@ -484,18 +521,20 @@ class BookmarkModel {
     queue.publish('bookmark.task.update', this.bookmarkTask);
   }
 
-  up(verseIdx) {
+  async up(verseIdx) {
     let bookmarks = this.activeFolder.bookmarks;
     let index = bookmarks.indexOf(verseIdx);
     if (index !== 0 && index !== -1) {
       this.reorderBookmarks(index, index - 1);
       this.updateFolders();
-      this.updateActiveFolder();
+      await this.updateActiveFolder();
     }
   }
 
-  updateActiveFolder() {
+  async updateActiveFolder() {
     this.activeFolder = this.getFolder(this.activeFolderName);
+    this.activeFolder.verseObjs = await tomeDb.verses.bulkGet(
+      this.activeFolder.bookmarks);
     queue.publish('bookmark.active-folder.update', this.activeFolder);
   }
 

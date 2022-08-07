@@ -40,11 +40,11 @@ const lowerToolSet = [
   { type: 'btn', icon: 'bookmark', label: 'Bookmark' },
   { type: 'btn', icon: 'search', label: 'Search' },
   { type: 'btn', icon: 'strong', label: 'Strong' },
-  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' },
-  { type: 'btn', icon: 'name-mode', label: 'Name Mode' },
-  { type: 'btn', icon: 'column-mode', label: 'Column Mode' },
   { type: 'btn', icon: 'setting', label: 'Setting' },
   { type: 'btn', icon: 'help', label: 'Help' },
+  { type: 'btn', icon: 'column-mode', label: 'Column Mode' },
+  { type: 'btn', icon: 'name-mode', label: 'Name Mode' },
+  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' },
   { type: 'btn', icon: 'v-menu', label: 'Toolbar Menu' }
 ];
 

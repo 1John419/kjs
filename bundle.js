@@ -286,7 +286,7 @@
   };
 
   const strongUrl = './json/strong.json';
-  const strongVersion = 6;
+  const strongVersion = 7;
 
   let strongCitations = {};
   let strongDb = null;
@@ -804,11 +804,11 @@
     { type: 'btn', icon: 'bookmark', label: 'Bookmark' },
     { type: 'btn', icon: 'search', label: 'Search' },
     { type: 'btn', icon: 'strong', label: 'Strong' },
-    { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' },
-    { type: 'btn', icon: 'name-mode', label: 'Name Mode' },
-    { type: 'btn', icon: 'column-mode', label: 'Column Mode' },
     { type: 'btn', icon: 'setting', label: 'Setting' },
     { type: 'btn', icon: 'help', label: 'Help' },
+    { type: 'btn', icon: 'column-mode', label: 'Column Mode' },
+    { type: 'btn', icon: 'name-mode', label: 'Name Mode' },
+    { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' },
     { type: 'btn', icon: 'v-menu', label: 'Toolbar Menu' }
   ];
 
@@ -2242,18 +2242,18 @@
       this.initialize();
     }
 
-    activeFolderChange(activeFolderName) {
+    async activeFolderChange(activeFolderName) {
       this.activeFolderName = activeFolderName;
       this.updateActiveFolderName();
-      this.updateActiveFolder();
+      await this.updateActiveFolder();
     }
 
-    add(verseIdx) {
+    async add(verseIdx) {
       let bookmarks = this.activeFolder.bookmarks;
       if (bookmarks.indexOf(verseIdx) === -1) {
         this.activeFolder.bookmarks = [verseIdx, ...bookmarks];
         this.updateFolders();
-        this.updateActiveFolder();
+        await this.updateActiveFolder();
       }
     }
 
@@ -2274,33 +2274,43 @@
       return [this.createFolder('Default')];
     }
 
-    delete(verseIdx) {
+    async delete(verseIdx) {
       let bookmarks = this.activeFolder.bookmarks;
       let index = bookmarks.indexOf(verseIdx);
       if (index !== -1) {
         bookmarks.splice(index, 1);
         this.updateFolders();
-        this.updateActiveFolder();
+        await this.updateActiveFolder();
       }
     }
 
-    down(verseIdx) {
+    async down(verseIdx) {
       let bookmarks = this.activeFolder.bookmarks;
       let index = bookmarks.indexOf(verseIdx);
       if (index !== bookmarks.length - 1 && index !== -1) {
         this.reorderBookmarks(index, index + 1);
         this.updateFolders();
-        this.updateActiveFolder();
+        await this.updateActiveFolder();
       }
     }
 
-    folderAdd(folderName) {
+    expandModeChange(expandMode) {
+      this.expandMode = expandMode;
+      this.saveExpandMode();
+      queue.publish('bookmark.expand-mode.update', this.expandMode);
+    }
+
+    expandModeToogle() {
+      this.expandModeChange(!this.expandMode);
+    }
+
+    async folderAdd(folderName) {
       let newFolder = this.getFolder(folderName);
       if (!newFolder) {
         newFolder = this.createFolder(folderName);
         this.folders.push(newFolder);
         this.updateFolders();
-        this.activeFolderChange(folderName);
+        await this.activeFolderChange(folderName);
         this.updateFolderList();
         queue.publish('bookmark.folder.added', null);
       } else {
@@ -2308,15 +2318,15 @@
       }
     }
 
-    folderDelete(folderName) {
+    async folderDelete(folderName) {
       let idx = this.getFolderIdx(folderName);
       this.folders.splice(idx, 1);
       if (this.folders.length === 0) {
-        this.folderAdd('Default');
+        await this.folderAdd('Default');
       }
       this.updateFolders();
       let firstFolderName = this.folders[firstEntry].name;
-      this.activeFolderChange(firstFolderName);
+      await this.activeFolderChange(firstFolderName);
       this.updateFolderList();
     }
 
@@ -2352,7 +2362,7 @@
       });
     }
 
-    folderRename(namePkg) {
+    async folderRename(namePkg) {
       if (namePkg.old === namePkg.new) {
         queue.publish('bookmark.folder.rename.error', 'Duplicate Folder Name');
       } else {
@@ -2361,7 +2371,7 @@
         this.updateFolders();
         this.updateFolderList();
         if (this.activeFolderName === namePkg.old) {
-          this.activeFolderChange(namePkg.new);
+          await this.activeFolderChange(namePkg.new);
         }
         queue.publish('bookmark.folder.renamed', null);
       }
@@ -2462,7 +2472,7 @@
       this.subscribe();
     }
 
-    move(movePkg) {
+    async move(movePkg) {
       let toFolder = this.getFolder(movePkg.to);
       toFolder.bookmarks.push(movePkg.verseIdx);
 
@@ -2471,7 +2481,7 @@
       if (index !== -1) {
         bookmarks.splice(index, 1);
         this.updateFolders();
-        this.updateActiveFolder(this.activeFolderName);
+        await this.updateActiveFolder(this.activeFolderName);
       }
     }
 
@@ -2501,14 +2511,15 @@
       );
     }
 
-    restore() {
+    async restore() {
       this.restoreTask();
       this.restoreFolders();
-      this.restoreActiveFolderName();
-      this.restoreMode();
+      await this.restoreActiveFolderName();
+      this.restoreExpandMode();
+      this.restoreStrongMode();
     }
 
-    restoreActiveFolderName() {
+    async restoreActiveFolderName() {
       let defaultFolderName = 'Default';
       let activeFolderName =
         localStorage.getItem(`${appPrefix}-activeFolderName`);
@@ -2524,7 +2535,25 @@
           activeFolderName = defaultFolderName;
         }
       }
-      this.activeFolderChange(activeFolderName);
+      await this.activeFolderChange(activeFolderName);
+    }
+
+    restoreExpandMode() {
+      let defaultMode = false;
+      let expandMode = localStorage.getItem(`${appPrefix}-bookmarkExpandMode`);
+      if (!expandMode) {
+        expandMode = defaultMode;
+      } else {
+        try {
+          expandMode = JSON.parse(expandMode);
+        } catch (error) {
+          expandMode = defaultMode;
+        }
+        if (typeof expandMode !== 'boolean') {
+          expandMode = defaultMode;
+        }
+      }
+      this.expandModeChange(expandMode);
     }
 
     restoreFolders() {
@@ -2547,7 +2576,7 @@
       this.updateFolderList();
     }
 
-    restoreMode() {
+    restoreStrongMode() {
       let defaultMode = false;
       let strongMode = localStorage.getItem(`${appPrefix}-bookmarkStrongMode`);
       if (!strongMode) {
@@ -2597,6 +2626,11 @@
         JSON.stringify(this.bookmarkTask));
     }
 
+    saveExpandMode() {
+      localStorage.setItem(`${appPrefix}-bookmarkExpandMode`,
+        JSON.stringify(this.expandMode));
+    }
+
     saveFolders() {
       localStorage.setItem(`${appPrefix}-folders`, JSON.stringify(this.folders));
     }
@@ -2606,20 +2640,20 @@
         JSON.stringify(this.strongMode));
     }
 
-    sort(sorter) {
+    async sort(sorter) {
       let bookmarks = this.activeFolder.bookmarks;
       if (bookmarks.length !== 0) {
         bookmarks.sort(sorter);
         this.updateFolders();
-        this.updateActiveFolder(this.activeFolderName);
+        await this.updateActiveFolder(this.activeFolderName);
       }
     }
 
-    sortInvert() {
+    async sortInvert() {
       let bookmarks = this.activeFolder.bookmarks;
       bookmarks.reverse();
       this.updateFolders();
-      this.updateActiveFolder(this.activeFolderName);
+      await this.updateActiveFolder(this.activeFolderName);
     }
 
     strongModeChange(strongMode) {
@@ -2633,53 +2667,56 @@
     }
 
     subscribe() {
-      queue.subscribe('bookmark.active-folder.change', (folderName) => {
-        this.activeFolderChange(folderName);
+      queue.subscribe('bookmark.active-folder.change', async (folderName) => {
+        await this.activeFolderChange(folderName);
       });
-      queue.subscribe('bookmark.add', (verseIdx) => {
-        this.add(verseIdx);
+      queue.subscribe('bookmark.add', async (verseIdx) => {
+        await this.add(verseIdx);
       });
       queue.subscribe('bookmark.copy', (copyPkg) => {
         this.copy(copyPkg);
       });
-      queue.subscribe('bookmark.delete', (verseIdx) => {
-        this.delete(verseIdx);
+      queue.subscribe('bookmark.delete', async (verseIdx) => {
+        await this.delete(verseIdx);
       });
-      queue.subscribe('bookmark.down', (verseIdx) => {
-        this.down(verseIdx);
+      queue.subscribe('bookmark.down', async (verseIdx) => {
+        await this.down(verseIdx);
       });
-      queue.subscribe('bookmark.folder.add', (folderName) => {
-        this.folderAdd(folderName);
+      queue.subscribe('bookmark.expand-mode.toggle', () => {
+        this.expandModeToogle();
       });
-      queue.subscribe('bookmark.folder.delete', (folderName) => {
-        this.folderDelete(folderName);
+      queue.subscribe('bookmark.folder.add', async (folderName) => {
+        await this.folderAdd(folderName);
+      });
+      queue.subscribe('bookmark.folder.delete', async (folderName) => {
+        await this.folderDelete(folderName);
       });
       queue.subscribe('bookmark.folder.down', (folderName) => {
         this.folderDown(folderName);
       });
-      queue.subscribe('bookmark.pkg.import', (pkgStr) => {
-        this.folderImport(pkgStr);
-      });
-      queue.subscribe('bookmark.folder.rename', (namePkg) => {
-        this.folderRename(namePkg);
+      queue.subscribe('bookmark.folder.rename', async (namePkg) => {
+        await this.folderRename(namePkg);
       });
       queue.subscribe('bookmark.folder.up', (folderName) => {
         this.folderUp(folderName);
       });
-      queue.subscribe('bookmark.move', (movePkg) => {
-        this.move(movePkg);
+      queue.subscribe('bookmark.move', async (movePkg) => {
+        await this.move(movePkg);
       });
       queue.subscribe('bookmark.move-copy.change', async (verseIdx) => {
         await this.moveCopyChange(verseIdx);
       });
-      queue.subscribe('bookmark.restore', () => {
-        this.restore();
+      queue.subscribe('bookmark.pkg.import', (pkgStr) => {
+        this.folderImport(pkgStr);
       });
-      queue.subscribe('bookmark.sort-ascend', () => {
-        this.sort(numSortAscend);
+      queue.subscribe('bookmark.restore', async () => {
+        await this.restore();
       });
-      queue.subscribe('bookmark.sort-invert', () => {
-        this.sortInvert();
+      queue.subscribe('bookmark.sort-ascend', async () => {
+        await this.sort(numSortAscend);
+      });
+      queue.subscribe('bookmark.sort-invert', async () => {
+        await this.sortInvert();
       });
       queue.subscribe('bookmark.strong-mode.toggle', () => {
         this.strongModeToogle();
@@ -2687,8 +2724,8 @@
       queue.subscribe('bookmark.task.change', (bookmarkTask) => {
         this.taskChange(bookmarkTask);
       });
-      queue.subscribe('bookmark.up', (verseIdx) => {
-        this.up(verseIdx);
+      queue.subscribe('bookmark.up', async (verseIdx) => {
+        await this.up(verseIdx);
       });
 
       queue.subscribe('bookmark-move-copy.list.change', (verseIdx) => {
@@ -2702,18 +2739,20 @@
       queue.publish('bookmark.task.update', this.bookmarkTask);
     }
 
-    up(verseIdx) {
+    async up(verseIdx) {
       let bookmarks = this.activeFolder.bookmarks;
       let index = bookmarks.indexOf(verseIdx);
       if (index !== 0 && index !== -1) {
         this.reorderBookmarks(index, index - 1);
         this.updateFolders();
-        this.updateActiveFolder();
+        await this.updateActiveFolder();
       }
     }
 
-    updateActiveFolder() {
+    async updateActiveFolder() {
       this.activeFolder = this.getFolder(this.activeFolderName);
+      this.activeFolder.verseObjs = await tomeDb.verses.bulkGet(
+        this.activeFolder.bookmarks);
       queue.publish('bookmark.active-folder.update', this.activeFolder);
     }
 
@@ -2759,7 +2798,8 @@
     { type: 'btn', icon: 'sort-ascend', label: 'Sort Ascending' },
     { type: 'btn', icon: 'sort-invert', label: 'Sort Invert' },
     { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' },
-    { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
+    { type: 'btn', icon: 'expand-mode', label: 'Expand Bookmarks' },
+    { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' },
   ];
 
   const upperToolSet$k = [
@@ -2845,12 +2885,63 @@
       container.appendChild(this.page);
     }
 
+    buildRefSpan(verseObj) {
+      let refSpan = document.createElement('span');
+      refSpan.classList.add('font--bold');
+      refSpan.textContent = verseObj.v[verseCitation] + ' ';
+      return refSpan;
+    }
+
+    buildVerse(verseObj) {
+      let btn = document.createElement('button');
+      btn.classList.add('btn-result');
+      btn.dataset.verseIdx = verseObj.k;
+      let searchText = document.createElement('span');
+      searchText.classList.add('span-result-text');
+      let acrostic = templateAcrostic(verseObj);
+      let ref = this.buildRefSpan(verseObj);
+      let text = document.createTextNode(verseObj.v[verseText]);
+      searchText.appendChild(ref);
+      if (acrostic) {
+        searchText.appendChild(acrostic);
+      }
+      searchText.appendChild(text);
+      btn.appendChild(searchText);
+      return btn;
+    }
+
     delete(verseIdx) {
       queue.publish('bookmark-list.delete', verseIdx);
     }
 
     down(verseIdx) {
       queue.publish('bookmark-list.down', verseIdx);
+    }
+
+    entryClick(target) {
+      if (target) {
+        if (target.classList.contains('btn-entry')) {
+          let verseIdx = parseInt(target.dataset.verseIdx);
+          if (this.strongMode) {
+            queue.publish('bookmark-list.strong-select', verseIdx);
+          } else {
+            queue.publish('bookmark-list.select', verseIdx);
+          }
+        } else if (target.classList.contains('btn-icon--h-menu')) {
+          let ref = target.previousSibling;
+          this.menuClick(ref);
+        }
+      }
+    }
+
+    expandModeUpdate(expandMode) {
+      this.expandMode = expandMode;
+      if (this.expandMode) {
+        this.btnExpandMode.classList.add('btn-icon--active');
+      } else {
+        this.btnExpandMode.classList.remove('btn-icon--active');
+      }
+      this.updateBookmarks();
     }
 
     getElements() {
@@ -2869,6 +2960,8 @@
         '.btn-icon--sort-ascend');
       this.btnSortInvert = this.toolbarLower.querySelector(
         '.btn-icon--sort-invert');
+      this.btnExpandMode = this.toolbarLower.querySelector(
+        '.btn-icon--expand-mode');
       this.btnStrongMode = this.toolbarLower.querySelector(
         '.btn-icon--strong-mode');
       this.btnBookmarkFolder = this.toolbarLower.querySelector(
@@ -2890,18 +2983,10 @@
     listClick(event) {
       event.preventDefault();
       let target = event.target.closest('button');
-      if (target) {
-        if (target.classList.contains('btn-entry')) {
-          let verseIdx = parseInt(target.dataset.verseIdx);
-          if (this.strongMode) {
-            queue.publish('bookmark-list.strong-select', verseIdx);
-          } else {
-            queue.publish('bookmark-list.select', verseIdx);
-          }
-        } else if (target.classList.contains('btn-icon--h-menu')) {
-          let ref = target.previousSibling;
-          this.menuClick(ref);
-        }
+      if (this.expandMode) {
+        this.verseClick(target);
+      } else {
+        this.entryClick(target);
       }
     }
 
@@ -2948,6 +3033,9 @@
       queue.subscribe('bookmark.active-folder.update', (activeFolder) => {
         this.updateActiveFolder(activeFolder);
       });
+      queue.subscribe('bookmark.expand-mode.update', (expandMode) => {
+        this.expandModeUpdate(expandMode);
+      });
       queue.subscribe('bookmark.strong-mode.update', (strongMode) => {
         this.strongModeUpdate(strongMode);
       });
@@ -2963,10 +3051,12 @@
           queue.publish('bookmark-list.sort-ascend', null);
         } else if (target === this.btnSortInvert) {
           queue.publish('bookmark-list.sort-invert', null);
-        } else if (target === this.btnStrongMode) {
-          queue.publish('bookmark-list.strong-mode.click', null);
         } else if (target === this.btnBookmarkFolder) {
           queue.publish('bookmark-folder', null);
+        } else if (target === this.btnExpandMode) {
+          queue.publish('bookmark-list.expand-mode.click', null);
+        } else if (target === this.btnStrongMode) {
+          queue.publish('bookmark-list.strong-mode.click', null);
         }
       }
     }
@@ -2993,13 +3083,33 @@
       } else {
         this.empty.classList.add('empty--hide');
         let fragment = document.createDocumentFragment();
-        for (let verseIdx of this.activeFolder.bookmarks) {
-          let ref = this.buildEntry(verseIdx);
-          fragment.appendChild(ref);
+        if (this.expandMode) {
+          for (let verseObj of this.activeFolder.verseObjs) {
+            let ref = this.buildVerse(verseObj);
+            fragment.appendChild(ref);
+          }
+        } else {
+          for (let verseIdx of this.activeFolder.bookmarks) {
+            let ref = this.buildEntry(verseIdx);
+            fragment.appendChild(ref);
+          }
         }
         this.list.appendChild(fragment);
       }
       this.scroll.scrollTop = scrollSave;
+    }
+
+    verseClick(target) {
+      if (target) {
+        if (target.classList.contains('btn-result')) {
+          let verseIdx = parseInt(target.dataset.verseIdx);
+          if (this.strongMode) {
+            queue.publish('bookmark-list.strong-select', verseIdx);
+          } else {
+            queue.publish('bookmark-list.select', verseIdx);
+          }
+        }
+      }
     }
 
   }
@@ -4109,6 +4219,10 @@
       }
     }
 
+    expandModeToggle() {
+      queue.publish('bookmark.expand-mode.toggle', null);
+    }
+
     exportPane() {
       queue.publish('bookmark.task.change', 'bookmark-export');
     }
@@ -4215,10 +4329,6 @@
       queue.publish('bookmark.up', verseIdx);
     }
 
-    modeToggle() {
-      queue.publish('bookmark.strong-mode.toggle', null);
-    }
-
     moveCopyCopy(copyPkg) {
       queue.publish('bookmark.copy', copyPkg);
     }
@@ -4246,6 +4356,10 @@
 
     sidebarUpdate(sidebar) {
       this.sidebar = sidebar;
+    }
+
+    strongModeToggle() {
+      queue.publish('bookmark.strong-mode.toggle', null);
     }
 
     strongSelect(verseIdx) {
@@ -4315,6 +4429,9 @@
       queue.subscribe('bookmark-list.down', (verseIdx) => {
         this.listDown(verseIdx);
       });
+      queue.subscribe('bookmark-list.expand-mode.click', () => {
+        this.expandModeToggle();
+      });
       queue.subscribe('bookmark-list.move-copy', (verseIdx) => {
         this.moveCopyPane(verseIdx);
       });
@@ -4328,7 +4445,7 @@
         this.listSortInvert();
       });
       queue.subscribe('bookmark-list.strong-mode.click', () => {
-        this.modeToggle();
+        this.strongModeToggle();
       });
       queue.subscribe('bookmark-list.strong-select', (verseIdx) => {
         this.strongSelect(verseIdx);
@@ -5029,24 +5146,6 @@
       });
     }
 
-    addVerse(verseObj) {
-      let btn = document.createElement('button');
-      btn.classList.add('btn-result');
-      btn.dataset.verseIdx = verseObj.k;
-      let searchText = document.createElement('span');
-      searchText.classList.add('span-result-text');
-      let acrostic = templateAcrostic(verseObj);
-      let ref = this.buildRefSpan(verseObj);
-      let text = document.createTextNode(verseObj.v[verseText]);
-      searchText.appendChild(ref);
-      if (acrostic) {
-        searchText.appendChild(acrostic);
-      }
-      searchText.appendChild(text);
-      btn.appendChild(searchText);
-      return btn;
-    }
-
     applyFilter() {
       let tomeBin = this.rig.tomeBin;
       let bookIdx = this.searchFilter.bookIdx;
@@ -5108,6 +5207,24 @@
       refSpan.classList.add('font--bold');
       refSpan.textContent = verseObj.v[verseCitation] + ' ';
       return refSpan;
+    }
+
+    buildVerse(verseObj) {
+      let btn = document.createElement('button');
+      btn.classList.add('btn-result');
+      btn.dataset.verseIdx = verseObj.k;
+      let searchText = document.createElement('span');
+      searchText.classList.add('span-result-text');
+      let acrostic = templateAcrostic(verseObj);
+      let ref = this.buildRefSpan(verseObj);
+      let text = document.createTextNode(verseObj.v[verseText]);
+      searchText.appendChild(ref);
+      if (acrostic) {
+        searchText.appendChild(acrostic);
+      }
+      searchText.appendChild(text);
+      btn.appendChild(searchText);
+      return btn;
     }
 
     changeFont() {
@@ -5218,7 +5335,7 @@
       let fragment = document.createDocumentFragment();
       let verseObjs = this.searchVerseObjs.filter(x => verses.includes(x.k));
       for (let verseObj of verseObjs) {
-        let verse = this.addVerse(verseObj);
+        let verse = this.buildVerse(verseObj);
         fragment.appendChild(verse);
       }
       this.list.appendChild(fragment);

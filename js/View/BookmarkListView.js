@@ -3,6 +3,7 @@
 import queue from '../CommandQueue.js';
 import {
   templateActionMenu,
+  templateAcrostic,
   templateBtnIcon,
   templateElement,
   templatePage,
@@ -11,6 +12,10 @@ import {
   templateToolbarUpper
 } from '../template.js';
 import { citationByVerseIdx } from '../data/tomeDb.js';
+import {
+  verseCitation,
+  verseText
+} from '../data/tomeIdx.js';
 import { removeAllChildren } from '../util.js';
 
 const actionSet = [
@@ -26,7 +31,8 @@ const lowerToolSet = [
   { type: 'btn', icon: 'sort-ascend', label: 'Sort Ascending' },
   { type: 'btn', icon: 'sort-invert', label: 'Sort Invert' },
   { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' },
-  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
+  { type: 'btn', icon: 'expand-mode', label: 'Expand Bookmarks' },
+  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' },
 ];
 
 const upperToolSet = [
@@ -112,12 +118,63 @@ class BookmarkListView {
     container.appendChild(this.page);
   }
 
+  buildRefSpan(verseObj) {
+    let refSpan = document.createElement('span');
+    refSpan.classList.add('font--bold');
+    refSpan.textContent = verseObj.v[verseCitation] + ' ';
+    return refSpan;
+  }
+
+  buildVerse(verseObj) {
+    let btn = document.createElement('button');
+    btn.classList.add('btn-result');
+    btn.dataset.verseIdx = verseObj.k;
+    let searchText = document.createElement('span');
+    searchText.classList.add('span-result-text');
+    let acrostic = templateAcrostic(verseObj);
+    let ref = this.buildRefSpan(verseObj);
+    let text = document.createTextNode(verseObj.v[verseText]);
+    searchText.appendChild(ref);
+    if (acrostic) {
+      searchText.appendChild(acrostic);
+    }
+    searchText.appendChild(text);
+    btn.appendChild(searchText);
+    return btn;
+  }
+
   delete(verseIdx) {
     queue.publish('bookmark-list.delete', verseIdx);
   }
 
   down(verseIdx) {
     queue.publish('bookmark-list.down', verseIdx);
+  }
+
+  entryClick(target) {
+    if (target) {
+      if (target.classList.contains('btn-entry')) {
+        let verseIdx = parseInt(target.dataset.verseIdx);
+        if (this.strongMode) {
+          queue.publish('bookmark-list.strong-select', verseIdx);
+        } else {
+          queue.publish('bookmark-list.select', verseIdx);
+        }
+      } else if (target.classList.contains('btn-icon--h-menu')) {
+        let ref = target.previousSibling;
+        this.menuClick(ref);
+      }
+    }
+  }
+
+  expandModeUpdate(expandMode) {
+    this.expandMode = expandMode;
+    if (this.expandMode) {
+      this.btnExpandMode.classList.add('btn-icon--active');
+    } else {
+      this.btnExpandMode.classList.remove('btn-icon--active');
+    }
+    this.updateBookmarks()
   }
 
   getElements() {
@@ -136,6 +193,8 @@ class BookmarkListView {
       '.btn-icon--sort-ascend');
     this.btnSortInvert = this.toolbarLower.querySelector(
       '.btn-icon--sort-invert');
+    this.btnExpandMode = this.toolbarLower.querySelector(
+      '.btn-icon--expand-mode');
     this.btnStrongMode = this.toolbarLower.querySelector(
       '.btn-icon--strong-mode');
     this.btnBookmarkFolder = this.toolbarLower.querySelector(
@@ -157,18 +216,10 @@ class BookmarkListView {
   listClick(event) {
     event.preventDefault();
     let target = event.target.closest('button');
-    if (target) {
-      if (target.classList.contains('btn-entry')) {
-        let verseIdx = parseInt(target.dataset.verseIdx);
-        if (this.strongMode) {
-          queue.publish('bookmark-list.strong-select', verseIdx);
-        } else {
-          queue.publish('bookmark-list.select', verseIdx);
-        }
-      } else if (target.classList.contains('btn-icon--h-menu')) {
-        let ref = target.previousSibling;
-        this.menuClick(ref);
-      }
+    if (this.expandMode) {
+      this.verseClick(target);
+    } else {
+      this.entryClick(target);
     }
   }
 
@@ -215,6 +266,9 @@ class BookmarkListView {
     queue.subscribe('bookmark.active-folder.update', (activeFolder) => {
       this.updateActiveFolder(activeFolder);
     });
+    queue.subscribe('bookmark.expand-mode.update', (expandMode) => {
+      this.expandModeUpdate(expandMode);
+    });
     queue.subscribe('bookmark.strong-mode.update', (strongMode) => {
       this.strongModeUpdate(strongMode);
     });
@@ -230,10 +284,12 @@ class BookmarkListView {
         queue.publish('bookmark-list.sort-ascend', null);
       } else if (target === this.btnSortInvert) {
         queue.publish('bookmark-list.sort-invert', null);
-      } else if (target === this.btnStrongMode) {
-        queue.publish('bookmark-list.strong-mode.click', null);
       } else if (target === this.btnBookmarkFolder) {
         queue.publish('bookmark-folder', null);
+      } else if (target === this.btnExpandMode) {
+        queue.publish('bookmark-list.expand-mode.click', null);
+      } else if (target === this.btnStrongMode) {
+        queue.publish('bookmark-list.strong-mode.click', null);
       }
     }
   }
@@ -260,13 +316,33 @@ class BookmarkListView {
     } else {
       this.empty.classList.add('empty--hide');
       let fragment = document.createDocumentFragment();
-      for (let verseIdx of this.activeFolder.bookmarks) {
-        let ref = this.buildEntry(verseIdx);
-        fragment.appendChild(ref);
+      if (this.expandMode) {
+        for (let verseObj of this.activeFolder.verseObjs) {
+          let ref = this.buildVerse(verseObj);
+          fragment.appendChild(ref);
+        }
+      } else {
+        for (let verseIdx of this.activeFolder.bookmarks) {
+          let ref = this.buildEntry(verseIdx);
+          fragment.appendChild(ref);
+        }
       }
       this.list.appendChild(fragment);
     }
     this.scroll.scrollTop = scrollSave;
+  }
+
+  verseClick(target) {
+    if (target) {
+      if (target.classList.contains('btn-result')) {
+        let verseIdx = parseInt(target.dataset.verseIdx);
+        if (this.strongMode) {
+          queue.publish('bookmark-list.strong-select', verseIdx);
+        } else {
+          queue.publish('bookmark-list.select', verseIdx);
+        }
+      }
+    }
   }
 
 }

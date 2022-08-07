@@ -70,24 +70,6 @@ class SearchResultView {
     });
   }
 
-  addVerse(verseObj) {
-    let btn = document.createElement('button');
-    btn.classList.add('btn-result');
-    btn.dataset.verseIdx = verseObj.k;
-    let searchText = document.createElement('span');
-    searchText.classList.add('span-result-text');
-    let acrostic = templateAcrostic(verseObj);
-    let ref = this.buildRefSpan(verseObj);
-    let text = document.createTextNode(verseObj.v[verseText]);
-    searchText.appendChild(ref);
-    if (acrostic) {
-      searchText.appendChild(acrostic);
-    }
-    searchText.appendChild(text);
-    btn.appendChild(searchText);
-    return btn;
-  }
-
   applyFilter() {
     let tomeBin = this.rig.tomeBin;
     let bookIdx = this.searchFilter.bookIdx;
@@ -149,6 +131,24 @@ class SearchResultView {
     refSpan.classList.add('font--bold');
     refSpan.textContent = verseObj.v[verseCitation] + ' ';
     return refSpan;
+  }
+
+  buildVerse(verseObj) {
+    let btn = document.createElement('button');
+    btn.classList.add('btn-result');
+    btn.dataset.verseIdx = verseObj.k;
+    let searchText = document.createElement('span');
+    searchText.classList.add('span-result-text');
+    let acrostic = templateAcrostic(verseObj);
+    let ref = this.buildRefSpan(verseObj);
+    let text = document.createTextNode(verseObj.v[verseText]);
+    searchText.appendChild(ref);
+    if (acrostic) {
+      searchText.appendChild(acrostic);
+    }
+    searchText.appendChild(text);
+    btn.appendChild(searchText);
+    return btn;
   }
 
   changeFont() {
@@ -259,7 +259,7 @@ class SearchResultView {
     let fragment = document.createDocumentFragment();
     let verseObjs = this.searchVerseObjs.filter(x => verses.includes(x.k));
     for (let verseObj of verseObjs) {
-      let verse = this.addVerse(verseObj);
+      let verse = this.buildVerse(verseObj);
       fragment.appendChild(verse);
     }
     this.list.appendChild(fragment);

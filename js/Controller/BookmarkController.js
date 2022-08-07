@@ -30,6 +30,10 @@ class BookmarkController {
     }
   }
 
+  expandModeToggle() {
+    queue.publish('bookmark.expand-mode.toggle', null);
+  }
+
   exportPane() {
     queue.publish('bookmark.task.change', 'bookmark-export');
   }
@@ -136,10 +140,6 @@ class BookmarkController {
     queue.publish('bookmark.up', verseIdx);
   }
 
-  modeToggle() {
-    queue.publish('bookmark.strong-mode.toggle', null);
-  }
-
   moveCopyCopy(copyPkg) {
     queue.publish('bookmark.copy', copyPkg);
   }
@@ -167,6 +167,10 @@ class BookmarkController {
 
   sidebarUpdate(sidebar) {
     this.sidebar = sidebar;
+  }
+
+  strongModeToggle() {
+    queue.publish('bookmark.strong-mode.toggle', null);
   }
 
   strongSelect(verseIdx) {
@@ -236,6 +240,9 @@ class BookmarkController {
     queue.subscribe('bookmark-list.down', (verseIdx) => {
       this.listDown(verseIdx);
     });
+    queue.subscribe('bookmark-list.expand-mode.click', () => {
+      this.expandModeToggle();
+    });
     queue.subscribe('bookmark-list.move-copy', (verseIdx) => {
       this.moveCopyPane(verseIdx);
     });
@@ -249,7 +256,7 @@ class BookmarkController {
       this.listSortInvert();
     });
     queue.subscribe('bookmark-list.strong-mode.click', () => {
-      this.modeToggle();
+      this.strongModeToggle();
     });
     queue.subscribe('bookmark-list.strong-select', (verseIdx) => {
       this.strongSelect(verseIdx);
