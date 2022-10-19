@@ -15,3 +15,8 @@ It should also support the latest version of the Safari browser, but has not bee
 
 ### Download Link
 [kjs](https://1john419.github.io/kjs/)
+
+### Contact
+Questions or comments?
+
+[Send email](mailto:github.1john419@gmail.com?subject=KJS%20Feedback)

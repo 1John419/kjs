@@ -37,12 +37,13 @@ let appCaches = [
     ]
   },
   {
-    name: 'kjs-help-20220807.01',
+    name: 'kjs-help-20221013.01',
     urls: [
       './help/bookmark.html',
       './help/help.html',
       './help/navigator.html',
       './help/overview.html',
+      './help/name-mode.html',
       './help/read.html',
       './help/search.html',
       './help/setting.html',
