@@ -1,9 +1,7 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
-
+import { queue } from '../CommandQueue.js';
 import { helpTopicList } from './HelpTopicView.js';
-
 import {
   templatePage,
   templateScroll,
@@ -12,12 +10,12 @@ import {
 } from '../template.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', label: 'Back' },
-  { type: 'btn', icon: 'help-topic', label: 'Help Topic' }
+  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
+  { type: 'btn', icon: 'help-topic', ariaLabel: 'Help Topic' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'help-read', text: null },
+  { type: 'banner', cssModifier: 'help-read', text: null },
 ];
 
 class HelpReadView {

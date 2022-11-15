@@ -1,15 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
-import {
-  verseCitation,
-  verseText
-} from '../data/tomeIdx.js';
-import {
-  mapSliceEnd,
-  mapSliceStart,
-  mapStrongNums
-} from '../data/strongIdx.js';
+import { queue } from '../CommandQueue.js';
 import {
   templateElement,
   templatePage,
@@ -20,15 +11,24 @@ import {
 import {
   removeAllChildren
 } from '../util.js';
+import {
+  verseCitation,
+  verseText
+} from '../data/tomeIdx.js';
+import {
+  mapSliceEnd,
+  mapSliceStart,
+  mapStrongNums
+} from '../data/strongIdx.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', label: 'Back' },
-  { type: 'btn', icon: 'strong-def', label: 'Strong Definition' },
-  { type: 'btn', icon: 'result', label: 'Strong Search' }
+  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
+  { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
+  { type: 'btn', icon: 'result', ariaLabel: 'Strong Search' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'strong-verse', text: 'Strong Verse' }
+  { type: 'banner', cssModifier: 'strong-verse', text: 'Strong Verse' }
 ];
 
 class StrongVerseView {

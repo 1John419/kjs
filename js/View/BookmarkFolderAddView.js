@@ -1,7 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
-
+import { queue } from '../CommandQueue.js';
 import {
   templateDivDialog,
   templateElement,
@@ -13,16 +12,16 @@ import {
 
 const dialogToolset = [
   { type: 'label', text: 'Name' },
-  { type: 'input', label: 'Name' },
-  { type: 'btn', id: 'save', label: 'Save' }
+  { type: 'input', ariaLabel: 'Name' },
+  { type: 'btn', id: 'save', ariaLabel: 'Save' }
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' }
+  { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'bookmark-folder-add', text: 'Folder Add' }
+  { type: 'banner', cssModifier: 'bookmark-folder-add', text: 'Folder Add' }
 ];
 
 class BookmarkFolderAddView {

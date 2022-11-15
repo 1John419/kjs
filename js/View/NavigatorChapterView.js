@@ -1,6 +1,17 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
+import {
+  templateElement,
+  templatePage,
+  templateScroll,
+  templateToolbarLower,
+  templateToolbarUpper
+} from '../template.js';
+import {
+  range,
+  removeAllChildren
+} from '../util.js';
 import {
   tomeBooks,
   tomeChapters
@@ -13,25 +24,14 @@ import {
   chapterName,
   chapterNum
 } from '../data/tomeIdx.js';
-import {
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper
-} from '../template.js';
-import {
-  range,
-  removeAllChildren
-} from '../util.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', label: 'Back' },
-  { type: 'btn', icon: 'navigator-book', label: 'Book' }
+  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
+  { type: 'btn', icon: 'navigator-book', ariaLabel: 'Book' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'navigator-chapter', text: null }
+  { type: 'banner', cssModifier: 'navigator-chapter', text: null }
 ];
 
 class NavigatorChapterView {

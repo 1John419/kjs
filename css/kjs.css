@@ -52,7 +52,7 @@ h3 {
 }
 
 hr {
-  border-color: var(--ui-base-fg);
+  border-top: 1px solid var(--ui-base-fg);
 }
 
 html {
@@ -659,7 +659,7 @@ textarea {
   --ui-hint-fg: hsl(  0,   0%,   3%);
 }
 
-.theme--amethyst-lite {
+.theme--amethyst-light {
   --ui-base-bg: hsl(270,  50%,  91%);
   --ui-base-fg: hsl(  0,   0%,  28%);
   --ui-tool-bg: hsl(270,  50%,  69%);
@@ -677,7 +677,7 @@ textarea {
   --ui-hint-fg: hsl(  0,   0%,   4%);
 }
 
-.theme--beryl-lite {
+.theme--beryl-light {
   --ui-base-bg: hsl( 50,  90%,  90%);
   --ui-base-fg: hsl(  0,   0%,  32%);
   --ui-tool-bg: hsl( 50,  90%,  51%);
@@ -695,7 +695,7 @@ textarea {
   --ui-hint-fg: hsl(  0,   0%,   3%);
 }
 
-.theme--chalcedony-lite {
+.theme--chalcedony-light {
   --ui-base-bg: hsl(240,  10%,  92%);
   --ui-base-fg: hsl(  0,   0%,  30%);
   --ui-tool-bg: hsl(240,  10%,  77%);
@@ -713,7 +713,7 @@ textarea {
   --ui-hint-fg: hsl(  0,   0%,   2%);
 }
 
-.theme--emerald-lite {
+.theme--emerald-light {
   --ui-base-bg: hsl(100,  60%,  93%);
   --ui-base-fg: hsl(  0,   0%,  32%);
   --ui-tool-bg: hsl(100,  60%,  65%);
@@ -731,7 +731,7 @@ textarea {
   --ui-hint-fg: hsl(  0,   0%,   1%);
 }
 
-.theme--jasper-lite {
+.theme--jasper-light {
   --ui-base-bg: hsl( 10,  90%,  93%);
   --ui-base-fg: hsl(  0,   0%,  28%);
   --ui-tool-bg: hsl( 10,  90%,  79%);
@@ -749,7 +749,7 @@ textarea {
   --ui-hint-fg: hsl(  0,   0%,   3%);
 }
 
-.theme--sapphire-lite {
+.theme--sapphire-light {
   --ui-base-bg: hsl(240,  50%,  94%);
   --ui-base-fg: hsl(  0,   0%,  30%);
   --ui-tool-bg: hsl(240,  50%,  82%);
@@ -767,7 +767,7 @@ textarea {
   --ui-hint-fg: hsl(  0,   0%,   2%);
 }
 
-.theme--topaz-lite {
+.theme--topaz-light {
   --ui-base-bg: hsl(195,  40%,  91%);
   --ui-base-fg: hsl(  0,   0%,  30%);
   --ui-tool-bg: hsl(195,  40%,  75%);

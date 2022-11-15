@@ -1,6 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
 
 class SettingController {
 
@@ -58,12 +58,12 @@ class SettingController {
     });
   }
 
-  getLiteThemeIdx() {
-    if (this.themes[this.themeIdx] === 'lite') {
+  getLightThemeIdx() {
+    if (this.themes[this.themeIdx] === 'light') {
       return this.themeIdx;
     }
     this.themeIdx = this.themes.findIndex((theme) => {
-      return theme.themeType === 'lite' &&
+      return theme.themeType === 'light' &&
         theme.themeName === this.theme.themeName;
     });
   }
@@ -122,8 +122,8 @@ class SettingController {
     queue.subscribe('setting.theme-dark', () => {
       this.themeDark();
     });
-    queue.subscribe('setting.theme-lite', () => {
-      this.themeLite();
+    queue.subscribe('setting.theme-light', () => {
+      this.themeLight();
     });
 
     queue.subscribe('theme.update', (theme) => {
@@ -144,9 +144,9 @@ class SettingController {
     queue.publish('theme.change', this.themes[this.themeIdx]);
   }
 
-  themeLite() {
+  themeLight() {
     let idxNow = this.themeIdx;
-    this.getLiteThemeIdx();
+    this.getLightThemeIdx();
     if (idxNow === this.themeIdx) {
       return;
     }

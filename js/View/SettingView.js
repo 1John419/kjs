@@ -1,6 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
 import {
   templateBtnIcon,
   templateElement,
@@ -11,19 +11,19 @@ import {
 } from '../template.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', label: 'Back' }
+  { type: 'btn', icon: 'back', ariaLabel: 'Back' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'setting', text: 'Setting' }
+  { type: 'banner', cssModifier: 'setting', text: 'Setting' }
 ];
 
 const fontSize = [
-  { size: 's', label: 'Small' },
-  { size: 'm', label: 'Medium' },
-  { size: 'l', label: 'Large' },
-  { size: 'xl', label: 'Extra Large' },
-  { size: 'xxl', label: 'Extra Extra Large' }
+  { size: 's', ariaLabel: 'Small' },
+  { size: 'm', ariaLabel: 'Medium' },
+  { size: 'l', ariaLabel: 'Large' },
+  { size: 'xl', ariaLabel: 'Extra Large' },
+  { size: 'xxl', ariaLabel: 'Extra Extra Large' }
 ];
 
 const templateBtnFontSize = (size, label) => {
@@ -94,8 +94,8 @@ const templateSettingTheme = (modifier, name) => {
     'div', 'selector', 'theme-type', null, null);
   let btnDark = templateBtnThemeType('dark', 'Dark');
   divSelector.appendChild(btnDark);
-  let btnLite = templateBtnThemeType('lite', 'Lite');
-  divSelector.appendChild(btnLite);
+  let btnLight = templateBtnThemeType('light', 'Light');
+  divSelector.appendChild(btnLight);
   divSetting.appendChild(divSelector);
   let divCarousel = templateSettingCarousel('theme', 'Theme');
   divSetting.appendChild(divCarousel);
@@ -192,7 +192,7 @@ class SettingView {
     
     this.divSelectorThemeType = this.divSettingTheme.querySelector('.selector--theme-type');
     this.btnDarkTheme = this.divSelectorThemeType.querySelector('.theme-type--dark');
-    this.btnLiteTheme = this.divSelectorThemeType.querySelector('.theme-type--lite');
+    this.btnLightTheme = this.divSelectorThemeType.querySelector('.theme-type--light');
     this.divCarouselTheme = this.divSettingTheme.querySelector(
       '.carousel--theme');
     this.btnPrevTheme = this.divCarouselTheme.querySelector('.btn-icon--prev');
@@ -271,8 +271,8 @@ class SettingView {
     if (btn) {
       if (btn === this.btnDarkTheme) {
         queue.publish('setting.theme-dark', null);
-      } else if (btn === this.btnLiteTheme) {
-        queue.publish('setting.theme-lite', null);
+      } else if (btn === this.btnLightTheme) {
+        queue.publish('setting.theme-light', null);
       }
     }
   }

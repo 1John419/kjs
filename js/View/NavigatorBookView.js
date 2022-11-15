@@ -1,11 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
-import { tomeBooks } from '../data/tomeDb.js';
-import {
-  bookLongName,
-  bookShortName
-} from '../data/tomeIdx.js';
+import { queue } from '../CommandQueue.js';
 import {
   templateElement,
   templatePage,
@@ -13,17 +8,22 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
+import { tomeBooks } from '../data/tomeDb.js';
+import {
+  bookLongName,
+  bookShortName
+} from '../data/tomeIdx.js';
 
 const greekFirstIdx = 39;
 const indices = [...Array(66).keys()];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', label: 'Back' },
-  { type: 'btn', icon: 'navigator-chapter', label: 'Chapter' }
+  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
+  { type: 'btn', icon: 'navigator-chapter', ariaLabel: 'Chapter' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'navigator-book', text: 'Book' }
+  { type: 'banner', cssModifier: 'navigator-book', text: 'Book' }
 ];
 
 class NavigatorBookView {

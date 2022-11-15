@@ -34,7 +34,7 @@ let swEvents = () => {
     });
   }
 
-  navigator.serviceWorker.register('./sw.js').then((reg) => {
+  navigator.serviceWorker.register('/sw.js').then((reg) => {
     console.log(`sw registered:      ${Date.now()}`);
     reg.onupdatefound = () => {
       updateFound = true;
@@ -73,15 +73,15 @@ const loadApp = async () => {
 
   let font = document.createElement('link');
   font.rel = 'stylesheet';
-  font.href = './css/font.css';
+  font.href = '/css/font.css';
   document.head.appendChild(font);
 
   let script = document.createElement('script');
   if (prod) {
-    script.src = './bundle.js';
+    script.src = '/bundle.js';
   } else {
     script.type = 'module';
-    script.src = './js/app.js';
+    script.src = '/js/app.js';
   }
   document.body.appendChild(script);
 };

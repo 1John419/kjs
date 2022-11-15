@@ -1,7 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
-import { verseCitation } from '../data/tomeIdx.js';
+import { queue } from '../CommandQueue.js';
 import {
   templateActionMenu,
   templateBtnIcon,
@@ -14,19 +13,20 @@ import {
 import {
   removeAllChildren
 } from '../util.js';
+import { verseCitation } from '../data/tomeIdx.js';
 
 const actionSet = [
-  { icon: 'move', label: 'Move' },
-  { icon: 'copy', label: 'Copy' },
-  { icon: 'cancel', label: 'Cancel' }
+  { icon: 'move', ariaLabel: 'Move' },
+  { icon: 'copy', ariaLabel: 'Copy' },
+  { icon: 'cancel', ariaLabel: 'Cancel' }
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' },
+  { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'bookmark-move-copy', text: null }
+  { type: 'banner', cssModifier: 'bookmark-move-copy', text: null }
 ];
 
 class BookmarkMoveCopyView {

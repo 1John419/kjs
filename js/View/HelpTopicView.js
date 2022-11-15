@@ -1,7 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
-
+import { queue } from '../CommandQueue.js';
 import {
   templateElement,
   templatePage,
@@ -11,12 +10,12 @@ import {
 } from '../template.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', label: 'Back' },
-  { type: 'btn', icon: 'help-read', label: 'Help Read' }
+  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
+  { type: 'btn', icon: 'help-read', ariaLabel: 'Help Read' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'topic', text: 'Topic' }
+  { type: 'banner', cssModifier: 'topic', text: 'Topic' }
 ];
 
 export const helpTopicList = [

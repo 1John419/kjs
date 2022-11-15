@@ -1,6 +1,17 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
+import {
+  templateAcrostic,
+  templateElement,
+  templatePage,
+  templateScroll,
+  templateToolbarLower,
+  templateToolbarUpper
+} from '../template.js';
+import {
+  removeAllChildren
+} from '../util.js';
 import {
   tomeBinBooks,
   bookBinChapters,
@@ -24,7 +35,7 @@ import {
 import {
   tomeBooks,
   tomeChapters,
-  tomeName
+  tomeName,
 } from '../data/tomeDb.js';
 import {
   bookLongName,
@@ -32,28 +43,17 @@ import {
   verseCitation,
   verseText
 } from '../data/tomeIdx.js';
-import {
-  templateAcrostic,
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper
-} from '../template.js';
-import {
-  removeAllChildren
-} from '../util.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', label: 'Back' },
-  { type: 'btn', icon: 'filter', label: 'Strong Filter' },
-  { type: 'btn', icon: 'strong-verse', label: 'Strong Verse' },
-  { type: 'btn', icon: 'strong-def', label: 'Strong Definition' },
-  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
+  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
+  { type: 'btn', icon: 'filter', ariaLabel: 'Strong Filter' },
+  { type: 'btn', icon: 'strong-verse', ariaLabel: 'Strong Verse' },
+  { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
+  { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'strong-result', text: 'Strong Search' }
+  { type: 'banner', cssModifier: 'strong-result', text: 'Strong Search' }
 ];
 
 const binIdx = 0;

@@ -1,28 +1,29 @@
 'use strict';
 
-import { progress } from '../load.js';
-import { chapterLastVerseIdx } from './tomeIdx.js';
 import {
   fetchJson,
   versionCheck
 } from './dbUtil.js';
+import { chapterLastVerseIdx } from './tomeIdx.js';
+import { progress } from '../load.js';
 
-const tomeStores = {
-  lists: 'k',
-  verses: 'k',
-  words: 'k'
+const tomeSetup = {
+  name: 'kjv',
+  stores: {
+    lists: 'k',
+    verses: 'k',
+    words: 'k'
+  },
+  url: '/json/kjv.json',
+  version: '2020-01-07',
 };
-
-const tomeUrl = './json/tome.kjv.json';
-const tomeVersion = 1;
-
-export const tomeName = 'KJV';
 
 export let tomeAcrostics = {};
 export let tomeBooks = null;
 export let tomeChapters = null;
 export let tomeCitations = [];
 export let tomeDb = null;
+export let tomeName = tomeSetup.name;
 export let tomeVerseCount = null;
 export let tomeWords = null;
 
@@ -45,7 +46,7 @@ export const initializeTome = async () => {
   progress('');
   progress('* tome database *');
   progress('');
-  tomeDb = await versionCheck('tome', tomeStores, tomeVersion);
+  tomeDb = await versionCheck(tomeSetup);
   await populateTome();
   await loadTomeAcrostics();
   await loadTomeBooks();
@@ -89,7 +90,7 @@ const loadTomeWords = async () => {
 const populateTome = async () => {
   let wordCount = await tomeDb.words.count();
   if (wordCount === 0) {
-    let data = await fetchJson(tomeUrl);
+    let data = await fetchJson(tomeSetup.url);
 
     progress('populating lists...');
     await tomeDb.lists.bulkAdd(data.lists);

@@ -1,7 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
-import { appPrefix } from '../util.js';
+import { queue } from '../CommandQueue.js';
 
 const validFontSizes = ['font-size--s', 'font-size--m', 'font-size--l',
   'font-size--xl', 'font-size--xxl'
@@ -57,10 +56,6 @@ class SettingModel {
       fontClass: 'font--open-sans'
     });
     this.fonts.push({
-      fontName: 'Lato',
-      fontClass: 'font--lato'
-    });
-    this.fonts.push({
       fontName: 'Roboto Slab',
       fontClass: 'font--roboto-slab'
     });
@@ -69,8 +64,20 @@ class SettingModel {
       fontClass: 'font--merriweather'
     });
     this.fonts.push({
-      fontName: 'Playfair Display',
-      fontClass: 'font--playfair-display'
+      fontName: 'Dancing Script',
+      fontClass: 'font--dancing-script'
+    });
+    this.fonts.push({
+      fontName: 'Shadows Into Light',
+      fontClass: 'font--shadows-into-light'
+    });
+    this.fonts.push({
+      fontName: 'Roboto Mono',
+      fontClass: 'font--roboto-mono'
+    });
+    this.fonts.push({
+      fontName: 'Inconsolata',
+      fontClass: 'font--inconsolata'
     });
     queue.publish('fonts.update', this.fonts);
   }
@@ -83,9 +90,9 @@ class SettingModel {
       themeClass: 'theme--jasper-dark'
     });
     this.themes.push({
-      themeType: 'lite',
+      themeType: 'light',
       themeName: 'Jasper',
-      themeClass: 'theme--jasper-lite'
+      themeClass: 'theme--jasper-light'
     });
     this.themes.push({
       themeType: 'dark',
@@ -93,9 +100,9 @@ class SettingModel {
       themeClass: 'theme--beryl-dark'
     });
     this.themes.push({
-      themeType: 'lite',
+      themeType: 'light',
       themeName: 'Beryl',
-      themeClass: 'theme--beryl-lite'
+      themeClass: 'theme--beryl-light'
     });
     this.themes.push({
       themeType: 'dark',
@@ -103,9 +110,9 @@ class SettingModel {
       themeClass: 'theme--emerald-dark'
     });
     this.themes.push({
-      themeType: 'lite',
+      themeType: 'light',
       themeName: 'Emerald',
-      themeClass: 'theme--emerald-lite'
+      themeClass: 'theme--emerald-light'
     });
     this.themes.push({
       themeType: 'dark',
@@ -113,9 +120,9 @@ class SettingModel {
       themeClass: 'theme--topaz-dark'
     });
     this.themes.push({
-      themeType: 'lite',
+      themeType: 'light',
       themeName: 'Topaz',
-      themeClass: 'theme--topaz-lite'
+      themeClass: 'theme--topaz-light'
     });
     this.themes.push({
       themeType: 'dark',
@@ -123,9 +130,9 @@ class SettingModel {
       themeClass: 'theme--sapphire-dark'
     });
     this.themes.push({
-      themeType: 'lite',
+      themeType: 'light',
       themeName: 'Sapphire',
-      themeClass: 'theme--sapphire-lite'
+      themeClass: 'theme--sapphire-light'
     });
     this.themes.push({
       themeType: 'dark',
@@ -133,9 +140,9 @@ class SettingModel {
       themeClass: 'theme--amethyst-dark'
     });
     this.themes.push({
-      themeType: 'lite',
+      themeType: 'light',
       themeName: 'Amethyst',
-      themeClass: 'theme--amethyst-lite'
+      themeClass: 'theme--amethyst-light'
     });
     this.themes.push({
       themeType: 'dark',
@@ -143,9 +150,9 @@ class SettingModel {
       themeClass: 'theme--chalcedony-dark'
     });
     this.themes.push({
-      themeType: 'lite',
+      themeType: 'light',
       themeName: 'Chalcedony',
-      themeClass: 'theme--chalcedony-lite'
+      themeClass: 'theme--chalcedony-light'
     });
         queue.publish('themes.update', this.themes);
   }
@@ -160,7 +167,7 @@ class SettingModel {
 
   restoreFont() {
     let defaultFont = this.fonts[fontDefault];
-    let font = localStorage.getItem(`${appPrefix}-font`);
+    let font = localStorage.getItem('font');
     if (!font) {
       font = defaultFont;
     } else {
@@ -178,7 +185,7 @@ class SettingModel {
 
   restoreFontSize() {
     let defaultFontSize = validFontSizes[fontSizeDefault];
-    let fontSize = localStorage.getItem(`${appPrefix}-fontSize`);
+    let fontSize = localStorage.getItem('fontSize');
     if (!fontSize) {
       fontSize = defaultFontSize;
     } else {
@@ -196,7 +203,7 @@ class SettingModel {
 
   restoreTheme() {
     let defaultTheme = this.themes[themeDefault];
-    let theme = localStorage.getItem(`${appPrefix}-theme`);
+    let theme = localStorage.getItem('theme');
     if (!theme) {
       theme = defaultTheme;
     } else {
@@ -213,15 +220,15 @@ class SettingModel {
   }
 
   saveFont() {
-    localStorage.setItem(`${appPrefix}-font`, JSON.stringify(this.font));
+    localStorage.setItem('font', JSON.stringify(this.font));
   }
 
   saveFontSize() {
-    localStorage.setItem(`${appPrefix}-fontSize`, JSON.stringify(this.fontSize));
+    localStorage.setItem('fontSize', JSON.stringify(this.fontSize));
   }
 
   saveTheme() {
-    localStorage.setItem(`${appPrefix}-theme`, JSON.stringify(this.theme));
+    localStorage.setItem('theme', JSON.stringify(this.theme));
   }
 
   subscribe() {

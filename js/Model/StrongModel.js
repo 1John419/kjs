@@ -1,6 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
 import { tomeBinVerses } from '../data/binIdx.js';
 import {
   strongDb,
@@ -11,7 +11,6 @@ import {
   wordTomeBin
 } from '../data/strongIdx.js';
 import { tomeDb } from '../data/tomeDb.js';
-import { appPrefix } from '../util.js';
 
 const strongDefReroute = ['strong-history', 'strong-lookup'];
 const strongResultReroute = ['strong-filter'];
@@ -156,7 +155,7 @@ class StrongModel {
 
   restoreChain() {
     let defaultChain = [];
-    let strongChain = localStorage.getItem(`${appPrefix}-strongChain`);
+    let strongChain = localStorage.getItem('strongChain');
     if (!strongChain) {
       strongChain = defaultChain;
     } else {
@@ -174,7 +173,7 @@ class StrongModel {
 
   async restoreDef() {
     let defaultDef = 'G2424';
-    let strongDef = localStorage.getItem(`${appPrefix}-strongDef`);
+    let strongDef = localStorage.getItem('strongDef');
     if (!strongDef) {
       strongDef = defaultDef;
     } else {
@@ -192,7 +191,7 @@ class StrongModel {
 
   restoreFilter() {
     let defaultFilter = this.tomeFilter();
-    let strongFilter = localStorage.getItem(`${appPrefix}-strongFilter`);
+    let strongFilter = localStorage.getItem('strongFilter');
     if (!strongFilter) {
       strongFilter = defaultFilter;
     } else {
@@ -210,7 +209,7 @@ class StrongModel {
 
   restoreHistory() {
     let defaultHistory = [];
-    let strongHistory = localStorage.getItem(`${appPrefix}-strongHistory`);
+    let strongHistory = localStorage.getItem('strongHistory');
     if (!strongHistory) {
       strongHistory = defaultHistory;
     } else {
@@ -228,7 +227,7 @@ class StrongModel {
 
   restoreMode() {
     let defaultMode = false;
-    let strongMode = localStorage.getItem(`${appPrefix}-strongStrongMode`);
+    let strongMode = localStorage.getItem('strongStrongMode');
     if (!strongMode) {
       strongMode = defaultMode;
     } else {
@@ -246,7 +245,7 @@ class StrongModel {
 
   restoreTask() {
     let defaultTask = 'strong-def';
-    let strongTask = localStorage.getItem(`${appPrefix}-strongTask`);
+    let strongTask = localStorage.getItem('strongTask');
     if (!strongTask) {
       strongTask = defaultTask;
     } else {
@@ -268,7 +267,7 @@ class StrongModel {
 
   async restoreVerseIdx() {
     let defaultVerseIdx = IDX_1_JOHN_4_19;
-    let strongVerseIdx = localStorage.getItem(`${appPrefix}-strongVerseIdx`);
+    let strongVerseIdx = localStorage.getItem('strongVerseIdx');
     if (!strongVerseIdx) {
       strongVerseIdx = defaultVerseIdx;
     } else {
@@ -286,7 +285,7 @@ class StrongModel {
 
   async restoreWord() {
     let defaultWord = null;
-    let strongWord = localStorage.getItem(`${appPrefix}-strongWord`);
+    let strongWord = localStorage.getItem('strongWord');
     if (!strongWord) {
       strongWord = defaultWord;
     } else {
@@ -303,42 +302,42 @@ class StrongModel {
   }
 
   saveChain() {
-    localStorage.setItem(`${appPrefix}-strongChain`,
+    localStorage.setItem('strongChain',
       JSON.stringify(this.strongChain));
   }
 
   saveDef() {
-    localStorage.setItem(`${appPrefix}-strongDef`,
+    localStorage.setItem('strongDef',
       JSON.stringify(this.strongDef));
   }
 
   saveFilter() {
-    localStorage.setItem(`${appPrefix}-strongFilter`,
+    localStorage.setItem('strongFilter',
       JSON.stringify(this.strongFilter));
   }
 
   saveHistory() {
-    localStorage.setItem(`${appPrefix}-strongHistory`,
+    localStorage.setItem('strongHistory',
       JSON.stringify(this.strongHistory));
   }
 
   saveMode() {
-    localStorage.setItem(`${appPrefix}-strongStrongMode`,
+    localStorage.setItem('strongStrongMode',
       JSON.stringify(this.strongMode));
   }
 
   saveTask() {
-    localStorage.setItem(`${appPrefix}-strongTask`,
+    localStorage.setItem('strongTask',
       JSON.stringify(this.strongTask));
   }
 
   saveVerseIdx() {
-    localStorage.setItem(`${appPrefix}-strongVerseIdx`,
+    localStorage.setItem('strongVerseIdx',
       JSON.stringify(this.strongVerseIdx));
   }
 
   saveWord() {
-    localStorage.setItem(`${appPrefix}-strongWord`,
+    localStorage.setItem('strongWord',
       JSON.stringify(this.strongWord));
   }
 

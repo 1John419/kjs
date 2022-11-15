@@ -56,7 +56,7 @@ const APP_FONT = 'font--roboto';
 let loadMsg = document.querySelector('.load-msg');
 let loadScroll = document.querySelector('.load-scroll');
 
-(async function() {
+(async () => {
   let body = document.body;
   let load = body.querySelector('.load');
 

@@ -1,7 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
-
+import { queue } from '../CommandQueue.js';
 import {
   templateDivDialog,
   templateElement,
@@ -13,16 +12,16 @@ import {
 
 const dialogToolset = [
   { type: 'label', text: 'Strong Number' },
-  { type: 'input', label: 'Strong Number' },
-  { type: 'btn', id: 'find', label: 'Find' }
+  { type: 'input', ariaLabel: 'Strong Number' },
+  { type: 'btn', id: 'find', ariaLabel: 'Find' }
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'strong-def', label: 'Strong Definition' }
+  { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'strong-lookup', text: 'Strong Lookup' },
+  { type: 'banner', cssModifier: 'strong-lookup', text: 'Strong Lookup' },
 ];
 
 class StrongLookupView {

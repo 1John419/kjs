@@ -1,20 +1,22 @@
 'use strict';
 
-import { progress } from '../load.js';
-import { defTranliteration } from '../data/strongIdx.js';
 import {
   fetchJson,
   versionCheck
 } from './dbUtil.js';
+import { progress } from '../load.js';
+import { defTranliteration } from '../data/strongIdx.js';
 
-const strongStores = {
-  defs: 'k',
-  maps: 'k',
-  words: 'k'
+const strongSetup = {
+  name: 'strong',
+  stores: {
+    defs: 'k',
+    maps: 'k',
+    words: 'k',
+  },
+  url: '/json/strong.json',
+  version: '2020-07-30',
 };
-
-const strongUrl = './json/strong.json';
-const strongVersion = 7;
 
 export let strongCitations = {};
 export let strongDb = null;
@@ -24,7 +26,7 @@ export const initializeStrong = async () => {
   progress('');
   progress('* strong database *');
   progress('');
-  strongDb = await versionCheck('strong', strongStores, strongVersion);
+  strongDb = await versionCheck(strongSetup);
   await populateStrong();
   await loadStrongNums();
   await loadStrongCitations();
@@ -46,7 +48,7 @@ const loadStrongNums = async () => {
 const populateStrong = async () => {
   let wordsCount = await strongDb.words.count();
   if (wordsCount === 0) {
-    let data = await fetchJson(strongUrl);
+    let data = await fetchJson(strongSetup.url);
 
     progress('populating defs...');
     await strongDb.defs.bulkAdd(data.defs);

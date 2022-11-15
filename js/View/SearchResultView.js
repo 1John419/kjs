@@ -1,6 +1,15 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
+import {
+  templateAcrostic,
+  templateElement,
+  templatePage,
+  templateScroll,
+  templateToolbarLower,
+  templateToolbarUpper
+} from '../template.js';
+import { removeAllChildren } from '../util.js';
 import {
   bookBinChapters,
   bookBinSliceEnd,
@@ -19,7 +28,7 @@ import {
 import {
   tomeBooks,
   tomeChapters,
-  tomeName
+  tomeName,
 } from '../data/tomeDb.js';
 import {
   bookLongName,
@@ -27,26 +36,17 @@ import {
   verseCitation,
   verseText
 } from '../data/tomeIdx.js';
-import {
-  templateAcrostic,
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper
-} from '../template.js';
-import { removeAllChildren } from '../util.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', label: 'Back' },
-  { type: 'btn', icon: 'search-lookup', label: 'Search Lookup' },
-  { type: 'btn', icon: 'filter', label: 'Search Filter' },
-  { type: 'btn', icon: 'history', label: 'Search History' },
-  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' }
+  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
+  { type: 'btn', icon: 'search-lookup', ariaLabel: 'Search Lookup' },
+  { type: 'btn', icon: 'filter', ariaLabel: 'Search Filter' },
+  { type: 'btn', icon: 'history', ariaLabel: 'Search History' },
+  { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'search-result', text: null }
+  { type: 'banner', cssModifier: 'search-result', text: null }
 ];
 
 const binIdx = 0;
@@ -110,7 +110,7 @@ class SearchResultView {
     this.list = templateElement('div', 'list', 'search-result', null, null);
     this.scroll.appendChild(this.list);
 
-    this.loadMore = templateElement('div', 'load-more', 'strong-result', null, null);
+    this.loadMore = templateElement('div', 'load-more', 'search-result', null, null);
     this.btnLoadMore = document.createElement('button');
     this.btnLoadMore.classList.add('btn-load-more');
     this.btnLoadMore.textContent = 'Load More';

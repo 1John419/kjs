@@ -1,7 +1,7 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
-import { strongCitations } from '../data/strongDb.js';
+import { queue } from '../CommandQueue.js';
+import { removeAllChildren } from '../util.js';
 import {
   templateBtnIcon,
   templateElement,
@@ -10,15 +10,15 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
-import { removeAllChildren } from '../util.js';
+import { strongCitations } from '../data/strongDb.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'strong-def', label: 'Strong Definition' },
-  { type: 'btn', icon: 'history-clear', label: 'Clear Hitory' }
+  { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
+  { type: 'btn', icon: 'history-clear', ariaLabel: 'Clear Hitory' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'strong-history', text: 'Strong History' }
+  { type: 'banner', cssModifier: 'strong-history', text: 'Strong History' }
 ];
 
 const firstXlit = 0;

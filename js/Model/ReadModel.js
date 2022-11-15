@@ -1,7 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
-import { appPrefix } from '../util.js';
+import { queue } from '../CommandQueue.js';
 
 class ReadModel {
 
@@ -47,7 +46,7 @@ class ReadModel {
 
   restoreColumnMode() {
     let defaultColumnMode = false;
-    let columnMode = localStorage.getItem(`${appPrefix}-columnMode`);
+    let columnMode = localStorage.getItem('columnMode');
     if (!columnMode) {
       columnMode = defaultColumnMode;
     } else {
@@ -65,7 +64,7 @@ class ReadModel {
 
   restoreNameMode() {
     let defaultNameMode = true;
-    let nameMode = localStorage.getItem(`${appPrefix}-readNameMode`);
+    let nameMode = localStorage.getItem('readNameMode');
     if (!nameMode) {
       nameMode = defaultNameMode;
     } else {
@@ -83,7 +82,7 @@ class ReadModel {
 
   restoreSidebar() {
     let defaultSidebar = this.panes > 1 ? 'navigator' : 'none';
-    let sidebar = localStorage.getItem(`${appPrefix}-sidebar`);
+    let sidebar = localStorage.getItem('sidebar');
     if (!sidebar) {
       sidebar = defaultSidebar;
     } else {
@@ -103,7 +102,7 @@ class ReadModel {
 
   restoreStrongMode() {
     let defaultStrongMode = false;
-    let strongMode = localStorage.getItem(`${appPrefix}-readStrongMode`);
+    let strongMode = localStorage.getItem('readStrongMode');
     if (!strongMode) {
       strongMode = defaultStrongMode;
     } else {
@@ -120,22 +119,22 @@ class ReadModel {
   }
 
   saveColumnMode() {
-    localStorage.setItem(`${appPrefix}-columnMode`,
+    localStorage.setItem('columnMode',
       JSON.stringify(this.columnMode));
   }
 
   saveNameMode() {
-    localStorage.setItem(`${appPrefix}-readNameMode`,
+    localStorage.setItem('readNameMode',
       JSON.stringify(this.nameMode));
   }
 
   saveStrongMode() {
-    localStorage.setItem(`${appPrefix}-readStrongMode`,
+    localStorage.setItem('readStrongMode',
       JSON.stringify(this.strongMode));
   }
 
   saveSidebar() {
-    localStorage.setItem(`${appPrefix}-sidebar`, JSON.stringify(this.sidebar));
+    localStorage.setItem('sidebar', JSON.stringify(this.sidebar));
   }
 
   sidebarChange(sidebar) {

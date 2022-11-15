@@ -1,7 +1,5 @@
 'use strict';
 
-export const appPrefix = 'kjs';
-
 export const centerScrollElement = (scrollElement, element) => {
   let y = element.offsetTop - scrollElement.offsetTop -
     (scrollElement.clientHeight - element.clientHeight) / 2;

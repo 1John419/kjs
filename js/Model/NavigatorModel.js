@@ -1,6 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
 import {
   tomeChapters,
   tomeDb
@@ -14,7 +14,6 @@ import {
   chapterLastVerseIdx
 } from '../data/tomeIdx.js';
 import {
-  appPrefix,
   range
 } from '../util.js';
 
@@ -72,7 +71,7 @@ class NavigatorModel {
 
   async restoreChapterIdx() {
     let defaultIdx = CHAPTER_IDX_GENESIS_1;
-    let chapterIdx = localStorage.getItem(`${appPrefix}-chapterIdx`);
+    let chapterIdx = localStorage.getItem('chapterIdx');
     if (!chapterIdx) {
       chapterIdx = defaultIdx;
     } else {
@@ -90,7 +89,7 @@ class NavigatorModel {
 
   restoreTask() {
     let defaultTask = 'navigator-book';
-    let navigatorTask = localStorage.getItem(`${appPrefix}-navigatorTask`);
+    let navigatorTask = localStorage.getItem('navigatorTask');
     if (!navigatorTask) {
       navigatorTask = defaultTask;
     } else {
@@ -107,12 +106,12 @@ class NavigatorModel {
   }
 
   saveChapterIdx() {
-    localStorage.setItem(`${appPrefix}-chapterIdx`,
+    localStorage.setItem('chapterIdx',
       JSON.stringify(this.chapterIdx));
   }
 
   saveNavigatorTask() {
-    localStorage.setItem(`${appPrefix}-navigatorTask`,
+    localStorage.setItem('navigatorTask',
       JSON.stringify(this.navigatorTask));
   }
 

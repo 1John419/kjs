@@ -1,29 +1,7 @@
 'use strict';
 
-import Dexie from '../lib/dexie.min.mjs';
 import { progress } from '../load.js';
-import { appPrefix } from '../util.js';
-
-const dbVersion = (dbName) => {
-  let defaultVersion = 0;
-  let version = localStorage.getItem(`${appPrefix}-${dbName}Version`);
-  if (!version) {
-    version = defaultVersion;
-  } else {
-    try {
-      version = JSON.parse(version);
-    } catch (error) {
-      version = defaultVersion;
-    }
-    if (typeof version !== 'number') {
-      version = defaultVersion;
-    }
-  }
-  localStorage.setItem(`${appPrefix}-${dbName}Version`,
-    JSON.stringify(version));
-
-  return version;
-};
+import { Dexie } from '../lib/dexie.min.mjs';
 
 export const fetchJson = async (url) => {
   progress('fetching...');
@@ -34,21 +12,42 @@ export const fetchJson = async (url) => {
   return data;
 };
 
-export const versionCheck = async (name, stores, version) => {
-  let currentVersion = dbVersion(name);
+const getVersion = (dbName) => {
+  let defaultVersion = '1970-01-01';
+  let version = localStorage.getItem(`${dbName}Version`);
+  if (!version) {
+    version = defaultVersion;
+  } else {
+    try {
+      version = JSON.parse(version);
+    } catch (error) {
+      version = defaultVersion;
+    }
+    if (typeof version !== 'string') {
+      version = defaultVersion;
+    }
+  }
+  localStorage.setItem(`${dbName}Version`,
+    JSON.stringify(version));
 
-  let db = new Dexie(name);
-  await db.version(1).stores(stores);
+  return version;
+};
+
+export const versionCheck = async (dbSetup) => {
+  let currentVersion = getVersion(dbSetup.name);
+
+  let db = new Dexie(dbSetup.name);
+  await db.version(1).stores(dbSetup.stores);
   db.open();
 
-  if (version !== currentVersion) {
+  if (dbSetup.version !== currentVersion) {
     progress('new version.');
-    for (let store of Object.keys(stores)) {
+    for (let store of Object.keys(dbSetup.stores)) {
       progress(`clearing ${store}...`);
       await db.table(store).clear();
     }
-    localStorage.setItem(`${appPrefix}-${name}Version`,
-      JSON.stringify(version));
+    localStorage.setItem(`${dbSetup.name}Version`,
+      JSON.stringify(dbSetup.version));
   }
 
   return db;

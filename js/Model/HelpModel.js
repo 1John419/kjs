@@ -1,7 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
-import { appPrefix } from '../util.js';
+import { queue } from '../CommandQueue.js';
 
 const validTasks = ['help-read', 'help-topic'];
 const validTopics = ['about', 'bookmark', 'help', 'name-mode', 'navigator',
@@ -24,7 +23,7 @@ class HelpModel {
 
   restoreTask() {
     let defaultTask = 'help-read';
-    let helpTask = localStorage.getItem(`${appPrefix}-helpTask`);
+    let helpTask = localStorage.getItem('helpTask');
     if (!helpTask) {
       helpTask = defaultTask;
     } else {
@@ -42,7 +41,7 @@ class HelpModel {
 
   restoreTopic() {
     let defaultTopic = 'overview';
-    let helpTopic = localStorage.getItem(`${appPrefix}-helpTopic`);
+    let helpTopic = localStorage.getItem('helpTopic');
     if (!helpTopic) {
       helpTopic = defaultTopic;
     } else {
@@ -59,11 +58,11 @@ class HelpModel {
   }
 
   saveHelpTask() {
-    localStorage.setItem(`${appPrefix}-helpTask`, JSON.stringify(this.helpTask));
+    localStorage.setItem('helpTask', JSON.stringify(this.helpTask));
   }
 
   saveHelpTopic() {
-    localStorage.setItem(`${appPrefix}-helpTopic`, JSON.stringify(this.helpTopic));
+    localStorage.setItem('helpTopic', JSON.stringify(this.helpTopic));
   }
 
   subscribe() {

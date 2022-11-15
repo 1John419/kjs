@@ -1,6 +1,17 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
+import {
+  templateBtnIcon,
+  templateElement,
+  templatePage,
+  templateScroll,
+  templateToolbarLower,
+  templateToolbarUpper
+} from '../template.js';
+import {
+  removeAllChildren
+} from '../util.js';
 import {
   bookBinBookIdx,
   bookBinChapters,
@@ -14,32 +25,21 @@ import {
   tomeBinWordCount
 } from '../data/binIdx.js';
 import {
+  tomeBooks,
   tomeChapters,
   tomeName,
-  tomeBooks
 } from '../data/tomeDb.js';
 import {
   bookLongName,
   chapterName
 } from '../data/tomeIdx.js';
-import {
-  templateBtnIcon,
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper
-} from '../template.js';
-import {
-  removeAllChildren
-} from '../util.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'result', label: 'Search Result' }
+  { type: 'btn', icon: 'result', ariaLabel: 'Search Result' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'search-filter', text: null }
+  { type: 'banner', cssModifier: 'search-filter', text: null }
 ];
 
 class SearchFilterView {

@@ -1,19 +1,6 @@
 'use strict';
 
 import {
-  tomeBooks,
-  tomeChapters,
-  tomeDb,
-  tomeWords
-} from './data/tomeDb.js';
-import {
-  bookLastVerseIdx,
-  chapterLastVerseIdx,
-  verseText,
-  wordCount,
-  wordVerseIdx
-} from './data/tomeIdx.js';
-import {
   bookBinBookIdx,
   bookBinChapters,
   bookBinSliceEnd,
@@ -28,6 +15,19 @@ import {
   tomeBinVerses,
   tomeBinWordCount
 } from './data/binIdx.js';
+import {
+  tomeBooks,
+  tomeChapters,
+  tomeDb,
+  tomeWords
+} from './data/tomeDb.js';
+import {
+  bookLastVerseIdx,
+  chapterLastVerseIdx,
+  verseText,
+  wordCount,
+  wordVerseIdx
+} from './data/tomeIdx.js';
 
 const numSort = (a, b) => a - b;
 
@@ -177,7 +177,7 @@ class SearchEngine {
         .replace(/ {2,}/g, ' ')
         .replace(/ *,+ */g, ',');
       if (
-        !this.searchTerms.match(/[^a-z ,'*-]/i) &&
+        !this.searchTerms.match(/[^\p{L} ,'*-]/ui) &&
         !(/^\*$|^\* | \* | \*$|^\*,|,\*,|,\*$/g.test(this.searchTerms)) &&
         !(/^,|,$/g.test(this.searchTerms)) &&
         !(

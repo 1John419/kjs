@@ -1,6 +1,16 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
+import {
+  templateElement,
+  templatePage,
+  templateScroll,
+  templateToolbarLower,
+  templateToolbarUpper
+} from '../template.js';
+import {
+  removeAllChildren
+} from '../util.js';
 import {
   tomeBinVerseCount,
   tomeBinWordCount
@@ -13,28 +23,18 @@ import {
   wordKjvWord,
   wordTomeBin
 } from '../data/strongIdx.js';
-import {
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper
-} from '../template.js';
-import {
-  removeAllChildren
-} from '../util.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', label: 'Back' },
-  { type: 'btn', icon: 'strong-lookup', label: 'Strong Lookup' },
-  { type: 'btn', icon: 'history', label: 'Strong History' },
-  { type: 'btn', icon: 'strong-verse', label: 'Strong Verse' },
-  { type: 'btn', icon: 'result', label: 'Strong Result' },
-  { type: 'btn', icon: 'prev', label: 'Previous Strong' }
+  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
+  { type: 'btn', icon: 'strong-lookup', ariaLabel: 'Strong Lookup' },
+  { type: 'btn', icon: 'history', ariaLabel: 'Strong History' },
+  { type: 'btn', icon: 'strong-verse', ariaLabel: 'Strong Verse' },
+  { type: 'btn', icon: 'result', ariaLabel: 'Strong Result' },
+  { type: 'btn', icon: 'prev', ariaLabel: 'Previous Strong' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'strong-def', text: 'Strong Definition' }
+  { type: 'banner', cssModifier: 'strong-def', text: 'Strong Definition' }
 ];
 
 class StrongDefView {

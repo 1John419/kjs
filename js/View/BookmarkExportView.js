@@ -1,8 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
-import { tomeName } from '../data/tomeDb.js';
-
+import { queue } from '../CommandQueue.js';
 import {
   templateDivDialog,
   templatePage,
@@ -10,21 +8,22 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
+import { tomeName } from '../data/tomeDb.js';
 
 const message = 'Select All and Copy the text below. ' +
   'Then Paste in a text editor and save the file.';
 
 const dialogToolset = [
   { type: 'label', text: message },
-  { type: 'textarea', label: 'Bookmark Package' },
+  { type: 'textarea', ariaLabel: 'Bookmark Package' },
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' }
+  { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'bookmark-export', text: 'Bookmark Export' }
+  { type: 'banner', cssModifier: 'bookmark-export', text: 'Bookmark Export' }
 ];
 
 class BookmarkExportview {

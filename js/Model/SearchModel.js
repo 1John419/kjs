@@ -1,10 +1,9 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
 import { SearchEngine } from '../SearchEngine.js';
 import { tomeBinVerses } from '../data/binIdx.js';
 import { tomeDb } from '../data/tomeDb.js';
-import { appPrefix } from '../util.js';
 
 const searchResultReroute = ['search-filter', 'search-history'];
 const validTasks = ['search-result', 'search-lookup', 'search-filter',
@@ -119,7 +118,7 @@ class SearchModel {
 
   restoreFilter() {
     let defaultFilter = this.tomeFilter();
-    let searchFilter = localStorage.getItem(`${appPrefix}-searchFilter`);
+    let searchFilter = localStorage.getItem('searchFilter');
     if (!searchFilter) {
       searchFilter = defaultFilter;
     } else {
@@ -137,7 +136,7 @@ class SearchModel {
 
   restoreHistory() {
     let defaultHistory = [];
-    let searchHistory = localStorage.getItem(`${appPrefix}-searchHistory`);
+    let searchHistory = localStorage.getItem('searchHistory');
     if (!searchHistory) {
       searchHistory = defaultHistory;
     } else {
@@ -159,7 +158,7 @@ class SearchModel {
 
   restoreMode() {
     let defaultMode = false;
-    let strongMode = localStorage.getItem(`${appPrefix}-searchStrongMode`);
+    let strongMode = localStorage.getItem('searchStrongMode');
     if (!strongMode) {
       strongMode = defaultMode;
     } else {
@@ -177,7 +176,7 @@ class SearchModel {
 
   async restoreQuery() {
     let defaultQuery = DEFAULT_QUERY;
-    let searchQuery = localStorage.getItem(`${appPrefix}-searchQuery`);
+    let searchQuery = localStorage.getItem('searchQuery');
     if (!searchQuery) {
       searchQuery = defaultQuery;
     } else {
@@ -195,7 +194,7 @@ class SearchModel {
 
   restoreTask() {
     let defaultTask = 'search-result';
-    let searchTask = localStorage.getItem(`${appPrefix}-searchTask`);
+    let searchTask = localStorage.getItem('searchTask');
     if (!searchTask) {
       searchTask = defaultTask;
     } else {
@@ -210,27 +209,27 @@ class SearchModel {
   }
 
   saveFilter() {
-    localStorage.setItem(`${appPrefix}-searchFilter`,
+    localStorage.setItem('searchFilter',
       JSON.stringify(this.searchFilter));
   }
 
   saveHistory() {
-    localStorage.setItem(`${appPrefix}-searchHistory`,
+    localStorage.setItem('searchHistory',
       JSON.stringify(this.searchHistory));
   }
 
   saveStrongMode() {
-    localStorage.setItem(`${appPrefix}-searchStrongMode`,
+    localStorage.setItem('searchStrongMode',
       JSON.stringify(this.strongMode));
   }
 
   saveQuery() {
-    localStorage.setItem(`${appPrefix}-searchQuery`,
+    localStorage.setItem('searchQuery',
       JSON.stringify(this.searchQuery));
   }
 
   saveTask() {
-    localStorage.setItem(`${appPrefix}-searchTask`,
+    localStorage.setItem('searchTask',
       JSON.stringify(this.searchTask));
   }
 

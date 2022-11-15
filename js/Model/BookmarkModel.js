@@ -1,12 +1,11 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
 import {
   tomeDb,
   tomeName,
   tomeVerseCount
 } from '../data/tomeDb.js';
-import { appPrefix } from '../util.js';
 
 const numSortAscend = (a, b) => a - b;
 
@@ -304,7 +303,7 @@ class BookmarkModel {
   async restoreActiveFolderName() {
     let defaultFolderName = 'Default';
     let activeFolderName =
-      localStorage.getItem(`${appPrefix}-activeFolderName`);
+      localStorage.getItem('activeFolderName');
     if (!activeFolderName) {
       activeFolderName = defaultFolderName;
     } else {
@@ -322,7 +321,7 @@ class BookmarkModel {
 
   restoreExpandMode() {
     let defaultMode = false;
-    let expandMode = localStorage.getItem(`${appPrefix}-bookmarkExpandMode`);
+    let expandMode = localStorage.getItem('bookmarkExpandMode');
     if (!expandMode) {
       expandMode = defaultMode;
     } else {
@@ -340,7 +339,7 @@ class BookmarkModel {
 
   restoreFolders() {
     let defaultFolders = this.createFolders();
-    let folders = localStorage.getItem(`${appPrefix}-folders`);
+    let folders = localStorage.getItem('folders');
     if (!folders) {
       folders = defaultFolders;
     } else {
@@ -360,7 +359,7 @@ class BookmarkModel {
 
   restoreStrongMode() {
     let defaultMode = false;
-    let strongMode = localStorage.getItem(`${appPrefix}-bookmarkStrongMode`);
+    let strongMode = localStorage.getItem('bookmarkStrongMode');
     if (!strongMode) {
       strongMode = defaultMode;
     } else {
@@ -378,7 +377,7 @@ class BookmarkModel {
 
   restoreTask() {
     let defaultTask = 'bookmark-list';
-    let bookmarkTask = localStorage.getItem(`${appPrefix}-bookmarkTask`);
+    let bookmarkTask = localStorage.getItem('bookmarkTask');
     if (!bookmarkTask) {
       bookmarkTask = defaultTask;
     } else {
@@ -399,26 +398,26 @@ class BookmarkModel {
   }
 
   saveActiveFolderName() {
-    localStorage.setItem(`${appPrefix}-activeFolderName`,
+    localStorage.setItem('activeFolderName',
       JSON.stringify(this.activeFolderName));
   }
 
   saveBookmarkTask() {
-    localStorage.setItem(`${appPrefix}-bookmarkTask`,
+    localStorage.setItem('bookmarkTask',
       JSON.stringify(this.bookmarkTask));
   }
 
   saveExpandMode() {
-    localStorage.setItem(`${appPrefix}-bookmarkExpandMode`,
+    localStorage.setItem('bookmarkExpandMode',
       JSON.stringify(this.expandMode));
   }
 
   saveFolders() {
-    localStorage.setItem(`${appPrefix}-folders`, JSON.stringify(this.folders));
+    localStorage.setItem('folders', JSON.stringify(this.folders));
   }
 
   saveStrongMode() {
-    localStorage.setItem(`${appPrefix}-bookmarkStrongMode`,
+    localStorage.setItem('bookmarkStrongMode',
       JSON.stringify(this.strongMode));
   }
 

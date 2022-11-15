@@ -1,6 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
 import {
   templateActionMenu,
   templateAcrostic,
@@ -11,32 +11,32 @@ import {
   templateToolbarLower,
   templateToolbarUpper
 } from '../template.js';
+import { removeAllChildren } from '../util.js';
 import { citationByVerseIdx } from '../data/tomeDb.js';
 import {
   verseCitation,
   verseText
 } from '../data/tomeIdx.js';
-import { removeAllChildren } from '../util.js';
 
 const actionSet = [
-  { icon: 'up', label: 'Up' },
-  { icon: 'down', label: 'Down' },
-  { icon: 'move-copy', label: 'Move/Copy' },
-  { icon: 'delete', label: 'Delete' },
-  { icon: 'cancel', label: 'Cancel' }
+  { icon: 'up', ariaLabel: 'Up' },
+  { icon: 'down', ariaLabel: 'Down' },
+  { icon: 'move-copy', ariaLabel: 'Move/Copy' },
+  { icon: 'delete', ariaLabel: 'Delete' },
+  { icon: 'cancel', ariaLabel: 'Cancel' }
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', label: 'Back' },
-  { type: 'btn', icon: 'sort-ascend', label: 'Sort Ascending' },
-  { type: 'btn', icon: 'sort-invert', label: 'Sort Invert' },
-  { type: 'btn', icon: 'bookmark-folder', label: 'Bookmark Folder' },
-  { type: 'btn', icon: 'expand-mode', label: 'Expand Bookmarks' },
-  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' },
+  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
+  { type: 'btn', icon: 'sort-ascend', ariaLabel: 'Sort Ascending' },
+  { type: 'btn', icon: 'sort-invert', ariaLabel: 'Sort Invert' },
+  { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
+  { type: 'btn', icon: 'expand-mode', ariaLabel: 'Expand Bookmarks' },
+  { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' },
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'bookmark-list', text: null },
+  { type: 'banner', cssModifier: 'bookmark-list', text: null },
 ];
 
 class BookmarkListView {

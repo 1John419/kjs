@@ -1,6 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
 import {
   templateBtnIcon,
   templateElement,
@@ -12,12 +12,12 @@ import {
 import { removeAllChildren } from '../util.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'result', label: 'Search Result' },
-  { type: 'btn', icon: 'history-clear', label: 'Clear Hitory' }
+  { type: 'btn', icon: 'result', ariaLabel: 'Search Result' },
+  { type: 'btn', icon: 'history-clear', ariaLabel: 'Clear Hitory' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'search-history', text: 'Search History' }
+  { type: 'banner', cssModifier: 'search-history', text: 'Search History' }
 ];
 
 class SearchHistoryView {

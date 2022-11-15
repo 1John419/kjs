@@ -1,6 +1,20 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
+import {
+  templateAcrostic,
+  templateElement,
+  templateToolbarLower,
+  templateToolbarMenu,
+  templatePage,
+  templateScroll,
+  templateToolbarUpper
+} from '../template.js';
+import {
+  centerScrollElement,
+  removeAllChildren,
+  sideScrollElement
+} from '../util.js';
 import {
   tomeChapters
 } from '../data/tomeDb.js';
@@ -20,44 +34,30 @@ import {
   nameSub,
   yahweh
 } from '../data/name.js';
-import {
-  templateAcrostic,
-  templateElement,
-  templateToolbarLower,
-  templateToolbarMenu,
-  templatePage,
-  templateScroll,
-  templateToolbarUpper
-} from '../template.js';
-import {
-  centerScrollElement,
-  removeAllChildren,
-  sideScrollElement
-} from '../util.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'navigator', label: 'Navigator' },
-  { type: 'btn', icon: 'bookmark', label: 'Bookmark' },
-  { type: 'btn', icon: 'search', label: 'Search' },
-  { type: 'btn', icon: 'strong', label: 'Strong' },
-  { type: 'btn', icon: 'setting', label: 'Setting' },
-  { type: 'btn', icon: 'help', label: 'Help' },
-  { type: 'btn', icon: 'column-mode', label: 'Column Mode' },
-  { type: 'btn', icon: 'name-mode', label: 'Name Mode' },
-  { type: 'btn', icon: 'strong-mode', label: 'Strong Mode' },
-  { type: 'btn', icon: 'v-menu', label: 'Toolbar Menu' }
+  { type: 'btn', icon: 'navigator', ariaLabel: 'Navigator' },
+  { type: 'btn', icon: 'bookmark', ariaLabel: 'Bookmark' },
+  { type: 'btn', icon: 'search', ariaLabel: 'Search' },
+  { type: 'btn', icon: 'strong', ariaLabel: 'Strong' },
+  { type: 'btn', icon: 'setting', ariaLabel: 'Setting' },
+  { type: 'btn', icon: 'help', ariaLabel: 'Help' },
+  { type: 'btn', icon: 'column-mode', ariaLabel: 'Column Mode' },
+  { type: 'btn', icon: 'name-mode', ariaLabel: 'Name Mode' },
+  { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' },
+  { type: 'btn', icon: 'v-menu', ariaLabel: 'Toolbar Menu' }
 ];
 
 const upperToolSet = [
-  { type: 'btn', icon: 'prev', label: 'Previous Chapter' },
-  { type: 'banner', modifier: 'read', text: null },
-  { type: 'btn', icon: 'next', label: 'Next Chapter' }
+  { type: 'btn', icon: 'prev', ariaLabel: 'Previous Chapter' },
+  { type: 'banner', cssModifier: 'read', text: null },
+  { type: 'btn', icon: 'next', ariaLabel: 'Next Chapter' }
 ];
 
 const menuSet = [
-  { type: 'btn', icon: 'cancel', label: 'Toolbar Menu' },
-  { type: 'btn', icon: 'setting', label: 'Setting' },
-  { type: 'btn', icon: 'help', label: 'Help' },
+  { type: 'btn', icon: 'cancel', ariaLabel: 'Toolbar Menu' },
+  { type: 'btn', icon: 'setting', ariaLabel: 'Setting' },
+  { type: 'btn', icon: 'help', ariaLabel: 'Help' },
 ];
 
 const matthewChapterIdx = 929;

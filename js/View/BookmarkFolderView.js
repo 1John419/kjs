@@ -1,6 +1,6 @@
 'use strict';
 
-import queue from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
 import {
   templateActionMenu,
   templateElement,
@@ -13,23 +13,23 @@ import {
 import { removeAllChildren } from '../util.js';
 
 const actionSet = [
-  { icon: 'up', label: 'Up' },
-  { icon: 'down', label: 'Down' },
-  { icon: 'rename', label: 'Rename' },
-  { icon: 'delete', label: 'Delete' },
-  { icon: 'cancel', label: 'Cancel' }
+  { icon: 'up', ariaLabel: 'Up' },
+  { icon: 'down', ariaLabel: 'Down' },
+  { icon: 'rename', ariaLabel: 'Rename' },
+  { icon: 'delete', ariaLabel: 'Delete' },
+  { icon: 'cancel', ariaLabel: 'Cancel' }
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', label: 'Back' },
-  { type: 'btn', icon: 'bookmark-folder-add', label: 'Bookmark Folder Add' },
-  { type: 'btn', icon: 'import', label: 'Import' },
-  { type: 'btn', icon: 'export', label: 'Export' },
-  { type: 'btn', icon: 'bookmark-list', label: 'Bookmark List' }
+  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
+  { type: 'btn', icon: 'bookmark-folder-add', ariaLabel: 'Bookmark Folder Add' },
+  { type: 'btn', icon: 'import', ariaLabel: 'Import' },
+  { type: 'btn', icon: 'export', ariaLabel: 'Export' },
+  { type: 'btn', icon: 'bookmark-list', ariaLabel: 'Bookmark List' }
 ];
 
 const upperToolSet = [
-  { type: 'banner', modifier: 'bookmark-folder', text: 'Bookmark Folder' }
+  { type: 'banner', cssModifier: 'bookmark-folder', text: 'Bookmark Folder' }
 ];
 
 class BookmarkFolderView {
