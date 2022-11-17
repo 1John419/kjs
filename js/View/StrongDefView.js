@@ -1,19 +1,21 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateElement,
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
 import {
-  removeAllChildren
+  removeAllChildren,
 } from '../util.js';
 import {
   tomeBinVerseCount,
-  tomeBinWordCount
+  tomeBinWordCount,
 } from '../data/binIdx.js';
 import {
   defDefinition,
@@ -21,7 +23,7 @@ import {
   defPronunciation,
   defTranliteration,
   wordKjvWord,
-  wordTomeBin
+  wordTomeBin,
 } from '../data/strongIdx.js';
 
 const lowerToolSet = [
@@ -30,11 +32,11 @@ const lowerToolSet = [
   { type: 'btn', icon: 'history', ariaLabel: 'Strong History' },
   { type: 'btn', icon: 'strong-verse', ariaLabel: 'Strong Verse' },
   { type: 'btn', icon: 'result', ariaLabel: 'Strong Result' },
-  { type: 'btn', icon: 'prev', ariaLabel: 'Previous Strong' }
+  { type: 'btn', icon: 'prev', ariaLabel: 'Previous Strong' },
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'strong-def', text: 'Strong Definition' }
+  { type: 'banner', cssModifier: 'strong-def', text: 'Strong Definition' },
 ];
 
 class StrongDefView {

@@ -88,8 +88,12 @@ export const nameSub = {
   ]
 };
 
-export const elElyon = [354, 355, 356, 358, 14770, 15148];
-
-export const elShaddai = [398, 20638];
-
-export const yahweh = [5110, 14389, 15510, 16173];
+export const elElyon = [
+  354, 355, 356, 358, 14770, 15148,
+];
+export const elShaddai = [
+  398, 20638,
+];
+export const yahweh = [
+  5110, 14389, 15510, 16173,
+];

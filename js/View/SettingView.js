@@ -1,21 +1,23 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateBtnIcon,
   templateElement,
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', ariaLabel: 'Back' }
+  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'setting', text: 'Setting' }
+  { type: 'banner', cssModifier: 'setting', text: 'Setting' },
 ];
 
 const fontSize = [
@@ -23,7 +25,7 @@ const fontSize = [
   { size: 'm', ariaLabel: 'Medium' },
   { size: 'l', ariaLabel: 'Large' },
   { size: 'xl', ariaLabel: 'Extra Large' },
-  { size: 'xxl', ariaLabel: 'Extra Extra Large' }
+  { size: 'xxl', ariaLabel: 'Extra Extra Large' },
 ];
 
 const templateBtnFontSize = (size, label) => {

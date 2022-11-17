@@ -1,13 +1,23 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
-import { SearchEngine } from '../SearchEngine.js';
-import { tomeBinVerses } from '../data/binIdx.js';
-import { tomeDb } from '../data/tomeDb.js';
+import {
+  queue,
+} from '../CommandQueue.js';
+import {
+  SearchEngine,
+} from '../SearchEngine.js';
+import {
+  tomeBinVerses,
+} from '../data/binIdx.js';
+import {
+  tomeDb,
+} from '../data/tomeDb.js';
 
-const searchResultReroute = ['search-filter', 'search-history'];
-const validTasks = ['search-result', 'search-lookup', 'search-filter',
-  'search-history'
+const searchResultReroute = [
+  'search-filter', 'search-history',
+];
+const validTasks = [
+  'search-result', 'search-lookup', 'search-filter', 'search-history',
 ];
 
 const DEFAULT_QUERY = 'day of the lord';

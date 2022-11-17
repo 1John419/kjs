@@ -1,10 +1,16 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 
-const validTasks = ['help-read', 'help-topic'];
-const validTopics = ['about', 'bookmark', 'help', 'name-mode', 'navigator',
-  'overview', 'read', 'search', 'setting', 'strong', 'thats-my-king'];
+const validTasks = [
+  'help-read', 'help-topic',
+];
+const validTopics = [
+  'about', 'bookmark', 'help', 'name-mode', 'navigator', 'overview', 'read',
+  'search', 'setting', 'strong', 'thats-my-king',
+];
 
 class HelpModel {
 

@@ -1,7 +1,11 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
-import { chapterIdxByVerseIdx } from '../data/tomeDb.js';
+import {
+  queue,
+} from '../CommandQueue.js';
+import {
+  chapterIdxByVerseIdx,
+} from '../data/tomeDb.js';
 
 class BookmarkController {
 

@@ -1,10 +1,14 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
-import { tomeBooks } from '../data/tomeDb.js';
+import {
+  queue,
+} from '../CommandQueue.js';
+import {
+  tomeBooks,
+} from '../data/tomeDb.js';
 import {
   bookFirstChapterIdx,
-  bookLastChapterIdx
+  bookLastChapterIdx,
 } from '../data/tomeIdx.js';
 
 class NavigatorController {

@@ -1,16 +1,18 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateAcrostic,
   templateElement,
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
 import {
-  removeAllChildren
+  removeAllChildren,
 } from '../util.js';
 import {
   tomeBinBooks,
@@ -25,12 +27,12 @@ import {
   chapterBinWordCount,
   tomeBinVerses,
   tomeBinVerseCount,
-  tomeBinWordCount
+  tomeBinWordCount,
 } from '../data/binIdx.js';
 import {
   mapSliceEnd,
   mapSliceStart,
-  mapStrongNums
+  mapStrongNums,
 } from '../data/strongIdx.js';
 import {
   tomeBooks,
@@ -41,7 +43,7 @@ import {
   bookLongName,
   chapterName,
   verseCitation,
-  verseText
+  verseText,
 } from '../data/tomeIdx.js';
 
 const lowerToolSet = [
@@ -49,11 +51,11 @@ const lowerToolSet = [
   { type: 'btn', icon: 'filter', ariaLabel: 'Strong Filter' },
   { type: 'btn', icon: 'strong-verse', ariaLabel: 'Strong Verse' },
   { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
-  { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' }
+  { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' },
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'strong-result', text: 'Strong Search' }
+  { type: 'banner', cssModifier: 'strong-result', text: 'Strong Search' },
 ];
 
 const binIdx = 0;

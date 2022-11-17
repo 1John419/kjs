@@ -1,20 +1,32 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
-import { tomeBinVerses } from '../data/binIdx.js';
+import {
+  queue,
+} from '../CommandQueue.js';
+import {
+  tomeBinVerses,
+} from '../data/binIdx.js';
 import {
   strongDb,
-  strongNums
+  strongNums,
 } from '../data/strongDb.js';
 import {
   wordKjvWord,
-  wordTomeBin
+  wordTomeBin,
 } from '../data/strongIdx.js';
-import { tomeDb } from '../data/tomeDb.js';
+import {
+  tomeDb,
+} from '../data/tomeDb.js';
 
-const strongDefReroute = ['strong-history', 'strong-lookup'];
-const strongResultReroute = ['strong-filter'];
-const validTasks = ['strong-def', 'strong-verse', 'strong-result'];
+const strongDefReroute = [
+  'strong-history', 'strong-lookup',
+];
+const strongResultReroute = [
+  'strong-filter',
+];
+const validTasks = [
+  'strong-def', 'strong-verse', 'strong-result',
+];
 
 const firstWord = 0;
 

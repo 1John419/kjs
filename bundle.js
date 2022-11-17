@@ -156,7 +156,7 @@
     stores: {
       lists: 'k',
       verses: 'k',
-      words: 'k'
+      words: 'k',
     },
     url: '/json/kjv.json',
     version: '2020-01-07',
@@ -794,11 +794,15 @@
     ]
   };
 
-  const elElyon = [354, 355, 356, 358, 14770, 15148];
-
-  const elShaddai = [398, 20638];
-
-  const yahweh = [5110, 14389, 15510, 16173];
+  const elElyon = [
+    354, 355, 356, 358, 14770, 15148,
+  ];
+  const elShaddai = [
+    398, 20638,
+  ];
+  const yahweh = [
+    5110, 14389, 15510, 16173,
+  ];
 
   const lowerToolSet$n = [
     { type: 'btn', icon: 'navigator', ariaLabel: 'Navigator' },
@@ -810,13 +814,13 @@
     { type: 'btn', icon: 'column-mode', ariaLabel: 'Column Mode' },
     { type: 'btn', icon: 'name-mode', ariaLabel: 'Name Mode' },
     { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' },
-    { type: 'btn', icon: 'v-menu', ariaLabel: 'Toolbar Menu' }
+    { type: 'btn', icon: 'v-menu', ariaLabel: 'Toolbar Menu' },
   ];
 
   const upperToolSet$n = [
     { type: 'btn', icon: 'prev', ariaLabel: 'Previous Chapter' },
     { type: 'banner', cssModifier: 'read', text: null },
-    { type: 'btn', icon: 'next', ariaLabel: 'Next Chapter' }
+    { type: 'btn', icon: 'next', ariaLabel: 'Next Chapter' },
   ];
 
   const menuSet = [
@@ -1602,7 +1606,9 @@
 
   }
 
-  const validTasks$4 = ['navigator-book', 'navigator-chapter'];
+  const validTasks$4 = [
+    'navigator-book', 'navigator-chapter',
+  ];
 
   const CHAPTER_IDX_GENESIS_1 = 0;
 
@@ -1753,11 +1759,11 @@
 
   const lowerToolSet$m = [
     { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-    { type: 'btn', icon: 'navigator-chapter', ariaLabel: 'Chapter' }
+    { type: 'btn', icon: 'navigator-chapter', ariaLabel: 'Chapter' },
   ];
 
   const upperToolSet$m = [
-    { type: 'banner', cssModifier: 'navigator-book', text: 'Book' }
+    { type: 'banner', cssModifier: 'navigator-book', text: 'Book' },
   ];
 
   class NavigatorBookView {
@@ -1915,11 +1921,11 @@
 
   const lowerToolSet$l = [
     { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-    { type: 'btn', icon: 'navigator-book', ariaLabel: 'Book' }
+    { type: 'btn', icon: 'navigator-book', ariaLabel: 'Book' },
   ];
 
   const upperToolSet$l = [
-    { type: 'banner', cssModifier: 'navigator-chapter', text: null }
+    { type: 'banner', cssModifier: 'navigator-chapter', text: null },
   ];
 
   class NavigatorChapterView {
@@ -2229,11 +2235,16 @@
 
   const numSortAscend = (a, b) => a - b;
 
-  const bookmarkFolderReroute = ['bookmark-folder-add', 'bookmark-folder-delete',
-    'bookmark-folder-rename', 'bookmark-export', 'bookmark-import'
+  const bookmarkFolderReroute = [
+    'bookmark-folder-add', 'bookmark-folder-delete', 'bookmark-folder-rename',
+    'bookmark-export', 'bookmark-import',
   ];
-  const bookmarkListReroute = ['bookmark-move-copy'];
-  const validTasks$3 = ['bookmark-list', 'bookmark-folder'];
+  const bookmarkListReroute = [
+    'bookmark-move-copy',
+  ];
+  const validTasks$3 = [
+    'bookmark-list', 'bookmark-folder',
+  ];
 
   const firstEntry = 0;
 
@@ -2343,7 +2354,7 @@
     folderImport(pkgStr) {
       let bookmarkPkg = this.getBookmarkPkg(pkgStr);
       if (!bookmarkPkg) {
-        queue.publish('bookmark-import.message', 'Invalid JSON string');
+        queue.publish('bookmark-import.message', 'Invalid JSON String');
       } else {
         let status = this.validatePkg(bookmarkPkg);
         if (status === 'OK') {
@@ -2389,7 +2400,7 @@
             !folder.bookmarks ||
             !Array.isArray(folder.bookmarks)
           ) {
-            status = 'Invalid folder structure';
+            status = 'Invalid Folder Structure';
             error = true;
           }
           if (!error) {
@@ -2399,7 +2410,7 @@
                 bookmark < 0 ||
                 bookmark > this.maxIdx
               ) {
-                status = 'Invalid verse';
+                status = 'Invalid Verse';
                 error = true;
               }
               return error;
@@ -2465,7 +2476,7 @@
       }
       this.updateFolders();
       this.updateFolderList();
-      queue.publish('bookmark-import.message', 'Import successful.');
+      queue.publish('bookmark-import.message', 'Import Successful');
     }
 
     initialize() {
@@ -2777,10 +2788,10 @@
         !bookmarkPkg.folders ||
         !Array.isArray(bookmarkPkg.folders)
       ) {
-        status = 'Invalid package structure';
+        status = 'Invalid Package Structure';
       }
       if (bookmarkPkg.tome !== tomeName) {
-        status = 'Tome mismatch';
+        status = 'Tome Mismatch';
       }
       return status;
     }
@@ -2791,7 +2802,7 @@
     { icon: 'down', ariaLabel: 'Down' },
     { icon: 'move-copy', ariaLabel: 'Move/Copy' },
     { icon: 'delete', ariaLabel: 'Delete' },
-    { icon: 'cancel', ariaLabel: 'Cancel' }
+    { icon: 'cancel', ariaLabel: 'Cancel' },
   ];
 
   const lowerToolSet$k = [
@@ -3118,7 +3129,7 @@
   const actionSet$1 = [
     { icon: 'move', ariaLabel: 'Move' },
     { icon: 'copy', ariaLabel: 'Copy' },
-    { icon: 'cancel', ariaLabel: 'Cancel' }
+    { icon: 'cancel', ariaLabel: 'Cancel' },
   ];
 
   const lowerToolSet$j = [
@@ -3126,7 +3137,7 @@
   ];
 
   const upperToolSet$j = [
-    { type: 'banner', cssModifier: 'bookmark-move-copy', text: null }
+    { type: 'banner', cssModifier: 'bookmark-move-copy', text: null },
   ];
 
   class BookmarkMoveCopyView {
@@ -3187,7 +3198,7 @@
       this.scroll = templateScroll('bookmark-move-copy');
 
       this.empty = templateElement('div', 'empty', 'bookmark-move-copy', null,
-        'No Target Folder.');
+        'No Target Folder');
       this.scroll.appendChild(this.empty);
 
       this.list = templateElement('div', 'list', 'bookmark-move-copy', null,
@@ -3208,7 +3219,7 @@
     copy(folderName) {
       let copyPkg = {
         to: folderName,
-        verseIdx: this.verseIdx
+        verseIdx: this.verseIdx,
       };
       queue.publish('bookmark-move-copy.copy', copyPkg);
     }
@@ -3264,7 +3275,7 @@
     move(folderName) {
       let movePkg = {
         to: folderName,
-        verseIdx: this.verseIdx
+        verseIdx: this.verseIdx,
       };
       queue.publish('bookmark-move-copy.move', movePkg);
     }
@@ -3347,7 +3358,7 @@
     { icon: 'down', ariaLabel: 'Down' },
     { icon: 'rename', ariaLabel: 'Rename' },
     { icon: 'delete', ariaLabel: 'Delete' },
-    { icon: 'cancel', ariaLabel: 'Cancel' }
+    { icon: 'cancel', ariaLabel: 'Cancel' },
   ];
 
   const lowerToolSet$i = [
@@ -3355,11 +3366,11 @@
     { type: 'btn', icon: 'bookmark-folder-add', ariaLabel: 'Bookmark Folder Add' },
     { type: 'btn', icon: 'import', ariaLabel: 'Import' },
     { type: 'btn', icon: 'export', ariaLabel: 'Export' },
-    { type: 'btn', icon: 'bookmark-list', ariaLabel: 'Bookmark List' }
+    { type: 'btn', icon: 'bookmark-list', ariaLabel: 'Bookmark List' },
   ];
 
   const upperToolSet$i = [
-    { type: 'banner', cssModifier: 'bookmark-folder', text: 'Bookmark Folder' }
+    { type: 'banner', cssModifier: 'bookmark-folder', text: 'Bookmark Folder' },
   ];
 
   class BookmarkFolderView {
@@ -3563,15 +3574,15 @@
   const dialogToolset$6 = [
     { type: 'label', text: 'Name' },
     { type: 'input', ariaLabel: 'Name' },
-    { type: 'btn', id: 'save', ariaLabel: 'Save' }
+    { type: 'btn', id: 'save', ariaLabel: 'Save' },
   ];
 
   const lowerToolSet$h = [
-    { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' }
+    { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
   ];
 
   const upperToolSet$h = [
-    { type: 'banner', cssModifier: 'bookmark-folder-add', text: 'Folder Add' }
+    { type: 'banner', cssModifier: 'bookmark-folder-add', text: 'Folder Add' },
   ];
 
   class BookmarkFolderAddView {
@@ -3696,16 +3707,15 @@
 
   const dialogToolset$5 = [
     { type: 'label', text: null },
-    { type: 'btn', id: 'delete', ariaLabel: 'Delete' }
+    { type: 'btn', id: 'delete', ariaLabel: 'Delete' },
   ];
 
   const lowerToolSet$g = [
-    { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' }
+    { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
   ];
 
   const upperToolSet$g = [
-    { type: 'banner', cssModifier: 'bookmark-folder-delete',
-      text: 'Folder Delete' }
+    { type: 'banner', cssModifier: 'bookmark-folder-delete', text: 'Folder Delete' },
   ];
 
   class BookmarkFolderDeleteView {
@@ -3817,16 +3827,15 @@
   const dialogToolset$4 = [
     { type: 'label', text: 'Folder Name' },
     { type: 'input', ariaLabel: 'Name' },
-    { type: 'btn', id: 'save', ariaLabel: 'Save' }
+    { type: 'btn', id: 'save', ariaLabel: 'Save' },
   ];
 
   const lowerToolSet$f = [
-    { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' }
+    { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
   ];
 
   const upperToolSet$f = [
-    { type: 'banner', cssModifier: 'bookmark-folder-rename',
-      text: 'Folder Rename'}
+    { type: 'banner', cssModifier: 'bookmark-folder-rename', text: 'Folder Rename'},
   ];
 
   class BookmarkFolderRenameView {
@@ -3927,7 +3936,7 @@
       this.page.classList.remove('page--hide');
       this.message.classList.add('message--hide');
       this.namePkg = {
-        old: this.folderName
+        old: this.folderName,
       };
       this.inputName.value = this.folderName;
       this.inputName.focus();
@@ -3971,11 +3980,11 @@
   ];
 
   const lowerToolSet$e = [
-    { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' }
+    { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
   ];
 
   const upperToolSet$e = [
-    { type: 'banner', cssModifier: 'bookmark-export', text: 'Bookmark Export' }
+    { type: 'banner', cssModifier: 'bookmark-export', text: 'Bookmark Export' },
   ];
 
   class BookmarkExportview {
@@ -4070,15 +4079,15 @@
   const dialogToolset$2 = [
     { type: 'label', text: 'Paste Bookmark Package Here:' },
     { type: 'textarea', ariaLabel: 'Bookmark Package' },
-    { type: 'btn', id: 'import', ariaLabel: 'Import' }
+    { type: 'btn', id: 'import', ariaLabel: 'Import' },
   ];
 
   const lowerToolSet$d = [
-    { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' }
+    { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
   ];
 
   const upperToolSet$d = [
-    { type: 'banner', cssModifier: 'bookmark-import', text: 'Bookmark Import' }
+    { type: 'banner', cssModifier: 'bookmark-import', text: 'Bookmark Import' },
   ];
 
   class BookmarkImportView {
@@ -4588,7 +4597,7 @@
           verseCount,
           sliceStart,
           sliceEnd,
-          chapters
+          chapters,
         ]);
         bookBin = tomeBin[tomeBinBooks][tomeBin[tomeBinBooks].length - 1];
       }
@@ -4609,7 +4618,7 @@
           wordCount,
           verseCount,
           sliceStart,
-          sliceEnd
+          sliceEnd,
         ]);
         chapterBin = bookBin[bookBinChapters][bookBin[bookBinChapters].length - 1];
       }
@@ -4771,7 +4780,7 @@
     }
 
     initialize() {
-      this.subscribe();
+      return;
     }
 
     initializeTomeBin() {
@@ -4783,7 +4792,7 @@
         wordCount,
         verseCount,
         books,
-        verses
+        verses,
       ];
     }
 
@@ -4829,13 +4838,13 @@
       return this.rig;
     }
 
-    subscribe() {}
-
   }
 
-  const searchResultReroute = ['search-filter', 'search-history'];
-  const validTasks$2 = ['search-result', 'search-lookup', 'search-filter',
-    'search-history'
+  const searchResultReroute = [
+    'search-filter', 'search-history',
+  ];
+  const validTasks$2 = [
+    'search-result', 'search-lookup', 'search-filter', 'search-history',
   ];
 
   const DEFAULT_QUERY = 'day of the lord';
@@ -5119,11 +5128,11 @@
     { type: 'btn', icon: 'search-lookup', ariaLabel: 'Search Lookup' },
     { type: 'btn', icon: 'filter', ariaLabel: 'Search Filter' },
     { type: 'btn', icon: 'history', ariaLabel: 'Search History' },
-    { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' }
+    { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' },
   ];
 
   const upperToolSet$c = [
-    { type: 'banner', cssModifier: 'search-result', text: null }
+    { type: 'banner', cssModifier: 'search-result', text: null },
   ];
 
   const binIdx$1 = 0;
@@ -5442,11 +5451,11 @@
   }
 
   const lowerToolSet$b = [
-    { type: 'btn', icon: 'result', ariaLabel: 'Search Result' }
+    { type: 'btn', icon: 'result', ariaLabel: 'Search Result' },
   ];
 
   const upperToolSet$b = [
-    { type: 'banner', cssModifier: 'search-filter', text: null }
+    { type: 'banner', cssModifier: 'search-filter', text: null },
   ];
 
   class SearchFilterView {
@@ -5564,7 +5573,7 @@
       let chapterIdx = parseInt(btnFilter.dataset.chapterIdx);
       let searchFilter = {
         bookIdx: bookIdx,
-        chapterIdx: chapterIdx
+        chapterIdx: chapterIdx,
       };
       queue.publish('search-filter.select', searchFilter);
     }
@@ -5705,11 +5714,11 @@
 
   const lowerToolSet$a = [
     { type: 'btn', icon: 'result', ariaLabel: 'Search Result' },
-    { type: 'btn', icon: 'history-clear', ariaLabel: 'Clear Hitory' }
+    { type: 'btn', icon: 'history-clear', ariaLabel: 'Clear History' },
   ];
 
   const upperToolSet$a = [
-    { type: 'banner', cssModifier: 'search-history', text: 'Search History' }
+    { type: 'banner', cssModifier: 'search-history', text: 'Search History' },
   ];
 
   class SearchHistoryView {
@@ -5748,7 +5757,7 @@
 
       this.scroll = templateScroll('search-history');
       this.empty = templateElement('div', 'empty', 'search-history', null,
-        'No searches saved.');
+        'No Searches Saved');
       this.scroll.appendChild(this.empty);
 
       this.list = templateElement('div', 'list', 'search-history', null, null);
@@ -5860,16 +5869,16 @@
   const dialogToolset$1 = [
     { type: 'label', text: 'Query' },
     { type: 'input', ariaLabel: 'Query' },
-    { type: 'btn', id: 'search', ariaLabel: 'Search' }
+    { type: 'btn', id: 'search', ariaLabel: 'Search' },
   ];
 
   const lowerToolSet$9 = [
     { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-    { type: 'btn', icon: 'result', ariaLabel: 'Search Result' }
+    { type: 'btn', icon: 'result', ariaLabel: 'Search Result' },
   ];
 
   const upperToolSet$9 = [
-    { type: 'banner', cssModifier: 'search-lookup', text: 'Search Lookup' }
+    { type: 'banner', cssModifier: 'search-lookup', text: 'Search Lookup' },
   ];
 
   class SearchLookupView {
@@ -6221,9 +6230,15 @@
 
   }
 
-  const strongDefReroute = ['strong-history', 'strong-lookup'];
-  const strongResultReroute = ['strong-filter'];
-  const validTasks$1 = ['strong-def', 'strong-verse', 'strong-result'];
+  const strongDefReroute = [
+    'strong-history', 'strong-lookup',
+  ];
+  const strongResultReroute = [
+    'strong-filter',
+  ];
+  const validTasks$1 = [
+    'strong-def', 'strong-verse', 'strong-result',
+  ];
 
   const firstWord = 0;
 
@@ -6691,11 +6706,11 @@
     { type: 'btn', icon: 'history', ariaLabel: 'Strong History' },
     { type: 'btn', icon: 'strong-verse', ariaLabel: 'Strong Verse' },
     { type: 'btn', icon: 'result', ariaLabel: 'Strong Result' },
-    { type: 'btn', icon: 'prev', ariaLabel: 'Previous Strong' }
+    { type: 'btn', icon: 'prev', ariaLabel: 'Previous Strong' },
   ];
 
   const upperToolSet$8 = [
-    { type: 'banner', cssModifier: 'strong-def', text: 'Strong Definition' }
+    { type: 'banner', cssModifier: 'strong-def', text: 'Strong Definition' },
   ];
 
   class StrongDefView {
@@ -6952,11 +6967,11 @@
   }
 
   const lowerToolSet$7 = [
-    { type: 'btn', icon: 'result', ariaLabel: 'Strong Result' }
+    { type: 'btn', icon: 'result', ariaLabel: 'Strong Result' },
   ];
 
   const upperToolSet$7 = [
-    { type: 'banner', cssModifier: 'strong-filter', text: 'Strong Filter' }
+    { type: 'banner', cssModifier: 'strong-filter', text: 'Strong Filter' },
   ];
 
   class StrongFilterView {
@@ -7083,7 +7098,7 @@
       let chapterIdx = parseInt(btnFilter.dataset.chapterIdx);
       let strongFilter = {
         bookIdx: bookIdx,
-        chapterIdx: chapterIdx
+        chapterIdx: chapterIdx,
       };
       queue.publish('strong-filter.select', strongFilter);
     }
@@ -7258,11 +7273,11 @@
 
   const lowerToolSet$6 = [
     { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
-    { type: 'btn', icon: 'history-clear', ariaLabel: 'Clear Hitory' }
+    { type: 'btn', icon: 'history-clear', ariaLabel: 'Clear History' },
   ];
 
   const upperToolSet$6 = [
-    { type: 'banner', cssModifier: 'strong-history', text: 'Strong History' }
+    { type: 'banner', cssModifier: 'strong-history', text: 'Strong History' },
   ];
 
   const firstXlit = 0;
@@ -7413,11 +7428,11 @@
   const dialogToolset = [
     { type: 'label', text: 'Strong Number' },
     { type: 'input', ariaLabel: 'Strong Number' },
-    { type: 'btn', id: 'find', ariaLabel: 'Find' }
+    { type: 'btn', id: 'find', ariaLabel: 'Find' },
   ];
 
   const lowerToolSet$5 = [
-    { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' }
+    { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
   ];
 
   const upperToolSet$5 = [
@@ -7551,11 +7566,11 @@
     { type: 'btn', icon: 'filter', ariaLabel: 'Strong Filter' },
     { type: 'btn', icon: 'strong-verse', ariaLabel: 'Strong Verse' },
     { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
-    { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' }
+    { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' },
   ];
 
   const upperToolSet$4 = [
-    { type: 'banner', cssModifier: 'strong-result', text: 'Strong Search' }
+    { type: 'banner', cssModifier: 'strong-result', text: 'Strong Search' },
   ];
 
   const binIdx = 0;
@@ -7960,11 +7975,11 @@
   const lowerToolSet$3 = [
     { type: 'btn', icon: 'back', ariaLabel: 'Back' },
     { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
-    { type: 'btn', icon: 'result', ariaLabel: 'Strong Search' }
+    { type: 'btn', icon: 'result', ariaLabel: 'Strong Search' },
   ];
 
   const upperToolSet$3 = [
-    { type: 'banner', cssModifier: 'strong-verse', text: 'Strong Verse' }
+    { type: 'banner', cssModifier: 'strong-verse', text: 'Strong Verse' },
   ];
 
   class StrongVerseView {
@@ -8407,8 +8422,9 @@
 
   }
 
-  const validFontSizes = ['font-size--s', 'font-size--m', 'font-size--l',
-    'font-size--xl', 'font-size--xxl'
+  const validFontSizes = [
+    'font-size--s', 'font-size--m', 'font-size--l', 'font-size--xl',
+    'font-size--xxl',
   ];
 
   const fontDefault = 0;
@@ -8677,11 +8693,11 @@
   }
 
   const lowerToolSet$2 = [
-    { type: 'btn', icon: 'back', ariaLabel: 'Back' }
+    { type: 'btn', icon: 'back', ariaLabel: 'Back' },
   ];
 
   const upperToolSet$2 = [
-    { type: 'banner', cssModifier: 'setting', text: 'Setting' }
+    { type: 'banner', cssModifier: 'setting', text: 'Setting' },
   ];
 
   const fontSize = [
@@ -8689,7 +8705,7 @@
     { size: 'm', ariaLabel: 'Medium' },
     { size: 'l', ariaLabel: 'Large' },
     { size: 'xl', ariaLabel: 'Extra Large' },
-    { size: 'xxl', ariaLabel: 'Extra Extra Large' }
+    { size: 'xxl', ariaLabel: 'Extra Extra Large' },
   ];
 
   const templateBtnFontSize = (size, label) => {
@@ -9194,9 +9210,13 @@
 
   }
 
-  const validTasks = ['help-read', 'help-topic'];
-  const validTopics = ['about', 'bookmark', 'help', 'name-mode', 'navigator',
-    'overview', 'read', 'search', 'setting', 'strong', 'thats-my-king'];
+  const validTasks = [
+    'help-read', 'help-topic',
+  ];
+  const validTopics = [
+    'about', 'bookmark', 'help', 'name-mode', 'navigator', 'overview', 'read',
+    'search', 'setting', 'strong', 'thats-my-king',
+  ];
 
   class HelpModel {
 
@@ -9285,11 +9305,11 @@
 
   const lowerToolSet$1 = [
     { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-    { type: 'btn', icon: 'help-read', ariaLabel: 'Help Read' }
+    { type: 'btn', icon: 'help-read', ariaLabel: 'Help Read' },
   ];
 
   const upperToolSet$1 = [
-    { type: 'banner', cssModifier: 'topic', text: 'Topic' }
+    { type: 'banner', cssModifier: 'topic', text: 'Topic' },
   ];
 
   const helpTopicList = [
@@ -9303,7 +9323,7 @@
     { topic: 'strong', name: 'Strong' },
     { topic: 'setting', name: 'Setting' },
     { topic: 'help', name: 'Help' },
-    { topic: 'thats-my-king', name: 'That\'s MY KING!' }
+    { topic: 'thats-my-king', name: 'That\'s MY KING!' },
   ];
 
   const templateBtnTopic = (helpTopic) => {
@@ -9413,7 +9433,7 @@
 
   const lowerToolSet = [
     { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-    { type: 'btn', icon: 'help-topic', ariaLabel: 'Help Topic' }
+    { type: 'btn', icon: 'help-topic', ariaLabel: 'Help Topic' },
   ];
 
   const upperToolSet = [

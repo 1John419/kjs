@@ -1,6 +1,8 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateActionMenu,
   templateBtnIcon,
@@ -8,17 +10,19 @@ import {
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
 import {
-  removeAllChildren
+  removeAllChildren,
 } from '../util.js';
-import { verseCitation } from '../data/tomeIdx.js';
+import {
+  verseCitation,
+} from '../data/tomeIdx.js';
 
 const actionSet = [
   { icon: 'move', ariaLabel: 'Move' },
   { icon: 'copy', ariaLabel: 'Copy' },
-  { icon: 'cancel', ariaLabel: 'Cancel' }
+  { icon: 'cancel', ariaLabel: 'Cancel' },
 ];
 
 const lowerToolSet = [
@@ -26,7 +30,7 @@ const lowerToolSet = [
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'bookmark-move-copy', text: null }
+  { type: 'banner', cssModifier: 'bookmark-move-copy', text: null },
 ];
 
 class BookmarkMoveCopyView {
@@ -87,7 +91,7 @@ class BookmarkMoveCopyView {
     this.scroll = templateScroll('bookmark-move-copy');
 
     this.empty = templateElement('div', 'empty', 'bookmark-move-copy', null,
-      'No Target Folder.');
+      'No Target Folder');
     this.scroll.appendChild(this.empty);
 
     this.list = templateElement('div', 'list', 'bookmark-move-copy', null,
@@ -108,7 +112,7 @@ class BookmarkMoveCopyView {
   copy(folderName) {
     let copyPkg = {
       to: folderName,
-      verseIdx: this.verseIdx
+      verseIdx: this.verseIdx,
     };
     queue.publish('bookmark-move-copy.copy', copyPkg);
   }
@@ -164,7 +168,7 @@ class BookmarkMoveCopyView {
   move(folderName) {
     let movePkg = {
       to: folderName,
-      verseIdx: this.verseIdx
+      verseIdx: this.verseIdx,
     };
     queue.publish('bookmark-move-copy.move', movePkg);
   }

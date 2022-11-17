@@ -1,41 +1,41 @@
 module.exports = {
     "env": {
         "browser": true,
-        "es6": true
+        "es6": true,
     },
     "extends": "eslint:recommended",
     "parserOptions": {
         "ecmaVersion": 8,
-        "sourceType": "module"
+        "sourceType": "module",
     },
     "rules": {
         "indent": [
             "error",
             2,
             {
-                "SwitchCase": 1
+                "SwitchCase": 1,
             }
         ],
         "linebreak-style": [
             "error",
-            "windows"
+            "windows",
         ],
         "no-console": [
             "error",
             {
-                "allow": ["log"]
+                "allow": ["log"],
             }
         ],
         "quotes": [
             "error",
             "single",
             {
-                "avoidEscape": true
+                "avoidEscape": true,
             }
         ],
         "semi": [
             "error",
-            "always"
+            "always",
         ]
     }
 };

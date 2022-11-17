@@ -1,23 +1,25 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateDivDialog,
   templateElement,
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
 
 const dialogToolset = [
   { type: 'label', text: 'Strong Number' },
   { type: 'input', ariaLabel: 'Strong Number' },
-  { type: 'btn', id: 'find', ariaLabel: 'Find' }
+  { type: 'btn', id: 'find', ariaLabel: 'Find' },
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' }
+  { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
 ];
 
 const upperToolSet = [

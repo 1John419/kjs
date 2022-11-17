@@ -1,15 +1,19 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateAcrostic,
   templateElement,
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
-import { removeAllChildren } from '../util.js';
+import {
+  removeAllChildren,
+} from '../util.js';
 import {
   bookBinChapters,
   bookBinSliceEnd,
@@ -23,7 +27,7 @@ import {
   tomeBinBooks,
   tomeBinVerseCount,
   tomeBinVerses,
-  tomeBinWordCount
+  tomeBinWordCount,
 } from '../data/binIdx.js';
 import {
   tomeBooks,
@@ -34,7 +38,7 @@ import {
   bookLongName,
   chapterName,
   verseCitation,
-  verseText
+  verseText,
 } from '../data/tomeIdx.js';
 
 const lowerToolSet = [
@@ -42,11 +46,11 @@ const lowerToolSet = [
   { type: 'btn', icon: 'search-lookup', ariaLabel: 'Search Lookup' },
   { type: 'btn', icon: 'filter', ariaLabel: 'Search Filter' },
   { type: 'btn', icon: 'history', ariaLabel: 'Search History' },
-  { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' }
+  { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' },
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'search-result', text: null }
+  { type: 'banner', cssModifier: 'search-result', text: null },
 ];
 
 const binIdx = 0;

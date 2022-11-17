@@ -1,34 +1,36 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateElement,
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
 import {
-  removeAllChildren
+  removeAllChildren,
 } from '../util.js';
 import {
   verseCitation,
-  verseText
+  verseText,
 } from '../data/tomeIdx.js';
 import {
   mapSliceEnd,
   mapSliceStart,
-  mapStrongNums
+  mapStrongNums,
 } from '../data/strongIdx.js';
 
 const lowerToolSet = [
   { type: 'btn', icon: 'back', ariaLabel: 'Back' },
   { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
-  { type: 'btn', icon: 'result', ariaLabel: 'Strong Search' }
+  { type: 'btn', icon: 'result', ariaLabel: 'Strong Search' },
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'strong-verse', text: 'Strong Verse' }
+  { type: 'banner', cssModifier: 'strong-verse', text: 'Strong Verse' },
 ];
 
 class StrongVerseView {

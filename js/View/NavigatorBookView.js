@@ -1,17 +1,21 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateElement,
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
-import { tomeBooks } from '../data/tomeDb.js';
+import {
+  tomeBooks,
+} from '../data/tomeDb.js';
 import {
   bookLongName,
-  bookShortName
+  bookShortName,
 } from '../data/tomeIdx.js';
 
 const greekFirstIdx = 39;
@@ -19,11 +23,11 @@ const indices = [...Array(66).keys()];
 
 const lowerToolSet = [
   { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-  { type: 'btn', icon: 'navigator-chapter', ariaLabel: 'Chapter' }
+  { type: 'btn', icon: 'navigator-chapter', ariaLabel: 'Chapter' },
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'navigator-book', text: 'Book' }
+  { type: 'banner', cssModifier: 'navigator-book', text: 'Book' },
 ];
 
 class NavigatorBookView {

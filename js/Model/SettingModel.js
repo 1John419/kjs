@@ -1,9 +1,12 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 
-const validFontSizes = ['font-size--s', 'font-size--m', 'font-size--l',
-  'font-size--xl', 'font-size--xxl'
+const validFontSizes = [
+  'font-size--s', 'font-size--m', 'font-size--l', 'font-size--xl',
+  'font-size--xxl',
 ];
 
 const fontDefault = 0;

@@ -2,17 +2,21 @@
 
 import {
   fetchJson,
-  versionCheck
+  versionCheck,
 } from './dbUtil.js';
-import { chapterLastVerseIdx } from './tomeIdx.js';
-import { progress } from '../load.js';
+import {
+  chapterLastVerseIdx,
+} from './tomeIdx.js';
+import {
+  progress,
+} from '../load.js';
 
 const tomeSetup = {
   name: 'kjv',
   stores: {
     lists: 'k',
     verses: 'k',
-    words: 'k'
+    words: 'k',
   },
   url: '/json/kjv.json',
   version: '2020-01-07',

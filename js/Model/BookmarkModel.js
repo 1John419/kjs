@@ -1,19 +1,26 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   tomeDb,
   tomeName,
-  tomeVerseCount
+  tomeVerseCount,
 } from '../data/tomeDb.js';
 
 const numSortAscend = (a, b) => a - b;
 
-const bookmarkFolderReroute = ['bookmark-folder-add', 'bookmark-folder-delete',
-  'bookmark-folder-rename', 'bookmark-export', 'bookmark-import'
+const bookmarkFolderReroute = [
+  'bookmark-folder-add', 'bookmark-folder-delete', 'bookmark-folder-rename',
+  'bookmark-export', 'bookmark-import',
 ];
-const bookmarkListReroute = ['bookmark-move-copy'];
-const validTasks = ['bookmark-list', 'bookmark-folder'];
+const bookmarkListReroute = [
+  'bookmark-move-copy',
+];
+const validTasks = [
+  'bookmark-list', 'bookmark-folder',
+];
 
 const firstEntry = 0;
 
@@ -123,7 +130,7 @@ class BookmarkModel {
   folderImport(pkgStr) {
     let bookmarkPkg = this.getBookmarkPkg(pkgStr);
     if (!bookmarkPkg) {
-      queue.publish('bookmark-import.message', 'Invalid JSON string');
+      queue.publish('bookmark-import.message', 'Invalid JSON String');
     } else {
       let status = this.validatePkg(bookmarkPkg);
       if (status === 'OK') {
@@ -169,7 +176,7 @@ class BookmarkModel {
           !folder.bookmarks ||
           !Array.isArray(folder.bookmarks)
         ) {
-          status = 'Invalid folder structure';
+          status = 'Invalid Folder Structure';
           error = true;
         }
         if (!error) {
@@ -179,7 +186,7 @@ class BookmarkModel {
               bookmark < 0 ||
               bookmark > this.maxIdx
             ) {
-              status = 'Invalid verse';
+              status = 'Invalid Verse';
               error = true;
             }
             return error;
@@ -245,7 +252,7 @@ class BookmarkModel {
     }
     this.updateFolders();
     this.updateFolderList();
-    queue.publish('bookmark-import.message', 'Import successful.');
+    queue.publish('bookmark-import.message', 'Import Successful');
   }
 
   initialize() {
@@ -557,10 +564,10 @@ class BookmarkModel {
       !bookmarkPkg.folders ||
       !Array.isArray(bookmarkPkg.folders)
     ) {
-      status = 'Invalid package structure';
+      status = 'Invalid Package Structure';
     }
     if (bookmarkPkg.tome !== tomeName) {
-      status = 'Tome mismatch';
+      status = 'Tome Mismatch';
     }
     return status;
   }

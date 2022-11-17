@@ -1,17 +1,21 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
-import { helpTopicList } from './HelpTopicView.js';
+import {
+  queue,
+} from '../CommandQueue.js';
+import {
+  helpTopicList,
+} from './HelpTopicView.js';
 import {
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
 
 const lowerToolSet = [
   { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-  { type: 'btn', icon: 'help-topic', ariaLabel: 'Help Topic' }
+  { type: 'btn', icon: 'help-topic', ariaLabel: 'Help Topic' },
 ];
 
 const upperToolSet = [

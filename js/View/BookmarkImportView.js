@@ -1,27 +1,29 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateElement,
   templateDivDialog,
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
 
 const dialogToolset = [
   { type: 'label', text: 'Paste Bookmark Package Here:' },
   { type: 'textarea', ariaLabel: 'Bookmark Package' },
-  { type: 'btn', id: 'import', ariaLabel: 'Import' }
+  { type: 'btn', id: 'import', ariaLabel: 'Import' },
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' }
+  { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'bookmark-import', text: 'Bookmark Import' }
+  { type: 'banner', cssModifier: 'bookmark-import', text: 'Bookmark Import' },
 ];
 
 class BookmarkImportView {

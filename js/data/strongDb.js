@@ -2,10 +2,14 @@
 
 import {
   fetchJson,
-  versionCheck
+  versionCheck,
 } from './dbUtil.js';
-import { progress } from '../load.js';
-import { defTranliteration } from '../data/strongIdx.js';
+import {
+  progress,
+} from '../load.js';
+import {
+  defTranliteration,
+} from '../data/strongIdx.js';
 
 const strongSetup = {
   name: 'strong',

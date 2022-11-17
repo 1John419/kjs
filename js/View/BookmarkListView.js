@@ -1,6 +1,8 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateActionMenu,
   templateAcrostic,
@@ -9,13 +11,17 @@ import {
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
-import { removeAllChildren } from '../util.js';
-import { citationByVerseIdx } from '../data/tomeDb.js';
+import {
+  removeAllChildren,
+} from '../util.js';
+import {
+  citationByVerseIdx,
+} from '../data/tomeDb.js';
 import {
   verseCitation,
-  verseText
+  verseText,
 } from '../data/tomeIdx.js';
 
 const actionSet = [
@@ -23,7 +29,7 @@ const actionSet = [
   { icon: 'down', ariaLabel: 'Down' },
   { icon: 'move-copy', ariaLabel: 'Move/Copy' },
   { icon: 'delete', ariaLabel: 'Delete' },
-  { icon: 'cancel', ariaLabel: 'Cancel' }
+  { icon: 'cancel', ariaLabel: 'Cancel' },
 ];
 
 const lowerToolSet = [

@@ -1,28 +1,30 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateDivDialog,
   templateElement,
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
 
 const dialogToolset = [
   { type: 'label', text: 'Query' },
   { type: 'input', ariaLabel: 'Query' },
-  { type: 'btn', id: 'search', ariaLabel: 'Search' }
+  { type: 'btn', id: 'search', ariaLabel: 'Search' },
 ];
 
 const lowerToolSet = [
   { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-  { type: 'btn', icon: 'result', ariaLabel: 'Search Result' }
+  { type: 'btn', icon: 'result', ariaLabel: 'Search Result' },
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'search-lookup', text: 'Search Lookup' }
+  { type: 'banner', cssModifier: 'search-lookup', text: 'Search Lookup' },
 ];
 
 class SearchLookupView {

@@ -1,16 +1,18 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateBtnIcon,
   templateElement,
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
 import {
-  removeAllChildren
+  removeAllChildren,
 } from '../util.js';
 import {
   bookBinBookIdx,
@@ -22,7 +24,7 @@ import {
   chapterBinWordCount,
   tomeBinBooks,
   tomeBinVerseCount,
-  tomeBinWordCount
+  tomeBinWordCount,
 } from '../data/binIdx.js';
 import {
   tomeBooks,
@@ -31,15 +33,15 @@ import {
 } from '../data/tomeDb.js';
 import {
   bookLongName,
-  chapterName
+  chapterName,
 } from '../data/tomeIdx.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'result', ariaLabel: 'Strong Result' }
+  { type: 'btn', icon: 'result', ariaLabel: 'Strong Result' },
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'strong-filter', text: 'Strong Filter' }
+  { type: 'banner', cssModifier: 'strong-filter', text: 'Strong Filter' },
 ];
 
 class StrongFilterView {
@@ -166,7 +168,7 @@ class StrongFilterView {
     let chapterIdx = parseInt(btnFilter.dataset.chapterIdx);
     let strongFilter = {
       bookIdx: bookIdx,
-      chapterIdx: chapterIdx
+      chapterIdx: chapterIdx,
     };
     queue.publish('strong-filter.select', strongFilter);
   }

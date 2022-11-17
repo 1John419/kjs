@@ -1,6 +1,8 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateAcrostic,
   templateElement,
@@ -8,31 +10,31 @@ import {
   templateToolbarMenu,
   templatePage,
   templateScroll,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
 import {
   centerScrollElement,
   removeAllChildren,
-  sideScrollElement
+  sideScrollElement,
 } from '../util.js';
 import {
-  tomeChapters
+  tomeChapters,
 } from '../data/tomeDb.js';
 import {
   chapterName,
   verseNum,
-  verseText
+  verseText,
 } from '../data/tomeIdx.js';
 import {
   mapSliceEnd,
   mapSliceStart,
-  mapStrongNums
+  mapStrongNums,
 } from '../data/strongIdx.js';
 import {
   elElyon,
   elShaddai,
   nameSub,
-  yahweh
+  yahweh,
 } from '../data/name.js';
 
 const lowerToolSet = [
@@ -45,13 +47,13 @@ const lowerToolSet = [
   { type: 'btn', icon: 'column-mode', ariaLabel: 'Column Mode' },
   { type: 'btn', icon: 'name-mode', ariaLabel: 'Name Mode' },
   { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' },
-  { type: 'btn', icon: 'v-menu', ariaLabel: 'Toolbar Menu' }
+  { type: 'btn', icon: 'v-menu', ariaLabel: 'Toolbar Menu' },
 ];
 
 const upperToolSet = [
   { type: 'btn', icon: 'prev', ariaLabel: 'Previous Chapter' },
   { type: 'banner', cssModifier: 'read', text: null },
-  { type: 'btn', icon: 'next', ariaLabel: 'Next Chapter' }
+  { type: 'btn', icon: 'next', ariaLabel: 'Next Chapter' },
 ];
 
 const menuSet = [

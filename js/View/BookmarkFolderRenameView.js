@@ -1,28 +1,29 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
+import {
+  queue,
+} from '../CommandQueue.js';
 import {
   templateDivDialog,
   templateElement,
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
 
 const dialogToolset = [
   { type: 'label', text: 'Folder Name' },
   { type: 'input', ariaLabel: 'Name' },
-  { type: 'btn', id: 'save', ariaLabel: 'Save' }
+  { type: 'btn', id: 'save', ariaLabel: 'Save' },
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' }
+  { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'bookmark-folder-rename',
-    text: 'Folder Rename'}
+  { type: 'banner', cssModifier: 'bookmark-folder-rename', text: 'Folder Rename'},
 ];
 
 class BookmarkFolderRenameView {
@@ -123,7 +124,7 @@ class BookmarkFolderRenameView {
     this.page.classList.remove('page--hide');
     this.message.classList.add('message--hide');
     this.namePkg = {
-      old: this.folderName
+      old: this.folderName,
     };
     this.inputName.value = this.folderName;
     this.inputName.focus();

@@ -1,24 +1,30 @@
 'use strict';
 
-import { queue } from '../CommandQueue.js';
-import { removeAllChildren } from '../util.js';
+import {
+  queue,
+} from '../CommandQueue.js';
+import {
+  removeAllChildren,
+} from '../util.js';
 import {
   templateBtnIcon,
   templateElement,
   templatePage,
   templateScroll,
   templateToolbarLower,
-  templateToolbarUpper
+  templateToolbarUpper,
 } from '../template.js';
-import { strongCitations } from '../data/strongDb.js';
+import {
+  strongCitations,
+} from '../data/strongDb.js';
 
 const lowerToolSet = [
   { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
-  { type: 'btn', icon: 'history-clear', ariaLabel: 'Clear Hitory' }
+  { type: 'btn', icon: 'history-clear', ariaLabel: 'Clear History' },
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'strong-history', text: 'Strong History' }
+  { type: 'banner', cssModifier: 'strong-history', text: 'Strong History' },
 ];
 
 const firstXlit = 0;

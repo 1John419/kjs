@@ -13,20 +13,20 @@ import {
   tomeBinBooks,
   tomeBinVerseCount,
   tomeBinVerses,
-  tomeBinWordCount
+  tomeBinWordCount,
 } from './data/binIdx.js';
 import {
   tomeBooks,
   tomeChapters,
   tomeDb,
-  tomeWords
+  tomeWords,
 } from './data/tomeDb.js';
 import {
   bookLastVerseIdx,
   chapterLastVerseIdx,
   verseText,
   wordCount,
-  wordVerseIdx
+  wordVerseIdx,
 } from './data/tomeIdx.js';
 
 const numSort = (a, b) => a - b;
@@ -75,7 +75,7 @@ class SearchEngine {
         verseCount,
         sliceStart,
         sliceEnd,
-        chapters
+        chapters,
       ]);
       bookBin = tomeBin[tomeBinBooks][tomeBin[tomeBinBooks].length - 1];
     }
@@ -96,7 +96,7 @@ class SearchEngine {
         wordCount,
         verseCount,
         sliceStart,
-        sliceEnd
+        sliceEnd,
       ]);
       chapterBin = bookBin[bookBinChapters][bookBin[bookBinChapters].length - 1];
     }
@@ -258,7 +258,7 @@ class SearchEngine {
   }
 
   initialize() {
-    this.subscribe();
+    return;
   }
 
   initializeTomeBin() {
@@ -270,7 +270,7 @@ class SearchEngine {
       wordCount,
       verseCount,
       books,
-      verses
+      verses,
     ];
   }
 
@@ -315,8 +315,6 @@ class SearchEngine {
     }
     return this.rig;
   }
-
-  subscribe() {}
 
 }
 

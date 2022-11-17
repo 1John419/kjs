@@ -1,7 +1,11 @@
 'use strict';
 
-import { progress } from '../load.js';
-import { Dexie } from '../lib/dexie.min.mjs';
+import {
+  progress,
+} from '../load.js';
+import {
+  Dexie,
+} from '../lib/dexie.min.mjs';
 
 export const fetchJson = async (url) => {
   progress('fetching...');

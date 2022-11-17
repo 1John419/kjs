@@ -2,7 +2,7 @@
 
 let appCaches = [
   {
-    name: 'core-20221114.01',
+    name: 'core-20221117.01',
     urls: [
       '/',
       '/bundle.js',
@@ -16,14 +16,14 @@ let appCaches = [
     ]
   },
   {
-    name: 'css-20221114.01',
+    name: 'css-20221117.01',
     urls: [
       '/css/kjs.css',
       '/css/font.css',
     ]
   },
   {
-    name: 'font-20221114.01',
+    name: 'font-20221117.01',
     urls: [
       '/font/dancing-script-v24-latin-regular.woff2',
       '/font/inconsolata-v31-latin-regular.woff2',
@@ -37,7 +37,7 @@ let appCaches = [
     ]
   },
   {
-    name: 'help-20221114.01',
+    name: 'help-20221117.01',
     urls: [
       '/help/bookmark.html',
       '/help/help.html',
@@ -52,22 +52,22 @@ let appCaches = [
     ]
   },
   {
-    name: 'json-20221114.01',
+    name: 'json-20221117.01',
     urls: [
       '/json/kjv.json',
       '/json/strong.json',
     ]
   },
   {
-    name: 'png-20221114.01',
+    name: 'png-20221117.01',
     urls: [
       '/favicon.png',
       '/png/icon-192.png',
       '/png/icon-512.png',
       '/png/maskable-icon-192.png',
       '/png/maskable-icon-512.png',
-    ]
-  }
+    ],
+  },
 ];
 
 let cacheNames = appCaches.map((cache) => cache.name);
