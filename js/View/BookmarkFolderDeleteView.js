@@ -13,7 +13,7 @@ import {
 
 const dialogToolset = [
   { type: 'label', text: null },
-  { type: 'btn', id: 'delete', ariaLabel: 'Delete' },
+  { type: 'btn', cssModifier: 'delete', ariaLabel: 'Delete' },
 ];
 
 const lowerToolSet = [

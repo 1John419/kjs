@@ -15,7 +15,7 @@ import {
 const dialogToolset = [
   { type: 'label', text: 'Query' },
   { type: 'input', ariaLabel: 'Query' },
-  { type: 'btn', id: 'search', ariaLabel: 'Search' },
+  { type: 'btn', cssModifier: 'search', ariaLabel: 'Search' },
 ];
 
 const lowerToolSet = [

@@ -15,7 +15,7 @@ import {
 const dialogToolset = [
   { type: 'label', text: 'Folder Name' },
   { type: 'input', ariaLabel: 'Name' },
-  { type: 'btn', id: 'save', ariaLabel: 'Save' },
+  { type: 'btn', cssModifier: 'save', ariaLabel: 'Save' },
 ];
 
 const lowerToolSet = [

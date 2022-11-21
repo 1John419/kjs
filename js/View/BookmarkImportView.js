@@ -15,7 +15,7 @@ import {
 const dialogToolset = [
   { type: 'label', text: 'Paste Bookmark Package Here:' },
   { type: 'textarea', ariaLabel: 'Bookmark Package' },
-  { type: 'btn', id: 'import', ariaLabel: 'Import' },
+  { type: 'btn', cssModifier: 'import', ariaLabel: 'Import' },
 ];
 
 const lowerToolSet = [

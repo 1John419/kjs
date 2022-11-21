@@ -15,7 +15,7 @@ import {
 const dialogToolset = [
   { type: 'label', text: 'Strong Number' },
   { type: 'input', ariaLabel: 'Strong Number' },
-  { type: 'btn', id: 'find', ariaLabel: 'Find' },
+  { type: 'btn', cssModifier: 'find', ariaLabel: 'Find' },
 ];
 
 const lowerToolSet = [
