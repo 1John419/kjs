@@ -116,6 +116,35 @@ textarea {
   margin: 0.25rem;
 }
 
+.btn-banner {
+  align-self: center;
+  background-color: transparent;
+  flex: 1 1 auto;
+  height: 100%;
+  overflow: hidden;
+  padding: 0 0.5rem;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-banner--active {
+  background-color: var(--ui-hint-bg);
+  color: var(--ui-hint-fg);
+}
+
+.btn-banner--bookmark-list {
+  width: 100%;
+}
+
+.btn-banner--search-result {
+  width: 100%;
+}
+
+.btn-banner--strong-result {
+  width: 100%;
+}
+
 .btn-book {
   flex: 0 0 20%;
   height: var(--target-size);

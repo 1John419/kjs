@@ -154,13 +154,13 @@ class BookmarkFolderView {
 
   listClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target.classList.contains('btn-entry')) {
-        let folderName = target.textContent;
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn.classList.contains('btn-entry')) {
+        let folderName = btn.textContent;
         queue.publish('bookmark-folder.select', folderName);
-      } else if (target.classList.contains('btn-icon--h-menu')) {
-        let entry = target.previousSibling;
+      } else if (btn.classList.contains('btn-icon--h-menu')) {
+        let entry = btn.previousSibling;
         this.menuClick(entry);
       }
     }
@@ -200,17 +200,17 @@ class BookmarkFolderView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnBack) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnBack) {
         queue.publish('bookmark.back', null);
-      } else if (target === this.btnBookmarkList) {
+      } else if (btn === this.btnBookmarkList) {
         queue.publish('bookmark-list', null);
-      } else if (target === this.btnBookmarkFolderAdd) {
+      } else if (btn === this.btnBookmarkFolderAdd) {
         queue.publish('bookmark-folder-add', null);
-      } else if (target === this.btnExport) {
+      } else if (btn === this.btnExport) {
         queue.publish('bookmark-export', null);
-      } else if (target === this.btnImport) {
+      } else if (btn === this.btnImport) {
         queue.publish('bookmark-import', null);
       }
     }

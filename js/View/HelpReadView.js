@@ -87,11 +87,11 @@ class HelpReadView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnBack) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnBack) {
         queue.publish('help.back', null);
-      } else if (target === this.btnHelpTopic) {
+      } else if (btn === this.btnHelpTopic) {
         queue.publish('help-topic', null);
       }
     }

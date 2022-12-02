@@ -69,8 +69,8 @@ class StrongLookupView {
 
   dialogClick(event) {
     event.preventDefault();
-    let target = event.target;
-    if (target === this.btnFind) {
+    let btn = event.target.closest('button');
+    if (btn === this.btnFind) {
       this.findClick();
     }
   }
@@ -138,9 +138,9 @@ class StrongLookupView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnDef) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnDef) {
         queue.publish('strong-def', null);
       }
     }

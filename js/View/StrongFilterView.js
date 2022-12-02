@@ -212,14 +212,14 @@ class StrongFilterView {
 
   listClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target.classList.contains('btn-filter')) {
-        this.filterClick(target);
-      } else if (target.classList.contains('btn-icon--filter-down')) {
-        this.foldClick(target);
-      } else if (target.classList.contains('btn-icon--filter-next')) {
-        this.unfoldClick(target);
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn.classList.contains('btn-filter')) {
+        this.filterClick(btn);
+      } else if (btn.classList.contains('btn-icon--filter-down')) {
+        this.foldClick(btn);
+      } else if (btn.classList.contains('btn-icon--filter-next')) {
+        this.unfoldClick(btn);
       }
     }
   }
@@ -259,9 +259,9 @@ class StrongFilterView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnResult) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnResult) {
         queue.publish('strong-result', null);
       }
     }

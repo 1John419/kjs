@@ -24,6 +24,7 @@ export const helpTopicList = [
   { topic: 'about', name: 'About' },
   { topic: 'overview', name: 'Overview' },
   { topic: 'read', name: 'Read' },
+  { topic: 'clipboard-mode', name: 'Clipboard Mode' },
   { topic: 'name-mode', name: 'Name Mode' },
   { topic: 'navigator', name: 'Navigator' },
   { topic: 'bookmark', name: 'Bookmark' },
@@ -103,10 +104,10 @@ class HelpTopicView {
 
   scrollClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target.classList.contains('btn-topic')) {
-        let helpTopic = target.dataset.topic;
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn.classList.contains('btn-topic')) {
+        let helpTopic = btn.dataset.topic;
         queue.publish('help-topic.select', helpTopic);
       }
     }
@@ -127,11 +128,11 @@ class HelpTopicView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnBack) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnBack) {
         queue.publish('help.back', null);
-      } else if (target === this.btnHelpRead) {
+      } else if (btn === this.btnHelpRead) {
         queue.publish('help-read', null);
       }
     }

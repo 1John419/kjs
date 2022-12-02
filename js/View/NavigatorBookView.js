@@ -144,10 +144,10 @@ class NavigatorBookView {
 
   listClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target.classList.contains('btn-book')) {
-        this.contentClick(target);
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn.classList.contains('btn-book')) {
+        this.contentClick(btn);
       }
     }
   }
@@ -171,11 +171,11 @@ class NavigatorBookView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnBack) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnBack) {
         queue.publish('navigator.back', null);
-      } else if (target === this.btnChapter) {
+      } else if (btn === this.btnChapter) {
         queue.publish('navigator-chapter', null);
       }
     }

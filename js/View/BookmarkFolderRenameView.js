@@ -69,8 +69,8 @@ class BookmarkFolderRenameView {
 
   dialogClick(event) {
     event.preventDefault();
-    let target = event.target;
-    if (target === this.btnSave) {
+    let btn = event.target.closest('button');
+    if (btn === this.btnSave) {
       this.saveClick();
     }
   }
@@ -149,9 +149,9 @@ class BookmarkFolderRenameView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnBookmarkFolder) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnBookmarkFolder) {
         queue.publish('bookmark-folder', null);
       }
     }

@@ -42,7 +42,7 @@ const lowerToolSet = [
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'bookmark-list', text: null },
+  { type: 'btn-banner', cssModifier: 'bookmark-list', ariaLbael: 'Toogle Clipboard' },
 ];
 
 class BookmarkListView {
@@ -81,6 +81,9 @@ class BookmarkListView {
     });
     this.toolbarLower.addEventListener('click', (event) => {
       this.toolbarLowerClick(event);
+    });
+    this.toolbarUpper.addEventListener('click', (event) => {
+      this.toolbarUpperClick(event);
     });
   }
 
@@ -177,16 +180,33 @@ class BookmarkListView {
     this.expandMode = expandMode;
     if (this.expandMode) {
       this.btnExpandMode.classList.add('btn-icon--active');
+      this.list.classList.add(this.font.fontClass);
+      this.list.classList.add(this.fontSize);
     } else {
       this.btnExpandMode.classList.remove('btn-icon--active');
+      this.list.classList.remove(this.font.fontClass);
+      this.list.classList.remove(this.fontSize);
     }
     this.updateBookmarks()
+  }
+
+  fontSizeUpdate(fontSize) {
+    this.fontSize = fontSize;
+    this.updateFontSize();
+    this.lastFontSize = this.fontSize;
+  }
+
+  fontUpdate(font) {
+    this.font = font;
+    this.updateFont();
+    this.lastFont = this.font;
+    this.lastFontSize = null;
   }
 
   getElements() {
     this.btnFolderAdd = this.toolbarUpper.querySelector(
       '.btn-icon--folder-add');
-    this.banner = this.toolbarUpper.querySelector('.banner--bookmark-list');
+    this.btnBanner = this.toolbarUpper.querySelector('.btn-banner--bookmark-list');
 
     this.btnUp = this.actionMenu.querySelector('.btn-icon--up');
     this.btnDown = this.actionMenu.querySelector('.btn-icon--down');
@@ -217,15 +237,17 @@ class BookmarkListView {
     this.getElements();
     this.addListeners();
     this.subscribe();
+    this.lastFont = null;
+    this.clipboardMode = false;
   }
 
   listClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
+    let btn = event.target.closest('button');
     if (this.expandMode) {
-      this.verseClick(target);
+      this.verseClick(btn);
     } else {
-      this.entryClick(target);
+      this.entryClick(btn);
     }
   }
 
@@ -278,24 +300,54 @@ class BookmarkListView {
     queue.subscribe('bookmark.strong-mode.update', (strongMode) => {
       this.strongModeUpdate(strongMode);
     });
+
+    queue.subscribe('font.update', (font) => {
+      this.fontUpdate(font);
+    });
+
+    queue.subscribe('font-size.update', (fontSize) => {
+      this.fontSizeUpdate(fontSize);
+    });
+  }
+
+  toogleClipboardMode() {
+    if (this.clipboardMode) {
+      this.btnBanner.classList.remove('btn-banner--active');
+    } else {
+      this.btnBanner.classList.add('btn-banner--active');
+    }
+    this.clipboardMode = !this.clipboardMode;
   }
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnBack) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnBack) {
         queue.publish('bookmark.back', null);
-      } else if (target === this.btnSortAscend) {
+      } else if (btn === this.btnSortAscend) {
         queue.publish('bookmark-list.sort-ascend', null);
-      } else if (target === this.btnSortInvert) {
+      } else if (btn === this.btnSortInvert) {
         queue.publish('bookmark-list.sort-invert', null);
-      } else if (target === this.btnBookmarkFolder) {
+      } else if (btn === this.btnBookmarkFolder) {
         queue.publish('bookmark-folder', null);
-      } else if (target === this.btnExpandMode) {
+      } else if (btn === this.btnExpandMode) {
         queue.publish('bookmark-list.expand-mode.click', null);
-      } else if (target === this.btnStrongMode) {
+      } else if (btn === this.btnStrongMode) {
         queue.publish('bookmark-list.strong-mode.click', null);
+      }
+    }
+  }
+
+  toolbarUpperClick(event) {
+    event.preventDefault();
+    if (!this.expandMode) {
+      return;
+    }
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnBanner) {
+        this.toogleClipboardMode();
       }
     }
   }
@@ -305,7 +357,7 @@ class BookmarkListView {
   }
 
   updateBanner() {
-    this.banner.innerHTML = `${this.activeFolder.name}`;
+    this.btnBanner.innerHTML = `${this.activeFolder.name}`;
   }
 
   updateActiveFolder(activeFolder) {
@@ -338,14 +390,39 @@ class BookmarkListView {
     this.scroll.scrollTop = scrollSave;
   }
 
+  updateFontSize() {
+    if (!this.expandMode) {
+      return;
+    }
+    if (this.lastFontSize) {
+      this.list.classList.remove(this.lastFontSize);
+    }
+    this.list.classList.add(this.fontSize);
+  }
+
+  updateFont() {
+    if (!this.expandMode) {
+      return;
+    }
+    if (this.lastFont) {
+      this.list.classList.remove(this.lastFont.fontClass);
+    }
+    this.list.classList.add(this.font.fontClass);
+  }
+
   verseClick(target) {
     if (target) {
       if (target.classList.contains('btn-result')) {
-        let verseIdx = parseInt(target.dataset.verseIdx);
-        if (this.strongMode) {
-          queue.publish('bookmark-list.strong-select', verseIdx);
+        if (this.clipboardMode) {
+          let text = target.textContent;
+          navigator.clipboard.writeText(text);
         } else {
-          queue.publish('bookmark-list.select', verseIdx);
+          let verseIdx = parseInt(target.dataset.verseIdx);
+          if (this.strongMode) {
+            queue.publish('bookmark-list.strong-select', verseIdx);
+          } else {
+            queue.publish('bookmark-list.select', verseIdx);
+          }
         }
       }
     }

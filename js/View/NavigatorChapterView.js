@@ -127,10 +127,10 @@ class NavigatorChapterView {
 
   listClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target.classList.contains('btn-chapter')) {
-        this.contentClick(target);
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn.classList.contains('btn-chapter')) {
+        this.contentClick(btn);
       }
     }
   }
@@ -162,11 +162,11 @@ class NavigatorChapterView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnBack) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnBack) {
         queue.publish('navigator.back', null);
-      } else if (target === this.btnBook) {
+      } else if (btn === this.btnBook) {
         queue.publish('navigator-book', null);
       }
     }

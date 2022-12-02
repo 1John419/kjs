@@ -108,13 +108,13 @@ class SearchHistoryView {
 
   listClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target.classList.contains('btn-entry--history')) {
-        let query = target.textContent;
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn.classList.contains('btn-entry--history')) {
+        let query = btn.textContent;
         queue.publish('search-history.select', query);
-      } else if (target.classList.contains('btn-icon--delete')) {
-        let entry = target.previousSibling;
+      } else if (btn.classList.contains('btn-icon--delete')) {
+        let entry = btn.previousSibling;
         let query = entry.textContent;
         queue.publish('search-history.delete', query);
       }
@@ -140,11 +140,11 @@ class SearchHistoryView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnResult) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnResult) {
         queue.publish('search-result', null);
-      } else if (target === this.btnHistoryClear) {
+      } else if (btn === this.btnHistoryClear) {
         queue.publish('search-history.clear', null);
       }
     }

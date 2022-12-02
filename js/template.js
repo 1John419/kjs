@@ -35,6 +35,12 @@ export const templateActionMenu = (cssModifier, actionSet) => {
   return actionMenu;
 };
 
+export const templateBtnBanner = (cssModifier, ariaLabel) => {
+  let btnIcon = templateElement(
+    'button', 'btn-banner', cssModifier, ariaLabel);
+  return btnIcon;
+};
+
 export const templateBtnIcon = (svgId, cssModifier, ariaLabel) => {
   let svgTag = document.createElementNS(svgNS, 'svg');
   svgTag.classList.add('icon-svg');
@@ -151,6 +157,9 @@ export const templateToolbarUpper = (toolSet) => {
     let element;
     if (tool.type === 'btn') {
       element = templateBtnIcon(tool.icon, tool.icon, tool.ariaLabel);
+      toolbarUpper.appendChild(element);
+    } else if (tool.type === 'btn-banner') {
+      element = templateBtnBanner(tool.cssModifier, tool.ariaLabel);
       toolbarUpper.appendChild(element);
     } else if (tool.type === 'banner') {
       element = templateElement(

@@ -279,7 +279,7 @@ class SearchModel {
   tomeFilter() {
     return {
       bookIdx: -1,
-      chapterIdx: -1
+      chapterIdx: -1,
     };
   }
 

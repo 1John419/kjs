@@ -111,13 +111,13 @@ class StrongHistoryView {
 
   listClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target.classList.contains('btn-entry--history')) {
-        let strongDef = target.dataset.def;
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn.classList.contains('btn-entry--history')) {
+        let strongDef = btn.dataset.def;
         queue.publish('strong-history.select', strongDef);
-      } else if (target.classList.contains('btn-icon--delete')) {
-        let entry = target.previousSibling;
+      } else if (btn.classList.contains('btn-icon--delete')) {
+        let entry = btn.previousSibling;
         let strongDef = entry.dataset.def;
         queue.publish('strong-history.delete', strongDef);
       }
@@ -143,11 +143,11 @@ class StrongHistoryView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnDef) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnDef) {
         queue.publish('strong-def', null);
-      } else if (target === this.btnHistoryClear) {
+      } else if (btn === this.btnHistoryClear) {
         queue.publish('strong-history.clear', null);
       }
     }

@@ -147,10 +147,10 @@ class BookmarkMoveCopyView {
 
   listClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target.classList.contains('btn-icon--h-menu')) {
-        let entry = target.previousSibling;
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn.classList.contains('btn-icon--h-menu')) {
+        let entry = btn.previousSibling;
         this.menuClick(entry);
       }
     }
@@ -214,9 +214,9 @@ class BookmarkMoveCopyView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnBookmarkFolder) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnBookmarkFolder) {
         queue.publish('bookmark-folder', null);
       }
     }

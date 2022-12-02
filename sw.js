@@ -2,7 +2,7 @@
 
 let appCaches = [
   {
-    name: 'core-20221120.02',
+    name: 'core-20221201.01',
     urls: [
       '/',
       '/bundle.js',
@@ -16,7 +16,7 @@ let appCaches = [
     ]
   },
   {
-    name: 'css-20221117.01',
+    name: 'css-20221201.01',
     urls: [
       '/css/kjs.css',
       '/css/font.css',
@@ -37,9 +37,10 @@ let appCaches = [
     ]
   },
   {
-    name: 'help-20221117.01',
+    name: 'help-20221201.01',
     urls: [
       '/help/bookmark.html',
+      '/help/clipboard-mode.html',
       '/help/help.html',
       '/help/navigator.html',
       '/help/overview.html',

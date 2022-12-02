@@ -183,12 +183,12 @@ class StrongDefView {
 
   listClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target.classList.contains('btn-strong-word')) {
-        this.wordClick(target);
-      } else if (target.classList.contains('btn-strong-def')) {
-        this.defClick(target);
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn.classList.contains('btn-strong-word')) {
+        this.wordClick(btn);
+      } else if (btn.classList.contains('btn-strong-def')) {
+        this.defClick(btn);
       }
     }
   }
@@ -225,19 +225,19 @@ class StrongDefView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnBack) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnBack) {
         queue.publish('strong.back', null);
-      } else if (target === this.btnLookup) {
+      } else if (btn === this.btnLookup) {
         queue.publish('strong-lookup', null);
-      } else if (target === this.btnHistory) {
+      } else if (btn === this.btnHistory) {
         queue.publish('strong-history', null);
-      } else if (target === this.btnVerse) {
+      } else if (btn === this.btnVerse) {
         queue.publish('strong-verse', null);
-      } else if (target === this.btnResult) {
+      } else if (btn === this.btnResult) {
         queue.publish('strong-result', null);
-      } else if (target === this.btnPrev) {
+      } else if (btn === this.btnPrev) {
         queue.publish('strong.prev', null);
       }
     }

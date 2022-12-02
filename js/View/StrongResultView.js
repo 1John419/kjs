@@ -55,7 +55,7 @@ const lowerToolSet = [
 ];
 
 const upperToolSet = [
-  { type: 'banner', cssModifier: 'strong-result', text: 'Strong Search' },
+  { type: 'btn-banner', cssModifier: 'strong-result', text: 'Strong Search' },
 ];
 
 const binIdx = 0;
@@ -76,6 +76,9 @@ class StrongResultView {
     });
     this.toolbarLower.addEventListener('click', (event) => {
       this.toolbarLowerClick(event);
+    });
+    this.toolbarUpper.addEventListener('click', (event) => {
+      this.toolbarUpperClick(event);
     });
   }
 
@@ -249,7 +252,7 @@ class StrongResultView {
   }
 
   getElements() {
-    this.banner = this.toolbarUpper.querySelector('.banner--strong-result');
+    this.btnBanner = this.toolbarUpper.querySelector('.btn-banner--strong-result');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
     this.btnFilter = this.toolbarLower.querySelector('.btn-icon--filter');
@@ -271,19 +274,24 @@ class StrongResultView {
     this.addListeners();
     this.subscribe();
     this.strongMode = false;
+    this.clipboardMode = false;
   }
 
   listClick(event) {
     event.preventDefault();
-    let target = event.target;
-    let btn = target.closest('button');
+    let btn = event.target.closest('button');
     if (btn) {
-      if (btn.classList.contains('btn-result')) {
-        let verseIdx = parseInt(btn.dataset.verseIdx);
-        if (this.strongMode) {
-          queue.publish('strong-result.strong-select', verseIdx);
-        } else {
-          queue.publish('strong-result.read-select', verseIdx);
+      if (this.clipboardMode) {
+        let text = btn.textContent;
+        navigator.clipboard.writeText(text);
+      } else {
+        if (btn.classList.contains('btn-result')) {
+          let verseIdx = parseInt(btn.dataset.verseIdx);
+          if (this.strongMode) {
+            queue.publish('strong-result.strong-select', verseIdx);
+          } else {
+            queue.publish('strong-result.read-select', verseIdx);
+          }
         }
       }
     }
@@ -291,8 +299,8 @@ class StrongResultView {
 
   loadMoreClick(event) {
     event.preventDefault();
-    let target = event.target;
-    if (target === this.btnLoadMore) {
+    let btn = event.target.closest('button');
+    if (btn === this.btnLoadMore) {
       this.loadVerses();
     }
   }
@@ -385,31 +393,50 @@ class StrongResultView {
     });
   }
 
+  toogleClipboardMode() {
+    if (this.clipboardMode) {
+      this.btnBanner.classList.remove('btn-banner--active');
+    } else {
+      this.btnBanner.classList.add('btn-banner--active');
+    }
+    this.clipboardMode = !this.clipboardMode;
+  }
+
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnBack) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnBack) {
         queue.publish('strong.back', null);
-      } else if (target === this.btnFilter) {
+      } else if (btn === this.btnFilter) {
         queue.publish('strong-filter', null);
-      } else if (target === this.btnStrongMode) {
+      } else if (btn === this.btnStrongMode) {
         queue.publish('strong.strong-mode.click', null);
-      } else if (target === this.btnStrongDef) {
+      } else if (btn === this.btnStrongDef) {
         queue.publish('strong-def', null);
-      } else if (target === this.btnStrongVerse) {
+      } else if (btn === this.btnStrongVerse) {
         queue.publish('strong-verse', null);
+      }
+    }
+  }
+
+  toolbarUpperClick(event) {
+    event.preventDefault();
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnBanner) {
+        this.toogleClipboardMode();
       }
     }
   }
 
   updateBanner() {
     if (this.citation) {
-      this.banner.innerHTML = `${this.citation} ` +
+      this.btnBanner.innerHTML = `${this.citation} ` +
         `(${this.wordCount}/${this.verseCount})<br>` +
         `${this.strongDef} ${this.strongWord}`;
     } else {
-      this.banner.innerHTML = this.strongDef;
+      this.btnBanner.innerHTML = this.strongDef;
     }
   }
 

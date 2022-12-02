@@ -557,6 +557,12 @@
     return actionMenu;
   };
 
+  const templateBtnBanner = (cssModifier, ariaLabel) => {
+    let btnIcon = templateElement(
+      'button', 'btn-banner', cssModifier, ariaLabel);
+    return btnIcon;
+  };
+
   const templateBtnIcon = (svgId, cssModifier, ariaLabel) => {
     let svgTag = document.createElementNS(svgNS, 'svg');
     svgTag.classList.add('icon-svg');
@@ -673,6 +679,9 @@
       let element;
       if (tool.type === 'btn') {
         element = templateBtnIcon(tool.icon, tool.icon, tool.ariaLabel);
+        toolbarUpper.appendChild(element);
+      } else if (tool.type === 'btn-banner') {
+        element = templateBtnBanner(tool.cssModifier, tool.ariaLabel);
         toolbarUpper.appendChild(element);
       } else if (tool.type === 'banner') {
         element = templateElement(
@@ -819,7 +828,7 @@
 
   const upperToolSet$n = [
     { type: 'btn', icon: 'prev', ariaLabel: 'Previous Chapter' },
-    { type: 'banner', cssModifier: 'read', text: null },
+    { type: 'btn-banner', cssModifier: 'read', text: 'Toogle Clipboard' },
     { type: 'btn', icon: 'next', ariaLabel: 'Next Chapter' },
   ];
 
@@ -952,7 +961,7 @@
       this.body = document.querySelector('body');
 
       this.btnPrev = this.toolbarUpper.querySelector('.btn-icon--prev');
-      this.banner = this.toolbarUpper.querySelector('.banner--read');
+      this.btnBanner = this.toolbarUpper.querySelector('.btn-banner--read');
       this.btnNext = this.toolbarUpper.querySelector('.btn-icon--next');
 
       this.btnNavigator = this.toolbarLower.querySelector('.btn-icon--navigator');
@@ -1004,6 +1013,7 @@
       this.subscribe();
       this.lastFont = null;
       this.lastFontSize = null;
+      this.clipboardMode = false;
     }
 
     listClick(event) {
@@ -1011,7 +1021,12 @@
       if (!document.getSelection().toString()) {
         let verse = event.target.closest('div.verse');
         if (verse) {
-          this.verseClick(verse);
+          if (this.clipboardMode) {
+            let text = `${this.btnBanner.textContent}:${verse.textContent}`;
+            navigator.clipboard.writeText(text);
+          } else {
+            this.verseClick(verse);
+          }
         }
       }
     }
@@ -1265,34 +1280,49 @@
       });
     }
 
+    themeUpdate(theme) {
+      this.theme = theme;
+      this.changeTheme();
+      this.lastTheme = this.theme;
+    }
+
+    toogleClipboardMode() {
+      if (this.clipboardMode) {
+        this.btnBanner.classList.remove('btn-banner--active');
+      } else {
+        this.btnBanner.classList.add('btn-banner--active');
+      }
+      this.clipboardMode = !this.clipboardMode;
+    }
+
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnStrongMode ||
-          target === this.btnNameMode ||
-          target === this.btnColumnMode ||
-          !target.classList.contains('btn-icon--active')
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnStrongMode ||
+          btn === this.btnNameMode ||
+          btn === this.btnColumnMode ||
+          !btn.classList.contains('btn-icon--active')
         ) {
-          if (target === this.btnNavigator) {
+          if (btn === this.btnNavigator) {
             queue.publish('sidebar.select', 'navigator');
-          } else if (target === this.btnBookmark) {
+          } else if (btn === this.btnBookmark) {
             queue.publish('sidebar.select', 'bookmark');
-          } else if (target === this.btnSearch) {
+          } else if (btn === this.btnSearch) {
             queue.publish('sidebar.select', 'search');
-          } else if (target === this.btnStrong) {
+          } else if (btn === this.btnStrong) {
             queue.publish('sidebar.select', 'strong');
-          } else if (target === this.btnSetting) {
+          } else if (btn === this.btnSetting) {
             queue.publish('sidebar.select', 'setting');
-          } else if (target === this.btnHelp) {
+          } else if (btn === this.btnHelp) {
             queue.publish('sidebar.select', 'help');
-          } else if (target === this.btnColumnMode) {
+          } else if (btn === this.btnColumnMode) {
             queue.publish('read.column-mode.click', null);
-          } else if (target === this.btnStrongMode) {
+          } else if (btn === this.btnStrongMode) {
             queue.publish('read.strong-mode.click', null);
-          } else if (target === this.btnNameMode) {
+          } else if (btn === this.btnNameMode) {
             queue.publish('read.name-mode.click', null);
-          } else if (target === this.btnMenu) {
+          } else if (btn === this.btnMenu) {
             this.showToolbarMenu();
           }
         }
@@ -1316,24 +1346,20 @@
 
     toolbarUpperClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnPrev) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBanner) {
+          this.toogleClipboardMode();
+        } else if (btn === this.btnPrev) {
           queue.publish('read.prev.chapter', 1);
-        } else if (target === this.btnNext) {
+        } else if (btn === this.btnNext) {
           queue.publish('read.next.chapter', 2);
         }
       }
     }
 
-    themeUpdate(theme) {
-      this.theme = theme;
-      this.changeTheme();
-      this.lastTheme = this.theme;
-    }
-
     updateBanner() {
-      this.banner.textContent = tomeChapters[this.chapterIdx][chapterName];
+      this.btnBanner.textContent = tomeChapters[this.chapterIdx][chapterName];
     }
 
     updateColumnMode() {
@@ -1880,10 +1906,10 @@
 
     listClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target.classList.contains('btn-book')) {
-          this.contentClick(target);
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn.classList.contains('btn-book')) {
+          this.contentClick(btn);
         }
       }
     }
@@ -1907,11 +1933,11 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBack) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBack) {
           queue.publish('navigator.back', null);
-        } else if (target === this.btnChapter) {
+        } else if (btn === this.btnChapter) {
           queue.publish('navigator-chapter', null);
         }
       }
@@ -2019,10 +2045,10 @@
 
     listClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target.classList.contains('btn-chapter')) {
-          this.contentClick(target);
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn.classList.contains('btn-chapter')) {
+          this.contentClick(btn);
         }
       }
     }
@@ -2054,11 +2080,11 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBack) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBack) {
           queue.publish('navigator.back', null);
-        } else if (target === this.btnBook) {
+        } else if (btn === this.btnBook) {
           queue.publish('navigator-book', null);
         }
       }
@@ -2815,7 +2841,7 @@
   ];
 
   const upperToolSet$k = [
-    { type: 'banner', cssModifier: 'bookmark-list', text: null },
+    { type: 'btn-banner', cssModifier: 'bookmark-list', ariaLbael: 'Toogle Clipboard' },
   ];
 
   class BookmarkListView {
@@ -2854,6 +2880,9 @@
       });
       this.toolbarLower.addEventListener('click', (event) => {
         this.toolbarLowerClick(event);
+      });
+      this.toolbarUpper.addEventListener('click', (event) => {
+        this.toolbarUpperClick(event);
       });
     }
 
@@ -2950,16 +2979,33 @@
       this.expandMode = expandMode;
       if (this.expandMode) {
         this.btnExpandMode.classList.add('btn-icon--active');
+        this.list.classList.add(this.font.fontClass);
+        this.list.classList.add(this.fontSize);
       } else {
         this.btnExpandMode.classList.remove('btn-icon--active');
+        this.list.classList.remove(this.font.fontClass);
+        this.list.classList.remove(this.fontSize);
       }
       this.updateBookmarks();
+    }
+
+    fontSizeUpdate(fontSize) {
+      this.fontSize = fontSize;
+      this.updateFontSize();
+      this.lastFontSize = this.fontSize;
+    }
+
+    fontUpdate(font) {
+      this.font = font;
+      this.updateFont();
+      this.lastFont = this.font;
+      this.lastFontSize = null;
     }
 
     getElements() {
       this.btnFolderAdd = this.toolbarUpper.querySelector(
         '.btn-icon--folder-add');
-      this.banner = this.toolbarUpper.querySelector('.banner--bookmark-list');
+      this.btnBanner = this.toolbarUpper.querySelector('.btn-banner--bookmark-list');
 
       this.btnUp = this.actionMenu.querySelector('.btn-icon--up');
       this.btnDown = this.actionMenu.querySelector('.btn-icon--down');
@@ -2990,15 +3036,17 @@
       this.getElements();
       this.addListeners();
       this.subscribe();
+      this.lastFont = null;
+      this.clipboardMode = false;
     }
 
     listClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
+      let btn = event.target.closest('button');
       if (this.expandMode) {
-        this.verseClick(target);
+        this.verseClick(btn);
       } else {
-        this.entryClick(target);
+        this.entryClick(btn);
       }
     }
 
@@ -3051,24 +3099,54 @@
       queue.subscribe('bookmark.strong-mode.update', (strongMode) => {
         this.strongModeUpdate(strongMode);
       });
+
+      queue.subscribe('font.update', (font) => {
+        this.fontUpdate(font);
+      });
+
+      queue.subscribe('font-size.update', (fontSize) => {
+        this.fontSizeUpdate(fontSize);
+      });
+    }
+
+    toogleClipboardMode() {
+      if (this.clipboardMode) {
+        this.btnBanner.classList.remove('btn-banner--active');
+      } else {
+        this.btnBanner.classList.add('btn-banner--active');
+      }
+      this.clipboardMode = !this.clipboardMode;
     }
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBack) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBack) {
           queue.publish('bookmark.back', null);
-        } else if (target === this.btnSortAscend) {
+        } else if (btn === this.btnSortAscend) {
           queue.publish('bookmark-list.sort-ascend', null);
-        } else if (target === this.btnSortInvert) {
+        } else if (btn === this.btnSortInvert) {
           queue.publish('bookmark-list.sort-invert', null);
-        } else if (target === this.btnBookmarkFolder) {
+        } else if (btn === this.btnBookmarkFolder) {
           queue.publish('bookmark-folder', null);
-        } else if (target === this.btnExpandMode) {
+        } else if (btn === this.btnExpandMode) {
           queue.publish('bookmark-list.expand-mode.click', null);
-        } else if (target === this.btnStrongMode) {
+        } else if (btn === this.btnStrongMode) {
           queue.publish('bookmark-list.strong-mode.click', null);
+        }
+      }
+    }
+
+    toolbarUpperClick(event) {
+      event.preventDefault();
+      if (!this.expandMode) {
+        return;
+      }
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBanner) {
+          this.toogleClipboardMode();
         }
       }
     }
@@ -3078,7 +3156,7 @@
     }
 
     updateBanner() {
-      this.banner.innerHTML = `${this.activeFolder.name}`;
+      this.btnBanner.innerHTML = `${this.activeFolder.name}`;
     }
 
     updateActiveFolder(activeFolder) {
@@ -3111,14 +3189,39 @@
       this.scroll.scrollTop = scrollSave;
     }
 
+    updateFontSize() {
+      if (!this.expandMode) {
+        return;
+      }
+      if (this.lastFontSize) {
+        this.list.classList.remove(this.lastFontSize);
+      }
+      this.list.classList.add(this.fontSize);
+    }
+
+    updateFont() {
+      if (!this.expandMode) {
+        return;
+      }
+      if (this.lastFont) {
+        this.list.classList.remove(this.lastFont.fontClass);
+      }
+      this.list.classList.add(this.font.fontClass);
+    }
+
     verseClick(target) {
       if (target) {
         if (target.classList.contains('btn-result')) {
-          let verseIdx = parseInt(target.dataset.verseIdx);
-          if (this.strongMode) {
-            queue.publish('bookmark-list.strong-select', verseIdx);
+          if (this.clipboardMode) {
+            let text = target.textContent;
+            navigator.clipboard.writeText(text);
           } else {
-            queue.publish('bookmark-list.select', verseIdx);
+            let verseIdx = parseInt(target.dataset.verseIdx);
+            if (this.strongMode) {
+              queue.publish('bookmark-list.strong-select', verseIdx);
+            } else {
+              queue.publish('bookmark-list.select', verseIdx);
+            }
           }
         }
       }
@@ -3254,10 +3357,10 @@
 
     listClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target.classList.contains('btn-icon--h-menu')) {
-          let entry = target.previousSibling;
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn.classList.contains('btn-icon--h-menu')) {
+          let entry = btn.previousSibling;
           this.menuClick(entry);
         }
       }
@@ -3321,9 +3424,9 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBookmarkFolder) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBookmarkFolder) {
           queue.publish('bookmark-folder', null);
         }
       }
@@ -3491,13 +3594,13 @@
 
     listClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target.classList.contains('btn-entry')) {
-          let folderName = target.textContent;
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn.classList.contains('btn-entry')) {
+          let folderName = btn.textContent;
           queue.publish('bookmark-folder.select', folderName);
-        } else if (target.classList.contains('btn-icon--h-menu')) {
-          let entry = target.previousSibling;
+        } else if (btn.classList.contains('btn-icon--h-menu')) {
+          let entry = btn.previousSibling;
           this.menuClick(entry);
         }
       }
@@ -3537,17 +3640,17 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBack) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBack) {
           queue.publish('bookmark.back', null);
-        } else if (target === this.btnBookmarkList) {
+        } else if (btn === this.btnBookmarkList) {
           queue.publish('bookmark-list', null);
-        } else if (target === this.btnBookmarkFolderAdd) {
+        } else if (btn === this.btnBookmarkFolderAdd) {
           queue.publish('bookmark-folder-add', null);
-        } else if (target === this.btnExport) {
+        } else if (btn === this.btnExport) {
           queue.publish('bookmark-export', null);
-        } else if (target === this.btnImport) {
+        } else if (btn === this.btnImport) {
           queue.publish('bookmark-import', null);
         }
       }
@@ -3628,8 +3731,8 @@
 
     dialogClick(event) {
       event.preventDefault();
-      let target = event.target;
-      if (target === this.btnSave) {
+      let btn = event.target.closest('button');
+      if (btn === this.btnSave) {
         this.saveClick();
       }
     }
@@ -3695,9 +3798,9 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBookmarkFolder) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBookmarkFolder) {
           queue.publish('bookmark-folder', null);
         }
       }
@@ -3757,8 +3860,8 @@
 
     dialogClick(event) {
       event.preventDefault();
-      let target = event.target;
-      if (target === this.btnDelete) {
+      let btn = event.target.closest('button');
+      if (btn === this.btnDelete) {
         this.deleteClick();
       }
     }
@@ -3810,9 +3913,9 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBookmarkFolder) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBookmarkFolder) {
           queue.publish('bookmark-folder', null);
         }
       }
@@ -3881,8 +3984,8 @@
 
     dialogClick(event) {
       event.preventDefault();
-      let target = event.target;
-      if (target === this.btnSave) {
+      let btn = event.target.closest('button');
+      if (btn === this.btnSave) {
         this.saveClick();
       }
     }
@@ -3961,9 +4064,9 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBookmarkFolder) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBookmarkFolder) {
           queue.publish('bookmark-folder', null);
         }
       }
@@ -4066,9 +4169,9 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBookmarkFolder) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBookmarkFolder) {
           queue.publish('bookmark-folder', null);
         }
       }
@@ -4129,8 +4232,8 @@
 
     dialogClick(event) {
       event.preventDefault();
-      let target = event.target;
-      if (target === this.btnImport) {
+      let btn = event.target.closest('button');
+      if (btn === this.btnImport) {
         this.importClick();
       }
     }
@@ -4192,9 +4295,9 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBookmarkFolder) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBookmarkFolder) {
           queue.publish('bookmark-folder', null);
         }
       }
@@ -5106,7 +5209,7 @@
     tomeFilter() {
       return {
         bookIdx: -1,
-        chapterIdx: -1
+        chapterIdx: -1,
       };
     }
 
@@ -5132,7 +5235,7 @@
   ];
 
   const upperToolSet$c = [
-    { type: 'banner', cssModifier: 'search-result', text: null },
+    { type: 'btn-banner', cssModifier: 'search-result', text: 'Toogle Clipboard' },
   ];
 
   const binIdx$1 = 0;
@@ -5153,6 +5256,9 @@
       });
       this.toolbarLower.addEventListener('click', (event) => {
         this.toolbarLowerClick(event);
+      });
+      this.toolbarUpper.addEventListener('click', (event) => {
+        this.toolbarUpperClick(event);
       });
     }
 
@@ -5285,7 +5391,7 @@
     }
 
     getElements() {
-      this.banner = this.toolbarUpper.querySelector('.banner--search-result');
+      this.btnBanner = this.toolbarUpper.querySelector('.btn-banner--search-result');
 
       this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
       this.btnFilter = this.toolbarLower.querySelector(
@@ -5309,24 +5415,29 @@
       this.subscribe();
       this.lastFont = null;
       this.lastFontSize = null;
+      this.clipboardMode = false;
     }
 
     listClick(event) {
       event.preventDefault();
-      let target = event.target;
-      let btn = target.closest('button');
-      let verseIdx = parseInt(btn.dataset.verseIdx);
-      if (this.strongMode) {
-        queue.publish('search-result.strong-select', verseIdx);
+      let btn = event.target.closest('button');
+      if (this.clipboardMode) {
+        let text = btn.textContent;
+        navigator.clipboard.writeText(text);
       } else {
-        queue.publish('search-result.read-select', verseIdx);
+        let verseIdx = parseInt(btn.dataset.verseIdx);
+        if (this.strongMode) {
+          queue.publish('search-result.strong-select', verseIdx);
+        } else {
+          queue.publish('search-result.read-select', verseIdx);
+        }
       }
     }
 
     loadMoreClick(event) {
       event.preventDefault();
-      let target = event.target;
-      if (target === this.btnLoadMore) {
+      let btn = event.target.closest('button');
+      if (btn === this.btnLoadMore) {
         this.loadVerses();
       }
     }
@@ -5410,26 +5521,45 @@
       });
     }
 
+    toogleClipboardMode() {
+      if (this.clipboardMode) {
+        this.btnBanner.classList.remove('btn-banner--active');
+      } else {
+        this.btnBanner.classList.add('btn-banner--active');
+      }
+      this.clipboardMode = !this.clipboardMode;
+    }
+
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBack) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBack) {
           queue.publish('search.back', null);
-        } else if (target === this.btnFilter) {
+        } else if (btn === this.btnFilter) {
           queue.publish('search-filter', null);
-        } else if (target === this.btnHistory) {
+        } else if (btn === this.btnHistory) {
           queue.publish('search-history', null);
-        } else if (target === this.btnStrongMode) {
+        } else if (btn === this.btnStrongMode) {
           queue.publish('search.strong-mode.click', null);
-        } else if (target === this.btnSearchLookup) {
+        } else if (btn === this.btnSearchLookup) {
           queue.publish('search-lookup', null);
         }
       }
     }
 
+    toolbarUpperClick(event) {
+      event.preventDefault();
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBanner) {
+          this.toogleClipboardMode();
+        }
+      }
+    }
+
     updateBanner() {
-      this.banner.innerHTML = `${this.citation} ` +
+      this.btnBanner.innerHTML = `${this.citation} ` +
         `(${this.wordCount}/${this.verseCount})<br>` +
         `${this.rig.query}`;
     }
@@ -5616,14 +5746,14 @@
 
     listClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target.classList.contains('btn-filter')) {
-          this.filterClick(target);
-        } else if (target.classList.contains('btn-icon--filter-down')) {
-          this.foldClick(target);
-        } else if (target.classList.contains('btn-icon--filter-next')) {
-          this.unfoldClick(target);
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn.classList.contains('btn-filter')) {
+          this.filterClick(btn);
+        } else if (btn.classList.contains('btn-icon--filter-down')) {
+          this.foldClick(btn);
+        } else if (btn.classList.contains('btn-icon--filter-next')) {
+          this.unfoldClick(btn);
         }
       }
     }
@@ -5661,9 +5791,9 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnSearchResult) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnSearchResult) {
           queue.publish('search-result', null);
         }
       }
@@ -5805,13 +5935,13 @@
 
     listClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target.classList.contains('btn-entry--history')) {
-          let query = target.textContent;
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn.classList.contains('btn-entry--history')) {
+          let query = btn.textContent;
           queue.publish('search-history.select', query);
-        } else if (target.classList.contains('btn-icon--delete')) {
-          let entry = target.previousSibling;
+        } else if (btn.classList.contains('btn-icon--delete')) {
+          let entry = btn.previousSibling;
           let query = entry.textContent;
           queue.publish('search-history.delete', query);
         }
@@ -5837,11 +5967,11 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnResult) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnResult) {
           queue.publish('search-result', null);
-        } else if (target === this.btnHistoryClear) {
+        } else if (btn === this.btnHistoryClear) {
           queue.publish('search-history.clear', null);
         }
       }
@@ -5924,8 +6054,8 @@
 
     dialogClick(event) {
       event.preventDefault();
-      let target = event.target;
-      if (target === this.btnSearch) {
+      let btn = event.target.closest('button');
+      if (btn === this.btnSearch) {
         this.searchClick();
       }
     }
@@ -5990,11 +6120,11 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBack) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBack) {
           queue.publish('search.back', null);
-        } else if (target === this.btnResult) {
+        } else if (btn === this.btnResult) {
           queue.publish('search-result', null);
         }
       }
@@ -6857,12 +6987,12 @@
 
     listClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target.classList.contains('btn-strong-word')) {
-          this.wordClick(target);
-        } else if (target.classList.contains('btn-strong-def')) {
-          this.defClick(target);
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn.classList.contains('btn-strong-word')) {
+          this.wordClick(btn);
+        } else if (btn.classList.contains('btn-strong-def')) {
+          this.defClick(btn);
         }
       }
     }
@@ -6899,19 +7029,19 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBack) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBack) {
           queue.publish('strong.back', null);
-        } else if (target === this.btnLookup) {
+        } else if (btn === this.btnLookup) {
           queue.publish('strong-lookup', null);
-        } else if (target === this.btnHistory) {
+        } else if (btn === this.btnHistory) {
           queue.publish('strong-history', null);
-        } else if (target === this.btnVerse) {
+        } else if (btn === this.btnVerse) {
           queue.publish('strong-verse', null);
-        } else if (target === this.btnResult) {
+        } else if (btn === this.btnResult) {
           queue.publish('strong-result', null);
-        } else if (target === this.btnPrev) {
+        } else if (btn === this.btnPrev) {
           queue.publish('strong.prev', null);
         }
       }
@@ -7142,14 +7272,14 @@
 
     listClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target.classList.contains('btn-filter')) {
-          this.filterClick(target);
-        } else if (target.classList.contains('btn-icon--filter-down')) {
-          this.foldClick(target);
-        } else if (target.classList.contains('btn-icon--filter-next')) {
-          this.unfoldClick(target);
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn.classList.contains('btn-filter')) {
+          this.filterClick(btn);
+        } else if (btn.classList.contains('btn-icon--filter-down')) {
+          this.foldClick(btn);
+        } else if (btn.classList.contains('btn-icon--filter-next')) {
+          this.unfoldClick(btn);
         }
       }
     }
@@ -7189,9 +7319,9 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnResult) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnResult) {
           queue.publish('strong-result', null);
         }
       }
@@ -7364,13 +7494,13 @@
 
     listClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target.classList.contains('btn-entry--history')) {
-          let strongDef = target.dataset.def;
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn.classList.contains('btn-entry--history')) {
+          let strongDef = btn.dataset.def;
           queue.publish('strong-history.select', strongDef);
-        } else if (target.classList.contains('btn-icon--delete')) {
-          let entry = target.previousSibling;
+        } else if (btn.classList.contains('btn-icon--delete')) {
+          let entry = btn.previousSibling;
           let strongDef = entry.dataset.def;
           queue.publish('strong-history.delete', strongDef);
         }
@@ -7396,11 +7526,11 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnDef) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnDef) {
           queue.publish('strong-def', null);
-        } else if (target === this.btnHistoryClear) {
+        } else if (btn === this.btnHistoryClear) {
           queue.publish('strong-history.clear', null);
         }
       }
@@ -7482,8 +7612,8 @@
 
     dialogClick(event) {
       event.preventDefault();
-      let target = event.target;
-      if (target === this.btnFind) {
+      let btn = event.target.closest('button');
+      if (btn === this.btnFind) {
         this.findClick();
       }
     }
@@ -7551,9 +7681,9 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnDef) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnDef) {
           queue.publish('strong-def', null);
         }
       }
@@ -7570,7 +7700,7 @@
   ];
 
   const upperToolSet$4 = [
-    { type: 'banner', cssModifier: 'strong-result', text: 'Strong Search' },
+    { type: 'btn-banner', cssModifier: 'strong-result', text: 'Strong Search' },
   ];
 
   const binIdx = 0;
@@ -7591,6 +7721,9 @@
       });
       this.toolbarLower.addEventListener('click', (event) => {
         this.toolbarLowerClick(event);
+      });
+      this.toolbarUpper.addEventListener('click', (event) => {
+        this.toolbarUpperClick(event);
       });
     }
 
@@ -7764,7 +7897,7 @@
     }
 
     getElements() {
-      this.banner = this.toolbarUpper.querySelector('.banner--strong-result');
+      this.btnBanner = this.toolbarUpper.querySelector('.btn-banner--strong-result');
 
       this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
       this.btnFilter = this.toolbarLower.querySelector('.btn-icon--filter');
@@ -7786,19 +7919,24 @@
       this.addListeners();
       this.subscribe();
       this.strongMode = false;
+      this.clipboardMode = false;
     }
 
     listClick(event) {
       event.preventDefault();
-      let target = event.target;
-      let btn = target.closest('button');
+      let btn = event.target.closest('button');
       if (btn) {
-        if (btn.classList.contains('btn-result')) {
-          let verseIdx = parseInt(btn.dataset.verseIdx);
-          if (this.strongMode) {
-            queue.publish('strong-result.strong-select', verseIdx);
-          } else {
-            queue.publish('strong-result.read-select', verseIdx);
+        if (this.clipboardMode) {
+          let text = btn.textContent;
+          navigator.clipboard.writeText(text);
+        } else {
+          if (btn.classList.contains('btn-result')) {
+            let verseIdx = parseInt(btn.dataset.verseIdx);
+            if (this.strongMode) {
+              queue.publish('strong-result.strong-select', verseIdx);
+            } else {
+              queue.publish('strong-result.read-select', verseIdx);
+            }
           }
         }
       }
@@ -7806,8 +7944,8 @@
 
     loadMoreClick(event) {
       event.preventDefault();
-      let target = event.target;
-      if (target === this.btnLoadMore) {
+      let btn = event.target.closest('button');
+      if (btn === this.btnLoadMore) {
         this.loadVerses();
       }
     }
@@ -7900,31 +8038,50 @@
       });
     }
 
+    toogleClipboardMode() {
+      if (this.clipboardMode) {
+        this.btnBanner.classList.remove('btn-banner--active');
+      } else {
+        this.btnBanner.classList.add('btn-banner--active');
+      }
+      this.clipboardMode = !this.clipboardMode;
+    }
+
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBack) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBack) {
           queue.publish('strong.back', null);
-        } else if (target === this.btnFilter) {
+        } else if (btn === this.btnFilter) {
           queue.publish('strong-filter', null);
-        } else if (target === this.btnStrongMode) {
+        } else if (btn === this.btnStrongMode) {
           queue.publish('strong.strong-mode.click', null);
-        } else if (target === this.btnStrongDef) {
+        } else if (btn === this.btnStrongDef) {
           queue.publish('strong-def', null);
-        } else if (target === this.btnStrongVerse) {
+        } else if (btn === this.btnStrongVerse) {
           queue.publish('strong-verse', null);
+        }
+      }
+    }
+
+    toolbarUpperClick(event) {
+      event.preventDefault();
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBanner) {
+          this.toogleClipboardMode();
         }
       }
     }
 
     updateBanner() {
       if (this.citation) {
-        this.banner.innerHTML = `${this.citation} ` +
+        this.btnBanner.innerHTML = `${this.citation} ` +
           `(${this.wordCount}/${this.verseCount})<br>` +
           `${this.strongDef} ${this.strongWord}`;
       } else {
-        this.banner.innerHTML = this.strongDef;
+        this.btnBanner.innerHTML = this.strongDef;
       }
     }
 
@@ -8058,9 +8215,9 @@
 
     listClick(event) {
       event.preventDefault();
-      let target = event.target;
-      if (target.classList.contains('btn-strong')) {
-        let strongDef = target.dataset.strongDef;
+      let btn = event.target.closest('button');
+      if (btn.classList.contains('btn-strong')) {
+        let strongDef = btn.dataset.strongDef;
         queue.publish('strong-verse.select', strongDef);
       }
     }
@@ -8096,13 +8253,13 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBack) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBack) {
           queue.publish('strong.back', null);
-        } else if (target === this.btnStrongDef) {
+        } else if (btn === this.btnStrongDef) {
           queue.publish('strong-def', null);
-        } else if (target === this.btnResult) {
+        } else if (btn === this.btnResult) {
           queue.publish('strong-result', null);
         }
       }
@@ -8900,15 +9057,15 @@
 
     scrollClick(event) {
       event.preventDefault();
-      let target = event.target;
-      if (this.divCarouselFont.contains(target)) {
-        this.fontClick(target);
-      } else if (this.divSelectorFontSize.contains(target)) {
-        this.fontSizeClick(target);
-      } else if (this.divSelectorThemeType.contains(target)) {
-        this.themeTypeClick(target);
-      } else if (this.divCarouselTheme.contains(target)) {
-        this.themeClick(target);
+      let btn = event.target.closest('button');
+      if (this.divCarouselFont.contains(btn)) {
+        this.fontClick(btn);
+      } else if (this.divSelectorFontSize.contains(btn)) {
+        this.fontSizeClick(btn);
+      } else if (this.divSelectorThemeType.contains(btn)) {
+        this.themeTypeClick(btn);
+      } else if (this.divCarouselTheme.contains(btn)) {
+        this.themeClick(btn);
       }
     }
 
@@ -8968,9 +9125,9 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBack) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBack) {
           queue.publish('setting.back', null);
         }
       }
@@ -9214,8 +9371,8 @@
     'help-read', 'help-topic',
   ];
   const validTopics = [
-    'about', 'bookmark', 'help', 'name-mode', 'navigator', 'overview', 'read',
-    'search', 'setting', 'strong', 'thats-my-king',
+    'about', 'bookmark', 'clipboard-mode', 'help', 'name-mode', 'navigator',
+    'overview', 'read', 'search', 'setting', 'strong', 'thats-my-king',
   ];
 
   class HelpModel {
@@ -9316,6 +9473,7 @@
     { topic: 'about', name: 'About' },
     { topic: 'overview', name: 'Overview' },
     { topic: 'read', name: 'Read' },
+    { topic: 'clipboard-mode', name: 'Clipboard Mode' },
     { topic: 'name-mode', name: 'Name Mode' },
     { topic: 'navigator', name: 'Navigator' },
     { topic: 'bookmark', name: 'Bookmark' },
@@ -9395,10 +9553,10 @@
 
     scrollClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target.classList.contains('btn-topic')) {
-          let helpTopic = target.dataset.topic;
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn.classList.contains('btn-topic')) {
+          let helpTopic = btn.dataset.topic;
           queue.publish('help-topic.select', helpTopic);
         }
       }
@@ -9419,11 +9577,11 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBack) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBack) {
           queue.publish('help.back', null);
-        } else if (target === this.btnHelpRead) {
+        } else if (btn === this.btnHelpRead) {
           queue.publish('help-read', null);
         }
       }
@@ -9505,11 +9663,11 @@
 
     toolbarLowerClick(event) {
       event.preventDefault();
-      let target = event.target.closest('button');
-      if (target) {
-        if (target === this.btnBack) {
+      let btn = event.target.closest('button');
+      if (btn) {
+        if (btn === this.btnBack) {
           queue.publish('help.back', null);
-        } else if (target === this.btnHelpTopic) {
+        } else if (btn === this.btnHelpTopic) {
           queue.publish('help-topic', null);
         }
       }

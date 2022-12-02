@@ -109,9 +109,9 @@ class StrongVerseView {
 
   listClick(event) {
     event.preventDefault();
-    let target = event.target;
-    if (target.classList.contains('btn-strong')) {
-      let strongDef = target.dataset.strongDef;
+    let btn = event.target.closest('button');
+    if (btn.classList.contains('btn-strong')) {
+      let strongDef = btn.dataset.strongDef;
       queue.publish('strong-verse.select', strongDef);
     }
   }
@@ -147,13 +147,13 @@ class StrongVerseView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let target = event.target.closest('button');
-    if (target) {
-      if (target === this.btnBack) {
+    let btn = event.target.closest('button');
+    if (btn) {
+      if (btn === this.btnBack) {
         queue.publish('strong.back', null);
-      } else if (target === this.btnStrongDef) {
+      } else if (btn === this.btnStrongDef) {
         queue.publish('strong-def', null);
-      } else if (target === this.btnResult) {
+      } else if (btn === this.btnResult) {
         queue.publish('strong-result', null);
       }
     }
