@@ -16,7 +16,7 @@ let appCaches = [
     ]
   },
   {
-    name: 'css-20221201.01',
+    name: 'css-20221203.01',
     urls: [
       '/css/kjs.css',
       '/css/font.css',
