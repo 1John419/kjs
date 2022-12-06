@@ -37,7 +37,7 @@ let appCaches = [
     ]
   },
   {
-    name: 'help-20221201.01',
+    name: 'help-20221206.01',
     urls: [
       '/help/bookmark.html',
       '/help/clipboard-mode.html',
