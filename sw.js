@@ -38,7 +38,7 @@ const appCaches = [
     ]
   },
   {
-    name: 'help-20240509.01',
+    name: 'help-20240509.02',
     urls: [
       '/help/bookmark.html',
       '/help/clipboard-mode.html',
