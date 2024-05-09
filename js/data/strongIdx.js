@@ -1,13 +1,22 @@
 'use strict';
 
-export const defLemma = 0;
-export const defTranliteration = 1;
-export const defPronunciation = 2;
-export const defDefinition = 3;
+export const strongIdx = {};
 
-export const mapSliceStart = 0;
-export const mapSliceEnd = 1;
-export const mapStrongNums = 2;
+strongIdx.def = {
+  lemma: 0,
+  tranliteration: 1,
+  pronunciation: 2,
+  deriv: 3,
+  strongDef: 4,
+  kjvDef: 5,
+};
 
-export const wordKjvWord = 0;
-export const wordTomeBin = 1;
+strongIdx.map = {
+  verseFragment: 0,
+  strongNums: 1,
+};
+
+strongIdx.word = {
+  kjvWord: 0,
+  kjvBin: 1,
+};

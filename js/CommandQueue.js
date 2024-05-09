@@ -11,7 +11,7 @@ class CommandQueue {
   publish(command, data) {
     // console.log(command);
     if (this.commands[command] && this.commands[command].length >= 1) {
-      for (let listener of this.commands[command]) {
+      for (const listener of this.commands[command]) {
         this.queue.push({listener, data});
       }
       if (!this.queueRunning) {
@@ -23,7 +23,7 @@ class CommandQueue {
   runQueue() {
     this.queueRunning = true;
     while (this.queue.length) {
-      let task = this.queue.shift();
+      const task = this.queue.shift();
       task.listener(task.data);
     }
     this.queueRunning = false;
@@ -38,4 +38,4 @@ class CommandQueue {
 
 }
 
-export let queue = new CommandQueue();
+export const queue = new CommandQueue();

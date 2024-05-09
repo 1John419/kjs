@@ -1,29 +1,16 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
-import {
-  tomeBooks,
-} from '../data/tomeDb.js';
-import {
-  bookLongName,
-  bookShortName,
-} from '../data/tomeIdx.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
+import { kjvIdx } from '../data/kjvIdx.js';
+import { kjvLists } from '../data/kjvLists.js';
 
 const greekFirstIdx = 39;
 const indices = [...Array(66).keys()];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-  { type: 'btn', icon: 'navigator-chapter', ariaLabel: 'Chapter' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'navigator-chapter', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -50,77 +37,76 @@ class NavigatorBookView {
     if (activeBtn) {
       activeBtn.classList.remove('btn-book--active');
     }
-    let selector = `.btn-book[data-book-idx="${bookIdx}"]`;
+    const selector = `.btn-book[data-book-idx="${bookIdx}"]`;
     activeBtn = this.list.querySelector(selector);
     activeBtn.classList.add('btn-book--active');
   }
 
   buildBookDivider() {
-    let divider = document.createElement('hr');
+    const divider = document.createElement('hr');
     divider.classList.add('book-divider');
     return divider;
   }
 
   buildBooklist() {
-    let booksHebrew = this.buildHebrewList();
-    let booksGreek = this.buildGreekList();
-    let divider = this.buildBookDivider();
+    const booksHebrew = this.buildHebrewList();
+    const booksGreek = this.buildGreekList();
+    const divider = this.buildBookDivider();
     this.list.appendChild(booksHebrew);
     this.list.appendChild(divider);
     this.list.appendChild(booksGreek);
   }
 
   buildBtnBook(bookIdx) {
-    let btn = document.createElement('button');
+    const btn = document.createElement('div');
     btn.classList.add('btn-book');
     btn.dataset.bookIdx = bookIdx;
-    btn.textContent = tomeBooks[bookIdx][bookShortName];
-    btn.setAttribute('aria-label', tomeBooks[bookIdx][bookLongName]);
+    btn.textContent = kjvLists.books[bookIdx][kjvIdx.book.shortName];
     return btn;
   }
 
   buildGreekList() {
-    let booksGreek = document.createElement('div');
+    const booksGreek = document.createElement('div');
     booksGreek.classList.add('content', 'content--greek-book');
-    let greekIndices = indices.slice(greekFirstIdx);
-    for (let idx of greekIndices) {
-      let btn = this.buildBtnBook(idx);
+    const greekIndices = indices.slice(greekFirstIdx);
+    for (const idx of greekIndices) {
+      const btn = this.buildBtnBook(idx);
       booksGreek.appendChild(btn);
     }
     return booksGreek;
   }
 
   buildHebrewList() {
-    let booksHebrew = document.createElement('div');
+    const booksHebrew = document.createElement('div');
     booksHebrew.classList.add('content', 'content--hebrew-book');
-    let hebrewIndices = indices.slice(0, greekFirstIdx);
-    for (let idx of hebrewIndices) {
-      let btn = this.buildBtnBook(idx);
+    const hebrewIndices = indices.slice(0, greekFirstIdx);
+    for (const idx of hebrewIndices) {
+      const btn = this.buildBtnBook(idx);
       booksHebrew.appendChild(btn);
     }
     return booksHebrew;
   }
 
   buildPage() {
-    this.page = templatePage('navigator-book');
+    this.page = template.page('navigator-book');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('navigator-book');
-    this.list = templateElement('div', 'list', 'navigator-book', null, null);
+    this.scroll = template.scroll('navigator-book');
+    this.list = template.element('div', 'list', 'navigator-book', null, null);
     this.scroll.appendChild(this.list);
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
   contentClick(btn) {
-    let bookIdx = parseInt(btn.dataset.bookIdx);
+    const bookIdx = parseInt(btn.dataset.bookIdx);
     queue.publish('navigator-book.select', bookIdx);
   }
 
@@ -144,7 +130,7 @@ class NavigatorBookView {
 
   listClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-book');
     if (btn) {
       if (btn.classList.contains('btn-book')) {
         this.contentClick(btn);
@@ -171,7 +157,7 @@ class NavigatorBookView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnBack) {
         queue.publish('navigator.back', null);

@@ -1,9 +1,9 @@
 'use strict';
 
-let prod = true;
+import { progress } from '/js/progress.js';
 
-let loadMsg = document.querySelector('.load-msg');
-let loadScroll = document.querySelector('.load-scroll');
+const prod = true;
+
 let newInstall = false;
 let updateFound = false;
 
@@ -19,7 +19,7 @@ window.onload = () => {
   }
 };
 
-let swEvents = () => {
+const swEvents = () => {
   if (navigator.serviceWorker) {
     navigator.serviceWorker.ready.then(() => {
       console.log(`sw.ready:           ${Date.now()}`);
@@ -56,14 +56,8 @@ let swEvents = () => {
   });
 };
 
-export const progress = (msg) => {
-  loadMsg.innerHTML += msg + '<br>';
-  loadScroll.scrollTop = loadScroll.scrollHeight;
-};
-
 const refresh = () => {
   console.log(`refresh():          ${Date.now()}`);
-  // window.location.reload(true);
 };
 
 const loadApp = async () => {
@@ -71,12 +65,12 @@ const loadApp = async () => {
   progress('');
   progress('* Launch app *');
 
-  let font = document.createElement('link');
+  const font = document.createElement('link');
   font.rel = 'stylesheet';
   font.href = '/css/font.css';
   document.head.appendChild(font);
 
-  let script = document.createElement('script');
+  const script = document.createElement('script');
   if (prod) {
     script.src = '/bundle.js';
   } else {

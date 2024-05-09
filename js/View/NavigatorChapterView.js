@@ -1,35 +1,14 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
-import {
-  range,
-  removeAllChildren,
-} from '../util.js';
-import {
-  tomeBooks,
-  tomeChapters,
-} from '../data/tomeDb.js';
-import {
-  bookFirstChapterIdx,
-  bookLastChapterIdx,
-  bookLongName,
-  chapterBookIdx,
-  chapterName,
-  chapterNum,
-} from '../data/tomeIdx.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
+import { util } from '../util.js';
+import { kjvIdx } from '../data/kjvIdx.js';
+import { kjvLists } from '../data/kjvLists.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-  { type: 'btn', icon: 'navigator-book', ariaLabel: 'Book' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'navigator-book', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -52,15 +31,14 @@ class NavigatorChapterView {
   }
 
   buildBtnContent(chapterIdx) {
-    let chapter = tomeChapters[chapterIdx];
-    let btn = document.createElement('button');
+    const chapter = kjvLists.chapters[chapterIdx];
+    const btn = document.createElement('div');
     btn.classList.add('btn-chapter');
-    btn.dataset.bookIdx = chapter[chapterBookIdx];
+    btn.dataset.bookIdx = chapter[kjvIdx.chapter.bookIdx];
     btn.dataset.chapterIdx = chapterIdx;
-    btn.dataset.chapterName = chapter[chapterName];
-    let num = chapter[chapterNum];
+    btn.dataset.chapterName = chapter[kjvIdx.chapter.name];
+    const num = chapter[kjvIdx.chapter.num];
     btn.textContent = num;
-    btn.setAttribute('aria-label', num);
     return btn;
   }
 
@@ -73,28 +51,28 @@ class NavigatorChapterView {
   }
 
   buildPage() {
-    this.page = templatePage('navigator-chapter');
+    this.page = template.page('navigator-chapter');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('navigator-chapter');
-    this.list = templateElement('div', 'list', 'navigator-chapter', null, null);
+    this.scroll = template.scroll('navigator-chapter');
+    this.list = template.element('div', 'list', 'navigator-chapter', null, null);
     this.scroll.appendChild(this.list);
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
   chapterIdxUpdate(chapterIdx) {
-    let oldChapterIdx = this.chapterIdx || chapterIdx;
-    let oldBookIdx = tomeChapters[oldChapterIdx][chapterBookIdx];
+    const oldChapterIdx = this.chapterIdx || chapterIdx;
+    const oldBookIdx = kjvLists.chapters[oldChapterIdx][kjvIdx.chapter.bookIdx];
     this.chapterIdx = chapterIdx;
-    let bookIdx = tomeChapters[this.chapterIdx][chapterBookIdx];
+    const bookIdx = kjvLists.chapters[this.chapterIdx][kjvIdx.chapter.bookIdx];
     if (oldBookIdx !== bookIdx) {
       this.updateBanner();
       this.updateChapterList();
@@ -103,7 +81,7 @@ class NavigatorChapterView {
   }
 
   contentClick(btn) {
-    let chapterIdx = parseInt(btn.dataset.chapterIdx);
+    const chapterIdx = parseInt(btn.dataset.chapterIdx);
     queue.publish('navigator-chapter.select', chapterIdx);
   }
 
@@ -127,16 +105,12 @@ class NavigatorChapterView {
 
   listClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-chapter');
     if (btn) {
       if (btn.classList.contains('btn-chapter')) {
         this.contentClick(btn);
       }
     }
-  }
-
-  scrollToTop() {
-    this.scroll.scrollTop = 0;
   }
 
   show() {
@@ -162,7 +136,7 @@ class NavigatorChapterView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnBack) {
         queue.publish('navigator.back', null);
@@ -177,27 +151,27 @@ class NavigatorChapterView {
     if (activeBtn) {
       activeBtn.classList.remove('btn-chapter--active');
     }
-    let selector =
+    const selector =
       `.btn-chapter[data-chapter-idx="${this.chapterIdx}"]`;
     activeBtn = this.list.querySelector(selector);
     activeBtn.classList.add('btn-chapter--active');
   }
 
   updateBanner() {
-    let longName = tomeBooks[this.bookIdx][bookLongName];
+    const longName = kjvLists.books[this.bookIdx][kjvIdx.book.longName];
     this.banner.innerHTML = `${longName}`;
   }
 
   updateChapterList() {
-    this.scrollToTop();
-    removeAllChildren(this.list);
-    let list = document.createElement('div');
+    this.scroll.scrollTop = 0;
+    util.removeAllChildren(this.list);
+    const list = document.createElement('div');
     list.classList.add('content', 'content--chapter');
-    let book = tomeBooks[this.bookIdx];
-    let indices = range(book[bookFirstChapterIdx],
-      book[bookLastChapterIdx] + 1);
-    for (let idx of indices) {
-      let btn = this.buildBtnContent(idx);
+    const book = kjvLists.books[this.bookIdx];
+    const indices = util.range(book[kjvIdx.book.firstChapterIdx],
+      book[kjvIdx.book.lastChapterIdx] + 1);
+    for (const idx of indices) {
+      const btn = this.buildBtnContent(idx);
       list.appendChild(btn);
     }
     this.list.appendChild(list);

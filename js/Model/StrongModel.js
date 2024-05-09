@@ -1,22 +1,10 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  tomeBinVerses,
-} from '../data/binIdx.js';
-import {
-  strongDb,
-  strongNums,
-} from '../data/strongDb.js';
-import {
-  wordKjvWord,
-  wordTomeBin,
-} from '../data/strongIdx.js';
-import {
-  tomeDb,
-} from '../data/tomeDb.js';
+import { queue} from '../CommandQueue.js';
+import { binIdx } from '../data/binIdx.js';
+import { strongDictDb, strongNums } from '../data/strongDictDb.js';
+import { strongIdx } from '../data/strongIdx.js';
+import { kjvDb, strongDb, strongName } from '../Model/DbModel.js';
 
 const strongDefReroute = [
   'strong-history', 'strong-lookup',
@@ -71,7 +59,7 @@ class StrongModel {
     if (this.strongChain.length == 0) {
       return;
     }
-    let strongDef = this.strongChain.pop();
+    const strongDef = this.strongChain.pop();
     this.updateChain();
     this.defChange(strongDef);
   }
@@ -89,7 +77,7 @@ class StrongModel {
 
   async defUpdate() {
     this.strongIdx = this.strongHistory.indexOf(this.strongDef);
-    this.strongDefObj = await strongDb.defs.get(this.strongDef);
+    this.strongDefObj = await strongDictDb.dict.get(this.strongDef);
     await this.updateWordObj();
     await this.wordFirst();
     queue.publish('strong.def.update', this.strongDefObj);
@@ -112,7 +100,7 @@ class StrongModel {
   }
 
   filterReset() {
-    let strongFilter = this.tomeFilter();
+    const strongFilter = this.kjvFilter();
     this.filterChange(strongFilter);
   }
 
@@ -128,7 +116,7 @@ class StrongModel {
   }
 
   historyDelete(strongDef) {
-    let index = this.strongHistory.indexOf(strongDef);
+    const index = this.strongHistory.indexOf(strongDef);
     this.strongHistory.splice(index, 1);
     this.updateHistory();
   }
@@ -166,7 +154,7 @@ class StrongModel {
   }
 
   restoreChain() {
-    let defaultChain = [];
+    const defaultChain = [];
     let strongChain = localStorage.getItem('strongChain');
     if (!strongChain) {
       strongChain = defaultChain;
@@ -184,7 +172,7 @@ class StrongModel {
   }
 
   async restoreDef() {
-    let defaultDef = 'G2424';
+    const defaultDef = 'G2424';
     let strongDef = localStorage.getItem('strongDef');
     if (!strongDef) {
       strongDef = defaultDef;
@@ -202,7 +190,7 @@ class StrongModel {
   }
 
   restoreFilter() {
-    let defaultFilter = this.tomeFilter();
+    const defaultFilter = this.kjvFilter();
     let strongFilter = localStorage.getItem('strongFilter');
     if (!strongFilter) {
       strongFilter = defaultFilter;
@@ -220,7 +208,7 @@ class StrongModel {
   }
 
   restoreHistory() {
-    let defaultHistory = [];
+    const defaultHistory = [];
     let strongHistory = localStorage.getItem('strongHistory');
     if (!strongHistory) {
       strongHistory = defaultHistory;
@@ -238,7 +226,7 @@ class StrongModel {
   }
 
   restoreMode() {
-    let defaultMode = false;
+    const defaultMode = false;
     let strongMode = localStorage.getItem('strongStrongMode');
     if (!strongMode) {
       strongMode = defaultMode;
@@ -256,7 +244,7 @@ class StrongModel {
   }
 
   restoreTask() {
-    let defaultTask = 'strong-def';
+    const defaultTask = 'strong-def';
     let strongTask = localStorage.getItem('strongTask');
     if (!strongTask) {
       strongTask = defaultTask;
@@ -278,7 +266,7 @@ class StrongModel {
   }
 
   async restoreVerseIdx() {
-    let defaultVerseIdx = IDX_1_JOHN_4_19;
+    const defaultVerseIdx = IDX_1_JOHN_4_19;
     let strongVerseIdx = localStorage.getItem('strongVerseIdx');
     if (!strongVerseIdx) {
       strongVerseIdx = defaultVerseIdx;
@@ -296,7 +284,7 @@ class StrongModel {
   }
 
   async restoreWord() {
-    let defaultWord = null;
+    const defaultWord = null;
     let strongWord = localStorage.getItem('strongWord');
     if (!strongWord) {
       strongWord = defaultWord;
@@ -354,6 +342,10 @@ class StrongModel {
   }
 
   subscribe() {
+    queue.subscribe('name-mode.update', () => {
+      this.updateStrongModel();
+    });
+
     queue.subscribe('strong.chain.add', () => {
       this.chainAdd();
     });
@@ -363,22 +355,18 @@ class StrongModel {
     queue.subscribe('strong.chain.clear', () => {
       this.chainClear();
     });
-
     queue.subscribe('strong.def.change', async (strongDef) => {
       await this.defChange(strongDef);
     });
-
     queue.subscribe('strong.filter.change', (strongFilter) => {
       this.filterChange(strongFilter);
     });
-
     queue.subscribe('strong.history.clear', () => {
       this.historyClear();
     });
     queue.subscribe('strong.history.delete', (strongDef) => {
       this.historyDelete(strongDef);
     });
-
     queue.subscribe('strong.restore', async () => {
       await this.restore();
     });
@@ -402,7 +390,7 @@ class StrongModel {
     queue.publish('strong.task.update', this.strongTask);
   }
 
-  tomeFilter() {
+  kjvFilter() {
     return {
       bookIdx: -1,
       chapterIdx: -1
@@ -419,9 +407,19 @@ class StrongModel {
     queue.publish('strong.history.update', this.strongHistory);
   }
 
+  async updateStrongModel() {
+    queue.publish('* update.strong.model *', null);
+    this.strongMapObj = await strongDb.maps.get(this.strongVerseIdx);
+    queue.publish('strong.map.update', this.strongMapObj);
+    this.strongVerseObj = await kjvDb.verses.get(this.strongVerseIdx);
+    queue.publish('strong.verse.update', this.strongVerseObj);
+    this.chainClear();
+    await this.defChange(this.strongDef);
+  }
+
   async updateWordMaps() {
     if (this.words.length) {
-      let verses = this.wordTomeBin[tomeBinVerses];
+      const verses = this.wordKjvBin[binIdx.kjvBinIdx.verses];
       this.wordMapObjs = await strongDb.maps.bulkGet(verses);
       queue.publish('strong.wordMap.update', this.wordMapObjs);
     } else {
@@ -438,15 +436,15 @@ class StrongModel {
 
   async updateWordVerses() {
     if (this.words.length) {
-      let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
-      this.wordTomeBin = word[wordTomeBin];
-      queue.publish('strong.wordTomeBin.update', this.wordTomeBin);
-      let verses = this.wordTomeBin[tomeBinVerses];
-      this.wordVerseObjs = await tomeDb.verses.bulkGet(verses);
+      const word = this.words.find(x => x[strongIdx.word.kjvWord] === this.strongWord);
+      this.wordKjvBin = word[strongIdx.word.kjvBin];
+      queue.publish('strong.wordKjvBin.update', this.wordKjvBin);
+      const verses = this.wordKjvBin[binIdx.kjvBinIdx.verses];
+      this.wordVerseObjs = await kjvDb.verses.bulkGet(verses);
       queue.publish('strong.wordVerse.update', this.wordVerseObjs);
     } else {
-      this.wordTomeBin = [];
-      queue.publish('strong.wordTomeBin.update', this.wordTomeBin);
+      this.strongIdx.word.kjvBin = [];
+      queue.publish('strong.wordKjvBin.update', this.wordKjvBin);
       this.wordVerseObjs = [];
       queue.publish('strong.wordVerse.update', this.wordVerseObjs);
     }
@@ -457,7 +455,7 @@ class StrongModel {
     this.saveVerseIdx();
     this.strongMapObj = await strongDb.maps.get(this.strongVerseIdx);
     queue.publish('strong.map.update', this.strongMapObj);
-    this.strongVerseObj = await tomeDb.verses.get(this.strongVerseIdx);
+    this.strongVerseObj = await kjvDb.verses.get(this.strongVerseIdx);
     queue.publish('strong.verse.update', this.strongVerseObj);
   }
 
@@ -465,10 +463,10 @@ class StrongModel {
     this.strongWord = strongWord;
     this.saveWord();
     if (this.words.length) {
-      let word = this.words.find(x => x[wordKjvWord] === this.strongWord);
-      this.wordTomeBin = word[wordTomeBin];
+      const word = this.words.find(x => x[strongIdx.word.kjvWord] === this.strongWord);
+      this.wordKjvBin = word[strongIdx.word.kjvBin];
     } else {
-      this.wordTomeBin = [];
+      this.wordKjvBin = [];
     }
     await this.updateWordVerses();
     await this.updateWordMaps();
@@ -479,7 +477,7 @@ class StrongModel {
   async wordFirst() {
     let firstKjvWord;
     if (this.words.length) {
-      firstKjvWord = this.words[firstWord][wordKjvWord];
+      firstKjvWord = this.words[firstWord][strongIdx.word.kjvWord];
     } else {
       firstKjvWord = null;
     }

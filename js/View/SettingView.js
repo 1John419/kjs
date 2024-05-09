@@ -1,19 +1,10 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateBtnIcon,
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -21,25 +12,36 @@ const upperToolSet = [
 ];
 
 const fontSize = [
-  { size: 's', ariaLabel: 'Small' },
-  { size: 'm', ariaLabel: 'Medium' },
-  { size: 'l', ariaLabel: 'Large' },
-  { size: 'xl', ariaLabel: 'Extra Large' },
-  { size: 'xxl', ariaLabel: 'Extra Extra Large' },
+  { size: 's', ariaLabel: null },
+  { size: 'm', ariaLabel: null },
+  { size: 'l', ariaLabel: null },
+  { size: 'xl', ariaLabel: null },
+  { size: 'xxl', ariaLabel: null },
+];
+
+const fontVariant = [
+  { variant: 'normal', ariaLabel: null},
+  { variant: 'small-caps', ariaLabel: null},
 ];
 
 const templateBtnFontSize = (size, label) => {
-  let btnFontSize = templateElement(
-    'button', 'btn-font-size', null, label, null);
+  const btnFontSize = template.element('div', 'btn-font-size', null, null, null);
   btnFontSize.textContent = 'Aa';
   btnFontSize.classList.add(`font-size--${size}`);
   btnFontSize.dataset.size = `font-size--${size}`;
   return btnFontSize;
 };
 
+const templateBtnFontVariant = (variant, label) => {
+  const btnFontVariant = template.element('div', 'btn-font-variant', null, null, null);
+  btnFontVariant.textContent = label;
+  btnFontVariant.classList.add(`${variant}`);
+  btnFontVariant.dataset.variant = `${variant}`;
+  return btnFontVariant;
+};
+
 const templateBtnThemeType = (type, label) => {
-  let btnThemeType = templateElement(
-    'button', 'btn-theme-type', null, label, null);
+  const btnThemeType = template.element('div', 'btn-theme-type', null, null, null);
   btnThemeType.textContent = label;
   btnThemeType.classList.add(`theme-type--${type}`);
   btnThemeType.dataset.type = `${type}`;
@@ -47,39 +49,45 @@ const templateBtnThemeType = (type, label) => {
 };
 
 const templateSettingFont = (modifier, name) => {
-  let divSetting = templateElement(
-    'div', 'setting', modifier, null, null);
-  let heading = templateElement(
-    'h1', 'header', modifier, null, name);
+  const divSetting = template.element('div', 'setting', modifier, null, null);
+  const heading = template.element('h1', 'header', modifier, null, name);
   divSetting.appendChild(heading);
-  let divCarousel = templateSettingCarousel('font', "Font");
+  const divCarousel = templateSettingCarousel('font', "Font");
   divSetting.appendChild(divCarousel);
   return divSetting;
 };
 
 const templateSettingFontSize = (modifier, name) => {
-  let divSetting = templateElement(
-    'div', 'setting', modifier, null, null);
-  let heading = templateElement(
-    'h1', 'header', modifier, null, name);
+  const divSetting = template.element('div', 'setting', modifier, null, null);
+  const heading = template.element('h1', 'header', modifier, null, name);
   divSetting.appendChild(heading);
-  let divSelector = templateElement(
-    'div', 'selector', 'font-size', null, null);
-  for (let size of fontSize) {
-    let btn = templateBtnFontSize(size.size, size.label);
+  const divSelector = template.element('div', 'selector', 'font-size', null, null);
+  for (const size of fontSize) {
+    const btn = templateBtnFontSize(size.size, size.label);
     divSelector.appendChild(btn);
   }
   divSetting.appendChild(divSelector);
   return divSetting;
 };
 
+const templateSettingFontVariant = (modifier, name) => {
+  const divSetting = template.element('div', 'setting', modifier, null, null);
+  const heading = template.element('h1', 'header', modifier, null, name);
+  divSetting.appendChild(heading);
+  const divSelector = template.element('div', 'selector', 'font-variant', null, null);
+  const btnNormal = templateBtnFontVariant('normal', 'Normal');
+  divSelector.appendChild(btnNormal);
+  const btnSmallCaps = templateBtnFontVariant('small-caps', 'Small Caps');
+  divSelector.appendChild(btnSmallCaps);
+  divSetting.appendChild(divSelector);
+  return divSetting;
+};
+
 const templateSettingCarousel = (modifier, name) => {
-  let divCarousel = templateElement(
-    'div', 'carousel', modifier, null, null);
-  let btnPrev = templateBtnIcon('prev', 'prev', `Previous ${name}`);
-  let divName = templateElement(
-    'div', 'name', modifier, null, null);
-  let btnNext = templateBtnIcon('next', 'next', `Next ${name}`);
+  const divCarousel = template.element('div', 'carousel', modifier, null, null);
+  const btnPrev = template.btnIcon('prev', 'prev', null);
+  const divName = template.element('div', 'name', modifier, null, null);
+  const btnNext = template.btnIcon('next', 'next', null);
   divCarousel.appendChild(btnPrev);
   divCarousel.appendChild(divName);
   divCarousel.appendChild(btnNext);
@@ -87,19 +95,16 @@ const templateSettingCarousel = (modifier, name) => {
 };
 
 const templateSettingTheme = (modifier, name) => {
-  let divSetting = templateElement(
-    'div', 'setting', modifier, null, null);
-  let heading = templateElement(
-    'h1', 'header', modifier, null, name);
+  const divSetting = template.element('div', 'setting', modifier, null, null);
+  const heading = template.element('h1', 'header', modifier, null, name);
   divSetting.appendChild(heading);
-  let divSelector = templateElement(
-    'div', 'selector', 'theme-type', null, null);
-  let btnDark = templateBtnThemeType('dark', 'Dark');
+  const divSelector = template.element('div', 'selector', 'theme-type', null, null);
+  const btnDark = templateBtnThemeType('dark', 'Dark');
   divSelector.appendChild(btnDark);
-  let btnLight = templateBtnThemeType('light', 'Light');
+  const btnLight = templateBtnThemeType('light', 'Light');
   divSelector.appendChild(btnLight);
   divSetting.appendChild(divSelector);
-  let divCarousel = templateSettingCarousel('theme', 'Theme');
+  const divCarousel = templateSettingCarousel('theme', 'Theme');
   divSetting.appendChild(divCarousel);
   return divSetting;
 };
@@ -120,14 +125,14 @@ class SettingView {
   }
 
   buildPage() {
-    this.page = templatePage('setting');
+    this.page = template.page('setting');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('setting');
+    this.scroll = template.scroll('setting');
 
-    this.fontSample = templateElement('div', 'font-sample', null, null, null);
+    this.fontSample = template.element('div', 'font-sample', null, null, null);
     this.fontSample.innerHTML = '<p class="font-sample-verse">' +
       '<span class="font--bold">1 John 4:19 </span>' +
       'We love him, because he first loved us.</p>';
@@ -139,20 +144,23 @@ class SettingView {
     this.divSettingFontSize = templateSettingFontSize('font-size', 'Font Size');
     this.scroll.appendChild(this.divSettingFontSize);
 
+    this.divSettingFontVariant = templateSettingFontVariant('font-variant', 'Font Variant');
+    this.scroll.appendChild(this.divSettingFontVariant);
+
     this.divSettingTheme = templateSettingTheme('theme', 'Theme');
     this.scroll.appendChild(this.divSettingTheme);
 
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
   fontClick(target) {
-    let btn = target.closest('button');
+    const btn = target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnPrevFont) {
         queue.publish('setting.font-prev', null);
@@ -163,10 +171,22 @@ class SettingView {
   }
 
   fontSizeClick(target) {
-    let btn = target.closest('button');
-    if (btn.classList.contains('btn-font-size')) {
-      let dataSize = btn.dataset.size;
-      queue.publish('setting.font-size', dataSize);
+    const btn = target.closest('div.btn-font-size');
+    if (btn) {
+      if (btn.classList.contains('btn-font-size')) {
+        const dataSize = btn.dataset.size;
+        queue.publish('setting.font-size', dataSize);
+      }
+    }
+  }
+
+  fontVariantClick(target) {
+    const btn = target.closest('div.btn-font-variant');
+    if (btn) {
+      if (btn.classList.contains('btn-font-variant')) {
+        const dataVariant = btn.dataset.variant;
+        queue.publish('setting.font-variant', dataVariant);
+      }
     }
   }
 
@@ -184,6 +204,13 @@ class SettingView {
     this.lastFont = this.font;
   }
 
+  fontVariantUpdate(fontVariant) {
+    this.fontVariant = fontVariant;
+    this.updateFontVariantBtn();
+    this.updateFontVariant();
+    this.lastFontVariant = this.fontVariant;
+  }
+
   getElements() {
     this.divCarouselFont = this.divSettingFont.querySelector('.carousel--font');
     this.btnPrevFont = this.divCarouselFont.querySelector('.btn-icon--prev');
@@ -191,12 +218,12 @@ class SettingView {
     this.btnNextFont = this.divCarouselFont.querySelector('.btn-icon--next');
 
     this.divSelectorFontSize = this.divSettingFontSize.querySelector('.selector--font-size');
-    
+    this.divSelectorFontVariant = this.divSettingFontVariant.querySelector('.selector--font-variant');
+
     this.divSelectorThemeType = this.divSettingTheme.querySelector('.selector--theme-type');
     this.btnDarkTheme = this.divSelectorThemeType.querySelector('.theme-type--dark');
     this.btnLightTheme = this.divSelectorThemeType.querySelector('.theme-type--light');
-    this.divCarouselTheme = this.divSettingTheme.querySelector(
-      '.carousel--theme');
+    this.divCarouselTheme = this.divSettingTheme.querySelector('.carousel--theme');
     this.btnPrevTheme = this.divCarouselTheme.querySelector('.btn-icon--prev');
     this.divNameTheme = this.divCarouselTheme.querySelector('.name--theme');
     this.btnNextTheme = this.divCarouselTheme.querySelector('.btn-icon--next');
@@ -215,20 +242,25 @@ class SettingView {
     this.subscribe();
     this.lastFont = null;
     this.lastFontSize = null;
+    this.lastFontVariant = null;
     this.lastTheme = null;
   }
 
   scrollClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
-    if (this.divCarouselFont.contains(btn)) {
-      this.fontClick(btn);
-    } else if (this.divSelectorFontSize.contains(btn)) {
-      this.fontSizeClick(btn);
-    } else if (this.divSelectorThemeType.contains(btn)) {
-      this.themeTypeClick(btn);
-    } else if (this.divCarouselTheme.contains(btn)) {
-      this.themeClick(btn);
+    const btn = event.target.closest('div');
+    if (btn) {
+      if (this.divCarouselFont.contains(btn)) {
+        this.fontClick(btn);
+      } else if (this.divSelectorFontSize.contains(btn)) {
+        this.fontSizeClick(btn);
+      } else if (this.divSelectorFontVariant.contains(btn)) {
+        this.fontVariantClick(btn);
+      } else if (this.divSelectorThemeType.contains(btn)) {
+        this.themeTypeClick(btn);
+      } else if (this.divCarouselTheme.contains(btn)) {
+        this.themeClick(btn);
+      }
     }
   }
 
@@ -245,6 +277,10 @@ class SettingView {
       this.fontSizeUpdate(fontSize);
     });
 
+    queue.subscribe('font-variant.update', (fontVariant) => {
+      this.fontVariantUpdate(fontVariant);
+    });
+
     queue.subscribe('setting.hide', () => {
       this.hide();
     });
@@ -258,7 +294,7 @@ class SettingView {
   }
 
   themeClick(target) {
-    let btn = target.closest('button');
+    const btn = target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnPrevTheme) {
         queue.publish('setting.theme-prev', null);
@@ -269,7 +305,7 @@ class SettingView {
   }
 
   themeTypeClick(target) {
-    let btn = target.closest('button');
+    const btn = target.closest('div.btn-theme-type');
     if (btn) {
       if (btn === this.btnDarkTheme) {
         queue.publish('setting.theme-dark', null);
@@ -288,7 +324,7 @@ class SettingView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnBack) {
         queue.publish('setting.back', null);
@@ -323,10 +359,25 @@ class SettingView {
     if (this.activeFontSizeBtn) {
       this.activeFontSizeBtn.classList.remove('btn-font-size--active');
     }
-    this.activeFontSizeBtn = this.divSelectorFontSize.querySelector(
-      `button[data-size="${this.fontSize}"]`
-    );
+    this.activeFontSizeBtn = this.divSelectorFontSize.querySelector(`div[data-size="${this.fontSize}"]`);
     this.activeFontSizeBtn.classList.add('btn-font-size--active');
+  }
+
+  updateFontVariant() {
+    if (this.lastFontVariant) {
+      this.fontSample.classList.remove(this.lastFontVariant);
+      this.divSelectorFontSize.classList.remove(this.lastFontVariant);
+    }
+    this.fontSample.classList.add(this.fontVariant);
+    this.divSelectorFontSize.classList.add(this.fontVariant);
+  }
+
+  updateFontVariantBtn() {
+    if (this.activeFontVariantBtn) {
+      this.activeFontVariantBtn.classList.remove('btn-font-variant--active');
+    }
+    this.activeFontVariantBtn = this.divSelectorFontVariant.querySelector(`div[data-variant="${this.fontVariant}"]`);
+    this.activeFontVariantBtn.classList.add('btn-font-variant--active');
   }
 
   updateThemeName() {
@@ -337,9 +388,7 @@ class SettingView {
     if (this.activeThemeTypeBtn) {
       this.activeThemeTypeBtn.classList.remove('btn-theme-type--active');
     }
-    this.activeThemeTypeBtn = this.divSelectorThemeType.querySelector(
-      `button[data-type="${this.theme.themeType}"]`
-    );
+    this.activeThemeTypeBtn = this.divSelectorThemeType.querySelector(`div[data-type="${this.theme.themeType}"]`);
     this.activeThemeTypeBtn.classList.add('btn-theme-type--active');
   }
 

@@ -1,25 +1,21 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateDivDialog,
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
 
 const dialogToolset = [
   { type: 'label', text: 'Strong Number' },
   { type: 'input', ariaLabel: 'Strong Number' },
-  { type: 'btn', cssModifier: 'find', ariaLabel: 'Find' },
+  { type: 'btn', cssModifier: 'find', ariaLabel: null, label: 'Find' },
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'strong-def', ariaLabel: null },
+  { type: 'btn', icon: 'result', ariaLabel: null },
+  { type: 'btn', icon: 'filter', ariaLabel: null },
+  { type: 'btn', icon: 'history', ariaLabel: null },
+  { type: 'btn', icon: 'strong-verse', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -45,43 +41,44 @@ class StrongLookupView {
   }
 
   buildPage() {
-    this.page = templatePage('strong-lookup');
+    this.page = template.page('strong-lookup');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('strong-lookup');
-    this.dialog = templateDivDialog('strong-lookup', dialogToolset);
+    this.scroll = template.scroll('strong-lookup');
+    this.dialog = template.divDialog('strong-lookup', dialogToolset);
     this.scroll.appendChild(this.dialog);
 
-    this.message = templateElement('div', 'message',
-      'strong-lookup', null, null);
+    this.message = template.element('div', 'message', 'strong-lookup', null, null);
     this.scroll.appendChild(this.message);
 
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
   dialogClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
-    if (btn === this.btnFind) {
-      this.findClick();
+    const btn = event.target.closest('div.btn-dialog');
+    if (btn) {
+      if (btn === this.btnFind) {
+        this.findClick();
+      }
     }
   }
 
   error(message) {
     this.message.textContent = message;
-    this.message.classList.remove('message--hide');
+    this.message.classList.remove('hide');
   }
 
   findClick() {
-    let strongNum = this.inputStrongNum.value;
+    const strongNum = this.inputStrongNum.value;
     if (strongNum) {
       queue.publish('strong-lookup.find', strongNum.toUpperCase());
     }
@@ -94,7 +91,12 @@ class StrongLookupView {
     this.dialogBtns = this.dialog.querySelector('.dialog-btns');
     this.btnFind = this.dialogBtns.querySelector('.btn-dialog--find');
 
+    this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
     this.btnDef = this.toolbarLower.querySelector('.btn-icon--strong-def');
+    this.btnResult = this.toolbarLower.querySelector('.btn-icon--result');
+    this.btnFilter = this.toolbarLower.querySelector('.btn-icon--filter');
+    this.btnHistory = this.toolbarLower.querySelector('.btn-icon--history');
+    this.btnVerse = this.toolbarLower.querySelector('.btn-icon--strong-verse');
   }
 
   hide() {
@@ -118,8 +120,8 @@ class StrongLookupView {
   show() {
     this.inputStrongNum.value = '';
     this.error.textContent = '';
-    this.message.classList.add('message--hide');
     this.page.classList.remove('page--hide');
+    this.message.classList.add('hide');
     this.inputStrongNum.focus();
   }
 
@@ -138,10 +140,20 @@ class StrongLookupView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
-      if (btn === this.btnDef) {
+      if (btn === this.btnBack) {
+        queue.publish('strong.back', null);
+      } else if (btn === this.btnDef) {
         queue.publish('strong-def', null);
+      } else if (btn === this.btnResult) {
+        queue.publish('strong-result', null);
+      } else if (btn === this.btnFilter) {
+        queue.publish('strong-filter', null);
+      } else if (btn === this.btnHistory) {
+        queue.publish('strong-history', null);
+      } else if (btn === this.btnVerse) {
+        queue.publish('strong-verse', null);
       }
     }
   }

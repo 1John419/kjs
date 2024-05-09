@@ -1,23 +1,15 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateBtnIcon,
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
-import {
-  removeAllChildren,
-} from '../util.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
+import { util } from '../util.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'result', ariaLabel: 'Search Result' },
-  { type: 'btn', icon: 'history-clear', ariaLabel: 'Clear History' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'search-lookup', ariaLabel: null },
+  { type: 'btn', icon: 'result', ariaLabel: null },
+  { type: 'btn', icon: 'filter', ariaLabel: null },
+  { type: 'btn', icon: 'history-clear', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -40,54 +32,46 @@ class SearchHistoryView {
   }
 
   buildEntry(query, idx) {
-    let entry = document.createElement('div');
+    const entry = document.createElement('div');
     entry.classList.add('entry', 'entry--history');
-    let btnEntry = document.createElement('button');
+    const btnEntry = document.createElement('div');
     btnEntry.classList.add('btn-entry', 'btn-entry--history');
     btnEntry.dataset.historyIdx = idx;
     btnEntry.textContent = query;
     entry.appendChild(btnEntry);
-    let btnDelete = templateBtnIcon('delete', 'delete', 'Delete');
+    const btnDelete = template.btnIcon('delete', 'delete', null);
     entry.appendChild(btnDelete);
     return entry;
   }
 
   buildPage() {
-    this.page = templatePage('search-history');
+    this.page = template.page('search-history');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('search-history');
-    this.empty = templateElement('div', 'empty', 'search-history', null,
-      'No Searches Saved');
+    this.scroll = template.scroll('search-history');
+    this.empty = template.element('div', 'empty', 'search-history', null, 'No Searches Saved');
     this.scroll.appendChild(this.empty);
 
-    this.list = templateElement('div', 'list', 'search-history', null, null);
+    this.list = template.element('div', 'list', 'search-history', null, null);
     this.scroll.appendChild(this.list);
 
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
-  delete(historyIdx) {
-    queue.publish('search-history.delete', historyIdx);
-  }
-
-  down(query) {
-    queue.publish('search-history.down', query);
-  }
-
   getElements() {
-    this.btnResult = this.toolbarLower.querySelector(
-      '.btn-icon--result');
-    this.btnHistoryClear = this.toolbarLower.querySelector(
-      '.btn-icon--history-clear');
+    this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
+    this.btnLookup = this.toolbarLower.querySelector('.btn-icon--search-lookup');
+    this.btnResult = this.toolbarLower.querySelector('.btn-icon--result');
+    this.btnFilter = this.toolbarLower.querySelector('.btn-icon--filter');
+    this.btnHistoryClear = this.toolbarLower.querySelector('.btn-icon--history-clear');
   }
 
   hide() {
@@ -108,14 +92,14 @@ class SearchHistoryView {
 
   listClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div');
     if (btn) {
       if (btn.classList.contains('btn-entry--history')) {
-        let query = btn.textContent;
+        const query = btn.textContent;
         queue.publish('search-history.select', query);
       } else if (btn.classList.contains('btn-icon--delete')) {
-        let entry = btn.previousSibling;
-        let query = entry.textContent;
+        const entry = btn.previousSibling;
+        const query = entry.textContent;
         queue.publish('search-history.delete', query);
       }
     }
@@ -126,6 +110,10 @@ class SearchHistoryView {
   }
 
   subscribe() {
+    queue.subscribe('search.query.error', () => {
+      queue.publish('search-lookup', null);
+    });
+
     queue.subscribe('search-history.hide', () => {
       this.hide();
     });
@@ -140,10 +128,16 @@ class SearchHistoryView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
-      if (btn === this.btnResult) {
+      if (btn === this.btnBack) {
+        queue.publish('search.back', null);
+      } else if (btn === this.btnLookup) {
+        queue.publish('search-lookup', null);
+      } else if (btn === this.btnResult) {
         queue.publish('search-result', null);
+      } else if (btn === this.btnFilter) {
+        queue.publish('search-filter', null);
       } else if (btn === this.btnHistoryClear) {
         queue.publish('search-history.clear', null);
       }
@@ -151,15 +145,15 @@ class SearchHistoryView {
   }
 
   updateHistory() {
-    let scrollSave = this.scroll.scrollTop;
-    removeAllChildren(this.list);
+    const scrollSave = this.scroll.scrollTop;
+    util.removeAllChildren(this.list);
     if (this.history.length === 0) {
-      this.empty.classList.remove('empty--hide');
+      this.empty.classList.remove('hide');
     } else {
-      this.empty.classList.add('empty--hide');
-      let fragment = document.createDocumentFragment();
-      for (let query of this.history) {
-        let entry = this.buildEntry(query);
+      this.empty.classList.add('hide');
+      const fragment = document.createDocumentFragment();
+      for (const query of this.history) {
+        const entry = this.buildEntry(query);
         fragment.appendChild(entry);
       }
       this.list.appendChild(fragment);

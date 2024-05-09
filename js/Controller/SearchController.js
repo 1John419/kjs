@@ -1,11 +1,7 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  chapterIdxByVerseIdx,
-} from '../data/tomeDb.js';
+import { queue } from '../CommandQueue.js';
+import { chapterIdxByVerseIdx } from '../data/kjvLists.js';
 
 class SearchController {
 
@@ -22,7 +18,7 @@ class SearchController {
       if (this.panes === 1 && this.sidebar !== 'none') {
         queue.publish('sidebar.select', 'none');
       }
-      queue.publish('read.scroll-to-verse', this.selectVerseIdx);
+      queue.publish('read.scroll-verse-idx', this.selectVerseIdx);
       this.selectVerseIdx = null;
     }
   }
@@ -75,10 +71,6 @@ class SearchController {
     this.subscribe();
   }
 
-  lookupCancel() {
-    queue.publish('search.task.change', 'search-result');
-  }
-
   lookupPane() {
     queue.publish('search.task.change', 'search-lookup');
   }
@@ -107,7 +99,7 @@ class SearchController {
 
   readSelect(verseIdx) {
     this.selectVerseIdx = verseIdx;
-    let chapterIdx = chapterIdxByVerseIdx(verseIdx);
+    const chapterIdx = chapterIdxByVerseIdx(verseIdx);
     queue.publish('chapterIdx.change', chapterIdx);
   }
 
@@ -166,9 +158,6 @@ class SearchController {
 
     queue.subscribe('search-lookup', () => {
       this.lookupPane();
-    });
-    queue.subscribe('search-lookup.cancel', () => {
-      this.lookupCancel();
     });
     queue.subscribe('search-lookup.search', (query) => {
       this.lookupSearch(query);

@@ -2,9 +2,7 @@
 
 /*eslint no-unused-vars: ["off"]*/
 
-import { initializeTome } from './data/tomeDb.js';
-import { initializeStrong } from './data/strongDb.js';
-import { progress } from './load.js';
+import { DbModel } from './Model/DbModel.js';
 
 import { ReadModel } from './Model/ReadModel.js';
 import { ReadView } from './View/ReadView.js';
@@ -50,65 +48,77 @@ import { HelpModel } from './Model/HelpModel.js';
 import { HelpReadView } from './View/HelpReadView.js';
 import { HelpTopicView } from './View/HelpTopicView.js';
 import { HelpController } from './Controller/HelpController.js';
+import { initializeKjvLists } from './data/kjvLists.js';
+import { initializeKjvPureDb } from './data/kjvPureDb.js';
+import { initializeKjvNameDb } from './data/kjvNameDb.js';
+import { initializeStrongDictDb } from './data/strongDictDb.js';
+import { initializeStrongPure } from './data/strongPureDb.js';
+import { initializeStrongName } from './data/strongNameDb.js';
 
 const APP_FONT = 'font--roboto';
 
-let loadMsg = document.querySelector('.load-msg');
-let loadScroll = document.querySelector('.load-scroll');
+const loadMsg = document.querySelector('.load-msg');
+const loadScroll = document.querySelector('.load-scroll');
 
 (async () => {
-  let body = document.body;
-  let load = body.querySelector('.load');
+  const body = document.body;
+  const load = body.querySelector('.load');
 
-  await initializeTome(progress);
-  await initializeStrong(progress);
+  await initializeKjvLists();
+  await initializeKjvPureDb();
+  await initializeKjvNameDb();
+  await initializeStrongDictDb();
+  await initializeStrongPure();
+  await initializeStrongName();
 
-  let readView = new ReadView();
-  let readController = new ReadController();
-  let readModel = new ReadModel();
+  const dbModel = new DbModel();
 
-  let navigatorBookView = new NavigatorBookView();
-  let navigatorChapterView = new NavigatorChapterView();
-  let navigatorController = new NavigatorController();
-  let navigatorModel = new NavigatorModel();
+  const readView = new ReadView();
+  const readController = new ReadController();
+  const readModel = new ReadModel();
 
-  let bookmarkListView = new BookmarkListView();
-  let bookmarkMoveCopyView = new BookmarkMoveCopyView();
-  let bookmarkFolderView = new BookmarkFolderView();
-  let bookmarkFolderAddView = new BookmarkFolderAddView();
-  let bookmarkFolderDeleteView = new BookmarkFolderDeleteView();
-  let bookmarkFolderRenameView = new BookmarkFolderRenameView();
-  let bookmarkExportview = new BookmarkExportview();
-  let bookmarkImportView = new BookmarkImportView();
-  let bookmarkController = new BookmarkController();
-  let bookmarkModel = new BookmarkModel();
+  const navigatorBookView = new NavigatorBookView();
+  const navigatorChapterView = new NavigatorChapterView();
+  const navigatorController = new NavigatorController();
+  const navigatorModel = new NavigatorModel();
 
-  let searchResultView = new SearchResultView();
-  let searchFilterView = new SearchFilterView();
-  let searchHistoryView = new SearchHistoryView();
-  let searchLookupView = new SearchLookupView();
-  let searchController = new SearchController();
-  let searchModel = new SearchModel();
+  const bookmarkListView = new BookmarkListView();
+  const bookmarkMoveCopyView = new BookmarkMoveCopyView();
+  const bookmarkFolderView = new BookmarkFolderView();
+  const bookmarkFolderAddView = new BookmarkFolderAddView();
+  const bookmarkFolderDeleteView = new BookmarkFolderDeleteView();
+  const bookmarkFolderRenameView = new BookmarkFolderRenameView();
+  const bookmarkExportview = new BookmarkExportview();
+  const bookmarkImportView = new BookmarkImportView();
+  const bookmarkController = new BookmarkController();
+  const bookmarkModel = new BookmarkModel();
 
-  let strongDefView = new StrongDefView();
-  let strongFilterView = new StrongFilterView();
-  let strongHistoryView = new StrongHistoryView();
-  let strongLookupView = new StrongLookupView();
-  let strongSearchView = new StrongResultView();
-  let strongVerseView = new StrongVerseView();
-  let strongController = new StrongController();
-  let strongModel = new StrongModel();
+  const searchResultView = new SearchResultView();
+  const searchFilterView = new SearchFilterView();
+  const searchHistoryView = new SearchHistoryView();
+  const searchLookupView = new SearchLookupView();
+  const searchController = new SearchController();
+  const searchModel = new SearchModel();
 
-  let settingView = new SettingView();
-  let settingController = new SettingController();
-  let settingModel = new SettingModel();
+  const strongDefView = new StrongDefView();
+  const strongFilterView = new StrongFilterView();
+  const strongHistoryView = new StrongHistoryView();
+  const strongLookupView = new StrongLookupView();
+  const strongSearchView = new StrongResultView();
+  const strongVerseView = new StrongVerseView();
+  const strongController = new StrongController();
+  const strongModel = new StrongModel();
 
-  let helpReadView = new HelpReadView();
-  let helpTopicView = new HelpTopicView();
-  let helpController = new HelpController();
-  let helpModel = new HelpModel();
+  const settingView = new SettingView();
+  const settingController = new SettingController();
+  const settingModel = new SettingModel();
 
-  load.classList.add('load--hide');
+  const helpReadView = new HelpReadView();
+  const helpTopicView = new HelpTopicView();
+  const helpController = new HelpController();
+  const helpModel = new HelpModel();
+
+  load.classList.add('hide');
   document.documentElement.classList.add(APP_FONT);
 
   console.log(`intializeApp():     ${Date.now()}`);

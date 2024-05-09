@@ -1,59 +1,25 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateAcrostic,
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
-import {
-  removeAllChildren,
-} from '../util.js';
-import {
-  bookBinChapters,
-  bookBinSliceEnd,
-  bookBinSliceStart,
-  bookBinVerseCount,
-  bookBinWordCount,
-  chapterBinSliceEnd,
-  chapterBinSliceStart,
-  chapterBinVerseCount,
-  chapterBinWordCount,
-  tomeBinBooks,
-  tomeBinVerseCount,
-  tomeBinVerses,
-  tomeBinWordCount,
-} from '../data/binIdx.js';
-import {
-  tomeBooks,
-  tomeChapters,
-  tomeName,
-} from '../data/tomeDb.js';
-import {
-  bookLongName,
-  chapterName,
-  verseCitation,
-  verseText,
-} from '../data/tomeIdx.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
+import { util } from '../util.js';
+import { binIdx } from '../data/binIdx.js';
+import { kjvIdx } from '../data/kjvIdx.js';
+import { kjvLists } from '../data/kjvLists.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-  { type: 'btn', icon: 'search-lookup', ariaLabel: 'Search Lookup' },
-  { type: 'btn', icon: 'filter', ariaLabel: 'Search Filter' },
-  { type: 'btn', icon: 'history', ariaLabel: 'Search History' },
-  { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'search-lookup', ariaLabel: null },
+  { type: 'btn', icon: 'filter', ariaLabel: null },
+  { type: 'btn', icon: 'history', ariaLabel: null },
+  { type: 'btn', icon: 'strong-mode', ariaLabel: null },
 ];
 
 const upperToolSet = [
   { type: 'btn-banner', cssModifier: 'search-result', text: 'Toogle Clipboard' },
 ];
 
-const binIdx = 0;
+const localBinIdx = 0;
 const loadIncrement = 50;
 
 class SearchResultView {
@@ -78,47 +44,45 @@ class SearchResultView {
   }
 
   applyFilter() {
-    let tomeBin = this.rig.tomeBin;
-    let bookIdx = this.searchFilter.bookIdx;
-    let chapterIdx = this.searchFilter.chapterIdx;
+    const kjvBin = this.rig.kjvBin;
+    const bookIdx = this.searchFilter.bookIdx;
+    const chapterIdx = this.searchFilter.chapterIdx;
     if (bookIdx === -1 && chapterIdx === -1) {
-      this.filteredVerses = tomeBin[tomeBinVerses];
-      this.wordCount = tomeBin[tomeBinWordCount];
-      this.verseCount = tomeBin[tomeBinVerseCount];
-      this.citation = tomeName;
+      this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses];
+      this.wordCount = kjvBin[binIdx.kjvBinIdx.wordCount];
+      this.verseCount = kjvBin[binIdx.kjvBinIdx.verseCount];
+      this.citation = kjvLists.name;
     } else {
-      let books = tomeBin[tomeBinBooks];
-      let bookBin = this.findBin(books, bookIdx);
+      const books = kjvBin[binIdx.kjvBinIdx.books];
+      const bookBin = this.findBin(books, bookIdx);
       if (chapterIdx === -1) {
-        this.filteredVerses = tomeBin[tomeBinVerses].slice(
-          bookBin[bookBinSliceStart], bookBin[bookBinSliceEnd]);
-        this.wordCount = bookBin[bookBinWordCount];
-        this.verseCount = bookBin[bookBinVerseCount];
-        this.citation = tomeBooks[bookIdx][bookLongName];
+        this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses].slice(bookBin[binIdx.bookBinIdx.sliceStart], bookBin[binIdx.bookBinIdx.sliceEnd]);
+        this.wordCount = bookBin[binIdx.bookBinIdx.wordCount];
+        this.verseCount = bookBin[binIdx.bookBinIdx.verseCount];
+        this.citation = kjvLists.books[bookIdx][kjvIdx.book.longName];
       } else {
-        let chapters = bookBin[bookBinChapters];
-        let chapterBin = this.findBin(chapters, chapterIdx);
-        this.filteredVerses = tomeBin[tomeBinVerses].slice(
-          chapterBin[chapterBinSliceStart], chapterBin[chapterBinSliceEnd]);
-        this.wordCount = chapterBin[chapterBinWordCount];
-        this.verseCount = chapterBin[chapterBinVerseCount];
-        this.citation = tomeChapters[chapterIdx][chapterName];
+        const chapters = bookBin[binIdx.bookBinIdx.chapters];
+        const chapterBin = this.findBin(chapters, chapterIdx);
+        this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses].slice(chapterBin[binIdx.chapterBinIdx.sliceStart], chapterBin[binIdx.chapterBinIdx.sliceEnd]);
+        this.wordCount = chapterBin[binIdx.chapterBinIdx.wordCount];
+        this.verseCount = chapterBin[binIdx.chapterBinIdx.verseCount];
+        this.citation = kjvLists.chapters[chapterIdx][kjvIdx.chapter.name];
       }
     }
   }
 
   buildPage() {
-    this.page = templatePage('search-result');
+    this.page = template.page('search-result');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('search-result');
-    this.list = templateElement('div', 'list', 'search-result', null, null);
+    this.scroll = template.scroll('search-result');
+    this.list = template.element('div', 'list', 'search-result', null, null);
     this.scroll.appendChild(this.list);
 
-    this.loadMore = templateElement('div', 'load-more', 'search-result', null, null);
-    this.btnLoadMore = document.createElement('button');
+    this.loadMore = template.element('div', 'load-more', 'search-result', null, null);
+    this.btnLoadMore = document.createElement('div');
     this.btnLoadMore.classList.add('btn-load-more');
     this.btnLoadMore.textContent = 'Load More';
     this.loadMore.appendChild(this.btnLoadMore);
@@ -126,29 +90,29 @@ class SearchResultView {
 
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
   buildRefSpan(verseObj) {
-    let refSpan = document.createElement('span');
+    const refSpan = document.createElement('span');
     refSpan.classList.add('font--bold');
-    refSpan.textContent = verseObj.v[verseCitation] + ' ';
+    refSpan.textContent = verseObj.v[kjvIdx.verse.citation] + ' ';
     return refSpan;
   }
 
   buildVerse(verseObj) {
-    let btn = document.createElement('button');
+    const btn = document.createElement('div');
     btn.classList.add('btn-result');
     btn.dataset.verseIdx = verseObj.k;
-    let searchText = document.createElement('span');
+    const searchText = document.createElement('span');
     searchText.classList.add('span-result-text');
-    let acrostic = templateAcrostic(verseObj);
-    let ref = this.buildRefSpan(verseObj);
-    let text = document.createTextNode(verseObj.v[verseText]);
+    const acrostic = template.acrostic(verseObj);
+    const ref = this.buildRefSpan(verseObj);
+    const text = document.createTextNode(verseObj.v[kjvIdx.verse.text]);
     searchText.appendChild(ref);
     if (acrostic) {
       searchText.appendChild(acrostic);
@@ -172,20 +136,34 @@ class SearchResultView {
     this.list.classList.add(this.fontSize);
   }
 
+  changeFontVariant() {
+    if (this.lastFontVariant) {
+      this.list.classList.remove(this.lastFontVariant);
+    }
+    this.list.classList.add(this.fontVariant);
+  }
+
+  clearResults() {
+    this.btnBanner.classList.add('btn-banner--search-result-error');
+    this.btnBanner.innerHTML = 'Query Error';
+    util.removeAllChildren(this.list);
+    this.loadMore.classList.add('hide');
+  }
+
   filterUpdate(searchFilter) {
     this.searchFilter = searchFilter;
     if (this.rig) {
       if (this.rig.state === 'OK') {
         this.applyFilter();
-        this.updateBanner();
-        this.updateResult();
       }
+      this.updateBanner();
+      this.updateResult();
     }
   }
 
   findBin(bins, idx) {
     return bins.find((bin) => {
-      return bin[binIdx] === idx;
+      return bin[localBinIdx] === idx;
     });
   }
 
@@ -205,18 +183,20 @@ class SearchResultView {
     this.changeFontSize();
   }
 
+  fontVariantUpdate(fontVariant) {
+    this.fontVariant = fontVariant;
+    this.changeFontVariant();
+    this.lastFontVariant = fontVariant;
+  }
+
   getElements() {
     this.btnBanner = this.toolbarUpper.querySelector('.btn-banner--search-result');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnFilter = this.toolbarLower.querySelector(
-      '.btn-icon--filter');
-    this.btnHistory = this.toolbarLower.querySelector(
-      '.btn-icon--history');
-    this.btnStrongMode = this.toolbarLower.querySelector(
-      '.btn-icon--strong-mode');
-    this.btnSearchLookup = this.toolbarLower.querySelector(
-      '.btn-icon--search-lookup');
+    this.btnLookup = this.toolbarLower.querySelector('.btn-icon--search-lookup');
+    this.btnFilter = this.toolbarLower.querySelector('.btn-icon--filter');
+    this.btnHistory = this.toolbarLower.querySelector('.btn-icon--history');
+    this.btnStrongMode = this.toolbarLower.querySelector('.btn-icon--strong-mode');
   }
 
   hide() {
@@ -228,32 +208,38 @@ class SearchResultView {
     this.getElements();
     this.addListeners();
     this.subscribe();
+    this.rig = null;
     this.lastFont = null;
     this.lastFontSize = null;
+    this.lastFontVariant = null;
     this.clipboardMode = false;
   }
 
   listClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
-    if (this.clipboardMode) {
-      let text = btn.textContent;
-      navigator.clipboard.writeText(text);
-    } else {
-      let verseIdx = parseInt(btn.dataset.verseIdx);
-      if (this.strongMode) {
-        queue.publish('search-result.strong-select', verseIdx);
+    const btn = event.target.closest('div');
+    if (btn) {
+      if (this.clipboardMode) {
+        const text = btn.textContent;
+        navigator.clipboard.writeText(text);
       } else {
-        queue.publish('search-result.read-select', verseIdx);
+        const verseIdx = parseInt(btn.dataset.verseIdx);
+        if (this.strongMode) {
+          queue.publish('search-result.strong-select', verseIdx);
+        } else {
+          queue.publish('search-result.read-select', verseIdx);
+        }
       }
     }
   }
 
   loadMoreClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
-    if (btn === this.btnLoadMore) {
-      this.loadVerses();
+    const btn = event.target.closest('div.btn-load-more');
+    if (btn) {
+      if (btn === this.btnLoadMore) {
+        this.loadVerses();
+      }
     }
   }
 
@@ -263,23 +249,23 @@ class SearchResultView {
       verses = this.filteredVerses;
       this.loadIdx = this.verseCount;
     } else {
-      let sliceEnd = Math.min(this.loadIdx + loadIncrement, this.verseCount);
+      const sliceEnd = Math.min(this.loadIdx + loadIncrement, this.verseCount);
       verses = this.filteredVerses.slice(this.loadIdx, sliceEnd);
       this.loadIdx = sliceEnd;
     }
 
-    let fragment = document.createDocumentFragment();
-    let verseObjs = this.searchVerseObjs.filter(x => verses.includes(x.k));
-    for (let verseObj of verseObjs) {
-      let verse = this.buildVerse(verseObj);
+    const fragment = document.createDocumentFragment();
+    const verseObjs = this.searchVerseObjs.filter(x => verses.includes(x.k));
+    for (const verseObj of verseObjs) {
+      const verse = this.buildVerse(verseObj);
       fragment.appendChild(verse);
     }
     this.list.appendChild(fragment);
 
     if (this.loadIdx < this.verseCount) {
-      this.loadMore.classList.remove('btn-load-more--hide');
+      this.loadMore.classList.remove('hide');
     } else {
-      this.loadMore.classList.add('btn-load-more--hide');
+      this.loadMore.classList.add('hide');
     }
   }
 
@@ -297,10 +283,6 @@ class SearchResultView {
     this.query = this.rig.query;
   }
 
-  scrollToTop() {
-    this.scroll.scrollTop = 0;
-  }
-
   show() {
     this.page.classList.remove('page--hide');
   }
@@ -312,6 +294,10 @@ class SearchResultView {
 
     queue.subscribe('font-size.update', (fontSize) => {
       this.fontSizeUpdate(fontSize);
+    });
+
+    queue.subscribe('font-variant.update', (fontVariant) => {
+      this.fontVariantUpdate(fontVariant);
     });
 
     queue.subscribe('rig.update', (rig) => {
@@ -328,10 +314,13 @@ class SearchResultView {
     queue.subscribe('search.filter.update', (searchFilter) => {
       this.filterUpdate(searchFilter);
     });
+    queue.subscribe('search.query.error', () => {
+      this.clearResults();
+    });
     queue.subscribe('search.strong-mode.update', (strongMode) => {
       this.modeUpdate(strongMode);
     });
-    queue.subscribe('search.verses.update', (searchVerseObjs) => {
+    queue.subscribe('search.verse-objs.update', (searchVerseObjs) => {
       this.versesUpdate(searchVerseObjs);
     });
   }
@@ -347,25 +336,25 @@ class SearchResultView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnBack) {
         queue.publish('search.back', null);
+      } else if (btn === this.btnLookup) {
+        queue.publish('search-lookup', null);
       } else if (btn === this.btnFilter) {
         queue.publish('search-filter', null);
       } else if (btn === this.btnHistory) {
         queue.publish('search-history', null);
       } else if (btn === this.btnStrongMode) {
         queue.publish('search.strong-mode.click', null);
-      } else if (btn === this.btnSearchLookup) {
-        queue.publish('search-lookup', null);
       }
     }
   }
 
   toolbarUpperClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-banner');
     if (btn) {
       if (btn === this.btnBanner) {
         this.toogleClipboardMode();
@@ -374,15 +363,19 @@ class SearchResultView {
   }
 
   updateBanner() {
+    this.btnBanner.classList.remove('btn-banner--search-result-error');
     this.btnBanner.innerHTML = `${this.citation} ` +
       `(${this.wordCount}/${this.verseCount})<br>` +
       `${this.rig.query}`;
   }
 
   updateResult() {
-    this.scrollToTop();
-    removeAllChildren(this.list);
-    if (this.rig.state === 'OK') {
+    this.scroll.scrollTop = 0;
+    util.removeAllChildren(this.list);
+    if (
+      this.rig !== null &&
+      this.rig.state === 'OK'
+    ) {
       this.loadIdx = 0;
       this.loadedVerses = 0;
       this.loadVerses();
@@ -391,6 +384,7 @@ class SearchResultView {
 
   versesUpdate(searchVerseObjs) {
     this.searchVerseObjs = searchVerseObjs;
+    this.updateResult();
   }
 
 }

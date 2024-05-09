@@ -1,11 +1,7 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  chapterIdxByVerseIdx,
-} from '../data/tomeDb.js';
+import { queue } from '../CommandQueue.js';
+import { chapterIdxByVerseIdx } from '../data/kjvLists.js';
 
 class StrongController {
 
@@ -22,7 +18,7 @@ class StrongController {
       if (this.panes === 1 && this.sidebar !== 'none') {
         queue.publish('sidebar.select', 'none');
       }
-      queue.publish('read.scroll-to-verse', this.selectVerseIdx);
+      queue.publish('read.scroll-verse-idx', this.selectVerseIdx);
       this.selectVerseIdx = null;
     }
   }
@@ -75,20 +71,12 @@ class StrongController {
     queue.publish('strong.history.delete', strongDef);
   }
 
-  historyDown(strongDef) {
-    queue.publish('strong.history.down', strongDef);
-  }
-
   historyPane() {
     queue.publish('strong.task.change', 'strong-history');
   }
 
   historySelect(strongDef) {
     queue.publish('strong.def.change', strongDef);
-  }
-
-  historyUp(strongDef) {
-    queue.publish('strong.history.up', strongDef);
   }
 
   initialize() {
@@ -118,7 +106,7 @@ class StrongController {
 
   readSelect(verseIdx) {
     this.selectVerseIdx = verseIdx;
-    let chapterIdx = chapterIdxByVerseIdx(verseIdx);
+    const chapterIdx = chapterIdxByVerseIdx(verseIdx);
     queue.publish('chapterIdx.change', chapterIdx);
   }
 
@@ -177,14 +165,8 @@ class StrongController {
     queue.subscribe('strong-history.delete', (strongDef) => {
       this.historyDelete(strongDef);
     });
-    queue.subscribe('strong-history.down', (strongDef) => {
-      this.historyDown(strongDef);
-    });
     queue.subscribe('strong-history.select', (strongDef) => {
       this.historySelect(strongDef);
-    });
-    queue.subscribe('strong-history.up', (strongDef) => {
-      this.historyUp(strongDef);
     });
 
     queue.subscribe('strong-lookup', () => {

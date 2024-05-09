@@ -1,35 +1,23 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateActionMenu,
-  templateElement,
-  templateBtnIcon,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
-import {
-  removeAllChildren,
-} from '../util.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
+import { util } from '../util.js';
 
 const actionSet = [
-  { icon: 'up', ariaLabel: 'Up' },
-  { icon: 'down', ariaLabel: 'Down' },
-  { icon: 'rename', ariaLabel: 'Rename' },
-  { icon: 'delete', ariaLabel: 'Delete' },
-  { icon: 'cancel', ariaLabel: 'Cancel' },
+  { icon: 'up', ariaLabel: null },
+  { icon: 'down', ariaLabel: null },
+  { icon: 'rename', ariaLabel: null },
+  { icon: 'delete', ariaLabel: null },
+  { icon: 'cancel', ariaLabel: null },
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-  { type: 'btn', icon: 'bookmark-folder-add', ariaLabel: 'Bookmark Folder Add' },
-  { type: 'btn', icon: 'import', ariaLabel: 'Import' },
-  { type: 'btn', icon: 'export', ariaLabel: 'Export' },
-  { type: 'btn', icon: 'bookmark-list', ariaLabel: 'Bookmark List' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'bookmark-folder-add', ariaLabel: null },
+  { type: 'btn', icon: 'import', ariaLabel: null },
+  { type: 'btn', icon: 'export', ariaLabel: null },
+  { type: 'btn', icon: 'bookmark-list', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -44,13 +32,13 @@ class BookmarkFolderView {
 
   actionMenuClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnCancel) {
-        this.actionMenu.classList.add('action-menu--hide');
+        this.actionMenu.classList.add('hide');
       } else {
-        let entry = this.activeEntry.querySelector('.btn-entry');
-        let folderName = entry.textContent;
+        const entry = this.activeEntry.querySelector('.btn-entry');
+        const folderName = entry.textContent;
         if (btn === this.btnDelete) {
           this.delete(folderName);
         } else if (btn === this.btnDown) {
@@ -60,7 +48,7 @@ class BookmarkFolderView {
         } else if (btn === this.btnUp) {
           this.up(folderName);
         }
-        this.actionMenu.classList.add('action-menu--hide');
+        this.actionMenu.classList.add('hide');
       }
     }
   }
@@ -78,36 +66,36 @@ class BookmarkFolderView {
   }
 
   buildEntry(folderName) {
-    let entry = document.createElement('div');
+    const entry = document.createElement('div');
     entry.classList.add('entry', 'entry--folder');
-    let btnEntry = document.createElement('button');
+    const btnEntry = document.createElement('div');
     btnEntry.classList.add('btn-entry', 'btn-entry--folder');
     btnEntry.textContent = folderName;
-    let btnMenu = templateBtnIcon('h-menu', 'h-menu', 'Menu');
+    const btnMenu = template.btnIcon('h-menu', 'h-menu', null);
     entry.appendChild(btnEntry);
     entry.appendChild(btnMenu);
     return entry;
   }
 
   buildPage() {
-    this.page = templatePage('bookmark-folder');
+    this.page = template.page('bookmark-folder');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('bookmark-folder');
+    this.scroll = template.scroll('bookmark-folder');
 
-    this.list = templateElement('div', 'list', 'bookmark-folder', null, null);
+    this.list = template.element('div', 'list', 'bookmark-folder', null, null);
     this.scroll.appendChild(this.list);
 
-    this.actionMenu = templateActionMenu('bookmark-folder', actionSet);
+    this.actionMenu = template.actionMenu('bookmark-folder', actionSet);
     this.scroll.appendChild(this.actionMenu);
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
@@ -132,17 +120,15 @@ class BookmarkFolderView {
     this.btnCancel = this.actionMenu.querySelector('.btn-icon--cancel');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnBookmarkList = this.toolbarLower.querySelector(
-      '.btn-icon--bookmark-list');
-    this.btnBookmarkFolderAdd = this.toolbarLower.querySelector(
-      '.btn-icon--bookmark-folder-add');
+    this.btnBookmarkList = this.toolbarLower.querySelector('.btn-icon--bookmark-list');
+    this.btnBookmarkFolderAdd = this.toolbarLower.querySelector('.btn-icon--bookmark-folder-add');
     this.btnImport = this.toolbarLower.querySelector('.btn-icon--import');
     this.btnExport = this.toolbarLower.querySelector('.btn-icon--export');
   }
 
   hide() {
-    this.actionMenu.classList.add('action-menu--hide');
     this.page.classList.add('page--hide');
+    this.actionMenu.classList.add('hide');
   }
 
   initialize() {
@@ -154,13 +140,13 @@ class BookmarkFolderView {
 
   listClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div');
     if (btn) {
       if (btn.classList.contains('btn-entry')) {
-        let folderName = btn.textContent;
+        const folderName = btn.textContent;
         queue.publish('bookmark-folder.select', folderName);
       } else if (btn.classList.contains('btn-icon--h-menu')) {
-        let entry = btn.previousSibling;
+        const entry = btn.previousSibling;
         this.menuClick(entry);
       }
     }
@@ -179,10 +165,10 @@ class BookmarkFolderView {
   }
 
   showActionMenu(target) {
-    this.activeEntry = target.closest('div');
-    let top = target.offsetTop;
+    this.activeEntry = target.closest('div.entry');
+    const top = target.offsetTop;
     this.actionMenu.style.top = `${top}px`;
-    this.actionMenu.classList.remove('action-menu--hide');
+    this.actionMenu.classList.remove('hide');
   }
 
   subscribe() {
@@ -200,7 +186,7 @@ class BookmarkFolderView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnBack) {
         queue.publish('bookmark.back', null);
@@ -221,11 +207,11 @@ class BookmarkFolderView {
   }
 
   updateFolders() {
-    let scrollSave = this.scroll.scrollTop;
-    removeAllChildren(this.list);
-    let fragment = document.createDocumentFragment();
-    for (let folderName of this.folderList) {
-      let entry = this.buildEntry(folderName);
+    const scrollSave = this.scroll.scrollTop;
+    util.removeAllChildren(this.list);
+    const fragment = document.createDocumentFragment();
+    for (const folderName of this.folderList) {
+      const entry = this.buildEntry(folderName);
       fragment.appendChild(entry);
     }
     this.list.appendChild(fragment);

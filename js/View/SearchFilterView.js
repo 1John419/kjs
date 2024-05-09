@@ -1,43 +1,17 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateBtnIcon,
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
-import {
-  removeAllChildren,
-} from '../util.js';
-import {
-  bookBinBookIdx,
-  bookBinChapters,
-  bookBinVerseCount,
-  bookBinWordCount,
-  chapterBinChapterIdx,
-  chapterBinVerseCount,
-  chapterBinWordCount,
-  tomeBinBooks,
-  tomeBinVerseCount,
-  tomeBinWordCount,
-} from '../data/binIdx.js';
-import {
-  tomeBooks,
-  tomeChapters,
-  tomeName,
-} from '../data/tomeDb.js';
-import {
-  bookLongName,
-  chapterName,
-} from '../data/tomeIdx.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
+import { util } from '../util.js';
+import { binIdx } from '../data/binIdx.js';
+import { kjvIdx } from '../data/kjvIdx.js';
+import { kjvLists } from '../data/kjvLists.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'result', ariaLabel: 'Search Result' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'search-lookup', ariaLabel: null },
+  { type: 'btn', icon: 'result', ariaLabel: null },
+  { type: 'btn', icon: 'history', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -60,24 +34,24 @@ class SearchFilterView {
   }
 
   buildBookFilter(bookBin) {
-    let bookIdx = bookBin[bookBinBookIdx];
-    let wordCount = bookBin[bookBinWordCount];
-    let verseCount = bookBin[bookBinVerseCount];
-    let citation = tomeBooks[bookIdx][bookLongName];
+    const bookIdx = bookBin[binIdx.bookBinIdx.bookIdx];
+    const wordCount = bookBin[binIdx.bookBinIdx.wordCount];
+    const verseCount = bookBin[binIdx.bookBinIdx.verseCount];
+    const citation = kjvLists.books[bookIdx][kjvIdx.book.longName];
 
-    let bookFilter = document.createElement('div');
+    const bookFilter = document.createElement('div');
     bookFilter.classList.add('filter', 'filter--book');
 
-    let btnUnfold = templateBtnIcon('next', 'filter-next', 'Unfold Book');
+    const btnUnfold = template.btnIcon('next', 'filter-next', null);
     btnUnfold.dataset.bookIdx = bookIdx;
     bookFilter.appendChild(btnUnfold);
 
-    let btnFold = templateBtnIcon('down', 'filter-down', 'Fold Book');
-    btnFold.classList.add('btn-icon--hide');
+    const btnFold = template.btnIcon('down', 'filter-down', null);
+    btnFold.classList.add('hide');
     btnFold.dataset.bookIdx = bookIdx;
     bookFilter.appendChild(btnFold);
 
-    let btnFilter = document.createElement('button');
+    const btnFilter = document.createElement('div');
     btnFilter.classList.add('btn-filter', 'btn-filter--book');
     btnFilter.textContent = `${citation} (${wordCount}/${verseCount})`;
     btnFilter.dataset.bookIdx = bookIdx;
@@ -88,15 +62,15 @@ class SearchFilterView {
   }
 
   buildChapterFilter(bookBin, chapterBin) {
-    let bookIdx = bookBin[bookBinBookIdx];
-    let chapterIdx = chapterBin[chapterBinChapterIdx];
-    let wordCount = chapterBin[chapterBinWordCount];
-    let verseCount = chapterBin[chapterBinVerseCount];
-    let citation = tomeChapters[chapterIdx][chapterName];
+    const bookIdx = bookBin[binIdx.bookBinIdx.bookIdx];
+    const chapterIdx = chapterBin[binIdx.chapterBinIdx.chapterIdx];
+    const wordCount = chapterBin[binIdx.chapterBinIdx.wordCount];
+    const verseCount = chapterBin[binIdx.chapterBinIdx.verseCount];
+    const citation = kjvLists.chapters[chapterIdx][kjvIdx.chapter.name];
 
-    let btnFilter = document.createElement('button');
+    const btnFilter = document.createElement('div');
     btnFilter.classList.add('btn-filter', 'btn-filter--chapter',
-      'btn-filter--hide');
+      'hide');
     btnFilter.textContent = `${citation} (${wordCount}/${verseCount})`;
     btnFilter.dataset.bookIdx = bookIdx;
     btnFilter.dataset.chapterIdx = chapterIdx;
@@ -105,17 +79,17 @@ class SearchFilterView {
   }
 
   buildFilters() {
-    let fragment = document.createDocumentFragment();
-    let tomeBin = this.rig.tomeBin;
-    let tomeFilter = this.buildTomeFilter(tomeBin);
-    fragment.appendChild(tomeFilter);
-    let books = tomeBin[tomeBinBooks];
-    for (let bookBin of books) {
-      let bookFilter = this.buildBookFilter(bookBin);
+    const fragment = document.createDocumentFragment();
+    const kjvBin = this.rig.kjvBin;
+    const kjvFilter = this.buildKjvFilter(kjvBin);
+    fragment.appendChild(kjvFilter);
+    const books = kjvBin[binIdx.kjvBinIdx.books];
+    for (const bookBin of books) {
+      const bookFilter = this.buildBookFilter(bookBin);
       fragment.appendChild(bookFilter);
-      let chapters = bookBin[bookBinChapters];
-      for (let chapterBin of chapters) {
-        let chapterFilter = this.buildChapterFilter(bookBin, chapterBin);
+      const chapters = bookBin[binIdx.bookBinIdx.chapters];
+      for (const chapterBin of chapters) {
+        const chapterFilter = this.buildChapterFilter(bookBin, chapterBin);
         fragment.appendChild(chapterFilter);
       }
     }
@@ -123,30 +97,30 @@ class SearchFilterView {
   }
 
   buildPage() {
-    this.page = templatePage('search-filter');
+    this.page = template.page('search-filter');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('search-filter');
-    this.list = templateElement('div', 'list', 'search-filter', null, null);
+    this.scroll = template.scroll('search-filter');
+    this.list = template.element('div', 'list', 'search-filter', null, null);
     this.scroll.appendChild(this.list);
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
-  buildTomeFilter(tomeBin) {
-    let citation = tomeName;
-    let wordCount = tomeBin[tomeBinWordCount];
-    let verseCount = tomeBin[tomeBinVerseCount];
+  buildKjvFilter(kjvBin) {
+    const citation = kjvLists.name;
+    const wordCount = kjvBin[binIdx.kjvBinIdx.wordCount];
+    const verseCount = kjvBin[binIdx.kjvBinIdx.verseCount];
 
-    let btnFilter = document.createElement('button');
-    btnFilter.classList.add('btn-filter', 'btn-filter--tome');
+    const btnFilter = document.createElement('div');
+    btnFilter.classList.add('btn-filter', 'btn-filter--kjv');
     btnFilter.textContent = `${citation} (${wordCount}/${verseCount})`;
     btnFilter.dataset.bookIdx = -1;
     btnFilter.dataset.chapterIdx = -1;
@@ -154,10 +128,15 @@ class SearchFilterView {
     return btnFilter;
   }
 
+  clearFilter() {
+    this.banner.innerHTML = 'Query Error';
+    util.removeAllChildren(this.list);
+  }
+
   filterClick(btnFilter) {
-    let bookIdx = parseInt(btnFilter.dataset.bookIdx);
-    let chapterIdx = parseInt(btnFilter.dataset.chapterIdx);
-    let searchFilter = {
+    const bookIdx = parseInt(btnFilter.dataset.bookIdx);
+    const chapterIdx = parseInt(btnFilter.dataset.chapterIdx);
+    const searchFilter = {
       bookIdx: bookIdx,
       chapterIdx: chapterIdx,
     };
@@ -170,23 +149,24 @@ class SearchFilterView {
   }
 
   foldClick(btnFold) {
-    let bookIdxStr = btnFold.dataset.bookIdx;
-    let chapters = this.list.querySelectorAll(
-      `.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`
+    const bookIdxStr = btnFold.dataset.bookIdx;
+    const chapters = this.list.querySelectorAll(`.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`
     );
-    for (let chapter of chapters) {
-      chapter.classList.add('btn-filter--hide');
+    for (const chapter of chapters) {
+      chapter.classList.add('hide');
     }
-    btnFold.classList.add('btn-icon--hide');
-    let btnUnfold = btnFold.previousSibling;
-    btnUnfold.classList.remove('btn-icon--hide');
+    btnFold.classList.add('hide');
+    const btnUnfold = btnFold.previousSibling;
+    btnUnfold.classList.remove('hide');
   }
 
   getElements() {
     this.banner = this.toolbarUpper.querySelector('.banner--search-filter');
 
-    this.btnSearchResult = this.toolbarLower.querySelector(
-      '.btn-icon--result');
+    this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
+    this.btnLookup = this.toolbarLower.querySelector('.btn-icon--search-lookup');
+    this.btnResult = this.toolbarLower.querySelector('.btn-icon--result');
+    this.btnHistory = this.toolbarLower.querySelector('.btn-icon--history');
   }
 
   hide() {
@@ -202,7 +182,7 @@ class SearchFilterView {
 
   listClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div');
     if (btn) {
       if (btn.classList.contains('btn-filter')) {
         this.filterClick(btn);
@@ -218,10 +198,6 @@ class SearchFilterView {
     this.rig = rig;
     this.updateBanner();
     this.updateFilters();
-  }
-
-  scrollToTop() {
-    this.scroll.scrollTop = 0;
   }
 
   show() {
@@ -243,40 +219,48 @@ class SearchFilterView {
     queue.subscribe('search.filter.update', (filter) => {
       this.filterUpdate(filter);
     });
+    queue.subscribe('search.query.error', () => {
+      this.clearFilter();
+    });
   }
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
-      if (btn === this.btnSearchResult) {
+      if (btn === this.btnBack) {
+        queue.publish('search.back', null);
+      } else if (btn === this.btnLookup) {
+        queue.publish('search-lookup', null);
+      } else if (btn === this.btnResult) {
         queue.publish('search-result', null);
+      } else if (btn === this.btnHistory) {
+        queue.publish('search-history', null);
       }
     }
   }
 
   unfoldClick(btnUnfold) {
-    let bookIdxStr = btnUnfold.dataset.bookIdx;
-    let chapters = this.list.querySelectorAll(
-      `.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`
+    const bookIdxStr = btnUnfold.dataset.bookIdx;
+    const chapters = this.list.querySelectorAll(`.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`
     );
-    for (let chapter of chapters) {
-      chapter.classList.remove('btn-filter--hide');
+    for (const chapter of chapters) {
+      chapter.classList.remove('hide');
     }
-    btnUnfold.classList.add('btn-icon--hide');
-    let btnFold = btnUnfold.nextSibling;
-    btnFold.classList.remove('btn-icon--hide');
+    btnUnfold.classList.add('hide');
+    const btnFold = btnUnfold.nextSibling;
+    btnFold.classList.remove('hide');
   }
 
   updateActiveFilter() {
     if (this.btnActiveFilter) {
       this.btnActiveFilter.classList.remove('btn-filter--active');
     }
-    let bookIdx = this.searchFilter.bookIdx;
-    let chapterIdx = this.searchFilter.chapterIdx;
-    let query = `.btn-filter[data-book-idx="${bookIdx}"]` +
+    const bookIdx = this.searchFilter.bookIdx;
+    const chapterIdx = this.searchFilter.chapterIdx;
+    const query = `.btn-filter[data-book-idx="${bookIdx}"]` +
       `[data-chapter-idx="${chapterIdx}"]`;
-    let btn = this.list.querySelector(query);
+    const btn = this.list.querySelector(query);
     if (btn) {
       this.btnActiveFilter = btn;
       btn.classList.add('btn-filter--active');
@@ -288,10 +272,10 @@ class SearchFilterView {
   }
 
   updateFilters() {
-    this.scrollToTop();
-    removeAllChildren(this.list);
+    this.scroll.scrollTop = 0;
+    util.removeAllChildren(this.list);
     if (this.rig.state === 'OK') {
-      let list = this.buildFilters();
+      const list = this.buildFilters();
       this.list.appendChild(list);
     }
   }

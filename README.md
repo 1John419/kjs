@@ -7,7 +7,7 @@ Offline King James with Strong Bible Search.
 
 ***
 
-Dedicated to our precious Lord and Saviour Jesus Christ.
+Dedicated to our precious Lord and Saviour, Jesus Christ of Nazareth.
 
 ALL the power belongs to My King! The glory is all His.
 
@@ -26,3 +26,7 @@ It should also support the latest version of the Safari browser, but has not bee
 ### Contact
 
 `github.1john419@gmail.com`
+
+### Website
+
+`1-john-419.org`

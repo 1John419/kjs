@@ -1,13 +1,20 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
+import { util } from '../util.js';
+import { kjvIdx} from '../data/kjvIdx.js';
+import { kjvLists} from '../data/kjvLists.js';
+import { kjvDb } from '../Model/DbModel.js';
 
 class ReadModel {
 
   constructor() {
     this.initialize();
+  }
+
+  chapterIdxUpdate(chapterIdx) {
+    this.chapterIdx = chapterIdx;
+    this.updateReadVerseObjs();
   }
 
   columnModeChange(columnMode) {
@@ -25,13 +32,7 @@ class ReadModel {
   }
 
   nameModeChange(nameMode) {
-    this.nameMode = nameMode;
-    this.saveNameMode();
-    queue.publish('read.name-mode.update', this.nameMode);
-  }
-
-  nameModeToogle() {
-    this.nameModeChange(!this.nameMode);
+    this.updateReadVerseObjs();
   }
 
   panesChange(panes) {
@@ -42,12 +43,11 @@ class ReadModel {
   restore() {
     this.restoreColumnMode();
     this.restoreStrongMode();
-    this.restoreNameMode();
     this.restoreSidebar();
   }
 
   restoreColumnMode() {
-    let defaultColumnMode = false;
+    const defaultColumnMode = false;
     let columnMode = localStorage.getItem('columnMode');
     if (!columnMode) {
       columnMode = defaultColumnMode;
@@ -64,26 +64,8 @@ class ReadModel {
     this.columnModeChange(columnMode);
   }
 
-  restoreNameMode() {
-    let defaultNameMode = true;
-    let nameMode = localStorage.getItem('readNameMode');
-    if (!nameMode) {
-      nameMode = defaultNameMode;
-    } else {
-      try {
-        nameMode = JSON.parse(nameMode);
-      } catch (error) {
-        nameMode = defaultNameMode;
-      }
-      if (typeof nameMode !== 'boolean') {
-        nameMode = defaultNameMode;
-      }
-    }
-    this.nameModeChange(nameMode);
-  }
-
   restoreSidebar() {
-    let defaultSidebar = this.panes > 1 ? 'navigator' : 'none';
+    const defaultSidebar = this.panes > 1 ? 'navigator' : 'none';
     let sidebar = localStorage.getItem('sidebar');
     if (!sidebar) {
       sidebar = defaultSidebar;
@@ -103,7 +85,7 @@ class ReadModel {
   }
 
   restoreStrongMode() {
-    let defaultStrongMode = false;
+    const defaultStrongMode = false;
     let strongMode = localStorage.getItem('readStrongMode');
     if (!strongMode) {
       strongMode = defaultStrongMode;
@@ -123,11 +105,6 @@ class ReadModel {
   saveColumnMode() {
     localStorage.setItem('columnMode',
       JSON.stringify(this.columnMode));
-  }
-
-  saveNameMode() {
-    localStorage.setItem('readNameMode',
-      JSON.stringify(this.nameMode));
   }
 
   saveStrongMode() {
@@ -156,6 +133,10 @@ class ReadModel {
   }
 
   subscribe() {
+    queue.subscribe('chapterIdx.update', (chapterIdx) => {
+      this.chapterIdxUpdate(chapterIdx);
+    });
+
     queue.subscribe('panes.change', (panes) => {
       this.panesChange(panes);
     });
@@ -163,8 +144,8 @@ class ReadModel {
     queue.subscribe('read.column-mode.toggle', () => {
       this.columnModeToogle();
     });
-    queue.subscribe('read.name-mode.toggle', () => {
-      this.nameModeToogle();
+    queue.subscribe('name-mode.change', () => {
+      this.nameModeChange();
     });
     queue.subscribe('read.restore',
       () => { this.restore(); }
@@ -178,6 +159,13 @@ class ReadModel {
     });
   }
 
+  async updateReadVerseObjs() {
+    const chapter = kjvLists.chapters[this.chapterIdx];
+    const keys = util.range(chapter[kjvIdx.chapter.firstVerseIdx],
+      chapter[kjvIdx.chapter.lastVerseIdx] + 1);
+    this.verseObjs = await kjvDb.verses.bulkGet(keys);
+    queue.publish('read.verse-objs.update', this.verseObjs);
+  }
 }
 
 export { ReadModel };

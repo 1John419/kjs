@@ -1,25 +1,17 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateDivDialog,
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
 
 const dialogToolset = [
   { type: 'label', text: 'Name' },
   { type: 'input', ariaLabel: 'Name' },
-  { type: 'btn', cssModifier: 'save', ariaLabel: 'Save' },
+  { type: 'btn', cssModifier: 'save', ariaLabel: null, label: 'Save' },
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'bookmark-folder', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -45,39 +37,40 @@ class BookmarkFolderAddView {
   }
 
   buildPage() {
-    this.page = templatePage('bookmark-folder-add');
+    this.page = template.page('bookmark-folder-add');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('bookmark-folder-add');
-    this.dialog = templateDivDialog('bookmark-folder-add', dialogToolset);
+    this.scroll = template.scroll('bookmark-folder-add');
+    this.dialog = template.divDialog('bookmark-folder-add', dialogToolset);
     this.scroll.appendChild(this.dialog);
 
-    this.message = templateElement('div', 'message',
-      'bookmark-folder-add', null, null);
+    this.message = template.element('div', 'message', 'bookmark-folder-add', null, null);
     this.scroll.appendChild(this.message);
 
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
   dialogClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
-    if (btn === this.btnSave) {
-      this.saveClick();
+    const btn = event.target.closest('div.btn-dialog');
+    if (btn) {
+      if (btn === this.btnSave) {
+        this.saveClick();
+      }
     }
   }
 
   error(message) {
     this.message.textContent = message;
-    this.message.classList.remove('message--hide');
+    this.message.classList.remove('hide');
   }
 
   getElements() {
@@ -85,8 +78,8 @@ class BookmarkFolderAddView {
     this.dialogBtns = this.dialog.querySelector('.dialog-btns');
     this.btnSave = this.dialogBtns.querySelector('.btn-dialog--save');
 
-    this.btnBookmarkFolder = this.toolbarLower.querySelector(
-      '.btn-icon--bookmark-folder');
+    this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
+    this.btnBookmarkFolder = this.toolbarLower.querySelector('.btn-icon--bookmark-folder');
   }
 
   hide() {
@@ -108,7 +101,7 @@ class BookmarkFolderAddView {
   }
 
   saveClick() {
-    let name = this.inputName.value;
+    const name = this.inputName.value;
     if (name) {
       queue.publish('bookmark-folder-add.save', name);
     }
@@ -116,7 +109,7 @@ class BookmarkFolderAddView {
 
   show() {
     this.page.classList.remove('page--hide');
-    this.message.classList.add('message--hide');
+    this.message.classList.add('hide');
     this.inputName.value = '';
     this.inputName.focus();
   }
@@ -136,9 +129,11 @@ class BookmarkFolderAddView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
-      if (btn === this.btnBookmarkFolder) {
+      if (btn === this.btnBack) {
+        queue.publish('bookmark.back', null);
+      } else if (btn === this.btnBookmarkFolder) {
         queue.publish('bookmark-folder', null);
       }
     }

@@ -1,64 +1,28 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateAcrostic,
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
-import {
-  removeAllChildren,
-} from '../util.js';
-import {
-  tomeBinBooks,
-  bookBinChapters,
-  bookBinSliceEnd,
-  bookBinSliceStart,
-  bookBinVerseCount,
-  bookBinWordCount,
-  chapterBinSliceEnd,
-  chapterBinSliceStart,
-  chapterBinVerseCount,
-  chapterBinWordCount,
-  tomeBinVerses,
-  tomeBinVerseCount,
-  tomeBinWordCount,
-} from '../data/binIdx.js';
-import {
-  mapSliceEnd,
-  mapSliceStart,
-  mapStrongNums,
-} from '../data/strongIdx.js';
-import {
-  tomeBooks,
-  tomeChapters,
-  tomeName,
-} from '../data/tomeDb.js';
-import {
-  bookLongName,
-  chapterName,
-  verseCitation,
-  verseText,
-} from '../data/tomeIdx.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
+import { util } from '../util.js';
+import { binIdx } from '../data/binIdx.js';
+import { kjvIdx } from '../data/kjvIdx.js';
+import { kjvLists } from '../data/kjvLists.js';
+import { strongIdx } from '../data/strongIdx.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-  { type: 'btn', icon: 'filter', ariaLabel: 'Strong Filter' },
-  { type: 'btn', icon: 'strong-verse', ariaLabel: 'Strong Verse' },
-  { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
-  { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'strong-lookup', ariaLabel: null },
+  { type: 'btn', icon: 'strong-def', ariaLabel: null },
+  { type: 'btn', icon: 'filter', ariaLabel: null },
+  { type: 'btn', icon: 'history', ariaLabel: null },
+  { type: 'btn', icon: 'strong-verse', ariaLabel: null },
+  { type: 'btn', icon: 'strong-mode', ariaLabel: null },
 ];
 
 const upperToolSet = [
   { type: 'btn-banner', cssModifier: 'strong-result', text: 'Strong Search' },
 ];
 
-const binIdx = 0;
+const localBinIdx = 0;
 const loadIncrement = 50;
 
 class StrongResultView {
@@ -83,51 +47,51 @@ class StrongResultView {
   }
 
   addVerse(verseObj) {
-    let btn = document.createElement('button');
+    const btn = document.createElement('div');
     btn.classList.add('btn-result');
     btn.dataset.verseIdx = verseObj.k;
-    let resultText = document.createElement('span');
+    const resultText = document.createElement('span');
     resultText.classList.add('span-search-text');
-    let acrostic = templateAcrostic(verseObj);
-    let ref = this.buildRefSpan(verseObj);
+    const acrostic = template.acrostic(verseObj);
+    const ref = this.buildRefSpan(verseObj);
     resultText.appendChild(ref);
     if (acrostic) {
       resultText.appendChild(acrostic);
     }
-    let text = this.buildStrongText(verseObj);
+    const text = this.buildStrongText(verseObj);
     resultText.insertAdjacentHTML('beforeend', text);
     btn.appendChild(resultText);
     return btn;
   }
 
   applyFilter() {
-    if (this.strongWordTomeBin.length) {
-      let tomeBin = this.strongWordTomeBin;
-      let bookIdx = this.strongFilter.bookIdx;
-      let chapterIdx = this.strongFilter.chapterIdx;
+    if (this.strongwordKjvBin.length) {
+      const kjvBin = this.strongwordKjvBin;
+      const bookIdx = this.strongFilter.bookIdx;
+      const chapterIdx = this.strongFilter.chapterIdx;
       if (bookIdx === -1 && chapterIdx === -1) {
-        this.filteredVerses = tomeBin[tomeBinVerses];
-        this.wordCount = tomeBin[tomeBinWordCount];
-        this.verseCount = tomeBin[tomeBinVerseCount];
-        this.citation = tomeName;
+        this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses];
+        this.wordCount = kjvBin[binIdx.kjvBinIdx.wordCount];
+        this.verseCount = kjvBin[binIdx.kjvBinIdx.verseCount];
+        this.citation = kjvLists.name;
       } else {
-        let books = tomeBin[tomeBinBooks];
-        let bookBin = this.findBin(books, bookIdx);
+        const books = kjvBin[binIdx.kjvBinIdx.books];
+        const bookBin = this.findBin(books, bookIdx);
         if (chapterIdx === -1) {
-          this.filteredVerses = tomeBin[tomeBinVerses]
-            .slice(bookBin[bookBinSliceStart], bookBin[bookBinSliceEnd]);
-          this.wordCount = bookBin[bookBinWordCount];
-          this.verseCount = bookBin[bookBinVerseCount];
-          this.citation = tomeBooks[bookIdx][bookLongName];
+          this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses]
+            .slice(bookBin[binIdx.bookBinIdx.sliceStart], bookBin[binIdx.bookBinIdx.sliceEnd]);
+          this.wordCount = bookBin[binIdx.bookBinIdx.wordCount];
+          this.verseCount = bookBin[binIdx.bookBinIdx.verseCount];
+          this.citation = kjvLists.books[bookIdx][kjvIdx.book.longName];
         } else {
-          let chapters = bookBin[bookBinChapters];
-          let chapterBin = this.findBin(chapters, chapterIdx);
-          this.filteredVerses = tomeBin[tomeBinVerses]
-            .slice(chapterBin[chapterBinSliceStart],
-              chapterBin[chapterBinSliceEnd]);
-          this.wordCount = chapterBin[chapterBinWordCount];
-          this.verseCount = chapterBin[chapterBinVerseCount];
-          this.citation = tomeChapters[chapterIdx][chapterName];
+          const chapters = bookBin[binIdx.bookBinIdx.chapters];
+          const chapterBin = this.findBin(chapters, chapterIdx);
+          this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses]
+            .slice(chapterBin[binIdx.chapterBinIdx.sliceStart],
+              chapterBin[binIdx.chapterBinIdx.sliceEnd]);
+          this.wordCount = chapterBin[binIdx.chapterBinIdx.wordCount];
+          this.verseCount = chapterBin[binIdx.chapterBinIdx.verseCount];
+          this.citation = kjvLists.chapters[chapterIdx][kjvIdx.chapter.name];
         }
       }
     } else {
@@ -139,22 +103,21 @@ class StrongResultView {
   }
 
   buildPage() {
-    this.page = templatePage('strong-result');
+    this.page = template.page('strong-result');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('strong-result');
+    this.scroll = template.scroll('strong-result');
 
-    this.empty = templateElement('div', 'empty', 'strong-result', null,
-      'No Strong Result.');
+    this.empty = template.element('div', 'empty', 'strong-result', null, 'No Strong Result.');
     this.scroll.appendChild(this.empty);
 
-    this.list = templateElement('div', 'list', 'strong-result', null, null);
+    this.list = template.element('div', 'list', 'strong-result', null, null);
     this.scroll.appendChild(this.list);
 
-    this.loadMore = templateElement('div', 'load-more', 'strong-result', null, null);
-    this.btnLoadMore = document.createElement('button');
+    this.loadMore = template.element('div', 'load-more', 'strong-result', null, null);
+    this.btnLoadMore = document.createElement('div');
     this.btnLoadMore.classList.add('btn-load-more');
     this.btnLoadMore.textContent = 'Load More';
     this.loadMore.appendChild(this.btnLoadMore);
@@ -162,36 +125,36 @@ class StrongResultView {
 
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
   buildRefSpan(verseObj) {
-    let refSpan = document.createElement('span');
+    const refSpan = document.createElement('span');
     refSpan.classList.add('font--bold');
-    refSpan.textContent = verseObj.v[verseCitation] + ' ';
+    refSpan.textContent = verseObj.v[kjvIdx.verse.citation] + ' ';
     return refSpan;
   }
 
   buildStrongText(verseObj) {
-    let verseIdx = verseObj.k;
-    let verse = verseObj.v;
-    let parts = [];
-    let kjvWords = verse[verseText].split(' ');
-    let maps = this.strongWordMapObjs.find(x => x.k === verseIdx).v;
-    for (let map of maps) {
-      let strongStr = map[mapStrongNums].join(' ');
-      let cleanNums = map[mapStrongNums].map(x => x.replace(/[()]/g, ''));
-      let phrase = kjvWords.slice(map[mapSliceStart], map[mapSliceEnd]).join(' ');
+    const verseIdx = verseObj.k;
+    const verse = verseObj.v;
+    const parts = [];
+    const kjvWords = verse[kjvIdx.verse.text].split(' ');
+    const maps = this.strongWordMapObjs.find(x => x.k === verseIdx).v;
+    for (const map of maps) {
+      const strongStr = map[strongIdx.map.strongNums].join(' ');
+      const cleanNums = map[strongIdx.map.strongNums].map(x => x.replace(/[()@]/g, ''));
+      const phrase = map[strongIdx.map.verseFragment];
       parts.push(phrase);
       if (cleanNums.includes(this.strongDef)) {
         parts.push(`<span class="super"> ${strongStr}</span>`);
       }
     }
-    let innerHtml = parts.join(' ').replace(/ <span/g, '<span');
+    const innerHtml = parts.join(' ').replace(/ <span/g, '<span');
     return innerHtml;
   }
 
@@ -207,6 +170,13 @@ class StrongResultView {
       this.list.classList.remove(this.lastFontSize);
     }
     this.list.classList.add(this.fontSize);
+  }
+
+  changeFontVariant() {
+    if (this.lastFontVariant) {
+      this.list.classList.remove(this.lastFontVariant);
+    }
+    this.list.classList.add(this.fontVariant);
   }
 
   defUpdate(strongDefObj) {
@@ -231,7 +201,7 @@ class StrongResultView {
 
   findBin(bins, idx) {
     return bins.find((bin) => {
-      return bin[binIdx] === idx;
+      return bin[localBinIdx] === idx;
     });
   }
 
@@ -251,17 +221,22 @@ class StrongResultView {
     this.changeFontSize();
   }
 
+  fontVariantUpdate(fontVariant) {
+    this.fontVariant = fontVariant;
+    this.changeFontVariant();
+    this.lastFontVariant = fontVariant;
+  }
+
   getElements() {
     this.btnBanner = this.toolbarUpper.querySelector('.btn-banner--strong-result');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
+    this.btnLookup = this.toolbarLower.querySelector('.btn-icon--strong-lookup');
+    this.btnDef = this.toolbarLower.querySelector('.btn-icon--strong-def');
     this.btnFilter = this.toolbarLower.querySelector('.btn-icon--filter');
-    this.btnStrongMode = this.toolbarLower.querySelector(
-      '.btn-icon--strong-mode');
-    this.btnStrongDef = this.toolbarLower.querySelector(
-      '.btn-icon--strong-def');
-    this.btnStrongVerse = this.toolbarLower.querySelector(
-      '.btn-icon--strong-verse');
+    this.btnHistory = this.toolbarLower.querySelector('.btn-icon--history');
+    this.btnVerse = this.toolbarLower.querySelector('.btn-icon--strong-verse');
+    this.btnStrongMode = this.toolbarLower.querySelector('.btn-icon--strong-mode');
   }
 
   hide() {
@@ -273,20 +248,23 @@ class StrongResultView {
     this.getElements();
     this.addListeners();
     this.subscribe();
+    this.lastFont = null;
+    this.lastFontSize = null;
+    this.lastFontVariant = null;
     this.strongMode = false;
     this.clipboardMode = false;
   }
 
   listClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div');
     if (btn) {
       if (this.clipboardMode) {
-        let text = btn.textContent;
+        const text = btn.textContent;
         navigator.clipboard.writeText(text);
       } else {
         if (btn.classList.contains('btn-result')) {
-          let verseIdx = parseInt(btn.dataset.verseIdx);
+          const verseIdx = parseInt(btn.dataset.verseIdx);
           if (this.strongMode) {
             queue.publish('strong-result.strong-select', verseIdx);
           } else {
@@ -299,7 +277,7 @@ class StrongResultView {
 
   loadMoreClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-load-more');
     if (btn === this.btnLoadMore) {
       this.loadVerses();
     }
@@ -311,23 +289,23 @@ class StrongResultView {
       verses = this.filteredVerses;
       this.loadIdx = this.verseCount;
     } else {
-      let sliceEnd = Math.min(this.loadIdx + loadIncrement, this.verseCount);
+      const sliceEnd = Math.min(this.loadIdx + loadIncrement, this.verseCount);
       verses = this.filteredVerses.slice(this.loadIdx, sliceEnd);
       this.loadIdx = sliceEnd;
     }
 
-    let fragment = document.createDocumentFragment();
-    let verseObjs = this.strongWordVerseObjs.filter(x => verses.includes(x.k));
-    for (let verseObj of verseObjs) {
-      let verse = this.addVerse(verseObj);
+    const fragment = document.createDocumentFragment();
+    const verseObjs = this.strongWordVerseObjs.filter(x => verses.includes(x.k));
+    for (const verseObj of verseObjs) {
+      const verse = this.addVerse(verseObj);
       fragment.appendChild(verse);
     }
     this.list.appendChild(fragment);
 
     if (this.loadIdx < this.verseCount) {
-      this.loadMore.classList.remove('btn-load-more--hide');
+      this.loadMore.classList.remove('hide');
     } else {
-      this.loadMore.classList.add('btn-load-more--hide');
+      this.loadMore.classList.add('hide');
     }
   }
 
@@ -338,10 +316,6 @@ class StrongResultView {
     } else {
       this.btnStrongMode.classList.remove('btn-icon--active');
     }
-  }
-
-  scrollToTop() {
-    this.scroll.scrollTop = 0;
   }
 
   show() {
@@ -355,6 +329,10 @@ class StrongResultView {
 
     queue.subscribe('font-size.update', (fontSize) => {
       this.fontSizeUpdate(fontSize);
+    });
+
+    queue.subscribe('font-variant.update', (fontVariant) => {
+      this.fontVariantUpdate(fontVariant);
     });
 
     queue.subscribe('strong-result.hide', () => {
@@ -382,8 +360,8 @@ class StrongResultView {
     queue.subscribe('strong.word.update', (strongWord) => {
       this.wordUpdate(strongWord);
     });
-    queue.subscribe('strong.wordTomeBin.update', (wordTomeBin) => {
-      this.wordTomeBinUpdate(wordTomeBin);
+    queue.subscribe('strong.wordKjvBin.update', (wordKjvBin) => {
+      this.wordKjvBinUpdate(wordKjvBin);
     });
     queue.subscribe('strong.wordMap.update', (wordMapObjs) => {
       this.wordMapUpdate(wordMapObjs);
@@ -404,25 +382,29 @@ class StrongResultView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnBack) {
         queue.publish('strong.back', null);
+      } else if (btn === this.btnLookup) {
+        queue.publish('strong-lookup', null);
+      } else if (btn === this.btnDef) {
+        queue.publish('strong-def', null);
       } else if (btn === this.btnFilter) {
         queue.publish('strong-filter', null);
+      } else if (btn === this.btnHistory) {
+        queue.publish('strong-history', null);
+      } else if (btn === this.btnVerse) {
+        queue.publish('strong-verse', null);
       } else if (btn === this.btnStrongMode) {
         queue.publish('strong.strong-mode.click', null);
-      } else if (btn === this.btnStrongDef) {
-        queue.publish('strong-def', null);
-      } else if (btn === this.btnStrongVerse) {
-        queue.publish('strong-verse', null);
       }
     }
   }
 
   toolbarUpperClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-banner');
     if (btn) {
       if (btn === this.btnBanner) {
         this.toogleClipboardMode();
@@ -446,12 +428,12 @@ class StrongResultView {
   }
 
   updateResult() {
-    this.scrollToTop();
-    removeAllChildren(this.list);
+    this.scroll.scrollTop = 0;
+    util.removeAllChildren(this.list);
     if (this.verseCount) {
-      this.empty.classList.add('empty--hide');
+      this.empty.classList.add('hide');
     } else {
-      this.empty.classList.remove('empty--hide');
+      this.empty.classList.remove('hide');
     }
     this.loadIdx = 0;
     this.loadedVerses = 0;
@@ -466,8 +448,8 @@ class StrongResultView {
     this.strongWordMapObjs = wordMapObjs;
   }
 
-  wordTomeBinUpdate(wordTomeBin) {
-    this.strongWordTomeBin = wordTomeBin;
+  wordKjvBinUpdate(wordKjvBin) {
+    this.strongwordKjvBin = wordKjvBin;
   }
 
   wordVerseUpdate(wordVerseObjs) {

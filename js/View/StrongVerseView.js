@@ -1,32 +1,18 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
-import {
-  removeAllChildren,
-} from '../util.js';
-import {
-  verseCitation,
-  verseText,
-} from '../data/tomeIdx.js';
-import {
-  mapSliceEnd,
-  mapSliceStart,
-  mapStrongNums,
-} from '../data/strongIdx.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
+import { util } from '../util.js';
+import { kjvIdx } from '../data/kjvIdx.js';
+import { strongIdx } from '../data/strongIdx.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-  { type: 'btn', icon: 'strong-def', ariaLabel: 'Strong Definition' },
-  { type: 'btn', icon: 'result', ariaLabel: 'Strong Search' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'strong-lookup', ariaLabel: null },
+  { type: 'btn', icon: 'strong-def', ariaLabel: null },
+  { type: 'btn', icon: 'result', ariaLabel: null },
+  { type: 'btn', icon: 'filter', ariaLabel: null },
+  { type: 'btn', icon: 'history', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -49,36 +35,31 @@ class StrongVerseView {
   }
 
   buildPage() {
-    this.page = templatePage('strong-verse');
+    this.page = template.page('strong-verse');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('strong-verse');
-    this.list = templateElement('div', 'list', 'strong-verse', null, null);
+    this.scroll = template.scroll('strong-verse');
+    this.list = template.element('div', 'list', 'strong-verse', null, null);
     this.scroll.appendChild(this.list);
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
   buildStrongFragment(map) {
-    let text = this.verseWords.slice(map[mapSliceStart], map[mapSliceEnd])
-      .join(' ');
-    let strongFragment = templateElement('div', 'strong-fragment',
-      null, null, null);
-    let verseFragment = templateElement('div', 'verse-fragment',
-      null, null, text);
-    let strongList = templateElement('div', 'strong-list',
-      null, null, null);
-    for (let num of map[mapStrongNums]) {
-      let btn = templateElement('button', 'btn-strong',
-        null, null, num);
-      btn.dataset.strongDef = num.replace(/[()]/g, '');
+    const text = map[strongIdx.map.verseFragment];
+    const strongFragment = template.element('div', 'strong-fragment', null, null, null);
+    const verseFragment = template.element('div', 'verse-fragment', null, null, text);
+    const strongList = template.element('div', 'strong-list', null, null, null);
+    for (const num of map[strongIdx.map.strongNums]) {
+      const btn = template.element('div', 'btn-strong', null, null, num);
+      btn.dataset.strongDef = num.replace(/@/g, '');
       strongList.appendChild(btn);
     }
     strongFragment.appendChild(verseFragment);
@@ -90,10 +71,11 @@ class StrongVerseView {
     this.banner = this.toolbarUpper.querySelector('.banner--strong-verse');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnStrongDef = this.toolbarLower.querySelector(
-      '.btn-icon--strong-def');
-    this.btnResult = this.toolbarLower.querySelector(
-      '.btn-icon--result');
+    this.btnLookup = this.toolbarLower.querySelector('.btn-icon--strong-lookup');
+    this.btnDef = this.toolbarLower.querySelector('.btn-icon--strong-def');
+    this.btnResult = this.toolbarLower.querySelector('.btn-icon--result');
+    this.btnFilter = this.toolbarLower.querySelector('.btn-icon--filter');
+    this.btnHistory = this.toolbarLower.querySelector('.btn-icon--history');
   }
 
   hide() {
@@ -109,20 +91,18 @@ class StrongVerseView {
 
   listClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
-    if (btn.classList.contains('btn-strong')) {
-      let strongDef = btn.dataset.strongDef;
-      queue.publish('strong-verse.select', strongDef);
+    const btn = event.target.closest('div.btn-strong');
+    if (btn) {
+      if (btn.classList.contains('btn-strong')) {
+        const strongDef = btn.dataset.strongDef;
+        queue.publish('strong-verse.select', strongDef);
+      }
     }
   }
 
   mapUpdate(strongMapObj) {
     this.strongMapObj = strongMapObj;
     this.maps = this.strongMapObj.v;
-  }
-
-  scrollToTop() {
-    this.scroll.scrollTop = 0;
   }
 
   show() {
@@ -147,29 +127,35 @@ class StrongVerseView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnBack) {
         queue.publish('strong.back', null);
-      } else if (btn === this.btnStrongDef) {
+      } else if (btn === this.btnLookup) {
+        queue.publish('strong-lookup', null);
+      } else if (btn === this.btnDef) {
         queue.publish('strong-def', null);
       } else if (btn === this.btnResult) {
         queue.publish('strong-result', null);
+      } else if (btn === this.btnFilter) {
+        queue.publish('strong-filter', null);
+      } else if (btn === this.btnHistory) {
+        queue.publish('strong-history', null);
       }
     }
   }
 
   updateBanner() {
-    this.banner.textContent = this.verse[verseCitation];
+    this.banner.textContent = this.verse[kjvIdx.verse.citation];
   }
 
   updateVerse() {
-    this.scrollToTop();
-    removeAllChildren(this.list);
-    let docFragment = document.createDocumentFragment();
-    this.verseWords = this.verse[verseText].split(' ');
-    for (let map of this.maps) {
-      let strongMap = this.buildStrongFragment(map);
+    this.scroll.scrollTop = 0;
+    util.removeAllChildren(this.list);
+    const docFragment = document.createDocumentFragment();
+    this.verseWords = this.verse[kjvIdx.verse.text].split(' ');
+    for (const map of this.maps) {
+      const strongMap = this.buildStrongFragment(map);
       docFragment.appendChild(strongMap);
     }
     this.list.appendChild(docFragment);

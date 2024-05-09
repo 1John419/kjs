@@ -1,11 +1,7 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  chapterIdxByVerseIdx,
-} from '../data/tomeDb.js';
+import { queue } from '../CommandQueue.js';
+import { chapterIdxByVerseIdx } from '../data/kjvLists.js';
 
 class BookmarkController {
 
@@ -29,7 +25,7 @@ class BookmarkController {
       if (this.panes === 1 && this.sidebar !== 'none') {
         queue.publish('sidebar.select', 'none');
       }
-      queue.publish('read.scroll-to-verse', this.selectVerseIdx);
+      queue.publish('read.scroll-verse-idx', this.selectVerseIdx);
       this.selectVerseIdx = null;
     }
   }
@@ -96,7 +92,7 @@ class BookmarkController {
 
   gotoBookmark(verseIdx) {
     this.selectVerseIdx = verseIdx;
-    let chapterIdx = chapterIdxByVerseIdx(verseIdx);
+    const chapterIdx = chapterIdxByVerseIdx(verseIdx);
     queue.publish('chapterIdx.change', chapterIdx);
   }
 

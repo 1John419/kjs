@@ -1,8 +1,6 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
 
 const SIDEBAR_WIDTH = 320;
 
@@ -66,6 +64,7 @@ class ReadController {
   initializeApp() {
     this.setPanes();
     this.currentPanes = this.panes;
+    queue.publish('db.restore', null);
     queue.publish('bookmark.restore', null);
     queue.publish('navigator.restore', null);
     queue.publish('search.restore', null);
@@ -73,10 +72,11 @@ class ReadController {
     queue.publish('setting.restore', null);
     queue.publish('help.restore', null);
     queue.publish('read.restore', null);
+    queue.publish('set.name-mode-btn', null);
   }
 
-  nameModeToggle() {
-    queue.publish('read.name-mode.toggle', null);
+  nameModeChange() {
+    queue.publish('name-mode.change', null);
   }
 
   nextChapter() {
@@ -89,12 +89,12 @@ class ReadController {
         this.updatePanes();
       }
     });
-    mqlTwoPanes.addEventListener('change',  (event) => {
+    mqlTwoPanes.addEventListener('change', (event) => {
       if (event.matches) {
         this.updatePanes();
       }
     });
-    mqlThreePanes.addEventListener('change',  (event) => {
+    mqlThreePanes.addEventListener('change', (event) => {
       if (event.matches) {
         this.updatePanes();
       }
@@ -112,7 +112,7 @@ class ReadController {
       this.panes = 2;
     } else if (mqlThreePanes.matches) {
       this.panes = 3;
-    } 
+    }
     queue.publish('panes.change', this.panes);
   }
 
@@ -177,7 +177,7 @@ class ReadController {
     });
 
     queue.subscribe('read.name-mode.click', () => {
-      this.nameModeToggle();
+      this.nameModeChange();
     });
 
     queue.subscribe('read.next.chapter', () => {

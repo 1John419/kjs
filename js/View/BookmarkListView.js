@@ -1,44 +1,26 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateActionMenu,
-  templateAcrostic,
-  templateBtnIcon,
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
-import {
-  removeAllChildren,
-} from '../util.js';
-import {
-  citationByVerseIdx,
-} from '../data/tomeDb.js';
-import {
-  verseCitation,
-  verseText,
-} from '../data/tomeIdx.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
+import { util } from '../util.js';
+import { kjvIdx } from '../data/kjvIdx.js';
+import { kjvLists } from '../data/kjvLists.js';
 
 const actionSet = [
-  { icon: 'up', ariaLabel: 'Up' },
-  { icon: 'down', ariaLabel: 'Down' },
-  { icon: 'move-copy', ariaLabel: 'Move/Copy' },
-  { icon: 'delete', ariaLabel: 'Delete' },
-  { icon: 'cancel', ariaLabel: 'Cancel' },
+  { icon: 'up', ariaLabel: null },
+  { icon: 'down', ariaLabel: null },
+  { icon: 'move-copy', ariaLabel: null },
+  { icon: 'delete', ariaLabel: null },
+  { icon: 'cancel', ariaLabel: null },
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-  { type: 'btn', icon: 'sort-ascend', ariaLabel: 'Sort Ascending' },
-  { type: 'btn', icon: 'sort-invert', ariaLabel: 'Sort Invert' },
-  { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
-  { type: 'btn', icon: 'expand-mode', ariaLabel: 'Expand Bookmarks' },
-  { type: 'btn', icon: 'strong-mode', ariaLabel: 'Strong Mode' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'sort-ascend', ariaLabel: null },
+  { type: 'btn', icon: 'sort-invert', ariaLabel: null },
+  { type: 'btn', icon: 'bookmark-folder', ariaLabel: null },
+  { type: 'btn', icon: 'expand-mode', ariaLabel: null },
+  { type: 'btn', icon: 'strong-mode', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -53,22 +35,24 @@ class BookmarkListView {
 
   actionMenuClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
-    if (btn === this.btnCancel) {
-      this.actionMenu.classList.add('action-menu--hide');
-    } else {
-      let btnEntry = this.activeEntry.querySelector('.btn-entry');
-      let verseIdx = parseInt(btnEntry.dataset.verseIdx);
-      if (btn === this.btnUp) {
-        this.up(verseIdx);
-      } else if (btn === this.btnDown) {
-        this.down(verseIdx);
-      } else if (btn === this.btnMoveCopy) {
-        this.moveCopy(verseIdx);
-      } else if (btn === this.btnDelete) {
-        this.delete(verseIdx);
+    const btn = event.target.closest('div.btn-icon');
+    if (btn) {
+      if (btn === this.btnCancel) {
+        this.actionMenu.classList.add('hide');
+      } else {
+        const btnEntry = this.activeEntry.querySelector('.btn-entry');
+        const verseIdx = parseInt(btnEntry.dataset.verseIdx);
+        if (btn === this.btnUp) {
+          this.up(verseIdx);
+        } else if (btn === this.btnDown) {
+          this.down(verseIdx);
+        } else if (btn === this.btnMoveCopy) {
+          this.moveCopy(verseIdx);
+        } else if (btn === this.btnDelete) {
+          this.delete(verseIdx);
+        }
+        this.actionMenu.classList.add('hide');
       }
-      this.actionMenu.classList.add('action-menu--hide');
     }
   }
 
@@ -76,8 +60,11 @@ class BookmarkListView {
     this.actionMenu.addEventListener('click', (event) => {
       this.actionMenuClick(event);
     });
-    this.list.addEventListener('click', (event) => {
-      this.listClick(event);
+    this.entryList.addEventListener('click', (event) => {
+      this.entryListClick(event);
+    });
+    this.verseList.addEventListener('click', (event) => {
+      this.verseListClick(event);
     });
     this.toolbarLower.addEventListener('click', (event) => {
       this.toolbarLowerClick(event);
@@ -88,61 +75,63 @@ class BookmarkListView {
   }
 
   buildEntry(verseIdx) {
-    let entry = document.createElement('div');
+    const entry = document.createElement('div');
     entry.classList.add('entry', 'entry--bookmark');
-    let btnRef = document.createElement('button');
+    const btnRef = document.createElement('div');
     btnRef.classList.add('btn-entry', 'btn-entry--bookmark');
-    btnRef.textContent = citationByVerseIdx(verseIdx);
+    btnRef.textContent = kjvLists.citations[verseIdx];
     btnRef.dataset.verseIdx = verseIdx;
     entry.appendChild(btnRef);
-    let btnMenu = templateBtnIcon('h-menu', 'h-menu', 'Menu');
+    const btnMenu = template.btnIcon('h-menu', 'h-menu', null);
     entry.appendChild(btnMenu);
     return entry;
   }
 
   buildPage() {
-    this.page = templatePage('bookmark-list');
+    this.page = template.page('bookmark-list');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('bookmark-list');
+    this.scroll = template.scroll('bookmark-list');
 
-    this.empty = templateElement('div', 'empty', 'bookmark-list', null,
-      'No bookmarks saved.');
+    this.empty = template.element('div', 'empty', 'bookmark-list', null, 'No bookmarks saved.');
     this.scroll.appendChild(this.empty);
 
-    this.list = templateElement('div', 'list', 'bookmark-list', null, null);
-    this.scroll.appendChild(this.list);
+    this.entryList = template.element('div', 'list', 'bookmark-entry-list', null, null);
+    this.scroll.appendChild(this.entryList);
 
-    this.actionMenu = templateActionMenu('bookmark-list', actionSet);
+    this.verseList = template.element('div', 'list', 'bookmark-verse-list', null, null);
+    this.scroll.appendChild(this.verseList);
+
+    this.actionMenu = template.actionMenu('bookmark-list', actionSet);
     this.scroll.appendChild(this.actionMenu);
 
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
   buildRefSpan(verseObj) {
-    let refSpan = document.createElement('span');
+    const refSpan = document.createElement('span');
     refSpan.classList.add('font--bold');
-    refSpan.textContent = verseObj.v[verseCitation] + ' ';
+    refSpan.textContent = verseObj.v[kjvIdx.verse.citation] + ' ';
     return refSpan;
   }
 
   buildVerse(verseObj) {
-    let btn = document.createElement('button');
+    const btn = document.createElement('div');
     btn.classList.add('btn-result');
     btn.dataset.verseIdx = verseObj.k;
-    let searchText = document.createElement('span');
+    const searchText = document.createElement('span');
     searchText.classList.add('span-result-text');
-    let acrostic = templateAcrostic(verseObj);
-    let ref = this.buildRefSpan(verseObj);
-    let text = document.createTextNode(verseObj.v[verseText]);
+    const acrostic = template.acrostic(verseObj);
+    const ref = this.buildRefSpan(verseObj);
+    const text = document.createTextNode(verseObj.v[kjvIdx.verse.text]);
     searchText.appendChild(ref);
     if (acrostic) {
       searchText.appendChild(acrostic);
@@ -163,14 +152,14 @@ class BookmarkListView {
   entryClick(target) {
     if (target) {
       if (target.classList.contains('btn-entry')) {
-        let verseIdx = parseInt(target.dataset.verseIdx);
+        const verseIdx = parseInt(target.dataset.verseIdx);
         if (this.strongMode) {
           queue.publish('bookmark-list.strong-select', verseIdx);
         } else {
           queue.publish('bookmark-list.select', verseIdx);
         }
       } else if (target.classList.contains('btn-icon--h-menu')) {
-        let ref = target.previousSibling;
+        const ref = target.previousSibling;
         this.menuClick(ref);
       }
     }
@@ -179,15 +168,18 @@ class BookmarkListView {
   expandModeUpdate(expandMode) {
     this.expandMode = expandMode;
     if (this.expandMode) {
+      this.verseScrollTop = this.scroll.scrollTop;
       this.btnExpandMode.classList.add('btn-icon--active');
-      this.list.classList.add(this.font.fontClass);
-      this.list.classList.add(this.fontSize);
+      this.entryList.classList.add('hide');
+      this.verseList.classList.remove('hide');
+      this.scroll.scrollTop = this.entrySrollTop;
     } else {
+      this.entrySrollTop = this.scroll.scrollTop;
       this.btnExpandMode.classList.remove('btn-icon--active');
-      this.list.classList.remove(this.font.fontClass);
-      this.list.classList.remove(this.fontSize);
+      this.entryList.classList.remove('hide');
+      this.verseList.classList.add('hide');
+      this.scroll.scrollTop = this.verseScrollTop;
     }
-    this.updateBookmarks()
   }
 
   fontSizeUpdate(fontSize) {
@@ -203,9 +195,14 @@ class BookmarkListView {
     this.lastFontSize = null;
   }
 
+  fontVariantUpdate(fontVariant) {
+    this.fontVariant = fontVariant;
+    this.updateFontVariant();
+    this.lastFontVariant = this.fontVariant;
+  }
+
   getElements() {
-    this.btnFolderAdd = this.toolbarUpper.querySelector(
-      '.btn-icon--folder-add');
+    this.btnFolderAdd = this.toolbarUpper.querySelector('.btn-icon--folder-add');
     this.btnBanner = this.toolbarUpper.querySelector('.btn-banner--bookmark-list');
 
     this.btnUp = this.actionMenu.querySelector('.btn-icon--up');
@@ -215,21 +212,16 @@ class BookmarkListView {
     this.btnCancel = this.actionMenu.querySelector('.btn-icon--cancel');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnSortAscend = this.toolbarLower.querySelector(
-      '.btn-icon--sort-ascend');
-    this.btnSortInvert = this.toolbarLower.querySelector(
-      '.btn-icon--sort-invert');
-    this.btnExpandMode = this.toolbarLower.querySelector(
-      '.btn-icon--expand-mode');
-    this.btnStrongMode = this.toolbarLower.querySelector(
-      '.btn-icon--strong-mode');
-    this.btnBookmarkFolder = this.toolbarLower.querySelector(
-      '.btn-icon--bookmark-folder');
+    this.btnSortAscend = this.toolbarLower.querySelector('.btn-icon--sort-ascend');
+    this.btnSortInvert = this.toolbarLower.querySelector('.btn-icon--sort-invert');
+    this.btnExpandMode = this.toolbarLower.querySelector('.btn-icon--expand-mode');
+    this.btnStrongMode = this.toolbarLower.querySelector('.btn-icon--strong-mode');
+    this.btnBookmarkFolder = this.toolbarLower.querySelector('.btn-icon--bookmark-folder');
   }
 
   hide() {
-    this.actionMenu.classList.add('action-menu--hide');
     this.page.classList.add('page--hide');
+    this.actionMenu.classList.add('hide');
   }
 
   initialize() {
@@ -239,14 +231,14 @@ class BookmarkListView {
     this.subscribe();
     this.lastFont = null;
     this.clipboardMode = false;
+    this.entrySrollTop = 0;
+    this.verseScrollTop = 0;
   }
 
-  listClick(event) {
+  entryListClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
-    if (this.expandMode) {
-      this.verseClick(btn);
-    } else {
+    const btn = event.target.closest('div');
+    if (btn) {
       this.entryClick(btn);
     }
   }
@@ -264,10 +256,10 @@ class BookmarkListView {
   }
 
   showActionMenu(target) {
-    this.activeEntry = target.closest('div');
-    let top = target.offsetTop;
+    this.activeEntry = target.closest('div.entry');
+    const top = target.offsetTop;
     this.actionMenu.style.top = `${top}px`;
-    this.actionMenu.classList.remove('action-menu--hide');
+    this.actionMenu.classList.remove('hide');
   }
 
   strongModeUpdate(strongMode) {
@@ -308,6 +300,14 @@ class BookmarkListView {
     queue.subscribe('font-size.update', (fontSize) => {
       this.fontSizeUpdate(fontSize);
     });
+
+    queue.subscribe('font-variant.update', (fontVariant) => {
+      this.fontVariantUpdate(fontVariant);
+    });
+
+    queue.subscribe('bookmark.verse-objs.update', (verseObjs) => {
+      this.updateBookmarkVerseObjs(verseObjs);
+    });
   }
 
   toogleClipboardMode() {
@@ -321,7 +321,7 @@ class BookmarkListView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnBack) {
         queue.publish('bookmark.back', null);
@@ -344,7 +344,7 @@ class BookmarkListView {
     if (!this.expandMode) {
       return;
     }
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-banner');
     if (btn) {
       if (btn === this.btnBanner) {
         this.toogleClipboardMode();
@@ -367,57 +367,77 @@ class BookmarkListView {
   }
 
   updateBookmarks() {
-    let scrollSave = this.scroll.scrollTop;
-    removeAllChildren(this.list);
+    this.entrySrollTop = 0;
+    this.updateEntryList();
+    this.verseScrollTop = 0;
+    this.updateVerseList();
+  }
+
+  updateBookmarkVerseObjs(verseObjs) {
+    this.activeFolder.verseObjs = verseObjs;
+    this.verseScrollTop = 0;
+    this.updateVerseList();
+  }
+
+  updateEntryList() {
+    util.removeAllChildren(this.entryList);
     if (this.activeFolder.bookmarks.length === 0) {
-      this.empty.classList.remove('empty--hide');
+      this.empty.classList.remove('hide');
     } else {
-      this.empty.classList.add('empty--hide');
-      let fragment = document.createDocumentFragment();
-      if (this.expandMode) {
-        for (let verseObj of this.activeFolder.verseObjs) {
-          let ref = this.buildVerse(verseObj);
-          fragment.appendChild(ref);
-        }
-      } else {
-        for (let verseIdx of this.activeFolder.bookmarks) {
-          let ref = this.buildEntry(verseIdx);
-          fragment.appendChild(ref);
-        }
+      this.empty.classList.add('hide');
+      const fragment = document.createDocumentFragment();
+      for (const verseIdx of this.activeFolder.bookmarks) {
+        const ref = this.buildEntry(verseIdx);
+        fragment.appendChild(ref);
       }
-      this.list.appendChild(fragment);
+      this.entryList.appendChild(fragment);
     }
-    this.scroll.scrollTop = scrollSave;
   }
 
   updateFontSize() {
-    if (!this.expandMode) {
-      return;
-    }
     if (this.lastFontSize) {
-      this.list.classList.remove(this.lastFontSize);
+      this.verseList.classList.remove(this.lastFontSize);
     }
-    this.list.classList.add(this.fontSize);
+    this.verseList.classList.add(this.fontSize);
+  }
+
+  updateFontVariant() {
+    if (this.lastFontVariant) {
+      this.verseList.classList.remove(this.lastFontVariant);
+    }
+    this.verseList.classList.add(this.fontVariant);
   }
 
   updateFont() {
-    if (!this.expandMode) {
-      return;
-    }
     if (this.lastFont) {
-      this.list.classList.remove(this.lastFont.fontClass);
+      this.verseList.classList.remove(this.lastFont.fontClass);
     }
-    this.list.classList.add(this.font.fontClass);
+    this.verseList.classList.add(this.font.fontClass);
+  }
+
+  updateVerseList() {
+    util.removeAllChildren(this.verseList);
+    if (this.activeFolder.bookmarks.length === 0) {
+      this.empty.classList.remove('hide');
+    } else {
+      this.empty.classList.add('hide');
+      const fragment = document.createDocumentFragment();
+      for (const verseObj of this.activeFolder.verseObjs) {
+        const ref = this.buildVerse(verseObj);
+        fragment.appendChild(ref);
+      }
+      this.verseList.appendChild(fragment);
+    }
   }
 
   verseClick(target) {
     if (target) {
       if (target.classList.contains('btn-result')) {
         if (this.clipboardMode) {
-          let text = target.textContent;
+          const text = target.textContent;
           navigator.clipboard.writeText(text);
         } else {
-          let verseIdx = parseInt(target.dataset.verseIdx);
+          const verseIdx = parseInt(target.dataset.verseIdx);
           if (this.strongMode) {
             queue.publish('bookmark-list.strong-select', verseIdx);
           } else {
@@ -425,6 +445,14 @@ class BookmarkListView {
           }
         }
       }
+    }
+  }
+
+  verseListClick(event) {
+    event.preventDefault();
+    const btn = event.target.closest('div');
+    if (btn) {
+      this.verseClick(btn);
     }
   }
 

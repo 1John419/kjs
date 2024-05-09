@@ -1,6 +1,5 @@
 /.gitignore
 /.vscode
 /ref
-/stores
-/test
-
+/seTest
+/eslint.config.js

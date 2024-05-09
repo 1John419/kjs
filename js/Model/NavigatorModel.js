@@ -1,23 +1,8 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  tomeChapters,
-  tomeDb,
-} from '../data/tomeDb.js';
-import {
-  strongDb,
-} from '../data/strongDb.js';
-import {
-  chapterBookIdx,
-  chapterFirstVerseIdx,
-  chapterLastVerseIdx,
-} from '../data/tomeIdx.js';
-import {
-  range,
-} from '../util.js';
+import { queue } from '../CommandQueue.js';
+import { kjvIdx } from '../data/kjvIdx.js';
+import { firstVerseIdxByChapterIdx, kjvLists } from '../data/kjvLists.js';
 
 const validTasks = [
   'navigator-book', 'navigator-chapter',
@@ -36,21 +21,21 @@ class NavigatorModel {
     queue.publish('bookIdx.update', this.bookIdx);
   }
 
-  async chapterIdxChange(chapterIdx) {
+  chapterIdxChange(chapterIdx) {
     this.chapterIdx = chapterIdx;
     this.saveChapterIdx();
-    await this.updateVerses();
-    await this.updateMaps();
-    let bookIdx = tomeChapters[this.chapterIdx][chapterBookIdx];
+    const bookIdx = kjvLists.chapters[this.chapterIdx][kjvIdx.chapter.bookIdx];
     if (this.bookIdx !== bookIdx) {
       this.bookIdxChange(bookIdx);
     }
     queue.publish('chapterIdx.update', this.chapterIdx);
+    const verseIdx = firstVerseIdxByChapterIdx(this.chapterIdx);
+    queue.publish('read.scroll-verse-idx', verseIdx);
   }
 
   async chapterNext() {
     let nextChapterIdx = this.chapterIdx + 1;
-    if (nextChapterIdx >= tomeChapters.length) {
+    if (nextChapterIdx >= kjvLists.chapters.length) {
       nextChapterIdx = 0;
     }
     await this.chapterIdxChange(nextChapterIdx);
@@ -59,7 +44,7 @@ class NavigatorModel {
   async chapterPrev() {
     let prevChapterIdx = this.chapterIdx - 1;
     if (prevChapterIdx < 0) {
-      prevChapterIdx = tomeChapters.length - 1;
+      prevChapterIdx = kjvLists.chapters.length - 1;
     }
     await this.chapterIdxChange(prevChapterIdx);
   }
@@ -74,7 +59,7 @@ class NavigatorModel {
   }
 
   async restoreChapterIdx() {
-    let defaultIdx = CHAPTER_IDX_GENESIS_1;
+    const defaultIdx = CHAPTER_IDX_GENESIS_1;
     let chapterIdx = localStorage.getItem('chapterIdx');
     if (!chapterIdx) {
       chapterIdx = defaultIdx;
@@ -84,7 +69,7 @@ class NavigatorModel {
       } catch (error) {
         chapterIdx = defaultIdx;
       }
-      if (!tomeChapters[chapterIdx]) {
+      if (!kjvLists.chapters[chapterIdx]) {
         chapterIdx = defaultIdx;
       }
     }
@@ -92,7 +77,7 @@ class NavigatorModel {
   }
 
   restoreTask() {
-    let defaultTask = 'navigator-book';
+    const defaultTask = 'navigator-book';
     let navigatorTask = localStorage.getItem('navigatorTask');
     if (!navigatorTask) {
       navigatorTask = defaultTask;
@@ -147,22 +132,6 @@ class NavigatorModel {
     this.navigatorTask = navigatorTask;
     this.saveNavigatorTask();
     queue.publish('navigator.task.update', this.navigatorTask);
-  }
-
-  async updateMaps() {
-    let chapter = tomeChapters[this.chapterIdx];
-    let keys = range(chapter[chapterFirstVerseIdx],
-      chapter[chapterLastVerseIdx] + 1);
-    this.mapObjs = await strongDb.maps.bulkGet(keys);
-    queue.publish('navigator.maps.update', this.mapObjs);
-  }
-
-  async updateVerses() {
-    let chapter = tomeChapters[this.chapterIdx];
-    let keys = range(chapter[chapterFirstVerseIdx],
-      chapter[chapterLastVerseIdx] + 1);
-    this.verseObjs = await tomeDb.verses.bulkGet(keys);
-    queue.publish('navigator.verses.update', this.verseObjs);
   }
 
 }

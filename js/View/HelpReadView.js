@@ -1,21 +1,12 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  helpTopicList,
-} from './HelpTopicView.js';
-import {
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
+import { helpTopicList } from '../View/HelpTopicView.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-  { type: 'btn', icon: 'help-topic', ariaLabel: 'Help Topic' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'help-topic', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -35,18 +26,18 @@ class HelpReadView {
   }
 
   buildPage() {
-    this.page = templatePage('help-read');
+    this.page = template.page('help-read');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('help-read');
+    this.scroll = template.scroll('help-read');
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
@@ -87,7 +78,7 @@ class HelpReadView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnBack) {
         queue.publish('help.back', null);
@@ -100,7 +91,7 @@ class HelpReadView {
   topicUpdate(helpTopic) {
     this.updateBanner(helpTopic);
     this.scroll.innerHTML = '';
-    let url = `help/${helpTopic}.html`;
+    const url = `help/${helpTopic}.html`;
     fetch(url).then((response) => {
       if (response.ok) {
         return response.text();
@@ -116,7 +107,7 @@ class HelpReadView {
   }
 
   updateBanner(helpTopic) {
-    let title = helpTopicList.find(obj => obj.topic === helpTopic).name;
+    const title = helpTopicList.find(obj => obj.topic === helpTopic).name;
     this.banner.textContent = title;
   }
 

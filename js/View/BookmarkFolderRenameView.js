@@ -1,25 +1,16 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateDivDialog,
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
 
 const dialogToolset = [
   { type: 'label', text: 'Folder Name' },
   { type: 'input', ariaLabel: 'Name' },
-  { type: 'btn', cssModifier: 'save', ariaLabel: 'Save' },
+  { type: 'btn', cssModifier: 'save', ariaLabel: null, label: 'Save' },
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
+  { type: 'btn', icon: 'bookmark-folder', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -45,39 +36,40 @@ class BookmarkFolderRenameView {
   }
 
   buildPage() {
-    this.page = templatePage('bookmark-folder-rename');
+    this.page = template.page('bookmark-folder-rename');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('bookmark-folder-rename');
-    this.dialog = templateDivDialog('bookmark-folder-rename', dialogToolset);
+    this.scroll = template.scroll('bookmark-folder-rename');
+    this.dialog = template.divDialog('bookmark-folder-rename', dialogToolset);
     this.scroll.appendChild(this.dialog);
 
-    this.message = templateElement('div', 'message',
-      'bookmark-folder-rename', null, null);
+    this.message = template.element('div', 'message', 'bookmark-folder-rename', null, null);
     this.scroll.appendChild(this.message);
 
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
   dialogClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
-    if (btn === this.btnSave) {
-      this.saveClick();
+    const btn = event.target.closest('div.btn-dialog');
+    if (btn) {
+      if (btn === this.btnSave) {
+        this.saveClick();
+      }
     }
   }
 
   error(message) {
     this.message.textContent = message;
-    this.message.classList.remove('message--hide');
+    this.message.classList.remove('hide');
   }
 
   folderToRename(folderName) {
@@ -89,8 +81,7 @@ class BookmarkFolderRenameView {
     this.dialogBtns = this.dialog.querySelector('.dialog-btns');
     this.btnSave = this.dialogBtns.querySelector('.btn-dialog--save');
 
-    this.btnBookmarkFolder = this.toolbarLower.querySelector(
-      '.btn-icon--bookmark-folder');
+    this.btnBookmarkFolder = this.toolbarLower.querySelector('.btn-icon--bookmark-folder');
   }
 
   hide() {
@@ -113,7 +104,7 @@ class BookmarkFolderRenameView {
   }
 
   saveClick() {
-    let name = this.inputName.value;
+    const name = this.inputName.value;
     if (name) {
       this.namePkg.new = name;
       queue.publish('bookmark-folder-rename.save', this.namePkg);
@@ -122,7 +113,7 @@ class BookmarkFolderRenameView {
 
   show() {
     this.page.classList.remove('page--hide');
-    this.message.classList.add('message--hide');
+    this.message.classList.add('hide');
     this.namePkg = {
       old: this.folderName,
     };
@@ -149,7 +140,7 @@ class BookmarkFolderRenameView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnBookmarkFolder) {
         queue.publish('bookmark-folder', null);

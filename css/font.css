@@ -3,8 +3,7 @@
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
-  src: local('Roboto'), local('Roboto-Regular'),
-    url('../font/roboto-v30-latin-regular.woff2') format('woff2');
+  src: url('/font/roboto-v30-latin-regular.woff2') format('woff2');
 }
 
 .font--roboto {
@@ -16,8 +15,7 @@
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: 400;
-  src: local('Open Sans Regular'), local('OpenSans-Regular'),
-    url('../font/open-sans-v34-latin-regular.woff2') format('woff2');
+  src: url('/font/open-sans-v40-latin-regular.woff2') format('woff2');
 }
 
 .font--open-sans {
@@ -29,8 +27,7 @@
   font-family: 'Roboto Slab';
   font-style: normal;
   font-weight: 400;
-  src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'),
-    url('../font/roboto-slab-v24-latin-regular.woff2') format('woff2');
+  src: url('/font/roboto-slab-v34-latin-regular.woff2') format('woff2');
 }
 
 .font--roboto-slab {
@@ -42,8 +39,7 @@
   font-family: 'Merriweather';
   font-style: normal;
   font-weight: 400;
-  src: local('Merriweather'), local('Merriweather-Regular'),
-    url('../font/merriweather-v30-latin-regular.woff2') format('woff2');
+  src: url('/font/merriweather-v30-latin-regular.woff2') format('woff2');
 }
 
 .font--merriweather {
@@ -51,32 +47,35 @@
 }
 
 @font-face {
-  font-family: 'Dancing Script';
+  font-display: swap;
+  font-family: 'Courgette';
   font-style: normal;
   font-weight: 400;
-  src: local('Dancing Script'), local('DancingScript-Regular'), url('../font/dancing-script-v24-latin-regular.woff2') format('woff2');
+  src: url('/font/courgette-v17-latin-regular.woff2') format('woff2');
 }
 
-.font--dancing-script {
-  font-family: 'Dancing Script', cursive;
+.font--courgette {
+  font-family: 'Courgette', cursive;
 }
 
 @font-face {
-  font-family: 'Shadows Into Light';
+  font-display: swap;
+  font-family: 'Merienda';
   font-style: normal;
   font-weight: 400;
-  src: local('Shadows Into Light'), local('ShadowsIntoLight-Regular'), url('../font/shadows-into-light-v15-latin-regular.woff2') format('woff2');
+  src: url('/font/merienda-v19-latin-regular.woff2') format('woff2');
 }
 
-.font--shadows-into-light {
-  font-family: 'Shadows Into Light', cursive;
+.font--merienda {
+  font-family: 'Mereanda', cursive;
 }
 
 @font-face {
+  font-display: swap;
   font-family: 'Roboto Mono';
   font-style: normal;
   font-weight: 400;
-  src: local('Roboto Mono'), local('RobotoMono-Regular'), url('../font/roboto-mono-v22-latin-regular.woff2') format('woff2');
+  src: url('/font/roboto-mono-v23-latin-regular.woff2') format('woff2');
 }
 
 .font--roboto-mono {
@@ -84,10 +83,11 @@
 }
 
 @font-face {
+  font-display: swap;
   font-family: 'Inconsolata';
   font-style: normal;
   font-weight: 400;
-  src: local('Inconsolata'), local('Inconsolata-Regular'), url('../font/inconsolata-v31-latin-regular.woff2') format('woff2');
+  src: url('/font/inconsolata-v32-latin-regular.woff2') format('woff2');
 }
 
 .font--inconsolata {
@@ -95,11 +95,11 @@
 }
 
 @font-face {
+  font-display: swap;
   font-family: 'Noto Serif Hebrew';
   font-style: normal;
   font-weight: 400;
-  src: local(''),
-       url('../font/noto-serif-hebrew-v20-latin-regular.woff2') format('woff2');
+  src: url('/font/noto-serif-hebrew-v25-latin-regular.woff2') format('woff2');
 }
 
 .font--hebrew {

@@ -1,16 +1,19 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
 
 const validFontSizes = [
   'font-size--s', 'font-size--m', 'font-size--l', 'font-size--xl',
   'font-size--xxl',
 ];
 
+const validFontVariants = [
+  'normal', 'small-caps',
+];
+
 const fontDefault = 0;
 const fontSizeDefault = 1;
+const fontVariantDefault = 0;
 const themeDefault = 9;
 
 class SettingModel {
@@ -44,6 +47,12 @@ class SettingModel {
     queue.publish('font-size.update', this.fontSize);
   }
 
+  fontVariantChange(fontVariant) {
+    this.fontVariant = fontVariant;
+    this.saveFontVariant();
+    queue.publish('font-variant.update', this.fontVariant);
+  }
+
   initialize() {
     this.subscribe();
   }
@@ -67,12 +76,12 @@ class SettingModel {
       fontClass: 'font--merriweather'
     });
     this.fonts.push({
-      fontName: 'Dancing Script',
-      fontClass: 'font--dancing-script'
+      fontName: 'Courgette',
+      fontClass: 'font--courgette'
     });
     this.fonts.push({
-      fontName: 'Shadows Into Light',
-      fontClass: 'font--shadows-into-light'
+      fontName: 'Merienda',
+      fontClass: 'font--merienda'
     });
     this.fonts.push({
       fontName: 'Roboto Mono',
@@ -164,12 +173,13 @@ class SettingModel {
     this.initializeFonts();
     this.restoreFont();
     this.restoreFontSize();
+    this.restoreFontVariant();
     this.initializeThemes();
     this.restoreTheme();
   }
 
   restoreFont() {
-    let defaultFont = this.fonts[fontDefault];
+    const defaultFont = this.fonts[fontDefault];
     let font = localStorage.getItem('font');
     if (!font) {
       font = defaultFont;
@@ -187,7 +197,7 @@ class SettingModel {
   }
 
   restoreFontSize() {
-    let defaultFontSize = validFontSizes[fontSizeDefault];
+    const defaultFontSize = validFontSizes[fontSizeDefault];
     let fontSize = localStorage.getItem('fontSize');
     if (!fontSize) {
       fontSize = defaultFontSize;
@@ -204,8 +214,26 @@ class SettingModel {
     this.fontSizeChange(fontSize);
   }
 
+  restoreFontVariant() {
+    const defaultFontVariant = validFontVariants[fontVariantDefault];
+    let fontVariant = localStorage.getItem('fontVariant');
+    if (!fontVariant) {
+      fontVariant = defaultFontVariant;
+    } else {
+      try {
+        fontVariant = JSON.parse(fontVariant);
+      } catch (error) {
+        fontVariant = defaultFontVariant;
+      }
+      if (!validFontVariants.includes(fontVariant)) {
+        fontVariant = defaultFontSize;
+      }
+    }
+    this.fontVariantChange(fontVariant);
+  }
+
   restoreTheme() {
-    let defaultTheme = this.themes[themeDefault];
+    const defaultTheme = this.themes[themeDefault];
     let theme = localStorage.getItem('theme');
     if (!theme) {
       theme = defaultTheme;
@@ -230,6 +258,10 @@ class SettingModel {
     localStorage.setItem('fontSize', JSON.stringify(this.fontSize));
   }
 
+  saveFontVariant() {
+    localStorage.setItem('fontVariant', JSON.stringify(this.fontVariant));
+  }
+
   saveTheme() {
     localStorage.setItem('theme', JSON.stringify(this.theme));
   }
@@ -241,6 +273,10 @@ class SettingModel {
 
     queue.subscribe('font-size.change', (fontSize) => {
       this.fontSizeChange(fontSize);
+    });
+
+    queue.subscribe('font-variant.change', (fontVariant) => {
+      this.fontVariantChange(fontVariant);
     });
 
     queue.subscribe('setting.restore', () => {

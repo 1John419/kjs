@@ -1,15 +1,14 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
 
 const validTasks = [
   'help-read', 'help-topic',
 ];
 const validTopics = [
   'about', 'bookmark', 'clipboard-mode', 'help', 'name-mode', 'navigator',
-  'overview', 'read', 'search', 'setting', 'strong', 'thats-my-king',
+  'overview', 'read', 'search', 'setting', 'strong', 'the-acts-of-peter',
+  'thats-my-king',
 ];
 
 class HelpModel {
@@ -28,7 +27,7 @@ class HelpModel {
   }
 
   restoreTask() {
-    let defaultTask = 'help-read';
+    const defaultTask = 'help-read';
     let helpTask = localStorage.getItem('helpTask');
     if (!helpTask) {
       helpTask = defaultTask;
@@ -46,7 +45,7 @@ class HelpModel {
   }
 
   restoreTopic() {
-    let defaultTopic = 'overview';
+    const defaultTopic = 'overview';
     let helpTopic = localStorage.getItem('helpTopic');
     if (!helpTopic) {
       helpTopic = defaultTopic;

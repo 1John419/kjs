@@ -1,23 +1,21 @@
 'use strict';
 
-import {
-  progress,
-} from '../load.js';
-import {
-  Dexie,
-} from '../lib/dexie.min.mjs';
+import { progress } from '../progress.js';
+import { Dexie } from '../lib/dexie.v4.0.4.min.mjs';
 
-export const fetchJson = async (url) => {
+export const dbUtil = {};
+
+dbUtil.fetchJson = async (url) => {
   progress('fetching...');
-  let response = await fetch(url);
+  const response = await fetch(url);
   progress('parsing...');
-  let data = await response.json();
+  const data = await response.json();
 
   return data;
 };
 
-const getVersion = (dbName) => {
-  let defaultVersion = '1970-01-01';
+dbUtil.getVersion = (dbName) => {
+  const defaultVersion = '1970-01-01';
   let version = localStorage.getItem(`${dbName}Version`);
   if (!version) {
     version = defaultVersion;
@@ -37,16 +35,16 @@ const getVersion = (dbName) => {
   return version;
 };
 
-export const versionCheck = async (dbSetup) => {
-  let currentVersion = getVersion(dbSetup.name);
+dbUtil.versionCheck = async (dbSetup) => {
+  const currentVersion = dbUtil.getVersion(dbSetup.name);
 
-  let db = new Dexie(dbSetup.name);
+  const db = new Dexie(dbSetup.name);
   await db.version(1).stores(dbSetup.stores);
   db.open();
 
   if (dbSetup.version !== currentVersion) {
     progress('new version.');
-    for (let store of Object.keys(dbSetup.stores)) {
+    for (const store of Object.keys(dbSetup.stores)) {
       progress(`clearing ${store}...`);
       await db.table(store).clear();
     }

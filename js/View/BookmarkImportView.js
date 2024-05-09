@@ -1,25 +1,17 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateElement,
-  templateDivDialog,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
 
 const dialogToolset = [
   { type: 'label', text: 'Paste Bookmark Package Here:' },
   { type: 'textarea', ariaLabel: 'Bookmark Package' },
-  { type: 'btn', cssModifier: 'import', ariaLabel: 'Import' },
+  { type: 'btn', cssModifier: 'import', ariaLabel: null, label: 'Import' },
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'bookmark-folder', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -42,38 +34,39 @@ class BookmarkImportView {
   }
 
   buildPage() {
-    this.page = templatePage('bookmark-import');
+    this.page = template.page('bookmark-import');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('bookmark-import');
-    this.dialog = templateDivDialog('bookmark-import', dialogToolset);
+    this.scroll = template.scroll('bookmark-import');
+    this.dialog = template.divDialog('bookmark-import', dialogToolset);
     this.scroll.appendChild(this.dialog);
 
-    this.message = templateElement('div', 'message', 'bookmark-import', null,
-      null);
+    this.message = template.element('div', 'message', 'bookmark-import', null, null);
     this.scroll.appendChild(this.message);
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
   dialogClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
-    if (btn === this.btnImport) {
-      this.importClick();
+    const btn = event.target.closest('div.btn-dialog');
+    if (btn) {
+      if (btn === this.btnImport) {
+        this.importClick();
+      }
     }
   }
 
   error(message) {
     this.message.textContent = message;
-    this.message.classList.remove('message--hide');
+    this.message.classList.remove('hide');
     if (message === 'Import successful.') {
       this.textarea.value = '';
     }
@@ -84,13 +77,13 @@ class BookmarkImportView {
     this.dialogBtns = this.dialog.querySelector('.dialog-btns');
     this.btnImport = this.dialogBtns.querySelector('.btn-dialog--import');
 
-    this.btnBookmarkFolder = this.toolbarLower.querySelector(
-      '.btn-icon--bookmark-folder');
+    this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
+    this.btnBookmarkFolder = this.toolbarLower.querySelector('.btn-icon--bookmark-folder');
   }
 
   importClick() {
     this.message.textContent = '';
-    let pkgStr = this.textarea.value;
+    const pkgStr = this.textarea.value;
     if (pkgStr) {
       queue.publish('bookmark-import.import', pkgStr);
     }
@@ -110,7 +103,7 @@ class BookmarkImportView {
   show() {
     this.textarea.value = '';
     this.message.textContent = '';
-    this.message.classList.add('message--hide');
+    this.message.classList.add('hide');
     this.page.classList.remove('page--hide');
   }
 
@@ -128,9 +121,11 @@ class BookmarkImportView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
-      if (btn === this.btnBookmarkFolder) {
+      if (btn === this.btnBack) {
+        queue.publish('bookmark.back', null);
+      } else if (btn === this.btnBookmarkFolder) {
         queue.publish('bookmark-folder', null);
       }
     }

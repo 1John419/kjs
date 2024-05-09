@@ -1,19 +1,11 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'back', ariaLabel: 'Back' },
-  { type: 'btn', icon: 'help-read', ariaLabel: 'Help Read' },
+  { type: 'btn', icon: 'back', ariaLabel: null },
+  { type: 'btn', icon: 'help-read', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -32,21 +24,20 @@ export const helpTopicList = [
   { topic: 'strong', name: 'Strong' },
   { topic: 'setting', name: 'Setting' },
   { topic: 'help', name: 'Help' },
+  { topic: 'the-acts-of-peter', name: 'The Acts of Peter' },
   { topic: 'thats-my-king', name: 'That\'s MY KING!' },
 ];
 
 const templateBtnTopic = (helpTopic) => {
-  let btnTopic = templateElement(
-    'button', 'btn-topic', helpTopic.topic, helpTopic.name, helpTopic.name);
+  const btnTopic = template.element('div', 'btn-topic', helpTopic.topic, null, helpTopic.name);
   btnTopic.dataset.topic = helpTopic.topic;
   return btnTopic;
 };
 
 const templateListTopic = () => {
-  let list = templateElement(
-    'div', 'list', 'topic', null, null);
-  for (let topic of helpTopicList) {
-    let btn = templateBtnTopic(topic);
+  const list = template.element('div', 'list', 'topic', null, null);
+  for (const topic of helpTopicList) {
+    const btn = templateBtnTopic(topic);
     list.appendChild(btn);
   }
   return list;
@@ -68,21 +59,21 @@ class HelpTopicView {
   }
 
   buildPage() {
-    this.page = templatePage('help-topic');
+    this.page = template.page('help-topic');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('help-topic');
+    this.scroll = template.scroll('help-topic');
     this.list = templateListTopic();
     this.scroll.appendChild(this.list);
 
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
@@ -104,10 +95,10 @@ class HelpTopicView {
 
   scrollClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-topic');
     if (btn) {
       if (btn.classList.contains('btn-topic')) {
-        let helpTopic = btn.dataset.topic;
+        const helpTopic = btn.dataset.topic;
         queue.publish('help-topic.select', helpTopic);
       }
     }
@@ -128,7 +119,7 @@ class HelpTopicView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnBack) {
         queue.publish('help.back', null);

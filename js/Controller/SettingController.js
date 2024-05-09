@@ -1,8 +1,6 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
+import { queue } from '../CommandQueue.js';
 
 class SettingController {
 
@@ -35,6 +33,10 @@ class SettingController {
         return font.fontName === this.font.fontName;
       });
     }
+  }
+
+  fontVariant(fontVariant) {
+    queue.publish('font-variant.change', fontVariant);
   }
 
   fontsUpdate(fonts) {
@@ -72,7 +74,7 @@ class SettingController {
 
   getNextThemeIdx() {
     let nameIdx = this.themeNames.findIndex(x => x === this.theme.themeName);
-    let nextNameIdx = nameIdx === this.maxThemeNamesIdx ? 0 : nameIdx += 1;
+    const nextNameIdx = nameIdx === this.maxThemeNamesIdx ? 0 : nameIdx += 1;
     this.themeIdx = this.themes.findIndex((theme) => {
       return theme.themeType === this.theme.themeType &&
         theme.themeName === this.themeNames[nextNameIdx];
@@ -81,7 +83,7 @@ class SettingController {
 
   getPrevThemeIdx() {
     let nameIdx = this.themeNames.findIndex(x => x === this.theme.themeName);
-    let nextNameIdx = nameIdx === 0 ? this.maxThemeNamesIdx : nameIdx -= 1;
+    const nextNameIdx = nameIdx === 0 ? this.maxThemeNamesIdx : nameIdx -= 1;
     this.themeIdx = this.themes.findIndex((theme) => {
       return theme.themeType === this.theme.themeType &&
         theme.themeName === this.themeNames[nextNameIdx];
@@ -113,6 +115,9 @@ class SettingController {
     queue.subscribe('setting.font-size', (fontSize) => {
       this.fontSize(fontSize);
     });
+    queue.subscribe('setting.font-variant', (fontVariant) => {
+      this.fontVariant(fontVariant);
+    });
 
     queue.subscribe('setting.theme-next', () => {
       this.themeNext();
@@ -138,7 +143,7 @@ class SettingController {
   }
 
   themeDark() {
-    let idxNow = this.themeIdx;
+    const idxNow = this.themeIdx;
     this.getDarkThemeIdx();
     if (idxNow === this.themeIdx) {
       return;
@@ -147,7 +152,7 @@ class SettingController {
   }
 
   themeLight() {
-    let idxNow = this.themeIdx;
+    const idxNow = this.themeIdx;
     this.getLightThemeIdx();
     if (idxNow === this.themeIdx) {
       return;

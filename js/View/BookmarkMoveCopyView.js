@@ -1,32 +1,18 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  templateActionMenu,
-  templateBtnIcon,
-  templateElement,
-  templatePage,
-  templateScroll,
-  templateToolbarLower,
-  templateToolbarUpper,
-} from '../template.js';
-import {
-  removeAllChildren,
-} from '../util.js';
-import {
-  verseCitation,
-} from '../data/tomeIdx.js';
+import { queue } from '../CommandQueue.js';
+import { template } from '../template.js';
+import { util } from '../util.js';
+import { kjvIdx } from '../data/kjvIdx.js';
 
 const actionSet = [
-  { icon: 'move', ariaLabel: 'Move' },
-  { icon: 'copy', ariaLabel: 'Copy' },
-  { icon: 'cancel', ariaLabel: 'Cancel' },
+  { icon: 'move', ariaLabel: null },
+  { icon: 'copy', ariaLabel: null },
+  { icon: 'cancel', ariaLabel: null },
 ];
 
 const lowerToolSet = [
-  { type: 'btn', icon: 'bookmark-folder', ariaLabel: 'Bookmark Folder' },
+  { type: 'btn', icon: 'bookmark-folder', ariaLabel: null },
 ];
 
 const upperToolSet = [
@@ -41,19 +27,19 @@ class BookmarkMoveCopyView {
 
   actionMenuClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnCancel) {
-        this.actionMenu.classList.add('action-menu--hide');
+        this.actionMenu.classList.add('hide');
       } else {
-        let entry = this.activeEntry.querySelector('.btn-entry');
-        let folderName = entry.textContent;
+        const entry = this.activeEntry.querySelector('.btn-entry');
+        const folderName = entry.textContent;
         if (btn === this.btnCopy) {
           this.copy(folderName);
         } else if (btn === this.btnMove) {
           this.move(folderName);
         }
-        this.actionMenu.classList.add('action-menu--hide');
+        this.actionMenu.classList.add('hide');
       }
     }
   }
@@ -71,46 +57,44 @@ class BookmarkMoveCopyView {
   }
 
   buildEntry(folderName) {
-    let entry = document.createElement('div');
+    const entry = document.createElement('div');
     entry.classList.add('entry', 'entry--bookmark-move-copy');
-    let btnEntry = document.createElement('button');
+    const btnEntry = document.createElement('div');
     btnEntry.classList.add('btn-entry', 'btn-entry--bookmark-move-copy');
     btnEntry.textContent = folderName;
-    let btnMenu = templateBtnIcon('h-menu', 'h-menu', 'Menu');
+    const btnMenu = template.btnIcon('h-menu', 'h-menu', null);
     entry.appendChild(btnEntry);
     entry.appendChild(btnMenu);
     return entry;
   }
 
   buildPage() {
-    this.page = templatePage('bookmark-move-copy');
+    this.page = template.page('bookmark-move-copy');
 
-    this.toolbarUpper = templateToolbarUpper(upperToolSet);
+    this.toolbarUpper = template.toolbarUpper(upperToolSet);
     this.page.appendChild(this.toolbarUpper);
 
-    this.scroll = templateScroll('bookmark-move-copy');
+    this.scroll = template.scroll('bookmark-move-copy');
 
-    this.empty = templateElement('div', 'empty', 'bookmark-move-copy', null,
-      'No Target Folder');
+    this.empty = template.element('div', 'empty', 'bookmark-move-copy', null, 'No Target Folder');
     this.scroll.appendChild(this.empty);
 
-    this.list = templateElement('div', 'list', 'bookmark-move-copy', null,
-      null);
+    this.list = template.element('div', 'list', 'bookmark-move-copy', null, null);
     this.scroll.appendChild(this.list);
 
-    this.actionMenu = templateActionMenu('bookmark-move-copy', actionSet);
+    this.actionMenu = template.actionMenu('bookmark-move-copy', actionSet);
     this.scroll.appendChild(this.actionMenu);
     this.page.appendChild(this.scroll);
 
-    this.toolbarLower = templateToolbarLower(lowerToolSet);
+    this.toolbarLower = template.toolbarLower(lowerToolSet);
     this.page.appendChild(this.toolbarLower);
 
-    let container = document.querySelector('.container');
+    const container = document.querySelector('.container');
     container.appendChild(this.page);
   }
 
   copy(folderName) {
-    let copyPkg = {
+    const copyPkg = {
       to: folderName,
       verseIdx: this.verseIdx,
     };
@@ -122,20 +106,18 @@ class BookmarkMoveCopyView {
   }
 
   getElements() {
-    this.banner = this.toolbarUpper.querySelector(
-      '.banner--bookmark-move-copy');
+    this.banner = this.toolbarUpper.querySelector('.banner--bookmark-move-copy');
 
     this.btnMove = this.actionMenu.querySelector('.btn-icon--move');
     this.btnCopy = this.actionMenu.querySelector('.btn-icon--copy');
     this.btnCancel = this.actionMenu.querySelector('.btn-icon--cancel');
 
-    this.btnBookmarkFolder = this.toolbarLower.querySelector(
-      '.btn-icon--bookmark-folder');
+    this.btnBookmarkFolder = this.toolbarLower.querySelector('.btn-icon--bookmark-folder');
   }
 
   hide() {
-    this.actionMenu.classList.add('action-menu--hide');
     this.page.classList.add('page--hide');
+    this.actionMenu.classList.add('hide');
   }
 
   initialize() {
@@ -147,10 +129,10 @@ class BookmarkMoveCopyView {
 
   listClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn.classList.contains('btn-icon--h-menu')) {
-        let entry = btn.previousSibling;
+        const entry = btn.previousSibling;
         this.menuClick(entry);
       }
     }
@@ -166,7 +148,7 @@ class BookmarkMoveCopyView {
   }
 
   move(folderName) {
-    let movePkg = {
+    const movePkg = {
       to: folderName,
       verseIdx: this.verseIdx,
     };
@@ -186,10 +168,10 @@ class BookmarkMoveCopyView {
   }
 
   showActionMenu(target) {
-    this.activeEntry = target.closest('div');
-    let top = target.offsetTop;
+    this.activeEntry = target.closest('div.entry');
+    const top = target.offsetTop;
     this.actionMenu.style.top = `${top}px`;
-    this.actionMenu.classList.remove('action-menu--hide');
+    this.actionMenu.classList.remove('hide');
   }
 
   subscribe() {
@@ -214,7 +196,7 @@ class BookmarkMoveCopyView {
 
   toolbarLowerClick(event) {
     event.preventDefault();
-    let btn = event.target.closest('button');
+    const btn = event.target.closest('div.btn-icon');
     if (btn) {
       if (btn === this.btnBookmarkFolder) {
         queue.publish('bookmark-folder', null);
@@ -223,20 +205,20 @@ class BookmarkMoveCopyView {
   }
 
   updateBanner() {
-    let ref = this.verse[verseCitation];
+    const ref = this.verse[kjvIdx.verse.citation];
     this.banner.innerHTML = `${ref} <br> Move/Copy to Folder:`;
   }
 
   updateFolders() {
-    let scrollSave = this.scroll.scrollTop;
-    removeAllChildren(this.list);
+    const scrollSave = this.scroll.scrollTop;
+    util.removeAllChildren(this.list);
     if (this.moveCopyList.length === 0) {
-      this.empty.classList.remove('empty--hide');
+      this.empty.classList.remove('hide');
     } else {
-      this.empty.classList.add('empty--hide');
-      let fragment = document.createDocumentFragment();
-      for (let folderName of this.moveCopyList) {
-        let entry = this.buildEntry(folderName);
+      this.empty.classList.add('hide');
+      const fragment = document.createDocumentFragment();
+      for (const folderName of this.moveCopyList) {
+        const entry = this.buildEntry(folderName);
         fragment.appendChild(entry);
       }
       this.list.appendChild(fragment);

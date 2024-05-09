@@ -1,15 +1,8 @@
 'use strict';
 
-import {
-  queue,
-} from '../CommandQueue.js';
-import {
-  tomeBooks,
-} from '../data/tomeDb.js';
-import {
-  bookFirstChapterIdx,
-  bookLastChapterIdx,
-} from '../data/tomeIdx.js';
+import { queue } from '../CommandQueue.js';
+import { kjvIdx } from '../data/kjvIdx.js';
+import { kjvLists } from '../data/kjvLists.js';
 
 class NavigatorController {
 
@@ -25,11 +18,11 @@ class NavigatorController {
     this.lastBookIdx = bookIdx;
     if (this.bookSelectPending) {
       this.bookSelectPending = false;
-      let book = tomeBooks[bookIdx];
-      this.chapterCount = book[bookLastChapterIdx] -
-        book[bookFirstChapterIdx] + 1;
+      const book = kjvLists.books[bookIdx];
+      this.chapterCount = book[kjvIdx.book.lastChapterIdx] -
+        book[kjvIdx.book.firstChapterIdx] + 1;
       if (this.panes > 1 || this.chapterCount === 1) {
-        let chapterIdx = tomeBooks[bookIdx][bookFirstChapterIdx];
+        const chapterIdx = kjvLists.books[bookIdx][kjvIdx.book.firstChapterIdx];
         queue.publish('chapterIdx.change', chapterIdx);
       } else {
         queue.publish('navigator.task.change', 'navigator-chapter');
@@ -48,8 +41,8 @@ class NavigatorController {
     }
   }
 
-  chapterIdxUpdate() {
-    queue.publish('read.scroll-to-top', null);
+  chapterIdxUpdate(chapterIdx) {
+    this.chapterIdx = chapterIdx;
     if (this.sidebar === 'navigator') {
       if (this.panes === 1) {
         queue.publish('sidebar.change', 'none');
@@ -93,8 +86,8 @@ class NavigatorController {
       this.bookIdxUpdate(bookIdx);
     });
 
-    queue.subscribe('chapterIdx.update', () => {
-      this.chapterIdxUpdate();
+    queue.subscribe('chapterIdx.update', (chapterIdx) => {
+      this.chapterIdxUpdate(chapterIdx);
     });
 
     queue.subscribe('navigator-book', () => {
