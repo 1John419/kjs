@@ -17,7 +17,7 @@ const appCaches = [
     ]
   },
   {
-    name: 'css-20240509.02',
+    name: 'css-20240509.03',
     urls: [
       '/css/font.css',
       '/css/kjs.css',
