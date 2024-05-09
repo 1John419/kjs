@@ -704,15 +704,15 @@ ul {
 }
 
 .strong-def-list--deriv {
-  list-style: '⯆ ';
+  list-style: '▽ ';
 }
 
 .strong-def-list--kjv-def {
-  list-style: '⯀ ';
+  list-style: '◁ ';
 }
 
 .strong-def-list--strong-def {
-  list-style: '⯈ ';
+  list-style: '▷ ';
 }
 
 .strong-fragment {
