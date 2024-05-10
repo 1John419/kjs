@@ -79,9 +79,7 @@ class StrongLookupView {
 
   findClick() {
     const strongNum = this.inputStrongNum.value;
-    if (strongNum) {
-      queue.publish('strong-lookup.find', strongNum.toUpperCase());
-    }
+    queue.publish('strong-lookup.find', strongNum.toUpperCase());
   }
 
   getElements() {

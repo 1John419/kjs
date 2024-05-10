@@ -612,7 +612,7 @@ ul {
 }
 
 .page--hide {
-  order: 10;
+  display: none;
 }
 
 :root {
