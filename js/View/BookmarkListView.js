@@ -435,7 +435,7 @@ class BookmarkListView {
       if (target.classList.contains('btn-result')) {
         if (this.clipboardMode) {
           const text = target.textContent;
-          navigator.clipboard.writeText(text);
+          util.writeClipboardText(text);
         } else {
           const verseIdx = parseInt(target.dataset.verseIdx);
           if (this.strongMode) {

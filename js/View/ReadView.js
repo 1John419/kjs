@@ -226,7 +226,7 @@ class ReadView {
       if (btnVerse) {
         if (this.clipboardMode) {
           const text = `${this.btnBanner.textContent}:${btnVerse.textContent}`;
-          navigator.clipboard.writeText(text);
+          util.writeClipboardText(text);
         } else {
           this.verseClick(btnVerse);
         }

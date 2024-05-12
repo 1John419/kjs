@@ -221,7 +221,7 @@ class SearchResultView {
     if (btn) {
       if (this.clipboardMode) {
         const text = btn.textContent;
-        navigator.clipboard.writeText(text);
+        util.writeClipboardText(text);
       } else {
         const verseIdx = parseInt(btn.dataset.verseIdx);
         if (this.strongMode) {

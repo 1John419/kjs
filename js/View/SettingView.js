@@ -52,7 +52,7 @@ const templateSettingFont = (modifier, name) => {
   const divSetting = template.element('div', 'setting', modifier, null, null);
   const heading = template.element('h1', 'header', modifier, null, name);
   divSetting.appendChild(heading);
-  const divCarousel = templateSettingCarousel('font', "Font");
+  const divCarousel = templateSettingCarousel('font', 'Font');
   divSetting.appendChild(divCarousel);
   return divSetting;
 };

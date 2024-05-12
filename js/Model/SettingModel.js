@@ -166,7 +166,7 @@ class SettingModel {
       themeName: 'Chalcedony',
       themeClass: 'theme--chalcedony-light'
     });
-        queue.publish('themes.update', this.themes);
+    queue.publish('themes.update', this.themes);
   }
 
   restore() {

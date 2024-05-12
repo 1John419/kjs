@@ -102,7 +102,7 @@ class HelpReadView {
       this.scroll.innerHTML = html;
       this.scroll.scrollTop = 0;
     }).catch((error) => {
-      console.log(error);
+      console.log(error.message);
     });
   }
 

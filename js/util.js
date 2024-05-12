@@ -24,3 +24,11 @@ util.sideScrollElement = (scrollElement, element) => {
   const x = element.offsetLeft - 8;
   scrollElement.scrollLeft = x;
 };
+
+util.writeClipboardText = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (error) {
+    console.log(error.message);
+  }
+};
