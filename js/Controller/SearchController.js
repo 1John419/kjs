@@ -1,7 +1,7 @@
 'use strict';
 
 import { queue } from '../CommandQueue.js';
-import { chapterIdxByVerseIdx } from '../data/kjvLists.js';
+import { chapterIdxByVerseIdx } from '../data/tomeLists.js';
 
 class SearchController {
 

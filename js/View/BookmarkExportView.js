@@ -2,7 +2,7 @@
 
 import { queue } from '../CommandQueue.js';
 import { template } from '../template.js';
-import { kjvLists } from '../data/kjvLists.js';
+import { tomeLists } from '../data/tomeLists.js';
 
 const message = 'Select All and Copy the text below. ' +
   'Then Paste in a text editor and save the file.';
@@ -35,7 +35,7 @@ class BookmarkExportview {
 
   buildBookmarkPkg() {
     const bookmarkPkg = {};
-    bookmarkPkg.kjv = kjvLists.name;
+    bookmarkPkg.tome = tomeLists.tomeName;
     bookmarkPkg.folders = [];
     for (const folder of this.folders) {
       const newFolder = {};

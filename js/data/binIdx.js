@@ -2,7 +2,7 @@
 
 export const binIdx = {};
 
-binIdx.kjvBinIdx = {
+binIdx.tomeBinIdx = {
   wordCount: 0,
   verseCount: 1,
   books: 2,

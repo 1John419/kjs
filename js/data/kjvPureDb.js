@@ -14,8 +14,7 @@ const dbSetup = {
 };
 
 export let kjvPureDb = null;
-export const kjvPureName = dbSetup.name;
-export let kjvVerseCount = null;
+export let kjvPureVerseCount = null;
 export let kjvPureWords = null;
 
 export const initializeKjvPureDb = async () => {
@@ -25,7 +24,7 @@ export const initializeKjvPureDb = async () => {
   kjvPureDb = await dbUtil.versionCheck(dbSetup);
   await populateDb();
   await loadKjvPureWords();
-  kjvVerseCount = await kjvPureDb.verses.count();
+  kjvPureVerseCount = await kjvPureDb.verses.count();
   progress('kjv pure initialized.');
 };
 

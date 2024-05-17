@@ -2,8 +2,8 @@
 
 import { queue } from '../CommandQueue.js';
 import { template } from '../template.js';
-import { kjvIdx } from '../data/kjvIdx.js';
-import { kjvLists } from '../data/kjvLists.js';
+import { tomeIdx } from '../data/tomeIdx.js';
+import { tomeLists } from '../data/tomeLists.js';
 
 const greekFirstIdx = 39;
 const indices = [...Array(66).keys()];
@@ -48,7 +48,7 @@ class NavigatorBookView {
     return divider;
   }
 
-  buildBooklist() {
+  buildBookList() {
     const booksHebrew = this.buildHebrewList();
     const booksGreek = this.buildGreekList();
     const divider = this.buildBookDivider();
@@ -61,7 +61,7 @@ class NavigatorBookView {
     const btn = document.createElement('div');
     btn.classList.add('btn-book');
     btn.dataset.bookIdx = bookIdx;
-    btn.textContent = kjvLists.books[bookIdx][kjvIdx.book.shortName];
+    btn.textContent = tomeLists.books[bookIdx][tomeIdx.book.shortName];
     return btn;
   }
 
@@ -125,7 +125,7 @@ class NavigatorBookView {
     this.addListeners();
     this.subscribe();
 
-    this.buildBooklist();
+    this.buildBookList();
   }
 
   listClick(event) {

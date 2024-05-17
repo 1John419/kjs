@@ -4,8 +4,8 @@ import { queue } from '../CommandQueue.js';
 import { template } from '../template.js';
 import { util } from '../util.js';
 import { binIdx } from '../data/binIdx.js';
-import { kjvIdx } from '../data/kjvIdx.js';
-import { kjvLists } from '../data/kjvLists.js';
+import { tomeIdx } from '../data/tomeIdx.js';
+import { tomeLists } from '../data/tomeLists.js';
 
 const lowerToolSet = [
   { type: 'btn', icon: 'back', ariaLabel: null },
@@ -44,29 +44,29 @@ class SearchResultView {
   }
 
   applyFilter() {
-    const kjvBin = this.rig.kjvBin;
+    const tomeBin = this.rig.tomeBin;
     const bookIdx = this.searchFilter.bookIdx;
     const chapterIdx = this.searchFilter.chapterIdx;
     if (bookIdx === -1 && chapterIdx === -1) {
-      this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses];
-      this.wordCount = kjvBin[binIdx.kjvBinIdx.wordCount];
-      this.verseCount = kjvBin[binIdx.kjvBinIdx.verseCount];
-      this.citation = kjvLists.name;
+      this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses];
+      this.wordCount = tomeBin[binIdx.tomeBinIdx.wordCount];
+      this.verseCount = tomeBin[binIdx.tomeBinIdx.verseCount];
+      this.citation = tomeLists.tomeName;
     } else {
-      const books = kjvBin[binIdx.kjvBinIdx.books];
+      const books = tomeBin[binIdx.tomeBinIdx.books];
       const bookBin = this.findBin(books, bookIdx);
       if (chapterIdx === -1) {
-        this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses].slice(bookBin[binIdx.bookBinIdx.sliceStart], bookBin[binIdx.bookBinIdx.sliceEnd]);
+        this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses].slice(bookBin[binIdx.bookBinIdx.sliceStart], bookBin[binIdx.bookBinIdx.sliceEnd]);
         this.wordCount = bookBin[binIdx.bookBinIdx.wordCount];
         this.verseCount = bookBin[binIdx.bookBinIdx.verseCount];
-        this.citation = kjvLists.books[bookIdx][kjvIdx.book.longName];
+        this.citation = tomeLists.books[bookIdx][tomeIdx.book.longName];
       } else {
         const chapters = bookBin[binIdx.bookBinIdx.chapters];
         const chapterBin = this.findBin(chapters, chapterIdx);
-        this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses].slice(chapterBin[binIdx.chapterBinIdx.sliceStart], chapterBin[binIdx.chapterBinIdx.sliceEnd]);
+        this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses].slice(chapterBin[binIdx.chapterBinIdx.sliceStart], chapterBin[binIdx.chapterBinIdx.sliceEnd]);
         this.wordCount = chapterBin[binIdx.chapterBinIdx.wordCount];
         this.verseCount = chapterBin[binIdx.chapterBinIdx.verseCount];
-        this.citation = kjvLists.chapters[chapterIdx][kjvIdx.chapter.name];
+        this.citation = tomeLists.chapters[chapterIdx][tomeIdx.chapter.name];
       }
     }
   }
@@ -100,7 +100,7 @@ class SearchResultView {
   buildRefSpan(verseObj) {
     const refSpan = document.createElement('span');
     refSpan.classList.add('font--bold');
-    refSpan.textContent = verseObj.v[kjvIdx.verse.citation] + ' ';
+    refSpan.textContent = verseObj.v[tomeIdx.verse.citation] + ' ';
     return refSpan;
   }
 
@@ -112,7 +112,7 @@ class SearchResultView {
     searchText.classList.add('span-result-text');
     const acrostic = template.acrostic(verseObj);
     const ref = this.buildRefSpan(verseObj);
-    const text = document.createTextNode(verseObj.v[kjvIdx.verse.text]);
+    const text = document.createTextNode(verseObj.v[tomeIdx.verse.text]);
     searchText.appendChild(ref);
     if (acrostic) {
       searchText.appendChild(acrostic);

@@ -1,8 +1,8 @@
 'use strict';
 
-export const kjvIdx = {};
+export const tomeIdx = {};
 
-kjvIdx.book = {
+tomeIdx.book = {
   longName: 0,
   shortName: 1,
   firstVerseIdx: 2,
@@ -11,7 +11,7 @@ kjvIdx.book = {
   lastChapterIdx: 5,
 };
 
-kjvIdx.chapter = {
+tomeIdx.chapter = {
   bookIdx: 0,
   name: 1,
   num: 2,
@@ -19,7 +19,7 @@ kjvIdx.chapter = {
   lastVerseIdx: 4,
 };
 
-kjvIdx.verse = {
+tomeIdx.verse = {
   text: 0,
   bookIdx: 1,
   chapterIdx: 2,
@@ -27,7 +27,7 @@ kjvIdx.verse = {
   num: 4,
 };
 
-kjvIdx.word = {
+tomeIdx.word = {
   verseIdx: 0,
   count: 1,
 };

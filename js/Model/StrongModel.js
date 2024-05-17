@@ -4,7 +4,7 @@ import { queue} from '../CommandQueue.js';
 import { binIdx } from '../data/binIdx.js';
 import { strongDictDb, strongNums } from '../data/strongDictDb.js';
 import { strongIdx } from '../data/strongIdx.js';
-import { kjvDb, strongDb, strongName } from '../Model/DbModel.js';
+import { tomeDb, strongDb, strongName } from '../Model/DbModel.js';
 
 const strongDefReroute = [
   'strong-history', 'strong-lookup',
@@ -100,7 +100,7 @@ class StrongModel {
   }
 
   filterReset() {
-    const strongFilter = this.kjvFilter();
+    const strongFilter = this.tomeFilter();
     this.filterChange(strongFilter);
   }
 
@@ -190,7 +190,7 @@ class StrongModel {
   }
 
   restoreFilter() {
-    const defaultFilter = this.kjvFilter();
+    const defaultFilter = this.tomeFilter();
     let strongFilter = localStorage.getItem('strongFilter');
     if (!strongFilter) {
       strongFilter = defaultFilter;
@@ -390,7 +390,7 @@ class StrongModel {
     queue.publish('strong.task.update', this.strongTask);
   }
 
-  kjvFilter() {
+  tomeFilter() {
     return {
       bookIdx: -1,
       chapterIdx: -1
@@ -408,10 +408,9 @@ class StrongModel {
   }
 
   async updateStrongModel() {
-    queue.publish('* update.strong.model *', null);
     this.strongMapObj = await strongDb.maps.get(this.strongVerseIdx);
     queue.publish('strong.map.update', this.strongMapObj);
-    this.strongVerseObj = await kjvDb.verses.get(this.strongVerseIdx);
+    this.strongVerseObj = await tomeDb.verses.get(this.strongVerseIdx);
     queue.publish('strong.verse.update', this.strongVerseObj);
     this.chainClear();
     await this.defChange(this.strongDef);
@@ -419,7 +418,7 @@ class StrongModel {
 
   async updateWordMaps() {
     if (this.words.length) {
-      const verses = this.wordKjvBin[binIdx.kjvBinIdx.verses];
+      const verses = this.wordTomeBin[binIdx.tomeBinIdx.verses];
       this.wordMapObjs = await strongDb.maps.bulkGet(verses);
       queue.publish('strong.wordMap.update', this.wordMapObjs);
     } else {
@@ -436,15 +435,15 @@ class StrongModel {
 
   async updateWordVerses() {
     if (this.words.length) {
-      const word = this.words.find(x => x[strongIdx.word.kjvWord] === this.strongWord);
-      this.wordKjvBin = word[strongIdx.word.kjvBin];
-      queue.publish('strong.wordKjvBin.update', this.wordKjvBin);
-      const verses = this.wordKjvBin[binIdx.kjvBinIdx.verses];
-      this.wordVerseObjs = await kjvDb.verses.bulkGet(verses);
+      const word = this.words.find(x => x[strongIdx.word.tomeWord] === this.strongWord);
+      this.wordTomeBin = word[strongIdx.word.tomeBin];
+      queue.publish('strong.wordTomeBin.update', this.wordTomeBin);
+      const verses = this.wordTomeBin[binIdx.tomeBinIdx.verses];
+      this.wordVerseObjs = await tomeDb.verses.bulkGet(verses);
       queue.publish('strong.wordVerse.update', this.wordVerseObjs);
     } else {
-      this.strongIdx.word.kjvBin = [];
-      queue.publish('strong.wordKjvBin.update', this.wordKjvBin);
+      this.strongIdx.word.tomeBin = [];
+      queue.publish('strong.wordTomeBin.update', this.wordTomeBin);
       this.wordVerseObjs = [];
       queue.publish('strong.wordVerse.update', this.wordVerseObjs);
     }
@@ -455,7 +454,7 @@ class StrongModel {
     this.saveVerseIdx();
     this.strongMapObj = await strongDb.maps.get(this.strongVerseIdx);
     queue.publish('strong.map.update', this.strongMapObj);
-    this.strongVerseObj = await kjvDb.verses.get(this.strongVerseIdx);
+    this.strongVerseObj = await tomeDb.verses.get(this.strongVerseIdx);
     queue.publish('strong.verse.update', this.strongVerseObj);
   }
 
@@ -463,10 +462,10 @@ class StrongModel {
     this.strongWord = strongWord;
     this.saveWord();
     if (this.words.length) {
-      const word = this.words.find(x => x[strongIdx.word.kjvWord] === this.strongWord);
-      this.wordKjvBin = word[strongIdx.word.kjvBin];
+      const word = this.words.find(x => x[strongIdx.word.tomeWord] === this.strongWord);
+      this.wordTomeBin = word[strongIdx.word.tomeBin];
     } else {
-      this.wordKjvBin = [];
+      this.wordTomeBin = [];
     }
     await this.updateWordVerses();
     await this.updateWordMaps();
@@ -475,13 +474,13 @@ class StrongModel {
   }
 
   async wordFirst() {
-    let firstKjvWord;
+    let firstTomeWord;
     if (this.words.length) {
-      firstKjvWord = this.words[firstWord][strongIdx.word.kjvWord];
+      firstTomeWord = this.words[firstWord][strongIdx.word.tomeWord];
     } else {
-      firstKjvWord = null;
+      firstTomeWord = null;
     }
-    await this.wordChange(firstKjvWord);
+    await this.wordChange(firstTomeWord);
   }
 
 }

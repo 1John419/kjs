@@ -3,7 +3,7 @@
 import { queue } from '../CommandQueue.js';
 import { template } from '../template.js';
 import { util } from '../util.js';
-import { kjvIdx } from '../data/kjvIdx.js';
+import { tomeIdx } from '../data/tomeIdx.js';
 import { strongIdx } from '../data/strongIdx.js';
 
 const lowerToolSet = [
@@ -146,14 +146,14 @@ class StrongVerseView {
   }
 
   updateBanner() {
-    this.banner.textContent = this.verse[kjvIdx.verse.citation];
+    this.banner.textContent = this.verse[tomeIdx.verse.citation];
   }
 
   updateVerse() {
     this.scroll.scrollTop = 0;
     util.removeAllChildren(this.list);
     const docFragment = document.createDocumentFragment();
-    this.verseWords = this.verse[kjvIdx.verse.text].split(' ');
+    this.verseWords = this.verse[tomeIdx.verse.text].split(' ');
     for (const map of this.maps) {
       const strongMap = this.buildStrongFragment(map);
       docFragment.appendChild(strongMap);

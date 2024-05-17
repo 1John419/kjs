@@ -3,8 +3,8 @@
 import { queue } from '../CommandQueue.js';
 import { template } from '../template.js';
 import { util } from '../util.js';
-import { kjvIdx } from '../data/kjvIdx.js';
-import { kjvLists } from '../data/kjvLists.js';
+import { tomeIdx } from '../data/tomeIdx.js';
+import { tomeLists } from '../data/tomeLists.js';
 
 const actionSet = [
   { icon: 'up', ariaLabel: null },
@@ -79,7 +79,7 @@ class BookmarkListView {
     entry.classList.add('entry', 'entry--bookmark');
     const btnRef = document.createElement('div');
     btnRef.classList.add('btn-entry', 'btn-entry--bookmark');
-    btnRef.textContent = kjvLists.citations[verseIdx];
+    btnRef.textContent = tomeLists.citations[verseIdx];
     btnRef.dataset.verseIdx = verseIdx;
     entry.appendChild(btnRef);
     const btnMenu = template.btnIcon('h-menu', 'h-menu', null);
@@ -119,7 +119,7 @@ class BookmarkListView {
   buildRefSpan(verseObj) {
     const refSpan = document.createElement('span');
     refSpan.classList.add('font--bold');
-    refSpan.textContent = verseObj.v[kjvIdx.verse.citation] + ' ';
+    refSpan.textContent = verseObj.v[tomeIdx.verse.citation] + ' ';
     return refSpan;
   }
 
@@ -131,7 +131,7 @@ class BookmarkListView {
     searchText.classList.add('span-result-text');
     const acrostic = template.acrostic(verseObj);
     const ref = this.buildRefSpan(verseObj);
-    const text = document.createTextNode(verseObj.v[kjvIdx.verse.text]);
+    const text = document.createTextNode(verseObj.v[tomeIdx.verse.text]);
     searchText.appendChild(ref);
     if (acrostic) {
       searchText.appendChild(acrostic);

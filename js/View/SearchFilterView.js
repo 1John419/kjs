@@ -4,8 +4,8 @@ import { queue } from '../CommandQueue.js';
 import { template } from '../template.js';
 import { util } from '../util.js';
 import { binIdx } from '../data/binIdx.js';
-import { kjvIdx } from '../data/kjvIdx.js';
-import { kjvLists } from '../data/kjvLists.js';
+import { tomeIdx } from '../data/tomeIdx.js';
+import { tomeLists } from '../data/tomeLists.js';
 
 const lowerToolSet = [
   { type: 'btn', icon: 'back', ariaLabel: null },
@@ -37,7 +37,7 @@ class SearchFilterView {
     const bookIdx = bookBin[binIdx.bookBinIdx.bookIdx];
     const wordCount = bookBin[binIdx.bookBinIdx.wordCount];
     const verseCount = bookBin[binIdx.bookBinIdx.verseCount];
-    const citation = kjvLists.books[bookIdx][kjvIdx.book.longName];
+    const citation = tomeLists.books[bookIdx][tomeIdx.book.longName];
 
     const bookFilter = document.createElement('div');
     bookFilter.classList.add('filter', 'filter--book');
@@ -66,7 +66,7 @@ class SearchFilterView {
     const chapterIdx = chapterBin[binIdx.chapterBinIdx.chapterIdx];
     const wordCount = chapterBin[binIdx.chapterBinIdx.wordCount];
     const verseCount = chapterBin[binIdx.chapterBinIdx.verseCount];
-    const citation = kjvLists.chapters[chapterIdx][kjvIdx.chapter.name];
+    const citation = tomeLists.chapters[chapterIdx][tomeIdx.chapter.name];
 
     const btnFilter = document.createElement('div');
     btnFilter.classList.add('btn-filter', 'btn-filter--chapter',
@@ -80,10 +80,10 @@ class SearchFilterView {
 
   buildFilters() {
     const fragment = document.createDocumentFragment();
-    const kjvBin = this.rig.kjvBin;
-    const kjvFilter = this.buildKjvFilter(kjvBin);
-    fragment.appendChild(kjvFilter);
-    const books = kjvBin[binIdx.kjvBinIdx.books];
+    const tomeBin = this.rig.tomeBin;
+    const tomeFilter = this.buildTomeFilter(tomeBin);
+    fragment.appendChild(tomeFilter);
+    const books = tomeBin[binIdx.tomeBinIdx.books];
     for (const bookBin of books) {
       const bookFilter = this.buildBookFilter(bookBin);
       fragment.appendChild(bookFilter);
@@ -114,13 +114,13 @@ class SearchFilterView {
     container.appendChild(this.page);
   }
 
-  buildKjvFilter(kjvBin) {
-    const citation = kjvLists.name;
-    const wordCount = kjvBin[binIdx.kjvBinIdx.wordCount];
-    const verseCount = kjvBin[binIdx.kjvBinIdx.verseCount];
+  buildTomeFilter(tomeBin) {
+    const citation = tomeLists.tomeName;
+    const wordCount = tomeBin[binIdx.tomeBinIdx.wordCount];
+    const verseCount = tomeBin[binIdx.tomeBinIdx.verseCount];
 
     const btnFilter = document.createElement('div');
-    btnFilter.classList.add('btn-filter', 'btn-filter--kjv');
+    btnFilter.classList.add('btn-filter', 'btn-filter--tome');
     btnFilter.textContent = `${citation} (${wordCount}/${verseCount})`;
     btnFilter.dataset.bookIdx = -1;
     btnFilter.dataset.chapterIdx = -1;

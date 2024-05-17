@@ -3,8 +3,8 @@
 import { queue } from '../CommandQueue.js';
 import { template } from '../template.js';
 import { util } from '../util.js';
-import { kjvIdx } from '../data/kjvIdx.js';
-import { kjvLists } from '../data/kjvLists.js';
+import { tomeIdx } from '../data/tomeIdx.js';
+import { tomeLists } from '../data/tomeLists.js';
 
 const lowerToolSet = [
   { type: 'btn', icon: 'back', ariaLabel: null },
@@ -31,13 +31,13 @@ class NavigatorChapterView {
   }
 
   buildBtnContent(chapterIdx) {
-    const chapter = kjvLists.chapters[chapterIdx];
+    const chapter = tomeLists.chapters[chapterIdx];
     const btn = document.createElement('div');
     btn.classList.add('btn-chapter');
-    btn.dataset.bookIdx = chapter[kjvIdx.chapter.bookIdx];
+    btn.dataset.bookIdx = chapter[tomeIdx.chapter.bookIdx];
     btn.dataset.chapterIdx = chapterIdx;
-    btn.dataset.chapterName = chapter[kjvIdx.chapter.name];
-    const num = chapter[kjvIdx.chapter.num];
+    btn.dataset.chapterName = chapter[tomeIdx.chapter.name];
+    const num = chapter[tomeIdx.chapter.num];
     btn.textContent = num;
     return btn;
   }
@@ -70,9 +70,9 @@ class NavigatorChapterView {
 
   chapterIdxUpdate(chapterIdx) {
     const oldChapterIdx = this.chapterIdx || chapterIdx;
-    const oldBookIdx = kjvLists.chapters[oldChapterIdx][kjvIdx.chapter.bookIdx];
+    const oldBookIdx = tomeLists.chapters[oldChapterIdx][tomeIdx.chapter.bookIdx];
     this.chapterIdx = chapterIdx;
-    const bookIdx = kjvLists.chapters[this.chapterIdx][kjvIdx.chapter.bookIdx];
+    const bookIdx = tomeLists.chapters[this.chapterIdx][tomeIdx.chapter.bookIdx];
     if (oldBookIdx !== bookIdx) {
       this.updateBanner();
       this.updateChapterList();
@@ -158,7 +158,7 @@ class NavigatorChapterView {
   }
 
   updateBanner() {
-    const longName = kjvLists.books[this.bookIdx][kjvIdx.book.longName];
+    const longName = tomeLists.books[this.bookIdx][tomeIdx.book.longName];
     this.banner.innerHTML = `${longName}`;
   }
 
@@ -167,9 +167,9 @@ class NavigatorChapterView {
     util.removeAllChildren(this.list);
     const list = document.createElement('div');
     list.classList.add('content', 'content--chapter');
-    const book = kjvLists.books[this.bookIdx];
-    const indices = util.range(book[kjvIdx.book.firstChapterIdx],
-      book[kjvIdx.book.lastChapterIdx] + 1);
+    const book = tomeLists.books[this.bookIdx];
+    const indices = util.range(book[tomeIdx.book.firstChapterIdx],
+      book[tomeIdx.book.lastChapterIdx] + 1);
     for (const idx of indices) {
       const btn = this.buildBtnContent(idx);
       list.appendChild(btn);

@@ -17,6 +17,6 @@ strongIdx.map = {
 };
 
 strongIdx.word = {
-  kjvWord: 0,
-  kjvBin: 1,
+  tomeWord: 0,
+  tomeBin: 1,
 };

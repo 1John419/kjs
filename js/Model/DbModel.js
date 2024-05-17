@@ -1,14 +1,14 @@
 'use strict';
 
 import { queue } from '../CommandQueue.js';
-import { kjvPureDb, kjvPureName, kjvPureWords } from '../data/kjvPureDb.js';
-import { kjvNameDb, kjvNameName, kjvNameWords } from '../data/kjvNameDb.js';
+import { kjvPureDb, kjvPureVerseCount, kjvPureWords } from '../data/kjvPureDb.js';
+import { kjvNameDb, kjvNameVerseCount, kjvNameWords } from '../data/kjvNameDb.js';
 import { strongNameDb } from '../data/strongNameDb.js';
 import { strongPureDb } from '../data/strongPureDb.js';
 
-export let kjvDb = null;
-export let kjvWords = null;
-export let kjvName = null;
+export let tomeDb = null;
+export let tomeVerseCount = null;
+export let tomeWords = null;
 export let dbNameMode = null;
 export let strongDb = null;
 export let strongName = null;
@@ -23,15 +23,15 @@ class DbModel {
     this.subscribe();
   }
 
-  kjvDbChange() {
+  tomeDbChange() {
     if (this.nameMode === true) {
-      kjvDb = kjvNameDb;
-      kjvWords = kjvNameWords;
-      kjvName = kjvNameName;
+      tomeDb = kjvNameDb;
+      tomeVerseCount = kjvNameVerseCount;
+      tomeWords = kjvNameWords;
     } else {
-      kjvDb = kjvPureDb;
-      kjvWords = kjvPureWords;
-      kjvName = kjvPureName;
+      tomeDb = kjvPureDb;
+      tomeVerseCount = kjvPureVerseCount;
+      tomeWords = kjvPureWords;
     }
   }
 
@@ -39,7 +39,7 @@ class DbModel {
     this.nameMode = !this.nameMode;
     this.saveNameMode();
     dbNameMode = this.nameMode;
-    this.kjvDbChange();
+    this.tomeDbChange();
     this.strongDbChange();
     queue.publish('name-mode.update', this.nameMode);
   }
@@ -63,7 +63,9 @@ class DbModel {
         nameMode = defaultNameMode;
       }
     }
-    this.kjvDbChange();
+    this.nameMode = nameMode;
+    dbNameMode = this.nameMode;
+    this.tomeDbChange();
     this.strongDbChange();
   }
 

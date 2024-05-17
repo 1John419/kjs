@@ -48,7 +48,7 @@ import { HelpModel } from './Model/HelpModel.js';
 import { HelpReadView } from './View/HelpReadView.js';
 import { HelpTopicView } from './View/HelpTopicView.js';
 import { HelpController } from './Controller/HelpController.js';
-import { initializeKjvLists } from './data/kjvLists.js';
+import { initializeTomeLists } from './data/tomeLists.js';
 import { initializeKjvPureDb } from './data/kjvPureDb.js';
 import { initializeKjvNameDb } from './data/kjvNameDb.js';
 import { initializeStrongDictDb } from './data/strongDictDb.js';
@@ -64,7 +64,7 @@ const loadScroll = document.querySelector('.load-scroll');
   const body = document.body;
   const load = body.querySelector('.load');
 
-  await initializeKjvLists();
+  await initializeTomeLists();
   await initializeKjvPureDb();
   await initializeKjvNameDb();
   await initializeStrongDictDb();

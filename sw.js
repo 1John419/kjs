@@ -2,7 +2,7 @@
 
 const appCaches = [
   {
-    name: 'core-20240509.03',
+    name: 'core-20240516.01',
     urls: [
       '/',
       '/bundle.js',
@@ -38,7 +38,7 @@ const appCaches = [
     ]
   },
   {
-    name: 'help-20240509.02',
+    name: 'help-20240516.01',
     urls: [
       '/help/bookmark.html',
       '/help/clipboard-mode.html',
@@ -66,8 +66,9 @@ const appCaches = [
     ]
   },
   {
-    name: 'png-20240509.01',
+    name: 'png-20240516.02',
     urls: [
+      '/png/icon-032.png',
       '/png/icon-192.png',
       '/png/icon-512.png',
       '/png/maskable-icon-192.png',

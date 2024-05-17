@@ -4,8 +4,8 @@ import { queue } from '../CommandQueue.js';
 import { template } from '../template.js';
 import { util } from '../util.js';
 import { binIdx } from '../data/binIdx.js';
-import { kjvIdx } from '../data/kjvIdx.js';
-import { kjvLists } from '../data/kjvLists.js';
+import { tomeIdx } from '../data/tomeIdx.js';
+import { tomeLists } from '../data/tomeLists.js';
 
 const lowerToolSet = [
   { type: 'btn', icon: 'back', ariaLabel: null },
@@ -39,7 +39,7 @@ class StrongFilterView {
     const bookIdx = bookBin[binIdx.bookBinIdx.bookIdx];
     const wordCount = bookBin[binIdx.bookBinIdx.wordCount];
     const verseCount = bookBin[binIdx.bookBinIdx.verseCount];
-    const citation = kjvLists.books[bookIdx][kjvIdx.book.longName];
+    const citation = tomeLists.books[bookIdx][tomeIdx.book.longName];
 
     const bookFilter = document.createElement('div');
     bookFilter.classList.add('filter', 'filter--book');
@@ -68,7 +68,7 @@ class StrongFilterView {
     const chapterIdx = chapterBin[binIdx.chapterBinIdx.chapterIdx];
     const wordCount = chapterBin[binIdx.chapterBinIdx.wordCount];
     const verseCount = chapterBin[binIdx.chapterBinIdx.verseCount];
-    const citation = kjvLists.chapters[chapterIdx][kjvIdx.chapter.name];
+    const citation = tomeLists.chapters[chapterIdx][tomeIdx.chapter.name];
 
     const btnFilter = document.createElement('div');
     btnFilter.classList.add('btn-filter', 'btn-filter--chapter',
@@ -82,9 +82,9 @@ class StrongFilterView {
 
   buildFilters() {
     const fragment = document.createDocumentFragment();
-    const kjvFilter = this.buildKjvFilter();
-    fragment.appendChild(kjvFilter);
-    const books = this.strongWordKjvBin[binIdx.kjvBinIdx.books];
+    const tomeFilter = this.buildTomeFilter();
+    fragment.appendChild(tomeFilter);
+    const books = this.wordTomeBin[binIdx.tomeBinIdx.books];
     for (const bookBin of books) {
       const bookFilter = this.buildBookFilter(bookBin);
       fragment.appendChild(bookFilter);
@@ -118,10 +118,10 @@ class StrongFilterView {
     container.appendChild(this.page);
   }
 
-  buildKjvFilter() {
-    const citation = kjvLists.name;
-    const wordCount = this.strongWordKjvBin[binIdx.kjvBinIdx.wordCount];
-    const verseCount = this.strongWordKjvBin[binIdx.kjvBinIdx.verseCount];
+  buildTomeFilter() {
+    const citation = tomeLists.tomeName;
+    const wordCount = this.wordTomeBin[binIdx.tomeBinIdx.wordCount];
+    const verseCount = this.wordTomeBin[binIdx.tomeBinIdx.verseCount];
 
     const btnFilter = document.createElement('div');
     btnFilter.classList.add('btn-filter', 'btn-filter--kjv');
@@ -225,8 +225,8 @@ class StrongFilterView {
     queue.subscribe('strong.word.update', (strongWord) => {
       this.wordUpdate(strongWord);
     });
-    queue.subscribe('strong.wordKjvBin.update', (strongWordKjvBin) => {
-      this.wordKjvBinUpdate(strongWordKjvBin);
+    queue.subscribe('strong.wordTomeBin.update', (wordTomeBin) => {
+      this.wordTomeBinUpdate(wordTomeBin);
     });
   }
 
@@ -262,7 +262,7 @@ class StrongFilterView {
   }
 
   updateActiveFilter() {
-    if (this.strongWordKjvBin.length) {
+    if (this.wordTomeBin.length) {
       if (this.btnActiveFilter) {
         this.btnActiveFilter.classList.remove('btn-filter--active');
       }
@@ -289,7 +289,7 @@ class StrongFilterView {
   updateFilters() {
     this.scroll.scrollTop = 0;
     util.removeAllChildren(this.list);
-    if (this.strongWordKjvBin.length) {
+    if (this.wordTomeBin.length) {
       this.empty.classList.add('hide');
       const list = this.buildFilters();
       this.list.appendChild(list);
@@ -308,8 +308,8 @@ class StrongFilterView {
     this.wordChangePending = true;
   }
 
-  wordKjvBinUpdate(strongWordKjvBin) {
-    this.strongWordKjvBin = strongWordKjvBin;
+  wordTomeBinUpdate(wordTomeBin) {
+    this.wordTomeBin = wordTomeBin;
   }
 
   wordUpdate(strongWord) {

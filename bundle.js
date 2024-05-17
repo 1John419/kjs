@@ -114,8 +114,7 @@
   };
 
   let kjvPureDb = null;
-  dbSetup$1.name;
-  let kjvVerseCount = null;
+  let kjvPureVerseCount = null;
   let kjvPureWords = null;
 
   const initializeKjvPureDb = async () => {
@@ -125,7 +124,7 @@
     kjvPureDb = await dbUtil.versionCheck(dbSetup$1);
     await populateDb();
     await loadKjvPureWords();
-    kjvVerseCount = await kjvPureDb.verses.count();
+    kjvPureVerseCount = await kjvPureDb.verses.count();
     progress('kjv pure initialized.');
   };
 
@@ -161,7 +160,7 @@
   };
 
   let kjvNameDb = null;
-  dbSetup.name;
+  let kjvNameVerseCount = null;
   let kjvNameWords = null;
 
   const initializeKjvNameDb = async () => {
@@ -171,6 +170,7 @@
     kjvNameDb = await dbUtil.versionCheck(dbSetup);
     await populateKjv();
     await loadKjvNameWords();
+    kjvNameVerseCount = await kjvNameDb.verses.count();
     progress('kjv name initialized.');
   };
 
@@ -268,8 +268,9 @@
     }
   };
 
-  let kjvDb = null;
-  let kjvWords = null;
+  let tomeDb = null;
+  let tomeVerseCount = null;
+  let tomeWords = null;
   let dbNameMode = null;
   let strongDb = null;
 
@@ -283,13 +284,15 @@
       this.subscribe();
     }
 
-    kjvDbChange() {
+    tomeDbChange() {
       if (this.nameMode === true) {
-        kjvDb = kjvNameDb;
-        kjvWords = kjvNameWords;
+        tomeDb = kjvNameDb;
+        tomeVerseCount = kjvNameVerseCount;
+        tomeWords = kjvNameWords;
       } else {
-        kjvDb = kjvPureDb;
-        kjvWords = kjvPureWords;
+        tomeDb = kjvPureDb;
+        tomeVerseCount = kjvPureVerseCount;
+        tomeWords = kjvPureWords;
       }
     }
 
@@ -297,7 +300,7 @@
       this.nameMode = !this.nameMode;
       this.saveNameMode();
       dbNameMode = this.nameMode;
-      this.kjvDbChange();
+      this.tomeDbChange();
       this.strongDbChange();
       queue.publish('name-mode.update', this.nameMode);
     }
@@ -321,7 +324,9 @@
           nameMode = defaultNameMode;
         }
       }
-      this.kjvDbChange();
+      this.nameMode = nameMode;
+      dbNameMode = this.nameMode;
+      this.tomeDbChange();
       this.strongDbChange();
     }
 
@@ -374,9 +379,17 @@
     scrollElement.scrollLeft = x;
   };
 
-  const kjvIdx = {};
+  util.writeClipboardText = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
-  kjvIdx.book = {
+  const tomeIdx = {};
+
+  tomeIdx.book = {
     longName: 0,
     shortName: 1,
     firstVerseIdx: 2,
@@ -385,7 +398,7 @@
     lastChapterIdx: 5,
   };
 
-  kjvIdx.chapter = {
+  tomeIdx.chapter = {
     bookIdx: 0,
     name: 1,
     num: 2,
@@ -393,7 +406,7 @@
     lastVerseIdx: 4,
   };
 
-  kjvIdx.verse = {
+  tomeIdx.verse = {
     text: 0,
     bookIdx: 1,
     chapterIdx: 2,
@@ -401,29 +414,29 @@
     num: 4,
   };
 
-  kjvIdx.word = {
+  tomeIdx.word = {
     verseIdx: 0,
     count: 1,
   };
 
-  let kjvLists;
+  let tomeLists;
   const url = '/json/kjv_lists.json';
 
   const chapterIdxByVerseIdx = (verseIdx) => {
-    const chapterIdx = kjvLists.chapters
-      .findIndex(x => x[kjvIdx.chapter.lastVerseIdx] >= verseIdx);
+    const chapterIdx = tomeLists.chapters
+      .findIndex(x => x[tomeIdx.chapter.lastVerseIdx] >= verseIdx);
     return chapterIdx;
   };
 
   const firstVerseIdxByChapterIdx = (chapterIdx) => {
-    const verseIdx = kjvLists.chapters[chapterIdx][kjvIdx.chapter.firstVerseIdx];
+    const verseIdx = tomeLists.chapters[chapterIdx][tomeIdx.chapter.firstVerseIdx];
     return verseIdx;
   };
 
-  const initializeKjvLists = async () => {
-    progress('loading kjv lists...');
-    kjvLists = await dbUtil.fetchJson(url);
-    kjvLists.name = 'kjv';
+  const initializeTomeLists = async () => {
+    progress('loading kja lists...');
+    tomeLists = await dbUtil.fetchJson(url);
+    tomeLists.tomeName = 'kjv';
   };
 
   class ReadModel {
@@ -451,7 +464,7 @@
       this.subscribe();
     }
 
-    nameModeChange(nameMode) {
+    nameModeChange() {
       this.updateReadVerseObjs();
     }
 
@@ -557,15 +570,16 @@
         this.chapterIdxUpdate(chapterIdx);
       });
 
+      queue.subscribe('name-mode.change', () => {
+        this.nameModeChange();
+      });
+
       queue.subscribe('panes.change', (panes) => {
         this.panesChange(panes);
       });
 
       queue.subscribe('read.column-mode.toggle', () => {
         this.columnModeToogle();
-      });
-      queue.subscribe('name-mode.change', () => {
-        this.nameModeChange();
       });
       queue.subscribe('read.restore',
         () => { this.restore(); }
@@ -580,10 +594,10 @@
     }
 
     async updateReadVerseObjs() {
-      const chapter = kjvLists.chapters[this.chapterIdx];
-      const keys = util.range(chapter[kjvIdx.chapter.firstVerseIdx],
-        chapter[kjvIdx.chapter.lastVerseIdx] + 1);
-      this.verseObjs = await kjvDb.verses.bulkGet(keys);
+      const chapter = tomeLists.chapters[this.chapterIdx];
+      const keys = util.range(chapter[tomeIdx.chapter.firstVerseIdx],
+        chapter[tomeIdx.chapter.lastVerseIdx] + 1);
+      this.verseObjs = await tomeDb.verses.bulkGet(keys);
       queue.publish('read.verse-objs.update', this.verseObjs);
     }
   }
@@ -595,8 +609,8 @@
 
   template.acrostic = (verseObj) => {
     let acrosticSpan = null;
-    if (kjvLists.acrostics) {
-      const acrostic = kjvLists.acrostics[verseObj.k];
+    if (tomeLists.acrostics) {
+      const acrostic = tomeLists.acrostics[verseObj.k];
       if (acrostic) {
         const glyph = acrostic.slice(0, 1);
         const xlit = acrostic.slice(1);
@@ -861,13 +875,13 @@
       if (acrostic) {
         verse.appendChild(acrostic);
       }
-      const text = template.element('span', 'verse-text', null, null, verseObj.v[kjvIdx.verse.text]);
+      const text = template.element('span', 'verse-text', null, null, verseObj.v[tomeIdx.verse.text]);
       verse.appendChild(text);
       return verse;
     }
 
     buildVerseNum(verseObj) {
-      const num = template.element('span', 'verse-num', null, null, verseObj.v[kjvIdx.verse.num] + ' ');
+      const num = template.element('span', 'verse-num', null, null, verseObj.v[tomeIdx.verse.num] + ' ');
       return num;
     }
 
@@ -987,7 +1001,7 @@
         if (btnVerse) {
           if (this.clipboardMode) {
             const text = `${this.btnBanner.textContent}:${btnVerse.textContent}`;
-            navigator.clipboard.writeText(text);
+            util.writeClipboardText(text);
           } else {
             this.verseClick(btnVerse);
           }
@@ -1274,7 +1288,7 @@
     }
 
     updateBanner() {
-      this.btnBanner.textContent = kjvLists.chapters[this.chapterIdx][kjvIdx.chapter.name];
+      this.btnBanner.textContent = tomeLists.chapters[this.chapterIdx][tomeIdx.chapter.name];
     }
 
     updateColumnMode() {
@@ -1564,7 +1578,7 @@
     chapterIdxChange(chapterIdx) {
       this.chapterIdx = chapterIdx;
       this.saveChapterIdx();
-      const bookIdx = kjvLists.chapters[this.chapterIdx][kjvIdx.chapter.bookIdx];
+      const bookIdx = tomeLists.chapters[this.chapterIdx][tomeIdx.chapter.bookIdx];
       if (this.bookIdx !== bookIdx) {
         this.bookIdxChange(bookIdx);
       }
@@ -1575,7 +1589,7 @@
 
     async chapterNext() {
       let nextChapterIdx = this.chapterIdx + 1;
-      if (nextChapterIdx >= kjvLists.chapters.length) {
+      if (nextChapterIdx >= tomeLists.chapters.length) {
         nextChapterIdx = 0;
       }
       await this.chapterIdxChange(nextChapterIdx);
@@ -1584,7 +1598,7 @@
     async chapterPrev() {
       let prevChapterIdx = this.chapterIdx - 1;
       if (prevChapterIdx < 0) {
-        prevChapterIdx = kjvLists.chapters.length - 1;
+        prevChapterIdx = tomeLists.chapters.length - 1;
       }
       await this.chapterIdxChange(prevChapterIdx);
     }
@@ -1609,7 +1623,7 @@
         } catch (error) {
           chapterIdx = defaultIdx;
         }
-        if (!kjvLists.chapters[chapterIdx]) {
+        if (!tomeLists.chapters[chapterIdx]) {
           chapterIdx = defaultIdx;
         }
       }
@@ -1719,7 +1733,7 @@
       return divider;
     }
 
-    buildBooklist() {
+    buildBookList() {
       const booksHebrew = this.buildHebrewList();
       const booksGreek = this.buildGreekList();
       const divider = this.buildBookDivider();
@@ -1732,7 +1746,7 @@
       const btn = document.createElement('div');
       btn.classList.add('btn-book');
       btn.dataset.bookIdx = bookIdx;
-      btn.textContent = kjvLists.books[bookIdx][kjvIdx.book.shortName];
+      btn.textContent = tomeLists.books[bookIdx][tomeIdx.book.shortName];
       return btn;
     }
 
@@ -1796,7 +1810,7 @@
       this.addListeners();
       this.subscribe();
 
-      this.buildBooklist();
+      this.buildBookList();
     }
 
     listClick(event) {
@@ -1865,13 +1879,13 @@
     }
 
     buildBtnContent(chapterIdx) {
-      const chapter = kjvLists.chapters[chapterIdx];
+      const chapter = tomeLists.chapters[chapterIdx];
       const btn = document.createElement('div');
       btn.classList.add('btn-chapter');
-      btn.dataset.bookIdx = chapter[kjvIdx.chapter.bookIdx];
+      btn.dataset.bookIdx = chapter[tomeIdx.chapter.bookIdx];
       btn.dataset.chapterIdx = chapterIdx;
-      btn.dataset.chapterName = chapter[kjvIdx.chapter.name];
-      const num = chapter[kjvIdx.chapter.num];
+      btn.dataset.chapterName = chapter[tomeIdx.chapter.name];
+      const num = chapter[tomeIdx.chapter.num];
       btn.textContent = num;
       return btn;
     }
@@ -1904,9 +1918,9 @@
 
     chapterIdxUpdate(chapterIdx) {
       const oldChapterIdx = this.chapterIdx || chapterIdx;
-      const oldBookIdx = kjvLists.chapters[oldChapterIdx][kjvIdx.chapter.bookIdx];
+      const oldBookIdx = tomeLists.chapters[oldChapterIdx][tomeIdx.chapter.bookIdx];
       this.chapterIdx = chapterIdx;
-      const bookIdx = kjvLists.chapters[this.chapterIdx][kjvIdx.chapter.bookIdx];
+      const bookIdx = tomeLists.chapters[this.chapterIdx][tomeIdx.chapter.bookIdx];
       if (oldBookIdx !== bookIdx) {
         this.updateBanner();
         this.updateChapterList();
@@ -1992,7 +2006,7 @@
     }
 
     updateBanner() {
-      const longName = kjvLists.books[this.bookIdx][kjvIdx.book.longName];
+      const longName = tomeLists.books[this.bookIdx][tomeIdx.book.longName];
       this.banner.innerHTML = `${longName}`;
     }
 
@@ -2001,9 +2015,9 @@
       util.removeAllChildren(this.list);
       const list = document.createElement('div');
       list.classList.add('content', 'content--chapter');
-      const book = kjvLists.books[this.bookIdx];
-      const indices = util.range(book[kjvIdx.book.firstChapterIdx],
-        book[kjvIdx.book.lastChapterIdx] + 1);
+      const book = tomeLists.books[this.bookIdx];
+      const indices = util.range(book[tomeIdx.book.firstChapterIdx],
+        book[tomeIdx.book.lastChapterIdx] + 1);
       for (const idx of indices) {
         const btn = this.buildBtnContent(idx);
         list.appendChild(btn);
@@ -2027,11 +2041,11 @@
       this.lastBookIdx = bookIdx;
       if (this.bookSelectPending) {
         this.bookSelectPending = false;
-        const book = kjvLists.books[bookIdx];
-        this.chapterCount = book[kjvIdx.book.lastChapterIdx] -
-          book[kjvIdx.book.firstChapterIdx] + 1;
+        const book = tomeLists.books[bookIdx];
+        this.chapterCount = book[tomeIdx.book.lastChapterIdx] -
+          book[tomeIdx.book.firstChapterIdx] + 1;
         if (this.panes > 1 || this.chapterCount === 1) {
-          const chapterIdx = kjvLists.books[bookIdx][kjvIdx.book.firstChapterIdx];
+          const chapterIdx = tomeLists.books[bookIdx][tomeIdx.book.firstChapterIdx];
           queue.publish('chapterIdx.change', chapterIdx);
         } else {
           queue.publish('navigator.task.change', 'navigator-chapter');
@@ -2397,7 +2411,6 @@
     }
 
     initialize() {
-      this.maxIdx = kjvVerseCount - 1;
       this.subscribe();
     }
 
@@ -2415,7 +2428,7 @@
     }
 
     async moveCopyChange(verseIdx) {
-      this.moveCopyVerseObj = await kjvDb.verses.get(verseIdx);
+      this.moveCopyVerseObj = await tomeDb.verses.get(verseIdx);
       queue.publish('bookmark.move-copy.update', this.moveCopyVerseObj);
     }
 
@@ -2461,6 +2474,10 @@
         }
       }
       await this.activeFolderChange(activeFolderName);
+    }
+
+    restoreDb() {
+      this.maxIdx = tomeVerseCount - 1;
     }
 
     restoreExpandMode() {
@@ -2657,8 +2674,12 @@
         this.moveCopyListChange(verseIdx);
       });
 
-      queue.subscribe('name-mode.update', (nameMode) => {
-        this.updateNameMode(nameMode);
+      queue.subscribe('db.restore', () => {
+        this.restoreDb();
+      });
+
+      queue.subscribe('name-mode.update', () => {
+        this.updateNameMode();
       });
     }
 
@@ -2680,7 +2701,7 @@
 
     async updateActiveFolder() {
       this.activeFolder = this.getFolder(this.activeFolderName);
-      this.activeFolder.verseObjs = await kjvDb.verses.bulkGet(this.activeFolder.bookmarks);
+      this.activeFolder.verseObjs = await tomeDb.verses.bulkGet(this.activeFolder.bookmarks);
       queue.publish('bookmark.active-folder.update', this.activeFolder);
     }
 
@@ -2689,7 +2710,7 @@
     }
 
     async updateBookmarkVerseObjs() {
-      this.activeFolder.verseObjs = await kjvDb.verses.bulkGet(this.activeFolder.bookmarks);
+      this.activeFolder.verseObjs = await tomeDb.verses.bulkGet(this.activeFolder.bookmarks);
       queue.publish('bookmark.verse-objs.update', this.activeFolder.verseObjs);
     }
 
@@ -2715,8 +2736,8 @@
       ) {
         status = 'Invalid Package Structure';
       }
-      if (bookmarkPkg.tome !== kjvLists.name) {
-        status = 'KJV Mismatch';
+      if (bookmarkPkg.tome !== tomeLists.tomeName) {
+        status = 'Tome Mismatch';
       }
       return status;
     }
@@ -2795,7 +2816,7 @@
       entry.classList.add('entry', 'entry--bookmark');
       const btnRef = document.createElement('div');
       btnRef.classList.add('btn-entry', 'btn-entry--bookmark');
-      btnRef.textContent = kjvLists.citations[verseIdx];
+      btnRef.textContent = tomeLists.citations[verseIdx];
       btnRef.dataset.verseIdx = verseIdx;
       entry.appendChild(btnRef);
       const btnMenu = template.btnIcon('h-menu', 'h-menu', null);
@@ -2835,7 +2856,7 @@
     buildRefSpan(verseObj) {
       const refSpan = document.createElement('span');
       refSpan.classList.add('font--bold');
-      refSpan.textContent = verseObj.v[kjvIdx.verse.citation] + ' ';
+      refSpan.textContent = verseObj.v[tomeIdx.verse.citation] + ' ';
       return refSpan;
     }
 
@@ -2847,7 +2868,7 @@
       searchText.classList.add('span-result-text');
       const acrostic = template.acrostic(verseObj);
       const ref = this.buildRefSpan(verseObj);
-      const text = document.createTextNode(verseObj.v[kjvIdx.verse.text]);
+      const text = document.createTextNode(verseObj.v[tomeIdx.verse.text]);
       searchText.appendChild(ref);
       if (acrostic) {
         searchText.appendChild(acrostic);
@@ -3151,7 +3172,7 @@
         if (target.classList.contains('btn-result')) {
           if (this.clipboardMode) {
             const text = target.textContent;
-            navigator.clipboard.writeText(text);
+            util.writeClipboardText(text);
           } else {
             const verseIdx = parseInt(target.dataset.verseIdx);
             if (this.strongMode) {
@@ -3374,7 +3395,7 @@
     }
 
     updateBanner() {
-      const ref = this.verse[kjvIdx.verse.citation];
+      const ref = this.verse[tomeIdx.verse.citation];
       this.banner.innerHTML = `${ref} <br> Move/Copy to Folder:`;
     }
 
@@ -4048,7 +4069,7 @@
 
     buildBookmarkPkg() {
       const bookmarkPkg = {};
-      bookmarkPkg.kjv = kjvLists.name;
+      bookmarkPkg.tome = tomeLists.tomeName;
       bookmarkPkg.folders = [];
       for (const folder of this.folders) {
         const newFolder = {};
@@ -4594,7 +4615,7 @@
 
   const binIdx = {};
 
-  binIdx.kjvBinIdx = {
+  binIdx.tomeBinIdx = {
     wordCount: 0,
     verseCount: 1,
     books: 2,
@@ -4637,24 +4658,24 @@
     }
 
     buildBins(verseIdx) {
-      const kjvBin = this.rig.kjvBin;
-      const versesLength = kjvBin[binIdx.kjvBinIdx.verses].length;
-      kjvBin[binIdx.kjvBinIdx.wordCount] += this.verseCount;
-      kjvBin[binIdx.kjvBinIdx.verseCount] += 1;
+      const tomeBin = this.rig.tomeBin;
+      const versesLength = tomeBin[binIdx.tomeBinIdx.verses].length;
+      tomeBin[binIdx.tomeBinIdx.wordCount] += this.verseCount;
+      tomeBin[binIdx.tomeBinIdx.verseCount] += 1;
 
-      const book = kjvLists.books.find(x => x[kjvIdx.book.lastVerseIdx] >= verseIdx);
-      const bookIdx = kjvLists.books.indexOf(book);
-      const chapter = kjvLists.chapters.find(x => x[kjvIdx.chapter.lastVerseIdx] >= verseIdx);
-      const chapterIdx = kjvLists.chapters.indexOf(chapter);
+      const book = tomeLists.books.find(x => x[tomeIdx.book.lastVerseIdx] >= verseIdx);
+      const bookIdx = tomeLists.books.indexOf(book);
+      const chapter = tomeLists.chapters.find(x => x[tomeIdx.chapter.lastVerseIdx] >= verseIdx);
+      const chapterIdx = tomeLists.chapters.indexOf(chapter);
 
-      let bookBin = kjvBin[binIdx.kjvBinIdx.books].find(x => x[binIdx.bookBinIdx.bookIdx] === bookIdx);
+      let bookBin = tomeBin[binIdx.tomeBinIdx.books].find(x => x[binIdx.bookBinIdx.bookIdx] === bookIdx);
       if (!bookBin) {
         const wordCount = 0;
         const verseCount = 0;
         const sliceStart = versesLength - 1;
         const sliceEnd = sliceStart;
         const chapters = [];
-        kjvBin[binIdx.kjvBinIdx.books].push([
+        tomeBin[binIdx.tomeBinIdx.books].push([
           bookIdx,
           wordCount,
           verseCount,
@@ -4662,7 +4683,7 @@
           sliceEnd,
           chapters,
         ]);
-        bookBin = kjvBin[binIdx.kjvBinIdx.books][kjvBin[binIdx.kjvBinIdx.books].length - 1];
+        bookBin = tomeBin[binIdx.tomeBinIdx.books][tomeBin[binIdx.tomeBinIdx.books].length - 1];
       }
       bookBin[binIdx.bookBinIdx.wordCount] += this.verseCount;
       bookBin[binIdx.bookBinIdx.verseCount] += 1;
@@ -4709,7 +4730,7 @@
       const missingTerms = [];
       for (const term of this.terms) {
         const re = new RegExp(`^${term.replace(/\*/g, '.*')}$`, this.testFlags);
-        const words = kjvWords.filter(x => re.test(x));
+        const words = tomeWords.filter(x => re.test(x));
         if (words.length > 0) {
           this.patterns.push(words);
         } else {
@@ -4723,14 +4744,14 @@
 
     async buildPhraseVerses() {
       const allVerses = [...this.intersects].sort(numSort);
-      const verseObjs = await kjvDb.verses.bulkGet(allVerses);
+      const verseObjs = await tomeDb.verses.bulkGet(allVerses);
       for (const verseObj of verseObjs) {
         this.verseIdx = verseObj.k;
         const re = this.buildRegExp(this.searchTerms, this.flags);
-        const text = verseObj.v[kjvIdx.verse.text].replace(/[!();:,.?-]/g, '');
+        const text = verseObj.v[tomeIdx.verse.text].replace(/[!();:,.?-]/g, '');
         this.verseCount = (text.match(re) || []).length;
         if (this.verseCount > 0) {
-          this.rig.kjvBin[binIdx.kjvBinIdx.verses].push(this.verseIdx);
+          this.rig.tomeBin[binIdx.tomeBinIdx.verses].push(this.verseIdx);
           this.buildBins(this.verseIdx);
         }
       }
@@ -4786,7 +4807,7 @@
       this.sets = [];
 
       const unique = [...new Set([].concat.apply([], this.combinations))].sort();
-      this.wordObjs = await kjvDb.words.bulkGet(unique);
+      this.wordObjs = await tomeDb.words.bulkGet(unique);
 
       const words = {};
       this.wordObjs.map(obj => words[obj.k] = obj.v);
@@ -4794,7 +4815,7 @@
       for (const combination of this.combinations) {
         const comboSets = [];
         for (const word of combination) {
-          const verseKeys = words[word].map(x => x[kjvIdx.word.verseIdx]);
+          const verseKeys = words[word].map(x => x[tomeIdx.word.verseIdx]);
           comboSets.push(new Set(verseKeys));
         }
         this.sets.push(comboSets);
@@ -4807,7 +4828,7 @@
         this.verseIdx = verseIdx;
         this.getVerseCount(verseIdx);
         if (this.verseCount > 0) {
-          this.rig.kjvBin[binIdx.kjvBinIdx.verses].push(this.verseIdx);
+          this.rig.tomeBin[binIdx.tomeBinIdx.verses].push(this.verseIdx);
           this.buildBins(this.verseIdx);
         }
       }
@@ -4824,9 +4845,9 @@
     getVerseCount(verseIdx) {
       this.verseCount = 0;
       for (const wordVerseObj of this.wordObjs) {
-        const verseCount = wordVerseObj.v.find(x => x[kjvIdx.word.verseIdx] === verseIdx);
+        const verseCount = wordVerseObj.v.find(x => x[tomeIdx.word.verseIdx] === verseIdx);
         if (verseCount) {
-          this.verseCount += verseCount[kjvIdx.word.count];
+          this.verseCount += verseCount[tomeIdx.word.count];
         }
       }
     }
@@ -4835,12 +4856,12 @@
       return;
     }
 
-    initializeKjvBin() {
+    initializeTomeBin() {
       const wordCount = 0;
       const verseCount = 0;
       const books = [];
       const verses = [];
-      this.rig.kjvBin = [
+      this.rig.tomeBin = [
         wordCount,
         verseCount,
         books,
@@ -4876,7 +4897,7 @@
 
     async performSearch(query) {
       this.buildRig(query);
-      this.initializeKjvBin();
+      this.initializeTomeBin();
       if (this.rig.type === 'WORD' || this.rig.type === 'PHRASE') {
         this.buildPatterns();
         if (this.rig.wordStatus === 'OK') {
@@ -4994,7 +5015,7 @@
     }
 
     resetFilter() {
-      const filter = this.kjvFilter();
+      const filter = this.tomeFilter();
       this.filterChange(filter);
     }
 
@@ -5007,7 +5028,7 @@
     }
 
     restoreFilter() {
-      const defaultFilter = this.kjvFilter();
+      const defaultFilter = this.tomeFilter();
       let searchFilter = localStorage.getItem('searchFilter');
       if (!searchFilter) {
         searchFilter = defaultFilter;
@@ -5160,7 +5181,7 @@
       queue.publish('search.task.update', this.searchTask);
     }
 
-    kjvFilter() {
+    tomeFilter() {
       return {
         bookIdx: -1,
         chapterIdx: -1,
@@ -5176,7 +5197,7 @@
       if (this.rig === null) {
         return;
       }
-      this.searchVerseObjs = await kjvDb.verses.bulkGet(this.rig.kjvBin[binIdx.kjvBinIdx.verses]);
+      this.searchVerseObjs = await tomeDb.verses.bulkGet(this.rig.tomeBin[binIdx.tomeBinIdx.verses]);
       queue.publish('search.verse-objs.update', this.searchVerseObjs);
     }
 
@@ -5219,29 +5240,29 @@
     }
 
     applyFilter() {
-      const kjvBin = this.rig.kjvBin;
+      const tomeBin = this.rig.tomeBin;
       const bookIdx = this.searchFilter.bookIdx;
       const chapterIdx = this.searchFilter.chapterIdx;
       if (bookIdx === -1 && chapterIdx === -1) {
-        this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses];
-        this.wordCount = kjvBin[binIdx.kjvBinIdx.wordCount];
-        this.verseCount = kjvBin[binIdx.kjvBinIdx.verseCount];
-        this.citation = kjvLists.name;
+        this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses];
+        this.wordCount = tomeBin[binIdx.tomeBinIdx.wordCount];
+        this.verseCount = tomeBin[binIdx.tomeBinIdx.verseCount];
+        this.citation = tomeLists.tomeName;
       } else {
-        const books = kjvBin[binIdx.kjvBinIdx.books];
+        const books = tomeBin[binIdx.tomeBinIdx.books];
         const bookBin = this.findBin(books, bookIdx);
         if (chapterIdx === -1) {
-          this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses].slice(bookBin[binIdx.bookBinIdx.sliceStart], bookBin[binIdx.bookBinIdx.sliceEnd]);
+          this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses].slice(bookBin[binIdx.bookBinIdx.sliceStart], bookBin[binIdx.bookBinIdx.sliceEnd]);
           this.wordCount = bookBin[binIdx.bookBinIdx.wordCount];
           this.verseCount = bookBin[binIdx.bookBinIdx.verseCount];
-          this.citation = kjvLists.books[bookIdx][kjvIdx.book.longName];
+          this.citation = tomeLists.books[bookIdx][tomeIdx.book.longName];
         } else {
           const chapters = bookBin[binIdx.bookBinIdx.chapters];
           const chapterBin = this.findBin(chapters, chapterIdx);
-          this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses].slice(chapterBin[binIdx.chapterBinIdx.sliceStart], chapterBin[binIdx.chapterBinIdx.sliceEnd]);
+          this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses].slice(chapterBin[binIdx.chapterBinIdx.sliceStart], chapterBin[binIdx.chapterBinIdx.sliceEnd]);
           this.wordCount = chapterBin[binIdx.chapterBinIdx.wordCount];
           this.verseCount = chapterBin[binIdx.chapterBinIdx.verseCount];
-          this.citation = kjvLists.chapters[chapterIdx][kjvIdx.chapter.name];
+          this.citation = tomeLists.chapters[chapterIdx][tomeIdx.chapter.name];
         }
       }
     }
@@ -5275,7 +5296,7 @@
     buildRefSpan(verseObj) {
       const refSpan = document.createElement('span');
       refSpan.classList.add('font--bold');
-      refSpan.textContent = verseObj.v[kjvIdx.verse.citation] + ' ';
+      refSpan.textContent = verseObj.v[tomeIdx.verse.citation] + ' ';
       return refSpan;
     }
 
@@ -5287,7 +5308,7 @@
       searchText.classList.add('span-result-text');
       const acrostic = template.acrostic(verseObj);
       const ref = this.buildRefSpan(verseObj);
-      const text = document.createTextNode(verseObj.v[kjvIdx.verse.text]);
+      const text = document.createTextNode(verseObj.v[tomeIdx.verse.text]);
       searchText.appendChild(ref);
       if (acrostic) {
         searchText.appendChild(acrostic);
@@ -5396,7 +5417,7 @@
       if (btn) {
         if (this.clipboardMode) {
           const text = btn.textContent;
-          navigator.clipboard.writeText(text);
+          util.writeClipboardText(text);
         } else {
           const verseIdx = parseInt(btn.dataset.verseIdx);
           if (this.strongMode) {
@@ -5594,7 +5615,7 @@
       const bookIdx = bookBin[binIdx.bookBinIdx.bookIdx];
       const wordCount = bookBin[binIdx.bookBinIdx.wordCount];
       const verseCount = bookBin[binIdx.bookBinIdx.verseCount];
-      const citation = kjvLists.books[bookIdx][kjvIdx.book.longName];
+      const citation = tomeLists.books[bookIdx][tomeIdx.book.longName];
 
       const bookFilter = document.createElement('div');
       bookFilter.classList.add('filter', 'filter--book');
@@ -5623,7 +5644,7 @@
       const chapterIdx = chapterBin[binIdx.chapterBinIdx.chapterIdx];
       const wordCount = chapterBin[binIdx.chapterBinIdx.wordCount];
       const verseCount = chapterBin[binIdx.chapterBinIdx.verseCount];
-      const citation = kjvLists.chapters[chapterIdx][kjvIdx.chapter.name];
+      const citation = tomeLists.chapters[chapterIdx][tomeIdx.chapter.name];
 
       const btnFilter = document.createElement('div');
       btnFilter.classList.add('btn-filter', 'btn-filter--chapter',
@@ -5637,10 +5658,10 @@
 
     buildFilters() {
       const fragment = document.createDocumentFragment();
-      const kjvBin = this.rig.kjvBin;
-      const kjvFilter = this.buildKjvFilter(kjvBin);
-      fragment.appendChild(kjvFilter);
-      const books = kjvBin[binIdx.kjvBinIdx.books];
+      const tomeBin = this.rig.tomeBin;
+      const tomeFilter = this.buildTomeFilter(tomeBin);
+      fragment.appendChild(tomeFilter);
+      const books = tomeBin[binIdx.tomeBinIdx.books];
       for (const bookBin of books) {
         const bookFilter = this.buildBookFilter(bookBin);
         fragment.appendChild(bookFilter);
@@ -5671,13 +5692,13 @@
       container.appendChild(this.page);
     }
 
-    buildKjvFilter(kjvBin) {
-      const citation = kjvLists.name;
-      const wordCount = kjvBin[binIdx.kjvBinIdx.wordCount];
-      const verseCount = kjvBin[binIdx.kjvBinIdx.verseCount];
+    buildTomeFilter(tomeBin) {
+      const citation = tomeLists.tomeName;
+      const wordCount = tomeBin[binIdx.tomeBinIdx.wordCount];
+      const verseCount = tomeBin[binIdx.tomeBinIdx.verseCount];
 
       const btnFilter = document.createElement('div');
-      btnFilter.classList.add('btn-filter', 'btn-filter--kjv');
+      btnFilter.classList.add('btn-filter', 'btn-filter--tome');
       btnFilter.textContent = `${citation} (${wordCount}/${verseCount})`;
       btnFilter.dataset.bookIdx = -1;
       btnFilter.dataset.chapterIdx = -1;
@@ -6399,8 +6420,8 @@
   };
 
   strongIdx.word = {
-    kjvWord: 0,
-    kjvBin: 1,
+    tomeWord: 0,
+    tomeBin: 1,
   };
 
   const strongSetup = {
@@ -6546,7 +6567,7 @@
     }
 
     filterReset() {
-      const strongFilter = this.kjvFilter();
+      const strongFilter = this.tomeFilter();
       this.filterChange(strongFilter);
     }
 
@@ -6636,7 +6657,7 @@
     }
 
     restoreFilter() {
-      const defaultFilter = this.kjvFilter();
+      const defaultFilter = this.tomeFilter();
       let strongFilter = localStorage.getItem('strongFilter');
       if (!strongFilter) {
         strongFilter = defaultFilter;
@@ -6836,7 +6857,7 @@
       queue.publish('strong.task.update', this.strongTask);
     }
 
-    kjvFilter() {
+    tomeFilter() {
       return {
         bookIdx: -1,
         chapterIdx: -1
@@ -6854,10 +6875,9 @@
     }
 
     async updateStrongModel() {
-      queue.publish('* update.strong.model *', null);
       this.strongMapObj = await strongDb.maps.get(this.strongVerseIdx);
       queue.publish('strong.map.update', this.strongMapObj);
-      this.strongVerseObj = await kjvDb.verses.get(this.strongVerseIdx);
+      this.strongVerseObj = await tomeDb.verses.get(this.strongVerseIdx);
       queue.publish('strong.verse.update', this.strongVerseObj);
       this.chainClear();
       await this.defChange(this.strongDef);
@@ -6865,7 +6885,7 @@
 
     async updateWordMaps() {
       if (this.words.length) {
-        const verses = this.wordKjvBin[binIdx.kjvBinIdx.verses];
+        const verses = this.wordTomeBin[binIdx.tomeBinIdx.verses];
         this.wordMapObjs = await strongDb.maps.bulkGet(verses);
         queue.publish('strong.wordMap.update', this.wordMapObjs);
       } else {
@@ -6882,15 +6902,15 @@
 
     async updateWordVerses() {
       if (this.words.length) {
-        const word = this.words.find(x => x[strongIdx.word.kjvWord] === this.strongWord);
-        this.wordKjvBin = word[strongIdx.word.kjvBin];
-        queue.publish('strong.wordKjvBin.update', this.wordKjvBin);
-        const verses = this.wordKjvBin[binIdx.kjvBinIdx.verses];
-        this.wordVerseObjs = await kjvDb.verses.bulkGet(verses);
+        const word = this.words.find(x => x[strongIdx.word.tomeWord] === this.strongWord);
+        this.wordTomeBin = word[strongIdx.word.tomeBin];
+        queue.publish('strong.wordTomeBin.update', this.wordTomeBin);
+        const verses = this.wordTomeBin[binIdx.tomeBinIdx.verses];
+        this.wordVerseObjs = await tomeDb.verses.bulkGet(verses);
         queue.publish('strong.wordVerse.update', this.wordVerseObjs);
       } else {
-        this.strongIdx.word.kjvBin = [];
-        queue.publish('strong.wordKjvBin.update', this.wordKjvBin);
+        this.strongIdx.word.tomeBin = [];
+        queue.publish('strong.wordTomeBin.update', this.wordTomeBin);
         this.wordVerseObjs = [];
         queue.publish('strong.wordVerse.update', this.wordVerseObjs);
       }
@@ -6901,7 +6921,7 @@
       this.saveVerseIdx();
       this.strongMapObj = await strongDb.maps.get(this.strongVerseIdx);
       queue.publish('strong.map.update', this.strongMapObj);
-      this.strongVerseObj = await kjvDb.verses.get(this.strongVerseIdx);
+      this.strongVerseObj = await tomeDb.verses.get(this.strongVerseIdx);
       queue.publish('strong.verse.update', this.strongVerseObj);
     }
 
@@ -6909,10 +6929,10 @@
       this.strongWord = strongWord;
       this.saveWord();
       if (this.words.length) {
-        const word = this.words.find(x => x[strongIdx.word.kjvWord] === this.strongWord);
-        this.wordKjvBin = word[strongIdx.word.kjvBin];
+        const word = this.words.find(x => x[strongIdx.word.tomeWord] === this.strongWord);
+        this.wordTomeBin = word[strongIdx.word.tomeBin];
       } else {
-        this.wordKjvBin = [];
+        this.wordTomeBin = [];
       }
       await this.updateWordVerses();
       await this.updateWordMaps();
@@ -6921,13 +6941,13 @@
     }
 
     async wordFirst() {
-      let firstKjvWord;
+      let firstTomeWord;
       if (this.words.length) {
-        firstKjvWord = this.words[firstWord][strongIdx.word.kjvWord];
+        firstTomeWord = this.words[firstWord][strongIdx.word.tomeWord];
       } else {
-        firstKjvWord = null;
+        firstTomeWord = null;
       }
-      await this.wordChange(firstKjvWord);
+      await this.wordChange(firstTomeWord);
     }
 
   }
@@ -7011,12 +7031,12 @@
     buildWords() {
       const strongWords = template.element('div', 'strong-words', null, null, null);
       for (const word of this.words) {
-        const kjvWord = word[strongIdx.word.kjvWord];
-        const kjvBin = word[strongIdx.word.kjvBin];
+        const tomeWord = word[strongIdx.word.tomeWord];
+        const tomeBin = word[strongIdx.word.tomeBin];
         const label =
-          `${kjvWord} (${kjvBin[binIdx.kjvBinIdx.wordCount]}/${kjvBin[binIdx.kjvBinIdx.verseCount]})`;
+          `${tomeWord} (${tomeBin[binIdx.tomeBinIdx.wordCount]}/${tomeBin[binIdx.tomeBinIdx.verseCount]})`;
         const btn = template.element('div', 'btn-strong-word', null, null, label);
-        btn.dataset.word = word[strongIdx.word.kjvWord];
+        btn.dataset.word = word[strongIdx.word.tomeWord];
         strongWords.appendChild(btn);
       }
       return strongWords;
@@ -7209,7 +7229,7 @@
       const bookIdx = bookBin[binIdx.bookBinIdx.bookIdx];
       const wordCount = bookBin[binIdx.bookBinIdx.wordCount];
       const verseCount = bookBin[binIdx.bookBinIdx.verseCount];
-      const citation = kjvLists.books[bookIdx][kjvIdx.book.longName];
+      const citation = tomeLists.books[bookIdx][tomeIdx.book.longName];
 
       const bookFilter = document.createElement('div');
       bookFilter.classList.add('filter', 'filter--book');
@@ -7238,7 +7258,7 @@
       const chapterIdx = chapterBin[binIdx.chapterBinIdx.chapterIdx];
       const wordCount = chapterBin[binIdx.chapterBinIdx.wordCount];
       const verseCount = chapterBin[binIdx.chapterBinIdx.verseCount];
-      const citation = kjvLists.chapters[chapterIdx][kjvIdx.chapter.name];
+      const citation = tomeLists.chapters[chapterIdx][tomeIdx.chapter.name];
 
       const btnFilter = document.createElement('div');
       btnFilter.classList.add('btn-filter', 'btn-filter--chapter',
@@ -7252,9 +7272,9 @@
 
     buildFilters() {
       const fragment = document.createDocumentFragment();
-      const kjvFilter = this.buildKjvFilter();
-      fragment.appendChild(kjvFilter);
-      const books = this.strongWordKjvBin[binIdx.kjvBinIdx.books];
+      const tomeFilter = this.buildTomeFilter();
+      fragment.appendChild(tomeFilter);
+      const books = this.wordTomeBin[binIdx.tomeBinIdx.books];
       for (const bookBin of books) {
         const bookFilter = this.buildBookFilter(bookBin);
         fragment.appendChild(bookFilter);
@@ -7288,10 +7308,10 @@
       container.appendChild(this.page);
     }
 
-    buildKjvFilter() {
-      const citation = kjvLists.name;
-      const wordCount = this.strongWordKjvBin[binIdx.kjvBinIdx.wordCount];
-      const verseCount = this.strongWordKjvBin[binIdx.kjvBinIdx.verseCount];
+    buildTomeFilter() {
+      const citation = tomeLists.tomeName;
+      const wordCount = this.wordTomeBin[binIdx.tomeBinIdx.wordCount];
+      const verseCount = this.wordTomeBin[binIdx.tomeBinIdx.verseCount];
 
       const btnFilter = document.createElement('div');
       btnFilter.classList.add('btn-filter', 'btn-filter--kjv');
@@ -7395,8 +7415,8 @@
       queue.subscribe('strong.word.update', (strongWord) => {
         this.wordUpdate(strongWord);
       });
-      queue.subscribe('strong.wordKjvBin.update', (strongWordKjvBin) => {
-        this.wordKjvBinUpdate(strongWordKjvBin);
+      queue.subscribe('strong.wordTomeBin.update', (wordTomeBin) => {
+        this.wordTomeBinUpdate(wordTomeBin);
       });
     }
 
@@ -7432,7 +7452,7 @@
     }
 
     updateActiveFilter() {
-      if (this.strongWordKjvBin.length) {
+      if (this.wordTomeBin.length) {
         if (this.btnActiveFilter) {
           this.btnActiveFilter.classList.remove('btn-filter--active');
         }
@@ -7459,7 +7479,7 @@
     updateFilters() {
       this.scroll.scrollTop = 0;
       util.removeAllChildren(this.list);
-      if (this.strongWordKjvBin.length) {
+      if (this.wordTomeBin.length) {
         this.empty.classList.add('hide');
         const list = this.buildFilters();
         this.list.appendChild(list);
@@ -7478,8 +7498,8 @@
       this.wordChangePending = true;
     }
 
-    wordKjvBinUpdate(strongWordKjvBin) {
-      this.strongWordKjvBin = strongWordKjvBin;
+    wordTomeBinUpdate(wordTomeBin) {
+      this.wordTomeBin = wordTomeBin;
     }
 
     wordUpdate(strongWord) {
@@ -7872,33 +7892,33 @@
     }
 
     applyFilter() {
-      if (this.strongwordKjvBin.length) {
-        const kjvBin = this.strongwordKjvBin;
+      if (this.wordTomeBin.length) {
+        const tomeBin = this.wordTomeBin;
         const bookIdx = this.strongFilter.bookIdx;
         const chapterIdx = this.strongFilter.chapterIdx;
         if (bookIdx === -1 && chapterIdx === -1) {
-          this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses];
-          this.wordCount = kjvBin[binIdx.kjvBinIdx.wordCount];
-          this.verseCount = kjvBin[binIdx.kjvBinIdx.verseCount];
-          this.citation = kjvLists.name;
+          this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses];
+          this.wordCount = tomeBin[binIdx.tomeBinIdx.wordCount];
+          this.verseCount = tomeBin[binIdx.tomeBinIdx.verseCount];
+          this.citation = tomeLists.tomeName;
         } else {
-          const books = kjvBin[binIdx.kjvBinIdx.books];
+          const books = tomeBin[binIdx.tomeBinIdx.books];
           const bookBin = this.findBin(books, bookIdx);
           if (chapterIdx === -1) {
-            this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses]
+            this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses]
               .slice(bookBin[binIdx.bookBinIdx.sliceStart], bookBin[binIdx.bookBinIdx.sliceEnd]);
             this.wordCount = bookBin[binIdx.bookBinIdx.wordCount];
             this.verseCount = bookBin[binIdx.bookBinIdx.verseCount];
-            this.citation = kjvLists.books[bookIdx][kjvIdx.book.longName];
+            this.citation = tomeLists.books[bookIdx][tomeIdx.book.longName];
           } else {
             const chapters = bookBin[binIdx.bookBinIdx.chapters];
             const chapterBin = this.findBin(chapters, chapterIdx);
-            this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses]
+            this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses]
               .slice(chapterBin[binIdx.chapterBinIdx.sliceStart],
                 chapterBin[binIdx.chapterBinIdx.sliceEnd]);
             this.wordCount = chapterBin[binIdx.chapterBinIdx.wordCount];
             this.verseCount = chapterBin[binIdx.chapterBinIdx.verseCount];
-            this.citation = kjvLists.chapters[chapterIdx][kjvIdx.chapter.name];
+            this.citation = tomeLists.chapters[chapterIdx][tomeIdx.chapter.name];
           }
         }
       } else {
@@ -7942,7 +7962,7 @@
     buildRefSpan(verseObj) {
       const refSpan = document.createElement('span');
       refSpan.classList.add('font--bold');
-      refSpan.textContent = verseObj.v[kjvIdx.verse.citation] + ' ';
+      refSpan.textContent = verseObj.v[tomeIdx.verse.citation] + ' ';
       return refSpan;
     }
 
@@ -7950,7 +7970,7 @@
       const verseIdx = verseObj.k;
       const verse = verseObj.v;
       const parts = [];
-      verse[kjvIdx.verse.text].split(' ');
+      verse[tomeIdx.verse.text].split(' ');
       const maps = this.strongWordMapObjs.find(x => x.k === verseIdx).v;
       for (const map of maps) {
         const strongStr = map[strongIdx.map.strongNums].join(' ');
@@ -8167,8 +8187,8 @@
       queue.subscribe('strong.word.update', (strongWord) => {
         this.wordUpdate(strongWord);
       });
-      queue.subscribe('strong.wordKjvBin.update', (wordKjvBin) => {
-        this.wordKjvBinUpdate(wordKjvBin);
+      queue.subscribe('strong.wordTomeBin.update', (wordTomeBin) => {
+        this.wordTomeBinUpdate(wordTomeBin);
       });
       queue.subscribe('strong.wordMap.update', (wordMapObjs) => {
         this.wordMapUpdate(wordMapObjs);
@@ -8255,8 +8275,8 @@
       this.strongWordMapObjs = wordMapObjs;
     }
 
-    wordKjvBinUpdate(wordKjvBin) {
-      this.strongwordKjvBin = wordKjvBin;
+    wordTomeBinUpdate(wordTomeBin) {
+      this.wordTomeBin = wordTomeBin;
     }
 
     wordVerseUpdate(wordVerseObjs) {
@@ -8413,14 +8433,14 @@
     }
 
     updateBanner() {
-      this.banner.textContent = this.verse[kjvIdx.verse.citation];
+      this.banner.textContent = this.verse[tomeIdx.verse.citation];
     }
 
     updateVerse() {
       this.scroll.scrollTop = 0;
       util.removeAllChildren(this.list);
       const docFragment = document.createDocumentFragment();
-      this.verseWords = this.verse[kjvIdx.verse.text].split(' ');
+      this.verseWords = this.verse[tomeIdx.verse.text].split(' ');
       for (const map of this.maps) {
         const strongMap = this.buildStrongFragment(map);
         docFragment.appendChild(strongMap);
@@ -8876,7 +8896,7 @@
         themeName: 'Chalcedony',
         themeClass: 'theme--chalcedony-light'
       });
-          queue.publish('themes.update', this.themes);
+      queue.publish('themes.update', this.themes);
     }
 
     restore() {
@@ -9918,7 +9938,7 @@
         this.scroll.innerHTML = html;
         this.scroll.scrollTop = 0;
       }).catch((error) => {
-        console.log(error);
+        console.log(error.message);
       });
     }
 
@@ -10031,7 +10051,7 @@
     const body = document.body;
     const load = body.querySelector('.load');
 
-    await initializeKjvLists();
+    await initializeTomeLists();
     await initializeKjvPureDb();
     await initializeKjvNameDb();
     await initializeStrongDictDb();

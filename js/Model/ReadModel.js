@@ -2,9 +2,9 @@
 
 import { queue } from '../CommandQueue.js';
 import { util } from '../util.js';
-import { kjvIdx} from '../data/kjvIdx.js';
-import { kjvLists} from '../data/kjvLists.js';
-import { kjvDb } from '../Model/DbModel.js';
+import { tomeIdx} from '../data/tomeIdx.js';
+import { tomeLists} from '../data/tomeLists.js';
+import { tomeDb } from '../Model/DbModel.js';
 
 class ReadModel {
 
@@ -31,7 +31,7 @@ class ReadModel {
     this.subscribe();
   }
 
-  nameModeChange(nameMode) {
+  nameModeChange() {
     this.updateReadVerseObjs();
   }
 
@@ -137,15 +137,16 @@ class ReadModel {
       this.chapterIdxUpdate(chapterIdx);
     });
 
+    queue.subscribe('name-mode.change', () => {
+      this.nameModeChange();
+    });
+
     queue.subscribe('panes.change', (panes) => {
       this.panesChange(panes);
     });
 
     queue.subscribe('read.column-mode.toggle', () => {
       this.columnModeToogle();
-    });
-    queue.subscribe('name-mode.change', () => {
-      this.nameModeChange();
     });
     queue.subscribe('read.restore',
       () => { this.restore(); }
@@ -160,10 +161,10 @@ class ReadModel {
   }
 
   async updateReadVerseObjs() {
-    const chapter = kjvLists.chapters[this.chapterIdx];
-    const keys = util.range(chapter[kjvIdx.chapter.firstVerseIdx],
-      chapter[kjvIdx.chapter.lastVerseIdx] + 1);
-    this.verseObjs = await kjvDb.verses.bulkGet(keys);
+    const chapter = tomeLists.chapters[this.chapterIdx];
+    const keys = util.range(chapter[tomeIdx.chapter.firstVerseIdx],
+      chapter[tomeIdx.chapter.lastVerseIdx] + 1);
+    this.verseObjs = await tomeDb.verses.bulkGet(keys);
     queue.publish('read.verse-objs.update', this.verseObjs);
   }
 }

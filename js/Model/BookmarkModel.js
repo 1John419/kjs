@@ -1,9 +1,9 @@
 'use strict';
 
 import { queue } from '../CommandQueue.js';
-import { kjvLists } from '../data/kjvLists.js';
-import { kjvVerseCount } from '../data/kjvPureDb.js';
-import { kjvDb } from '../Model/DbModel.js';
+import { tomeLists } from '../data/tomeLists.js';
+import { tomeVerseCount } from './DbModel.js';
+import { tomeDb } from '../Model/DbModel.js';
 
 const numSortAscend = (a, b) => a - b;
 
@@ -253,7 +253,6 @@ class BookmarkModel {
   }
 
   initialize() {
-    this.maxIdx = kjvVerseCount - 1;
     this.subscribe();
   }
 
@@ -271,7 +270,7 @@ class BookmarkModel {
   }
 
   async moveCopyChange(verseIdx) {
-    this.moveCopyVerseObj = await kjvDb.verses.get(verseIdx);
+    this.moveCopyVerseObj = await tomeDb.verses.get(verseIdx);
     queue.publish('bookmark.move-copy.update', this.moveCopyVerseObj);
   }
 
@@ -317,6 +316,10 @@ class BookmarkModel {
       }
     }
     await this.activeFolderChange(activeFolderName);
+  }
+
+  restoreDb() {
+    this.maxIdx = tomeVerseCount - 1;
   }
 
   restoreExpandMode() {
@@ -513,8 +516,12 @@ class BookmarkModel {
       this.moveCopyListChange(verseIdx);
     });
 
-    queue.subscribe('name-mode.update', (nameMode) => {
-      this.updateNameMode(nameMode);
+    queue.subscribe('db.restore', () => {
+      this.restoreDb();
+    });
+
+    queue.subscribe('name-mode.update', () => {
+      this.updateNameMode();
     });
   }
 
@@ -536,7 +543,7 @@ class BookmarkModel {
 
   async updateActiveFolder() {
     this.activeFolder = this.getFolder(this.activeFolderName);
-    this.activeFolder.verseObjs = await kjvDb.verses.bulkGet(this.activeFolder.bookmarks);
+    this.activeFolder.verseObjs = await tomeDb.verses.bulkGet(this.activeFolder.bookmarks);
     queue.publish('bookmark.active-folder.update', this.activeFolder);
   }
 
@@ -545,7 +552,7 @@ class BookmarkModel {
   }
 
   async updateBookmarkVerseObjs() {
-    this.activeFolder.verseObjs = await kjvDb.verses.bulkGet(this.activeFolder.bookmarks);
+    this.activeFolder.verseObjs = await tomeDb.verses.bulkGet(this.activeFolder.bookmarks);
     queue.publish('bookmark.verse-objs.update', this.activeFolder.verseObjs);
   }
 
@@ -571,8 +578,8 @@ class BookmarkModel {
     ) {
       status = 'Invalid Package Structure';
     }
-    if (bookmarkPkg.tome !== kjvLists.name) {
-      status = 'KJV Mismatch';
+    if (bookmarkPkg.tome !== tomeLists.tomeName) {
+      status = 'Tome Mismatch';
     }
     return status;
   }

@@ -20,8 +20,8 @@ const fontSize = [
 ];
 
 const fontVariant = [
-  { variant: 'normal', ariaLabel: null},
-  { variant: 'small-caps', ariaLabel: null},
+  { variant: 'normal', ariaLabel: null },
+  { variant: 'small-caps', ariaLabel: null },
 ];
 
 const templateBtnFontSize = (size, label) => {

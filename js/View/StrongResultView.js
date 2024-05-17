@@ -4,8 +4,8 @@ import { queue } from '../CommandQueue.js';
 import { template } from '../template.js';
 import { util } from '../util.js';
 import { binIdx } from '../data/binIdx.js';
-import { kjvIdx } from '../data/kjvIdx.js';
-import { kjvLists } from '../data/kjvLists.js';
+import { tomeIdx } from '../data/tomeIdx.js';
+import { tomeLists } from '../data/tomeLists.js';
 import { strongIdx } from '../data/strongIdx.js';
 
 const lowerToolSet = [
@@ -65,33 +65,33 @@ class StrongResultView {
   }
 
   applyFilter() {
-    if (this.strongwordKjvBin.length) {
-      const kjvBin = this.strongwordKjvBin;
+    if (this.wordTomeBin.length) {
+      const tomeBin = this.wordTomeBin;
       const bookIdx = this.strongFilter.bookIdx;
       const chapterIdx = this.strongFilter.chapterIdx;
       if (bookIdx === -1 && chapterIdx === -1) {
-        this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses];
-        this.wordCount = kjvBin[binIdx.kjvBinIdx.wordCount];
-        this.verseCount = kjvBin[binIdx.kjvBinIdx.verseCount];
-        this.citation = kjvLists.name;
+        this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses];
+        this.wordCount = tomeBin[binIdx.tomeBinIdx.wordCount];
+        this.verseCount = tomeBin[binIdx.tomeBinIdx.verseCount];
+        this.citation = tomeLists.tomeName;
       } else {
-        const books = kjvBin[binIdx.kjvBinIdx.books];
+        const books = tomeBin[binIdx.tomeBinIdx.books];
         const bookBin = this.findBin(books, bookIdx);
         if (chapterIdx === -1) {
-          this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses]
+          this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses]
             .slice(bookBin[binIdx.bookBinIdx.sliceStart], bookBin[binIdx.bookBinIdx.sliceEnd]);
           this.wordCount = bookBin[binIdx.bookBinIdx.wordCount];
           this.verseCount = bookBin[binIdx.bookBinIdx.verseCount];
-          this.citation = kjvLists.books[bookIdx][kjvIdx.book.longName];
+          this.citation = tomeLists.books[bookIdx][tomeIdx.book.longName];
         } else {
           const chapters = bookBin[binIdx.bookBinIdx.chapters];
           const chapterBin = this.findBin(chapters, chapterIdx);
-          this.filteredVerses = kjvBin[binIdx.kjvBinIdx.verses]
+          this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses]
             .slice(chapterBin[binIdx.chapterBinIdx.sliceStart],
               chapterBin[binIdx.chapterBinIdx.sliceEnd]);
           this.wordCount = chapterBin[binIdx.chapterBinIdx.wordCount];
           this.verseCount = chapterBin[binIdx.chapterBinIdx.verseCount];
-          this.citation = kjvLists.chapters[chapterIdx][kjvIdx.chapter.name];
+          this.citation = tomeLists.chapters[chapterIdx][tomeIdx.chapter.name];
         }
       }
     } else {
@@ -135,7 +135,7 @@ class StrongResultView {
   buildRefSpan(verseObj) {
     const refSpan = document.createElement('span');
     refSpan.classList.add('font--bold');
-    refSpan.textContent = verseObj.v[kjvIdx.verse.citation] + ' ';
+    refSpan.textContent = verseObj.v[tomeIdx.verse.citation] + ' ';
     return refSpan;
   }
 
@@ -143,7 +143,7 @@ class StrongResultView {
     const verseIdx = verseObj.k;
     const verse = verseObj.v;
     const parts = [];
-    const kjvWords = verse[kjvIdx.verse.text].split(' ');
+    const kjvWords = verse[tomeIdx.verse.text].split(' ');
     const maps = this.strongWordMapObjs.find(x => x.k === verseIdx).v;
     for (const map of maps) {
       const strongStr = map[strongIdx.map.strongNums].join(' ');
@@ -360,8 +360,8 @@ class StrongResultView {
     queue.subscribe('strong.word.update', (strongWord) => {
       this.wordUpdate(strongWord);
     });
-    queue.subscribe('strong.wordKjvBin.update', (wordKjvBin) => {
-      this.wordKjvBinUpdate(wordKjvBin);
+    queue.subscribe('strong.wordTomeBin.update', (wordTomeBin) => {
+      this.wordTomeBinUpdate(wordTomeBin);
     });
     queue.subscribe('strong.wordMap.update', (wordMapObjs) => {
       this.wordMapUpdate(wordMapObjs);
@@ -448,8 +448,8 @@ class StrongResultView {
     this.strongWordMapObjs = wordMapObjs;
   }
 
-  wordKjvBinUpdate(wordKjvBin) {
-    this.strongwordKjvBin = wordKjvBin;
+  wordTomeBinUpdate(wordTomeBin) {
+    this.wordTomeBin = wordTomeBin;
   }
 
   wordVerseUpdate(wordVerseObjs) {

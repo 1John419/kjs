@@ -1,8 +1,8 @@
 'use strict';
 
 import { queue } from '../CommandQueue.js';
-import { kjvIdx } from '../data/kjvIdx.js';
-import { kjvLists } from '../data/kjvLists.js';
+import { tomeIdx } from '../data/tomeIdx.js';
+import { tomeLists } from '../data/tomeLists.js';
 
 class NavigatorController {
 
@@ -18,11 +18,11 @@ class NavigatorController {
     this.lastBookIdx = bookIdx;
     if (this.bookSelectPending) {
       this.bookSelectPending = false;
-      const book = kjvLists.books[bookIdx];
-      this.chapterCount = book[kjvIdx.book.lastChapterIdx] -
-        book[kjvIdx.book.firstChapterIdx] + 1;
+      const book = tomeLists.books[bookIdx];
+      this.chapterCount = book[tomeIdx.book.lastChapterIdx] -
+        book[tomeIdx.book.firstChapterIdx] + 1;
       if (this.panes > 1 || this.chapterCount === 1) {
-        const chapterIdx = kjvLists.books[bookIdx][kjvIdx.book.firstChapterIdx];
+        const chapterIdx = tomeLists.books[bookIdx][tomeIdx.book.firstChapterIdx];
         queue.publish('chapterIdx.change', chapterIdx);
       } else {
         queue.publish('navigator.task.change', 'navigator-chapter');

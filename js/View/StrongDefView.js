@@ -85,12 +85,12 @@ class StrongDefView {
   buildWords() {
     const strongWords = template.element('div', 'strong-words', null, null, null);
     for (const word of this.words) {
-      const kjvWord = word[strongIdx.word.kjvWord];
-      const kjvBin = word[strongIdx.word.kjvBin];
+      const tomeWord = word[strongIdx.word.tomeWord];
+      const tomeBin = word[strongIdx.word.tomeBin];
       const label =
-        `${kjvWord} (${kjvBin[binIdx.kjvBinIdx.wordCount]}/${kjvBin[binIdx.kjvBinIdx.verseCount]})`;
+        `${tomeWord} (${tomeBin[binIdx.tomeBinIdx.wordCount]}/${tomeBin[binIdx.tomeBinIdx.verseCount]})`;
       const btn = template.element('div', 'btn-strong-word', null, null, label);
-      btn.dataset.word = word[strongIdx.word.kjvWord];
+      btn.dataset.word = word[strongIdx.word.tomeWord];
       strongWords.appendChild(btn);
     }
     return strongWords;

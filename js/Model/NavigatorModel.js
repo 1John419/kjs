@@ -1,8 +1,8 @@
 'use strict';
 
 import { queue } from '../CommandQueue.js';
-import { kjvIdx } from '../data/kjvIdx.js';
-import { firstVerseIdxByChapterIdx, kjvLists } from '../data/kjvLists.js';
+import { tomeIdx } from '../data/tomeIdx.js';
+import { firstVerseIdxByChapterIdx, tomeLists } from '../data/tomeLists.js';
 
 const validTasks = [
   'navigator-book', 'navigator-chapter',
@@ -24,7 +24,7 @@ class NavigatorModel {
   chapterIdxChange(chapterIdx) {
     this.chapterIdx = chapterIdx;
     this.saveChapterIdx();
-    const bookIdx = kjvLists.chapters[this.chapterIdx][kjvIdx.chapter.bookIdx];
+    const bookIdx = tomeLists.chapters[this.chapterIdx][tomeIdx.chapter.bookIdx];
     if (this.bookIdx !== bookIdx) {
       this.bookIdxChange(bookIdx);
     }
@@ -35,7 +35,7 @@ class NavigatorModel {
 
   async chapterNext() {
     let nextChapterIdx = this.chapterIdx + 1;
-    if (nextChapterIdx >= kjvLists.chapters.length) {
+    if (nextChapterIdx >= tomeLists.chapters.length) {
       nextChapterIdx = 0;
     }
     await this.chapterIdxChange(nextChapterIdx);
@@ -44,7 +44,7 @@ class NavigatorModel {
   async chapterPrev() {
     let prevChapterIdx = this.chapterIdx - 1;
     if (prevChapterIdx < 0) {
-      prevChapterIdx = kjvLists.chapters.length - 1;
+      prevChapterIdx = tomeLists.chapters.length - 1;
     }
     await this.chapterIdxChange(prevChapterIdx);
   }
@@ -69,7 +69,7 @@ class NavigatorModel {
       } catch (error) {
         chapterIdx = defaultIdx;
       }
-      if (!kjvLists.chapters[chapterIdx]) {
+      if (!tomeLists.chapters[chapterIdx]) {
         chapterIdx = defaultIdx;
       }
     }

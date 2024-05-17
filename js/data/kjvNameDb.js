@@ -14,7 +14,7 @@ const dbSetup = {
 };
 
 export let kjvNameDb = null;
-export const kjvNameName = dbSetup.name;
+export let kjvNameVerseCount = null;
 export let kjvNameWords = null;
 
 export const initializeKjvNameDb = async () => {
@@ -24,6 +24,7 @@ export const initializeKjvNameDb = async () => {
   kjvNameDb = await dbUtil.versionCheck(dbSetup);
   await populateKjv();
   await loadKjvNameWords();
+  kjvNameVerseCount = await kjvNameDb.verses.count();
   progress('kjv name initialized.');
 };
 

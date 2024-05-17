@@ -3,7 +3,7 @@
 import { queue } from '../CommandQueue.js';
 import { template } from '../template.js';
 import { util } from '../util.js';
-import { kjvIdx } from '../data/kjvIdx.js';
+import { tomeIdx } from '../data/tomeIdx.js';
 
 const actionSet = [
   { icon: 'move', ariaLabel: null },
@@ -205,7 +205,7 @@ class BookmarkMoveCopyView {
   }
 
   updateBanner() {
-    const ref = this.verse[kjvIdx.verse.citation];
+    const ref = this.verse[tomeIdx.verse.citation];
     this.banner.innerHTML = `${ref} <br> Move/Copy to Folder:`;
   }
 

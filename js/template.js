@@ -1,6 +1,6 @@
 'use strict';
 
-import { kjvLists } from './data/kjvLists.js';
+import { tomeLists } from './data/tomeLists.js';
 
 const svgNS = 'http://www.w3.org/2000/svg';
 const xlinkNS = 'http://www.w3.org/1999/xlink';
@@ -9,8 +9,8 @@ export const template = {};
 
 template.acrostic = (verseObj) => {
   let acrosticSpan = null;
-  if (kjvLists.acrostics) {
-    const acrostic = kjvLists.acrostics[verseObj.k];
+  if (tomeLists.acrostics) {
+    const acrostic = tomeLists.acrostics[verseObj.k];
     if (acrostic) {
       const glyph = acrostic.slice(0, 1);
       const xlit = acrostic.slice(1);
