@@ -1,32 +1,42 @@
+# Bible App
 
-> 1 John 4:19 We love him, because he first loved us.
+KJS - King James with Strong
 
-## KJS
+## Features:
 
-Offline King James with Strong Bible Search.
+* Free, open source, offline-first, and mobile-first.
+* Once downloaded, an internet connection is not required.
+* Supports the latest version of a Chromium-based browser on Android, Linux, or Windows devices.
+* Supports the latest version of the Safari browser on Mac/iOS/iPhone devices.
+* Easy Navigation
+* Bookmarks:
+    * Organize by folders
+    * Import and export
+* Search:
+    * Word or phrase queries
+    * Wildcards and case sensitivity
+    * Filter by book/chapter
+* Strong:
+    * Hebrew and Greek dictionaries
+    * Word summaries
+* Customizable Interface:
+    * Font face/size
+    * Light and dark app themes
+* Help System
+* Same User Interface:
+    * Desktop
+    * Laptop
+    * Tablet
+    * Phone
 
-***
+## Download
 
-Dedicated to our precious Lord and Saviour, Jesus Christ of Nazareth.
+*[KJS](https://kja.1-john-419.org)*
 
-ALL the power belongs to My King! The glory is all His.
+## Contact
 
-> **Heaven and earth shall pass away, but my words shall not pass away.**
+email *[1John419](github.1john419@gmail.com)*
 
-***
+## Website
 
-The application supports Android, Linux, or Windows platforms with the latest version of a Chromium-based browser.
-
-It should also support the latest version of the Safari browser, but has not been extensively tested on Mac/iOS platforms.
-
-### Download
-
-<https://kjs.1-john-419.org>
-
-### Contact
-
-<github.1john419@gmail.com>
-
-### Website
-
-<https://1-john-419.org>
+*[1-john419.og](https://1-john-419.org)*
