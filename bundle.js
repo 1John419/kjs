@@ -434,7 +434,7 @@
   };
 
   const initializeTomeLists = async () => {
-    progress('loading kja lists...');
+    progress('loading kjs lists...');
     tomeLists = await dbUtil.fetchJson(url);
     tomeLists.tomeName = 'kjv';
   };
