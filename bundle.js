@@ -9623,8 +9623,7 @@
   ];
   const validTopics = [
     'about', 'bookmark', 'clipboard-mode', 'help', 'name-mode', 'navigator',
-    'overview', 'read', 'search', 'setting', 'strong', 'the-acts-of-peter',
-    'thats-my-king',
+    'overview', 'read', 'search', 'setting', 'strong',
   ];
 
   class HelpModel {
@@ -9733,8 +9732,6 @@
     { topic: 'strong', name: 'Strong' },
     { topic: 'setting', name: 'Setting' },
     { topic: 'help', name: 'Help' },
-    { topic: 'the-acts-of-peter', name: 'The Acts of Peter' },
-    { topic: 'thats-my-king', name: 'That\'s MY KING!' },
   ];
 
   const templateBtnTopic = (helpTopic) => {

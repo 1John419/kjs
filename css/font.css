@@ -3,7 +3,7 @@
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/roboto-v30-latin-regular.woff2') format('woff2');
+  src: url('/font/roboto-v47-latin-regular.woff2') format('woff2');
 }
 
 .font--roboto {
@@ -39,7 +39,7 @@
   font-family: 'Merriweather';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/merriweather-v30-latin-regular.woff2') format('woff2');
+  src: url('/font/merriweather-v31-latin-regular.woff2') format('woff2');
 }
 
 .font--merriweather {
@@ -99,7 +99,7 @@
   font-family: 'Noto Serif Hebrew';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/noto-serif-hebrew-v25-latin-regular.woff2') format('woff2');
+  src: url('/font/noto-serif-hebrew-v28-latin-regular.woff2') format('woff2');
 }
 
 .font--hebrew {

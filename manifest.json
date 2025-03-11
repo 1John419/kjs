@@ -1,6 +1,6 @@
 {
   "background_color": "transparent",
-  "description": "KJS Bible Search",
+  "description": "KJS - King James with Strong",
   "dir": "ltr",
   "display": "standalone",
   "icons": [
@@ -31,7 +31,7 @@
   ],
   "id": "/",
   "lang": "en",
-  "name": "KJS Bible Search",
+  "name": "KJS - King James with Strong",
   "orientation": "any",
   "scope": "/",
   "screenshots": [
