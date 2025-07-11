@@ -43,7 +43,8 @@ class BookmarkImportView {
     this.dialog = template.divDialog('bookmark-import', dialogToolset);
     this.scroll.appendChild(this.dialog);
 
-    this.message = template.element('div', 'message', 'bookmark-import', null, null);
+    this.message = template.element('div', 'message', 'bookmark-import',
+      null, null);
     this.scroll.appendChild(this.message);
     this.page.appendChild(this.scroll);
 
@@ -78,7 +79,8 @@ class BookmarkImportView {
     this.btnImport = this.dialogBtns.querySelector('.btn-dialog--import');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnBookmarkFolder = this.toolbarLower.querySelector('.btn-icon--bookmark-folder');
+    this.btnBookmarkFolder = this.toolbarLower
+      .querySelector('.btn-icon--bookmark-folder');
   }
 
   importClick() {

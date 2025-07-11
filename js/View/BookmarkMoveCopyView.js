@@ -76,10 +76,12 @@ class BookmarkMoveCopyView {
 
     this.scroll = template.scroll('bookmark-move-copy');
 
-    this.empty = template.element('div', 'empty', 'bookmark-move-copy', null, 'No Target Folder');
+    this.empty = template.element('div', 'empty', 'bookmark-move-copy', null,
+      'No Target Folder');
     this.scroll.appendChild(this.empty);
 
-    this.list = template.element('div', 'list', 'bookmark-move-copy', null, null);
+    this.list = template.element('div', 'list', 'bookmark-move-copy', null,
+      null);
     this.scroll.appendChild(this.list);
 
     this.actionMenu = template.actionMenu('bookmark-move-copy', actionSet);
@@ -106,13 +108,15 @@ class BookmarkMoveCopyView {
   }
 
   getElements() {
-    this.banner = this.toolbarUpper.querySelector('.banner--bookmark-move-copy');
+    this.banner = this.toolbarUpper
+      .querySelector('.banner--bookmark-move-copy');
 
     this.btnMove = this.actionMenu.querySelector('.btn-icon--move');
     this.btnCopy = this.actionMenu.querySelector('.btn-icon--copy');
     this.btnCancel = this.actionMenu.querySelector('.btn-icon--cancel');
 
-    this.btnBookmarkFolder = this.toolbarLower.querySelector('.btn-icon--bookmark-folder');
+    this.btnBookmarkFolder = this.toolbarLower
+      .querySelector('.btn-icon--bookmark-folder');
   }
 
   hide() {

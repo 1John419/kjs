@@ -48,7 +48,8 @@ class SearchLookupView {
     this.dialog = template.divDialog('search-lookup', dialogToolset);
     this.scroll.appendChild(this.dialog);
 
-    this.message = template.element('div', 'message', 'search-lookup', null, null);
+    this.message = template.element('div', 'message', 'search-lookup', null,
+      null);
     this.scroll.appendChild(this.message);
 
     this.page.appendChild(this.scroll);
@@ -139,7 +140,7 @@ class SearchLookupView {
     });
 
     queue.subscribe('search-history.select', () => {
-      this.searchHistorySelect = true;;
+      this.searchHistorySelect = true;
     });
     queue.subscribe('search-lookup.hide', () => {
       this.hide();

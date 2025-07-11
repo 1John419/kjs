@@ -52,12 +52,8 @@ class StrongResultView {
     btn.dataset.verseIdx = verseObj.k;
     const resultText = document.createElement('span');
     resultText.classList.add('span-search-text');
-    const acrostic = template.acrostic(verseObj);
     const ref = this.buildRefSpan(verseObj);
     resultText.appendChild(ref);
-    if (acrostic) {
-      resultText.appendChild(acrostic);
-    }
     const text = this.buildStrongText(verseObj);
     resultText.insertAdjacentHTML('beforeend', text);
     btn.appendChild(resultText);
@@ -79,7 +75,8 @@ class StrongResultView {
         const bookBin = this.findBin(books, bookIdx);
         if (chapterIdx === -1) {
           this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses]
-            .slice(bookBin[binIdx.bookBinIdx.sliceStart], bookBin[binIdx.bookBinIdx.sliceEnd]);
+            .slice(bookBin[binIdx.bookBinIdx.sliceStart],
+              bookBin[binIdx.bookBinIdx.sliceEnd]);
           this.wordCount = bookBin[binIdx.bookBinIdx.wordCount];
           this.verseCount = bookBin[binIdx.bookBinIdx.verseCount];
           this.citation = tomeLists.books[bookIdx][tomeIdx.book.longName];
@@ -110,13 +107,15 @@ class StrongResultView {
 
     this.scroll = template.scroll('strong-result');
 
-    this.empty = template.element('div', 'empty', 'strong-result', null, 'No Strong Result.');
+    this.empty = template.element('div', 'empty', 'strong-result', null,
+      'No Strong Result.');
     this.scroll.appendChild(this.empty);
 
     this.list = template.element('div', 'list', 'strong-result', null, null);
     this.scroll.appendChild(this.list);
 
-    this.loadMore = template.element('div', 'load-more', 'strong-result', null, null);
+    this.loadMore = template.element('div', 'load-more', 'strong-result',
+      null, null);
     this.btnLoadMore = document.createElement('div');
     this.btnLoadMore.classList.add('btn-load-more');
     this.btnLoadMore.textContent = 'Load More';
@@ -147,7 +146,8 @@ class StrongResultView {
     const maps = this.strongWordMapObjs.find(x => x.k === verseIdx).v;
     for (const map of maps) {
       const strongStr = map[strongIdx.map.strongNums].join(' ');
-      const cleanNums = map[strongIdx.map.strongNums].map(x => x.replace(/[()@]/g, ''));
+      const cleanNums = map[strongIdx.map.strongNums]
+        .map(x => x.replace(/[()@]/g, ''));
       const phrase = map[strongIdx.map.verseFragment];
       parts.push(phrase);
       if (cleanNums.includes(this.strongDef)) {
@@ -228,15 +228,18 @@ class StrongResultView {
   }
 
   getElements() {
-    this.btnBanner = this.toolbarUpper.querySelector('.btn-banner--strong-result');
+    this.btnBanner = this.toolbarUpper
+      .querySelector('.btn-banner--strong-result');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnLookup = this.toolbarLower.querySelector('.btn-icon--strong-lookup');
+    this.btnLookup = this.toolbarLower
+      .querySelector('.btn-icon--strong-lookup');
     this.btnDef = this.toolbarLower.querySelector('.btn-icon--strong-def');
     this.btnFilter = this.toolbarLower.querySelector('.btn-icon--filter');
     this.btnHistory = this.toolbarLower.querySelector('.btn-icon--history');
     this.btnVerse = this.toolbarLower.querySelector('.btn-icon--strong-verse');
-    this.btnStrongMode = this.toolbarLower.querySelector('.btn-icon--strong-mode');
+    this.btnStrongMode = this.toolbarLower
+      .querySelector('.btn-icon--strong-mode');
   }
 
   hide() {
@@ -295,7 +298,8 @@ class StrongResultView {
     }
 
     const fragment = document.createDocumentFragment();
-    const verseObjs = this.strongWordVerseObjs.filter(x => verses.includes(x.k));
+    const verseObjs = this.strongWordVerseObjs
+      .filter(x => verses.includes(x.k));
     for (const verseObj of verseObjs) {
       const verse = this.addVerse(verseObj);
       fragment.appendChild(verse);

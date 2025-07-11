@@ -22,7 +22,8 @@ class NavigatorController {
       this.chapterCount = book[tomeIdx.book.lastChapterIdx] -
         book[tomeIdx.book.firstChapterIdx] + 1;
       if (this.panes > 1 || this.chapterCount === 1) {
-        const chapterIdx = tomeLists.books[bookIdx][tomeIdx.book.firstChapterIdx];
+        const chapterIdx =
+          tomeLists.books[bookIdx][tomeIdx.book.firstChapterIdx];
         queue.publish('chapterIdx.change', chapterIdx);
       } else {
         queue.publish('navigator.task.change', 'navigator-chapter');

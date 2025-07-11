@@ -8,24 +8,27 @@ const xlinkNS = 'http://www.w3.org/1999/xlink';
 export const template = {};
 
 template.acrostic = (verseObj) => {
-  let acrosticSpan = null;
+  let acrosticDiv = null;
   if (tomeLists.acrostics) {
     const acrostic = tomeLists.acrostics[verseObj.k];
     if (acrostic) {
       const glyph = acrostic.slice(0, 1);
       const xlit = acrostic.slice(1);
-      const glyphSpan = template.element('span', 'font--hebrew', null, null, glyph);
-      const xlitSpan = template.element('span', 'font--bold', null, null, xlit + ' ');
-      acrosticSpan = document.createDocumentFragment();
-      acrosticSpan.appendChild(glyphSpan);
-      acrosticSpan.appendChild(xlitSpan);
+      const glyphSpan = template.element('span', 'font--hebrew', null, null,
+        glyph);
+      const xlitSpan = template.element('span', 'font--bold', null, null,
+        xlit + ' ');
+      acrosticDiv = template.element('div', 'acrostic', null, null, null);
+      acrosticDiv.appendChild(glyphSpan);
+      acrosticDiv.appendChild(xlitSpan);
     }
   }
-  return acrosticSpan;
+  return acrosticDiv;
 };
 
 template.actionMenu = (cssModifier, actionSet) => {
-  const actionMenu = template.element('div', 'action-menu', cssModifier, null, null);
+  const actionMenu = template.element('div', 'action-menu', cssModifier, null,
+    null);
   actionMenu.classList.add('hide');
   for (const btn of actionSet) {
     const element = template.btnIcon(btn.icon, btn.icon, null);
@@ -35,7 +38,8 @@ template.actionMenu = (cssModifier, actionSet) => {
 };
 
 template.btnBanner = (cssModifier, ariaLabel) => {
-  const btnIcon = template.element('div', 'btn-banner', cssModifier, ariaLabel, null);
+  const btnIcon = template.element('div', 'btn-banner', cssModifier, ariaLabel,
+    null);
   return btnIcon;
 };
 
@@ -45,30 +49,61 @@ template.btnIcon = (svgId, cssModifier, ariaLabel) => {
   const useTag = document.createElementNS(svgNS, 'use');
   useTag.setAttributeNS(xlinkNS, 'xlink:href', `icons.svg#${svgId}`);
   svgTag.appendChild(useTag);
-  const btnIcon = template.element('div', 'btn-icon', cssModifier, ariaLabel, null);
+  const btnIcon = template.element('div', 'btn-icon', cssModifier, ariaLabel,
+    null);
   btnIcon.appendChild(svgTag);
   return btnIcon;
 };
 
+template.colophon = (verseObj) => {
+  let colophonDiv = null;
+  if (tomeLists.colophons) {
+    const verseIdx = verseObj.k;
+    if (verseIdx in tomeLists.colophons) {
+      colophonDiv = template.element('div', 'colophon', null, null, null);
+      colophonDiv.textContent = tomeLists.colophons[verseIdx];
+    }
+  }
+  return colophonDiv;
+};
+
+template.readOptionCheckbox = (id, ariaLabel) => {
+  const divCheckbox = template.element('div', 'checkbox-container', null,
+    null, null);
+  const checkbox = template.element('input', null, null, ariaLabel, null);
+  checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('id', id);
+  const label = template.element('label', null, null, null, null);
+  label.setAttribute('for', id);
+  label.textContent = ariaLabel;
+  divCheckbox.appendChild(checkbox);
+  divCheckbox.appendChild(label);
+  return divCheckbox;
+};
+
 template.divDialog = (cssModifier, toolSet) => {
   const divDialog = template.element('div', 'dialog', cssModifier, null, null);
-  const divDialogBtns = template.element('div', 'dialog-btns', cssModifier, null, null);
+  const divDialogBtns = template.element('div', 'dialog-btns', cssModifier,
+    null, null);
   for (const tool of toolSet) {
     let element;
     if (tool.type === 'btn') {
-      element = template.element('div', 'btn-dialog', tool.cssModifier, tool.ariaLabel, tool.label);
+      element = template.element('div', 'btn-dialog', tool.cssModifier,
+        tool.ariaLabel, tool.label);
       divDialogBtns.appendChild(element);
     } else if (tool.type === 'input') {
       element = template.input('dialog-input', cssModifier, tool.ariaLabel);
       divDialog.appendChild(element);
     } else if (tool.type === 'label') {
-      element = template.element('div', 'dialog-label', cssModifier, null, null);
+      element = template.element('div', 'dialog-label', cssModifier, null,
+        null);
       if (tool.text) {
         element.textContent = tool.text;
       }
       divDialog.appendChild(element);
     } else if (tool.type === 'textarea') {
-      element = template.element('textarea', 'dialog-textarea', cssModifier, tool.ariaLabel, null);
+      element = template.element('textarea', 'dialog-textarea', cssModifier,
+        tool.ariaLabel, null);
       divDialog.appendChild(element);
     }
   }
@@ -78,7 +113,9 @@ template.divDialog = (cssModifier, toolSet) => {
 
 template.element = (tagName, cssBlock, cssModifier, ariaLabel, textContent) => {
   const element = document.createElement(tagName);
-  element.classList.add(cssBlock);
+  if (cssBlock) {
+    element.classList.add(cssBlock);
+  }
   if (cssModifier) {
     element.classList.add(`${cssBlock}--${cssModifier}`);
   }
@@ -92,7 +129,8 @@ template.element = (tagName, cssBlock, cssModifier, ariaLabel, textContent) => {
 };
 
 template.input = (cssBlock, cssModifier, ariaLabel) => {
-  const input = template.element('input', cssBlock, cssModifier, ariaLabel, null);
+  const input = template.element('input', cssBlock, cssModifier, ariaLabel,
+    null);
   input.setAttribute('type', 'text');
   return input;
 };
@@ -103,13 +141,26 @@ template.page = (cssModifier) => {
   return page;
 };
 
+template.paragraph = (verseObj) => {
+  let paragraphDiv = null;
+  if (tomeLists.paragraphs) {
+    const verseIdx = verseObj.k;
+    if (tomeLists.paragraphs.includes(verseIdx)) {
+      paragraphDiv = template.element('div', 'paragraph', null, null, null);
+      paragraphDiv.textContent = '¶';
+    }
+  }
+  return paragraphDiv;
+};
+
 template.scroll = (cssModifier) => {
   const scroll = template.element('div', 'scroll', cssModifier, null, null);
   return scroll;
 };
 
 template.strongList = (list, cssModifier) => {
-  const strongList = template.element('ul', 'strong-def-list', cssModifier, null, null);
+  const strongList = template.element('ul', 'strong-def-list', cssModifier,
+    null, null);
   for (const listItem of list) {
     const strongItem = template.element('li', 'list-item', null, null, null);
     const frags = listItem.split(/[HG]\d+/);
@@ -121,7 +172,8 @@ template.strongList = (list, cssModifier) => {
         strongItem.appendChild(span);
         if (words[index]) {
           const num = words[index];
-          const btn = template.element('div', 'btn-strong-def', null, null, num);
+          const btn = template.element('div', 'btn-strong-def', null, null,
+            num);
           btn.dataset.strongDef = num;
           strongItem.appendChild(btn);
         }
@@ -132,6 +184,19 @@ template.strongList = (list, cssModifier) => {
     strongList.appendChild(strongItem);
   }
   return strongList;
+};
+
+template.superscription = (verseObj) => {
+  let superscriptionDiv = null;
+  if (tomeLists.superscriptions) {
+    const verseIdx = verseObj.k;
+    if (verseIdx in tomeLists.superscriptions) {
+      superscriptionDiv = template.element('div', 'superscription', null,
+        null, null);
+      superscriptionDiv.textContent = tomeLists.superscriptions[verseIdx];
+    }
+  }
+  return superscriptionDiv;
 };
 
 template.toolbar = (cssModifier) => {
@@ -155,10 +220,12 @@ template.toolbarLower = (toolSet) => {
 };
 
 template.toolbarMenu = (modifier, actionSet) => {
-  const toolbarMenu = template.element('div', 'toolbar-menu', modifier, null, null);
+  const toolbarMenu = template.element('div', 'toolbar-menu', modifier, null,
+    null);
   toolbarMenu.classList.add('toolbar-menu--hide');
   for (const btn of actionSet) {
-    const element = template.btnIcon(btn.icon, `${modifier}-${btn.icon}`, btn.label);
+    const element = template.btnIcon(btn.icon, `${modifier}-${btn.icon}`,
+      btn.label);
     toolbarMenu.appendChild(element);
   }
   return toolbarMenu;
@@ -175,7 +242,8 @@ template.toolbarUpper = (toolSet) => {
       element = template.btnBanner(tool.cssModifier, tool.ariaLabel);
       toolbarUpper.appendChild(element);
     } else if (tool.type === 'banner') {
-      element = template.element('div', 'banner', tool.cssModifier, null, tool.text);
+      element = template.element('div', 'banner', tool.cssModifier, null,
+        tool.text);
       toolbarUpper.appendChild(element);
     }
   }

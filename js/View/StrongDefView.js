@@ -37,14 +37,17 @@ class StrongDefView {
 
   buildDef() {
     const fragment = document.createDocumentFragment();
-    const lemma = template.element('div', 'strong-def', 'lemma', null, this.def[strongIdx.def.lemma].normalize('NFC'));
+    const lemma = template.element('div', 'strong-def', 'lemma', null, this.
+      def[strongIdx.def.lemma].normalize('NFC'));
     if (this.strongDef.startsWith('H')) {
       lemma.classList.add('font--hebrew');
     } else {
       lemma.classList.add('font--greek');
     }
-    const xlit = template.element('div', 'strong-def', 'xlit', null, this.def[strongIdx.def.tranliteration].normalize('NFC'));
-    const pron = template.element('div', 'strong-def', 'pron', null, this.def[strongIdx.def.pronunciation].normalize('NFC'));
+    const xlit = template.element('div', 'strong-def', 'xlit', null,
+      this.def[strongIdx.def.tranliteration].normalize('NFC'));
+    const pron = template.element('div', 'strong-def', 'pron', null,
+      this.def[strongIdx.def.pronunciation].normalize('NFC'));
     const definition = this.buildDefinition();
     fragment.appendChild(lemma);
     fragment.appendChild(xlit);
@@ -57,9 +60,11 @@ class StrongDefView {
     const defDiv = template.element('div', 'strong-def', 'def', null, null);
     const deriv = template.strongList(this.def[strongIdx.def.deriv], 'deriv');
     defDiv.appendChild(deriv);
-    const strongDef = template.strongList(this.def[strongIdx.def.strongDef], 'strong-def');
+    const strongDef = template.strongList(this.def[strongIdx.def.strongDef],
+      'strong-def');
     defDiv.appendChild(strongDef);
-    const kjvDef = template.strongList(this.def[strongIdx.def.kjvDef], 'kjv-def');
+    const kjvDef = template.strongList(this.def[strongIdx.def.kjvDef],
+      'kjv-def');
     defDiv.appendChild(kjvDef);
     return defDiv;
   }
@@ -83,12 +88,14 @@ class StrongDefView {
   }
 
   buildWords() {
-    const strongWords = template.element('div', 'strong-words', null, null, null);
+    const strongWords = template.element('div', 'strong-words', null, null,
+      null);
     for (const word of this.words) {
       const tomeWord = word[strongIdx.word.tomeWord];
       const tomeBin = word[strongIdx.word.tomeBin];
       const label =
-        `${tomeWord} (${tomeBin[binIdx.tomeBinIdx.wordCount]}/${tomeBin[binIdx.tomeBinIdx.verseCount]})`;
+        `${tomeWord} (${tomeBin[binIdx.tomeBinIdx.wordCount]}/\
+        ${tomeBin[binIdx.tomeBinIdx.verseCount]})`;
       const btn = template.element('div', 'btn-strong-word', null, null, label);
       btn.dataset.word = word[strongIdx.word.tomeWord];
       strongWords.appendChild(btn);
@@ -123,7 +130,8 @@ class StrongDefView {
     this.banner = this.toolbarUpper.querySelector('.banner--strong-def');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnLookup = this.toolbarLower.querySelector('.btn-icon--strong-lookup');
+    this.btnLookup = this.toolbarLower
+      .querySelector('.btn-icon--strong-lookup');
     this.btnResult = this.toolbarLower.querySelector('.btn-icon--result');
     this.btnFilter = this.toolbarLower.querySelector('.btn-icon--filter');
     this.btnHistory = this.toolbarLower.querySelector('.btn-icon--history');

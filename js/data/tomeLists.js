@@ -14,7 +14,8 @@ export const chapterIdxByVerseIdx = (verseIdx) => {
 };
 
 export const firstVerseIdxByChapterIdx = (chapterIdx) => {
-  const verseIdx = tomeLists.chapters[chapterIdx][tomeIdx.chapter.firstVerseIdx];
+  const verseIdx =
+    tomeLists.chapters[chapterIdx][tomeIdx.chapter.firstVerseIdx];
   return verseIdx;
 };
 

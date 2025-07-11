@@ -54,8 +54,10 @@ class StrongVerseView {
 
   buildStrongFragment(map) {
     const text = map[strongIdx.map.verseFragment];
-    const strongFragment = template.element('div', 'strong-fragment', null, null, null);
-    const verseFragment = template.element('div', 'verse-fragment', null, null, text);
+    const strongFragment = template.element('div', 'strong-fragment', null, 
+      null, null);
+    const verseFragment = template.element('div', 'verse-fragment', null, 
+      null, text);
     const strongList = template.element('div', 'strong-list', null, null, null);
     for (const num of map[strongIdx.map.strongNums]) {
       const btn = template.element('div', 'btn-strong', null, null, num);
@@ -71,7 +73,8 @@ class StrongVerseView {
     this.banner = this.toolbarUpper.querySelector('.banner--strong-verse');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnLookup = this.toolbarLower.querySelector('.btn-icon--strong-lookup');
+    this.btnLookup = this.toolbarLower
+      .querySelector('.btn-icon--strong-lookup');
     this.btnDef = this.toolbarLower.querySelector('.btn-icon--strong-def');
     this.btnResult = this.toolbarLower.querySelector('.btn-icon--result');
     this.btnFilter = this.toolbarLower.querySelector('.btn-icon--filter');

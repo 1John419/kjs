@@ -3,7 +3,7 @@
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/roboto-v47-latin-regular.woff2') format('woff2');
+  src: url('/font/roboto-v48-latin-regular.woff2') format('woff2');
 }
 
 .font--roboto {
@@ -15,7 +15,7 @@
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/open-sans-v40-latin-regular.woff2') format('woff2');
+  src: url('/font/open-sans-v43-latin-regular.woff2') format('woff2');
 }
 
 .font--open-sans {
@@ -27,7 +27,7 @@
   font-family: 'Roboto Slab';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/roboto-slab-v34-latin-regular.woff2') format('woff2');
+  src: url('/font/roboto-slab-v35-latin-regular.woff2') format('woff2');
 }
 
 .font--roboto-slab {
@@ -39,7 +39,7 @@
   font-family: 'Merriweather';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/merriweather-v31-latin-regular.woff2') format('woff2');
+  src: url('/font/merriweather-v32-latin-regular.woff2') format('woff2');
 }
 
 .font--merriweather {
@@ -51,7 +51,7 @@
   font-family: 'Courgette';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/courgette-v17-latin-regular.woff2') format('woff2');
+  src: url('/font/courgette-v18-latin-regular.woff2') format('woff2');
 }
 
 .font--courgette {
@@ -63,7 +63,7 @@
   font-family: 'Merienda';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/merienda-v19-latin-regular.woff2') format('woff2');
+  src: url('/font/merienda-v21-latin-regular.woff2') format('woff2');
 }
 
 .font--merienda {
@@ -75,7 +75,7 @@
   font-family: 'Roboto Mono';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/roboto-mono-v23-latin-regular.woff2') format('woff2');
+  src: url('/font/roboto-mono-v30-latin-regular.woff2') format('woff2');
 }
 
 .font--roboto-mono {
@@ -87,7 +87,7 @@
   font-family: 'Inconsolata';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/inconsolata-v32-latin-regular.woff2') format('woff2');
+  src: url('/font/inconsolata-v36-latin-regular.woff2') format('woff2');
 }
 
 .font--inconsolata {
@@ -99,7 +99,7 @@
   font-family: 'Noto Serif Hebrew';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/noto-serif-hebrew-v28-latin-regular.woff2') format('woff2');
+  src: url('/font/noto-serif-hebrew-v29-latin-regular.woff2') format('woff2');
 }
 
 .font--hebrew {

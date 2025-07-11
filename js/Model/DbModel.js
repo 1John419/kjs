@@ -1,8 +1,10 @@
 'use strict';
 
 import { queue } from '../CommandQueue.js';
-import { kjvPureDb, kjvPureVerseCount, kjvPureWords } from '../data/kjvPureDb.js';
-import { kjvNameDb, kjvNameVerseCount, kjvNameWords } from '../data/kjvNameDb.js';
+import { kjvPureDb, kjvPureVerseCount, kjvPureWords }
+  from '../data/kjvPureDb.js';
+import { kjvNameDb, kjvNameVerseCount, kjvNameWords }
+  from '../data/kjvNameDb.js';
 import { strongNameDb } from '../data/strongNameDb.js';
 import { strongPureDb } from '../data/strongPureDb.js';
 

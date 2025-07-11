@@ -51,7 +51,8 @@ class SearchHistoryView {
     this.page.appendChild(this.toolbarUpper);
 
     this.scroll = template.scroll('search-history');
-    this.empty = template.element('div', 'empty', 'search-history', null, 'No Searches Saved');
+    this.empty = template.element('div', 'empty', 'search-history', null,
+      'No Searches Saved');
     this.scroll.appendChild(this.empty);
 
     this.list = template.element('div', 'list', 'search-history', null, null);
@@ -68,10 +69,12 @@ class SearchHistoryView {
 
   getElements() {
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnLookup = this.toolbarLower.querySelector('.btn-icon--search-lookup');
+    this.btnLookup = this.toolbarLower
+      .querySelector('.btn-icon--search-lookup');
     this.btnResult = this.toolbarLower.querySelector('.btn-icon--result');
     this.btnFilter = this.toolbarLower.querySelector('.btn-icon--filter');
-    this.btnHistoryClear = this.toolbarLower.querySelector('.btn-icon--history-clear');
+    this.btnHistoryClear = this.toolbarLower
+      .querySelector('.btn-icon--history-clear');
   }
 
   hide() {

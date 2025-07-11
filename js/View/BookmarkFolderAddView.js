@@ -46,7 +46,8 @@ class BookmarkFolderAddView {
     this.dialog = template.divDialog('bookmark-folder-add', dialogToolset);
     this.scroll.appendChild(this.dialog);
 
-    this.message = template.element('div', 'message', 'bookmark-folder-add', null, null);
+    this.message = template.element('div', 'message', 'bookmark-folder-add',
+      null, null);
     this.scroll.appendChild(this.message);
 
     this.page.appendChild(this.scroll);
@@ -79,7 +80,8 @@ class BookmarkFolderAddView {
     this.btnSave = this.dialogBtns.querySelector('.btn-dialog--save');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnBookmarkFolder = this.toolbarLower.querySelector('.btn-icon--bookmark-folder');
+    this.btnBookmarkFolder = this.toolbarLower
+      .querySelector('.btn-icon--bookmark-folder');
   }
 
   hide() {

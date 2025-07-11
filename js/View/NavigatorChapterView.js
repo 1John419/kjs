@@ -57,7 +57,8 @@ class NavigatorChapterView {
     this.page.appendChild(this.toolbarUpper);
 
     this.scroll = template.scroll('navigator-chapter');
-    this.list = template.element('div', 'list', 'navigator-chapter', null, null);
+    this.list = template.element('div', 'list', 'navigator-chapter', null,
+      null);
     this.scroll.appendChild(this.list);
     this.page.appendChild(this.scroll);
 
@@ -70,9 +71,11 @@ class NavigatorChapterView {
 
   chapterIdxUpdate(chapterIdx) {
     const oldChapterIdx = this.chapterIdx || chapterIdx;
-    const oldBookIdx = tomeLists.chapters[oldChapterIdx][tomeIdx.chapter.bookIdx];
+    const oldBookIdx = tomeLists
+      .chapters[oldChapterIdx][tomeIdx.chapter.bookIdx];
     this.chapterIdx = chapterIdx;
-    const bookIdx = tomeLists.chapters[this.chapterIdx][tomeIdx.chapter.bookIdx];
+    const bookIdx = tomeLists
+      .chapters[this.chapterIdx][tomeIdx.chapter.bookIdx];
     if (oldBookIdx !== bookIdx) {
       this.updateBanner();
       this.updateChapterList();

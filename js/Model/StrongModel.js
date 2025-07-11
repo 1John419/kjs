@@ -435,7 +435,8 @@ class StrongModel {
 
   async updateWordVerses() {
     if (this.words.length) {
-      const word = this.words.find(x => x[strongIdx.word.tomeWord] === this.strongWord);
+      const word = this.words
+        .find(x => x[strongIdx.word.tomeWord] === this.strongWord);
       this.wordTomeBin = word[strongIdx.word.tomeBin];
       queue.publish('strong.wordTomeBin.update', this.wordTomeBin);
       const verses = this.wordTomeBin[binIdx.tomeBinIdx.verses];
@@ -462,7 +463,8 @@ class StrongModel {
     this.strongWord = strongWord;
     this.saveWord();
     if (this.words.length) {
-      const word = this.words.find(x => x[strongIdx.word.tomeWord] === this.strongWord);
+      const word = this.words
+        .find(x => x[strongIdx.word.tomeWord] === this.strongWord);
       this.wordTomeBin = word[strongIdx.word.tomeBin];
     } else {
       this.wordTomeBin = [];

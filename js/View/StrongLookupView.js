@@ -50,7 +50,8 @@ class StrongLookupView {
     this.dialog = template.divDialog('strong-lookup', dialogToolset);
     this.scroll.appendChild(this.dialog);
 
-    this.message = template.element('div', 'message', 'strong-lookup', null, null);
+    this.message = template.element('div', 'message', 'strong-lookup', null,
+      null);
     this.scroll.appendChild(this.message);
 
     this.page.appendChild(this.scroll);

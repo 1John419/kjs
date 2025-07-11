@@ -24,7 +24,8 @@ class NavigatorModel {
   chapterIdxChange(chapterIdx) {
     this.chapterIdx = chapterIdx;
     this.saveChapterIdx();
-    const bookIdx = tomeLists.chapters[this.chapterIdx][tomeIdx.chapter.bookIdx];
+    const bookIdx = 
+      tomeLists.chapters[this.chapterIdx][tomeIdx.chapter.bookIdx];
     if (this.bookIdx !== bookIdx) {
       this.bookIdxChange(bookIdx);
     }

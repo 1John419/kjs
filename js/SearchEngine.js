@@ -31,12 +31,15 @@ class SearchEngine {
     tomeBin[binIdx.tomeBinIdx.wordCount] += this.verseCount;
     tomeBin[binIdx.tomeBinIdx.verseCount] += 1;
 
-    const book = tomeLists.books.find(x => x[tomeIdx.book.lastVerseIdx] >= verseIdx);
+    const book =
+      tomeLists.books.find(x => x[tomeIdx.book.lastVerseIdx] >= verseIdx);
     const bookIdx = tomeLists.books.indexOf(book);
-    const chapter = tomeLists.chapters.find(x => x[tomeIdx.chapter.lastVerseIdx] >= verseIdx);
+    const chapter =
+      tomeLists.chapters.find(x => x[tomeIdx.chapter.lastVerseIdx] >= verseIdx);
     const chapterIdx = tomeLists.chapters.indexOf(chapter);
 
-    let bookBin = tomeBin[binIdx.tomeBinIdx.books].find(x => x[binIdx.bookBinIdx.bookIdx] === bookIdx);
+    let bookBin = tomeBin[binIdx.tomeBinIdx.books]
+      .find(x => x[binIdx.bookBinIdx.bookIdx] === bookIdx);
     if (!bookBin) {
       const wordCount = 0;
       const verseCount = 0;
@@ -51,13 +54,15 @@ class SearchEngine {
         sliceEnd,
         chapters,
       ]);
-      bookBin = tomeBin[binIdx.tomeBinIdx.books][tomeBin[binIdx.tomeBinIdx.books].length - 1];
+      bookBin = tomeBin[binIdx.tomeBinIdx.books]
+        [tomeBin[binIdx.tomeBinIdx.books].length - 1];
     }
     bookBin[binIdx.bookBinIdx.wordCount] += this.verseCount;
     bookBin[binIdx.bookBinIdx.verseCount] += 1;
     bookBin[binIdx.bookBinIdx.sliceEnd] += 1;
 
-    let chapterBin = bookBin[binIdx.bookBinIdx.chapters].find((x) => x[binIdx.chapterBinIdx.chapterIdx] === chapterIdx);
+    let chapterBin = bookBin[binIdx.bookBinIdx.chapters]
+      .find((x) => x[binIdx.chapterBinIdx.chapterIdx] === chapterIdx);
     if (!chapterBin) {
       const wordCount = 0;
       const verseCount = 0;
@@ -70,7 +75,8 @@ class SearchEngine {
         sliceStart,
         sliceEnd,
       ]);
-      chapterBin = bookBin[binIdx.bookBinIdx.chapters][bookBin[binIdx.bookBinIdx.chapters].length - 1];
+      chapterBin = bookBin[binIdx.bookBinIdx.chapters]
+        [bookBin[binIdx.bookBinIdx.chapters].length - 1];
     }
     chapterBin[binIdx.chapterBinIdx.wordCount] += this.verseCount;
     chapterBin[binIdx.chapterBinIdx.verseCount] += 1;
@@ -213,7 +219,8 @@ class SearchEngine {
   getVerseCount(verseIdx) {
     this.verseCount = 0;
     for (const wordVerseObj of this.wordObjs) {
-      const verseCount = wordVerseObj.v.find(x => x[tomeIdx.word.verseIdx] === verseIdx);
+      const verseCount = wordVerseObj.v
+        .find(x => x[tomeIdx.word.verseIdx] === verseIdx);
       if (verseCount) {
         this.verseCount += verseCount[tomeIdx.word.count];
       }

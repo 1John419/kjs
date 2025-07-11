@@ -22,6 +22,26 @@ class SettingModel {
     this.initialize();
   }
 
+  acrosticsChange(acrostics) {
+    this.acrostics = acrostics;
+    this.saveAcrostics();
+    queue.publish('acrostics.update', this.acrostics);
+  }
+
+  acrosticsToogle() {
+    this.acrosticsChange(!this.acrostics);
+  }
+
+  colophonsChange(colophons) {
+    this.colophons = colophons;
+    this.saveColophons();
+    queue.publish('colophons.update', this.colophons);
+  }
+
+  colophonsToogle() {
+    this.colophonsChange(!this.colophons);
+  }
+
   fontChange(font) {
     this.font = font;
     this.saveFont();
@@ -169,6 +189,16 @@ class SettingModel {
     queue.publish('themes.update', this.themes);
   }
 
+  paragraphsChange(paragraphs) {
+    this.paragraphs = paragraphs;
+    this.saveParagraphs();
+    queue.publish('paragraphs.update', this.paragraphs);
+  }
+
+  paragraphsToogle() {
+    this.paragraphsChange(!this.paragraphs);
+  }
+
   restore() {
     this.initializeFonts();
     this.restoreFont();
@@ -176,6 +206,46 @@ class SettingModel {
     this.restoreFontVariant();
     this.initializeThemes();
     this.restoreTheme();
+    this.restoreAcrostics();
+    this.restoreColophons();
+    this.restoreParagraphs();
+    this.restoreSuperscriptions();
+  }
+
+  restoreAcrostics() {
+    const defaultAcrostics = false;
+    let acrostics = localStorage.getItem('acrostics');
+    if (!acrostics) {
+      acrostics = defaultAcrostics;
+    } else {
+      try {
+        acrostics = JSON.parse(acrostics);
+      } catch (error) {
+        acrostics = defaultAcrostics;
+      }
+      if (typeof acrostics !== 'boolean') {
+        acrostics = defaultAcrostics;
+      }
+    }
+    this.acrosticsChange(acrostics);
+  }
+
+  restoreColophons() {
+    const defaultColophons = false;
+    let colophons = localStorage.getItem('colophons');
+    if (!colophons) {
+      colophons = defaultColophons;
+    } else {
+      try {
+        colophons = JSON.parse(colophons);
+      } catch (error) {
+        colophons = defaultColophons;
+      }
+      if (typeof colophons !== 'boolean') {
+        colophons = defaultColophons;
+      }
+    }
+    this.colophonsChange(colophons);
   }
 
   restoreFont() {
@@ -232,6 +302,42 @@ class SettingModel {
     this.fontVariantChange(fontVariant);
   }
 
+  restoreParagraphs() {
+    const defaultParagraphs = false;
+    let paragraphs = localStorage.getItem('paragraphs');
+    if (!paragraphs) {
+      paragraphs = defaultParagraphs;
+    } else {
+      try {
+        paragraphs = JSON.parse(paragraphs);
+      } catch (error) {
+        paragraphs = defaultParagraphs;
+      }
+      if (typeof paragraphs !== 'boolean') {
+        paragraphs = defaultParagraphs;
+      }
+    }
+    this.paragraphsChange(paragraphs);
+  }
+
+  restoreSuperscriptions() {
+    const defaultSuperscriptions = false;
+    let superscriptions = localStorage.getItem('superscriptions');
+    if (!superscriptions) {
+      superscriptions = defaultSuperscriptions;
+    } else {
+      try {
+        superscriptions = JSON.parse(superscriptions);
+      } catch (error) {
+        superscriptions = defaultSuperscriptions;
+      }
+      if (typeof superscriptions !== 'boolean') {
+        superscriptions = defaultSuperscriptions;
+      }
+    }
+    this.superscriptionsChange(superscriptions);
+  }
+
   restoreTheme() {
     const defaultTheme = this.themes[themeDefault];
     let theme = localStorage.getItem('theme');
@@ -250,6 +356,14 @@ class SettingModel {
     this.themeChange(theme);
   }
 
+  saveAcrostics() {
+    localStorage.setItem('acrostics', JSON.stringify(this.acrostics));
+  }
+
+  saveColophons() {
+    localStorage.setItem('colophons', JSON.stringify(this.colophons));
+  }
+
   saveFont() {
     localStorage.setItem('font', JSON.stringify(this.font));
   }
@@ -262,11 +376,28 @@ class SettingModel {
     localStorage.setItem('fontVariant', JSON.stringify(this.fontVariant));
   }
 
+  saveParagraphs() {
+    localStorage.setItem('paragraphs', JSON.stringify(this.paragraphs));
+  }
+
+  saveSuperscriptions() {
+    localStorage.setItem('superscriptions',
+      JSON.stringify(this.superscriptions));
+  }
+
   saveTheme() {
     localStorage.setItem('theme', JSON.stringify(this.theme));
   }
 
   subscribe() {
+    queue.subscribe('acrostics.toogle', () => {
+      this.acrosticsToogle();
+    });
+
+    queue.subscribe('colophons.toogle', () => {
+      this.colophonsToogle();
+    });
+
     queue.subscribe('font.change', (font) => {
       this.fontChange(font);
     });
@@ -279,13 +410,31 @@ class SettingModel {
       this.fontVariantChange(fontVariant);
     });
 
+    queue.subscribe('paragraphs.toogle', () => {
+      this.paragraphsToogle();
+    });
+
     queue.subscribe('setting.restore', () => {
       this.restore();
+    });
+
+    queue.subscribe('superscriptions.toogle', () => {
+      this.superscriptionsToogle();
     });
 
     queue.subscribe('theme.change', (theme) => {
       this.themeChange(theme);
     });
+  }
+
+  superscriptionsChange(superscriptions) {
+    this.superscriptions = superscriptions;
+    this.saveSuperscriptions();
+    queue.publish('superscriptions.update', this.superscriptions);
+  }
+
+  superscriptionsToogle() {
+    this.superscriptionsChange(!this.superscriptions);
   }
 
   themeChange(theme) {

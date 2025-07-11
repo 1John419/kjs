@@ -15,9 +15,8 @@ const lowerToolSet = [
   { type: 'btn', icon: 'strong-mode', ariaLabel: null },
 ];
 
-const upperToolSet = [
-  { type: 'btn-banner', cssModifier: 'search-result', text: 'Toogle Clipboard' },
-];
+const upperToolSet = [{type: 'btn-banner', cssModifier: 'search-result',
+  text: 'Toogle Clipboard' },];
 
 const localBinIdx = 0;
 const loadIncrement = 50;
@@ -56,14 +55,20 @@ class SearchResultView {
       const books = tomeBin[binIdx.tomeBinIdx.books];
       const bookBin = this.findBin(books, bookIdx);
       if (chapterIdx === -1) {
-        this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses].slice(bookBin[binIdx.bookBinIdx.sliceStart], bookBin[binIdx.bookBinIdx.sliceEnd]);
+        this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses].slice(
+          bookBin[binIdx.bookBinIdx.sliceStart],
+          bookBin[binIdx.bookBinIdx.sliceEnd]
+        );
         this.wordCount = bookBin[binIdx.bookBinIdx.wordCount];
         this.verseCount = bookBin[binIdx.bookBinIdx.verseCount];
         this.citation = tomeLists.books[bookIdx][tomeIdx.book.longName];
       } else {
         const chapters = bookBin[binIdx.bookBinIdx.chapters];
         const chapterBin = this.findBin(chapters, chapterIdx);
-        this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses].slice(chapterBin[binIdx.chapterBinIdx.sliceStart], chapterBin[binIdx.chapterBinIdx.sliceEnd]);
+        this.filteredVerses = tomeBin[binIdx.tomeBinIdx.verses].slice(
+          chapterBin[binIdx.chapterBinIdx.sliceStart],
+          chapterBin[binIdx.chapterBinIdx.sliceEnd]
+        );
         this.wordCount = chapterBin[binIdx.chapterBinIdx.wordCount];
         this.verseCount = chapterBin[binIdx.chapterBinIdx.verseCount];
         this.citation = tomeLists.chapters[chapterIdx][tomeIdx.chapter.name];
@@ -81,7 +86,8 @@ class SearchResultView {
     this.list = template.element('div', 'list', 'search-result', null, null);
     this.scroll.appendChild(this.list);
 
-    this.loadMore = template.element('div', 'load-more', 'search-result', null, null);
+    this.loadMore = template.element(
+      'div', 'load-more', 'search-result', null, null);
     this.btnLoadMore = document.createElement('div');
     this.btnLoadMore.classList.add('btn-load-more');
     this.btnLoadMore.textContent = 'Load More';
@@ -110,13 +116,9 @@ class SearchResultView {
     btn.dataset.verseIdx = verseObj.k;
     const searchText = document.createElement('span');
     searchText.classList.add('span-result-text');
-    const acrostic = template.acrostic(verseObj);
     const ref = this.buildRefSpan(verseObj);
     const text = document.createTextNode(verseObj.v[tomeIdx.verse.text]);
     searchText.appendChild(ref);
-    if (acrostic) {
-      searchText.appendChild(acrostic);
-    }
     searchText.appendChild(text);
     btn.appendChild(searchText);
     return btn;
@@ -190,13 +192,16 @@ class SearchResultView {
   }
 
   getElements() {
-    this.btnBanner = this.toolbarUpper.querySelector('.btn-banner--search-result');
+    this.btnBanner = this.toolbarUpper
+      .querySelector('.btn-banner--search-result');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnLookup = this.toolbarLower.querySelector('.btn-icon--search-lookup');
+    this.btnLookup = this.toolbarLower
+      .querySelector('.btn-icon--search-lookup');
     this.btnFilter = this.toolbarLower.querySelector('.btn-icon--filter');
     this.btnHistory = this.toolbarLower.querySelector('.btn-icon--history');
-    this.btnStrongMode = this.toolbarLower.querySelector('.btn-icon--strong-mode');
+    this.btnStrongMode = this.toolbarLower
+      .querySelector('.btn-icon--strong-mode');
   }
 
   hide() {

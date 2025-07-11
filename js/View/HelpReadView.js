@@ -45,7 +45,8 @@ class HelpReadView {
     this.banner = this.toolbarUpper.querySelector('.banner--help-read');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnHelpTopic = this.toolbarLower.querySelector('.btn-icon--help-topic');
+    this.btnHelpTopic = this.toolbarLower
+      .querySelector('.btn-icon--help-topic');
   }
 
   hide() {

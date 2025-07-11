@@ -150,8 +150,8 @@ class SearchFilterView {
 
   foldClick(btnFold) {
     const bookIdxStr = btnFold.dataset.bookIdx;
-    const chapters = this.list.querySelectorAll(`.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`
-    );
+    const chapters = this.list
+      .querySelectorAll(`.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`);
     for (const chapter of chapters) {
       chapter.classList.add('hide');
     }
@@ -164,7 +164,8 @@ class SearchFilterView {
     this.banner = this.toolbarUpper.querySelector('.banner--search-filter');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnLookup = this.toolbarLower.querySelector('.btn-icon--search-lookup');
+    this.btnLookup = this.toolbarLower
+      .querySelector('.btn-icon--search-lookup');
     this.btnResult = this.toolbarLower.querySelector('.btn-icon--result');
     this.btnHistory = this.toolbarLower.querySelector('.btn-icon--history');
   }
@@ -242,8 +243,8 @@ class SearchFilterView {
 
   unfoldClick(btnUnfold) {
     const bookIdxStr = btnUnfold.dataset.bookIdx;
-    const chapters = this.list.querySelectorAll(`.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`
-    );
+    const chapters = this.list
+      .querySelectorAll(`.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`);
     for (const chapter of chapters) {
       chapter.classList.remove('hide');
     }

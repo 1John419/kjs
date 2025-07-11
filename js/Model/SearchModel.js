@@ -290,7 +290,8 @@ class SearchModel {
     if (this.rig === null) {
       return;
     }
-    this.searchVerseObjs = await tomeDb.verses.bulkGet(this.rig.tomeBin[binIdx.tomeBinIdx.verses]);
+    this.searchVerseObjs =
+      await tomeDb.verses.bulkGet(this.rig.tomeBin[binIdx.tomeBinIdx.verses]);
     queue.publish('search.verse-objs.update', this.searchVerseObjs);
   }
 

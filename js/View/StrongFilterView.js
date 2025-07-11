@@ -105,7 +105,8 @@ class StrongFilterView {
 
     this.scroll = template.scroll('strong-filter');
 
-    this.empty = template.element('div', 'empty', 'strong-filter', null, 'No Strong Filter.');
+    this.empty = template.element('div', 'empty', 'strong-filter', null,
+      'No Strong Filter.');
     this.scroll.appendChild(this.empty);
     this.list = template.element('div', 'list', 'strong-filter', null, null);
     this.scroll.appendChild(this.list);
@@ -155,7 +156,8 @@ class StrongFilterView {
 
   foldClick(btnFold) {
     const bookIdxStr = btnFold.dataset.bookIdx;
-    const chapters = this.list.querySelectorAll(`.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`);
+    const chapters = this.list
+      .querySelectorAll(`.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`);
     for (const chapter of chapters) {
       chapter.classList.add('hide');
     }
@@ -168,7 +170,8 @@ class StrongFilterView {
     this.banner = this.toolbarUpper.querySelector('.banner--strong-filter');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnLookup = this.toolbarLower.querySelector('.btn-icon--strong-lookup');
+    this.btnLookup = this.toolbarLower
+      .querySelector('.btn-icon--strong-lookup');
     this.btnDef = this.toolbarLower.querySelector('.btn-icon--strong-def');
     this.btnResult = this.toolbarLower.querySelector('.btn-icon--result');
     this.btnHistory = this.toolbarLower.querySelector('.btn-icon--history');
@@ -252,7 +255,8 @@ class StrongFilterView {
 
   unfoldClick(btnUnfold) {
     const bookIdxStr = btnUnfold.dataset.bookIdx;
-    const chapters = this.list.querySelectorAll(`.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`);
+    const chapters = this.list
+      .querySelectorAll(`.btn-filter--chapter[data-book-idx="${bookIdxStr}"]`);
     for (const chapter of chapters) {
       chapter.classList.remove('hide');
     }

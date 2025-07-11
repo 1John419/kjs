@@ -27,7 +27,8 @@ export const helpTopicList = [
 ];
 
 const templateBtnTopic = (helpTopic) => {
-  const btnTopic = template.element('div', 'btn-topic', helpTopic.topic, null, helpTopic.name);
+  const btnTopic = template.element('div', 'btn-topic', helpTopic.topic, null,
+    helpTopic.name);
   btnTopic.dataset.topic = helpTopic.topic;
   return btnTopic;
 };

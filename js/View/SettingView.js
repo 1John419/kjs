@@ -25,7 +25,8 @@ const fontVariant = [
 ];
 
 const templateBtnFontSize = (size, label) => {
-  const btnFontSize = template.element('div', 'btn-font-size', null, null, null);
+  const btnFontSize = template.element('div', 'btn-font-size', null, null,
+    null);
   btnFontSize.textContent = 'Aa';
   btnFontSize.classList.add(`font-size--${size}`);
   btnFontSize.dataset.size = `font-size--${size}`;
@@ -33,7 +34,8 @@ const templateBtnFontSize = (size, label) => {
 };
 
 const templateBtnFontVariant = (variant, label) => {
-  const btnFontVariant = template.element('div', 'btn-font-variant', null, null, null);
+  const btnFontVariant = template.element('div', 'btn-font-variant', null, null,
+    null);
   btnFontVariant.textContent = label;
   btnFontVariant.classList.add(`${variant}`);
   btnFontVariant.dataset.variant = `${variant}`;
@@ -41,11 +43,20 @@ const templateBtnFontVariant = (variant, label) => {
 };
 
 const templateBtnThemeType = (type, label) => {
-  const btnThemeType = template.element('div', 'btn-theme-type', null, null, null);
+  const btnThemeType = template.element('div', 'btn-theme-type', null, null,
+    null);
   btnThemeType.textContent = label;
   btnThemeType.classList.add(`theme-type--${type}`);
   btnThemeType.dataset.type = `${type}`;
   return btnThemeType;
+};
+
+const templateBtnReadOption = (type, label) => {
+  const btnReadOption = template.element('div', 'btn-read-option', null, null,
+    null);
+  btnReadOption.textContent = label;
+  btnReadOption.dataset.type = `${type}`;
+  return btnReadOption;
 };
 
 const templateSettingFont = (modifier, name) => {
@@ -61,7 +72,8 @@ const templateSettingFontSize = (modifier, name) => {
   const divSetting = template.element('div', 'setting', modifier, null, null);
   const heading = template.element('h1', 'header', modifier, null, name);
   divSetting.appendChild(heading);
-  const divSelector = template.element('div', 'selector', 'font-size', null, null);
+  const divSelector = template.element('div', 'selector', 'font-size', null,
+    null);
   for (const size of fontSize) {
     const btn = templateBtnFontSize(size.size, size.label);
     divSelector.appendChild(btn);
@@ -74,12 +86,33 @@ const templateSettingFontVariant = (modifier, name) => {
   const divSetting = template.element('div', 'setting', modifier, null, null);
   const heading = template.element('h1', 'header', modifier, null, name);
   divSetting.appendChild(heading);
-  const divSelector = template.element('div', 'selector', 'font-variant', null, null);
+  const divSelector = template.element('div', 'selector', 'font-variant', null,
+    null);
   const btnNormal = templateBtnFontVariant('normal', 'Normal');
   divSelector.appendChild(btnNormal);
   const btnSmallCaps = templateBtnFontVariant('small-caps', 'Small Caps');
   divSelector.appendChild(btnSmallCaps);
   divSetting.appendChild(divSelector);
+  return divSetting;
+};
+
+const templateSettingReadOption = (id, name) => {
+  const divSetting = template.element('div', 'setting', 'read-option', null,
+    null);
+  const heading = template.element('h1', 'header', null, null, name);
+  const container = template.element('div', 'selector', 'read-option', null,
+    null);
+  const btnAcrostics = templateBtnReadOption('acrostics', 'Acrostics');
+  const btnColophons = templateBtnReadOption('colophons', 'Colophons');
+  const btnParagraphs = templateBtnReadOption('paragraphs', 'Paragraphs');
+  const btnSuperscriptions = templateBtnReadOption('superscriptions',
+    'Superscriptions');
+  container.appendChild(btnAcrostics);
+  container.appendChild(btnColophons);
+  container.appendChild(btnParagraphs);
+  container.appendChild(btnSuperscriptions);
+  divSetting.appendChild(heading);
+  divSetting.appendChild(container);
   return divSetting;
 };
 
@@ -98,7 +131,8 @@ const templateSettingTheme = (modifier, name) => {
   const divSetting = template.element('div', 'setting', modifier, null, null);
   const heading = template.element('h1', 'header', modifier, null, name);
   divSetting.appendChild(heading);
-  const divSelector = template.element('div', 'selector', 'theme-type', null, null);
+  const divSelector = template.element('div', 'selector', 'theme-type', null,
+    null);
   const btnDark = templateBtnThemeType('dark', 'Dark');
   divSelector.appendChild(btnDark);
   const btnLight = templateBtnThemeType('light', 'Light');
@@ -113,6 +147,14 @@ class SettingView {
 
   constructor() {
     this.initialize();
+  }
+
+  acrosticsUpdate(acrostics) {
+    if (acrostics) {
+      this.btnAcrostics.classList.add('btn-read-option--active');
+    } else {
+      this.btnAcrostics.classList.remove('btn-read-option--active');
+    }
   }
 
   addListeners() {
@@ -144,11 +186,16 @@ class SettingView {
     this.divSettingFontSize = templateSettingFontSize('font-size', 'Font Size');
     this.scroll.appendChild(this.divSettingFontSize);
 
-    this.divSettingFontVariant = templateSettingFontVariant('font-variant', 'Font Variant');
+    this.divSettingFontVariant = templateSettingFontVariant('font-variant',
+      'Font Variant');
     this.scroll.appendChild(this.divSettingFontVariant);
 
     this.divSettingTheme = templateSettingTheme('theme', 'Theme');
     this.scroll.appendChild(this.divSettingTheme);
+
+    this.divSettingReadOption = templateSettingReadOption('read-option',
+      'Read Option');
+    this.scroll.appendChild(this.divSettingReadOption);
 
     this.page.appendChild(this.scroll);
 
@@ -157,6 +204,14 @@ class SettingView {
 
     const container = document.querySelector('.container');
     container.appendChild(this.page);
+  }
+
+  colophonsUpdate(colophons) {
+    if (colophons) {
+      this.btnColophons.classList.add('btn-read-option--active');
+    } else {
+      this.btnColophons.classList.remove('btn-read-option--active');
+    }
   }
 
   fontClick(target) {
@@ -217,16 +272,33 @@ class SettingView {
     this.divNameFont = this.divCarouselFont.querySelector('.name--font');
     this.btnNextFont = this.divCarouselFont.querySelector('.btn-icon--next');
 
-    this.divSelectorFontSize = this.divSettingFontSize.querySelector('.selector--font-size');
-    this.divSelectorFontVariant = this.divSettingFontVariant.querySelector('.selector--font-variant');
+    this.divSelectorFontSize = this.divSettingFontSize
+      .querySelector('.selector--font-size');
+    this.divSelectorFontVariant = 
+      this.divSettingFontVariant.querySelector('.selector--font-variant');
 
-    this.divSelectorThemeType = this.divSettingTheme.querySelector('.selector--theme-type');
-    this.btnDarkTheme = this.divSelectorThemeType.querySelector('.theme-type--dark');
-    this.btnLightTheme = this.divSelectorThemeType.querySelector('.theme-type--light');
-    this.divCarouselTheme = this.divSettingTheme.querySelector('.carousel--theme');
-    this.btnPrevTheme = this.divCarouselTheme.querySelector('.btn-icon--prev');
+    this.divSelectorThemeType = this.divSettingTheme
+      .querySelector('.selector--theme-type');
+    this.btnDarkTheme = this.divSelectorThemeType
+      .querySelector('.theme-type--dark');
+    this.btnLightTheme = this.divSelectorThemeType
+      .querySelector('.theme-type--light');
+    this.divCarouselTheme = this.divSettingTheme
+      .querySelector('.carousel--theme');
+    this.btnPrevTheme = this.divCarouselTheme
+      .querySelector('.btn-icon--prev');
     this.divNameTheme = this.divCarouselTheme.querySelector('.name--theme');
     this.btnNextTheme = this.divCarouselTheme.querySelector('.btn-icon--next');
+    this.btnLightTheme = this.divSelectorThemeType
+      .querySelector('.theme-type--light');
+    this.btnAcrostics = this.divSettingReadOption
+      .querySelector('[data-type="acrostics"]');
+    this.btnColophons = this.divSettingReadOption
+      .querySelector('[data-type="colophons"]');
+    this.btnParagraphs = this.divSettingReadOption
+      .querySelector('[data-type="paragraphs"]');
+    this.btnSuperscriptions = this.divSettingReadOption
+      .querySelector('[data-type="superscriptions"]');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
   }
@@ -246,20 +318,46 @@ class SettingView {
     this.lastTheme = null;
   }
 
+  paragraphsUpdate(paragraphs) {
+    if (paragraphs) {
+      this.btnParagraphs.classList.add('btn-read-option--active');
+    } else {
+      this.btnParagraphs.classList.remove('btn-read-option--active');
+    }
+  }
+
+  readOptionClick(event) {
+    const type = event.dataset.type;
+    if (type) {
+      if (type === 'acrostics') {
+        queue.publish('acrostics.toogle', null);
+      } else if (type === 'colophons') {
+        queue.publish('colophons.toogle', null);
+      } else if (type === 'paragraphs') {
+        queue.publish('paragraphs.toogle', null);
+      } else if (type === 'superscriptions') {
+        queue.publish('superscriptions.toogle', null);
+      }
+    }
+
+  }
+
   scrollClick(event) {
     event.preventDefault();
-    const btn = event.target.closest('div');
-    if (btn) {
-      if (this.divCarouselFont.contains(btn)) {
-        this.fontClick(btn);
-      } else if (this.divSelectorFontSize.contains(btn)) {
-        this.fontSizeClick(btn);
-      } else if (this.divSelectorFontVariant.contains(btn)) {
-        this.fontVariantClick(btn);
-      } else if (this.divSelectorThemeType.contains(btn)) {
-        this.themeTypeClick(btn);
-      } else if (this.divCarouselTheme.contains(btn)) {
-        this.themeClick(btn);
+    const div = event.target.closest('div');
+    if (div) {
+      if (this.divCarouselFont.contains(div)) {
+        this.fontClick(div);
+      } else if (this.divSelectorFontSize.contains(div)) {
+        this.fontSizeClick(div);
+      } else if (this.divSelectorFontVariant.contains(div)) {
+        this.fontVariantClick(div);
+      } else if (this.divSelectorThemeType.contains(div)) {
+        this.themeTypeClick(div);
+      } else if (this.divCarouselTheme.contains(div)) {
+        this.themeClick(div);
+      } else if (this.divSettingReadOption.contains(div)) {
+        this.readOptionClick(div);
       }
     }
   }
@@ -269,6 +367,14 @@ class SettingView {
   }
 
   subscribe() {
+    queue.subscribe('acrostics.update', (acrostics) => {
+      this.acrosticsUpdate(acrostics);
+    });
+
+    queue.subscribe('colophons.update', (colophons) => {
+      this.colophonsUpdate(colophons);
+    });
+
     queue.subscribe('font.update', (font) => {
       this.fontUpdate(font);
     });
@@ -281,6 +387,10 @@ class SettingView {
       this.fontVariantUpdate(fontVariant);
     });
 
+    queue.subscribe('paragraphs.update', (paragraphs) => {
+      this.paragraphsUpdate(paragraphs);
+    });
+
     queue.subscribe('setting.hide', () => {
       this.hide();
     });
@@ -288,9 +398,21 @@ class SettingView {
       this.show();
     });
 
+    queue.subscribe('superscriptions.update', (superscriptions) => {
+      this.superscriptionsUpdate(superscriptions);
+    });
+
     queue.subscribe('theme.update', (theme) => {
       this.themeUpdate(theme);
     });
+  }
+
+  superscriptionsUpdate(superscriptions) {
+    if (superscriptions) {
+      this.btnSuperscriptions.classList.add('btn-read-option--active');
+    } else {
+      this.btnSuperscriptions.classList.remove('btn-read-option--active');
+    }
   }
 
   themeClick(target) {
@@ -359,7 +481,8 @@ class SettingView {
     if (this.activeFontSizeBtn) {
       this.activeFontSizeBtn.classList.remove('btn-font-size--active');
     }
-    this.activeFontSizeBtn = this.divSelectorFontSize.querySelector(`div[data-size="${this.fontSize}"]`);
+    this.activeFontSizeBtn = this.divSelectorFontSize
+      .querySelector(`div[data-size="${this.fontSize}"]`);
     this.activeFontSizeBtn.classList.add('btn-font-size--active');
   }
 
@@ -376,7 +499,8 @@ class SettingView {
     if (this.activeFontVariantBtn) {
       this.activeFontVariantBtn.classList.remove('btn-font-variant--active');
     }
-    this.activeFontVariantBtn = this.divSelectorFontVariant.querySelector(`div[data-variant="${this.fontVariant}"]`);
+    this.activeFontVariantBtn = this.divSelectorFontVariant
+      .querySelector(`div[data-variant="${this.fontVariant}"]`);
     this.activeFontVariantBtn.classList.add('btn-font-variant--active');
   }
 
@@ -388,7 +512,8 @@ class SettingView {
     if (this.activeThemeTypeBtn) {
       this.activeThemeTypeBtn.classList.remove('btn-theme-type--active');
     }
-    this.activeThemeTypeBtn = this.divSelectorThemeType.querySelector(`div[data-type="${this.theme.themeType}"]`);
+    this.activeThemeTypeBtn = this.divSelectorThemeType
+      .querySelector(`div[data-type="${this.theme.themeType}"]`);
     this.activeThemeTypeBtn.classList.add('btn-theme-type--active');
   }
 

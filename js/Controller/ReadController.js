@@ -5,7 +5,8 @@ import { queue } from '../CommandQueue.js';
 const SIDEBAR_WIDTH = 320;
 
 const mqlOnePane = window.matchMedia('screen and (max-width: 639px)');
-const mqlTwoPanes = window.matchMedia('screen and (min-width: 640px) and (max-width: 959px)');
+const mqlTwoPanes =
+  window.matchMedia('screen and (min-width: 640px) and (max-width: 959px)');
 const mqlThreePanes = window.matchMedia('screen and (min-width: 960px)');
 
 class ReadController {

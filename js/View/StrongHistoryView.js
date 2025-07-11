@@ -58,7 +58,8 @@ class StrongHistoryView {
     this.page.appendChild(this.toolbarUpper);
 
     this.scroll = template.scroll('strong-history');
-    this.empty = template.element('div', 'empty', 'strong-history', null, 'No Strong History.');
+    this.empty = template.element('div', 'empty', 'strong-history', null,
+      'No Strong History.');
     this.scroll.appendChild(this.empty);
 
     this.list = template.element('div', 'list', 'strong-history', null, null);
@@ -75,13 +76,15 @@ class StrongHistoryView {
 
   getElements() {
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnLookup = this.toolbarLower.querySelector('.btn-icon--strong-lookup');
+    this.btnLookup = this.toolbarLower
+      .querySelector('.btn-icon--strong-lookup');
     this.btnDef = this.toolbarLower.querySelector('.btn-icon--strong-def');
     this.btnResult = this.toolbarLower.querySelector('.btn-icon--result');
     this.btnFilter = this.toolbarLower.querySelector('.btn-icon--filter');
     this.btnHistory = this.toolbarLower.querySelector('.btn-icon--history');
     this.btnVerse = this.toolbarLower.querySelector('.btn-icon--strong-verse');
-    this.btnHistoryClear = this.toolbarLower.querySelector('.btn-icon--history-clear');
+    this.btnHistoryClear = this.toolbarLower
+      .querySelector('.btn-icon--history-clear');
   }
 
   hide() {

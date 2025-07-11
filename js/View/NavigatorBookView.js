@@ -112,7 +112,8 @@ class NavigatorBookView {
 
   getElements() {
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnChapter = this.toolbarLower.querySelector('.btn-icon--navigator-chapter');
+    this.btnChapter = this.toolbarLower
+      .querySelector('.btn-icon--navigator-chapter');
   }
 
   hide() {

@@ -120,8 +120,10 @@ class BookmarkFolderView {
     this.btnCancel = this.actionMenu.querySelector('.btn-icon--cancel');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnBookmarkList = this.toolbarLower.querySelector('.btn-icon--bookmark-list');
-    this.btnBookmarkFolderAdd = this.toolbarLower.querySelector('.btn-icon--bookmark-folder-add');
+    this.btnBookmarkList = this.toolbarLower
+      .querySelector('.btn-icon--bookmark-list');
+    this.btnBookmarkFolderAdd = this.toolbarLower
+      .querySelector('.btn-icon--bookmark-folder-add');
     this.btnImport = this.toolbarLower.querySelector('.btn-icon--import');
     this.btnExport = this.toolbarLower.querySelector('.btn-icon--export');
   }

@@ -115,7 +115,8 @@ class BookmarkModel {
   }
 
   folderDown(folderName) {
-    const index = this.folders.findIndex((folder) => folder.name === folderName);
+    const index = this.folders
+      .findIndex((folder) => folder.name === folderName);
     if (index !== this.folders.length - 1 && index !== -1) {
       this.reorderFolders(index, index + 1);
       this.updateFolders();
@@ -197,7 +198,8 @@ class BookmarkModel {
   }
 
   folderUp(folderName) {
-    const index = this.folders.findIndex((folder) => folder.name === folderName);
+    const index = this.folders
+      .findIndex((folder) => folder.name === folderName);
     if (index !== 0 && index !== -1) {
       this.reorderFolders(index, index - 1);
       this.updateFolders();
@@ -275,7 +277,9 @@ class BookmarkModel {
   }
 
   moveCopyListChange(verseIdx) {
-    const foldersNotFoundIn = this.folders.filter((folder) => !folder.bookmarks.some((element) => element === verseIdx));
+    const foldersNotFoundIn = this.folders.filter(
+      (folder) => !folder.bookmarks.some((element) => element === verseIdx)
+    );
     const moveCopyList = foldersNotFoundIn.map((folder) => folder.name);
     queue.publish('bookmark-move-copy.list.update', moveCopyList);
   }
@@ -543,7 +547,8 @@ class BookmarkModel {
 
   async updateActiveFolder() {
     this.activeFolder = this.getFolder(this.activeFolderName);
-    this.activeFolder.verseObjs = await tomeDb.verses.bulkGet(this.activeFolder.bookmarks);
+    this.activeFolder.verseObjs =
+      await tomeDb.verses.bulkGet(this.activeFolder.bookmarks);
     queue.publish('bookmark.active-folder.update', this.activeFolder);
   }
 
@@ -552,7 +557,8 @@ class BookmarkModel {
   }
 
   async updateBookmarkVerseObjs() {
-    this.activeFolder.verseObjs = await tomeDb.verses.bulkGet(this.activeFolder.bookmarks);
+    this.activeFolder.verseObjs =
+      await tomeDb.verses.bulkGet(this.activeFolder.bookmarks);
     queue.publish('bookmark.verse-objs.update', this.activeFolder.verseObjs);
   }
 

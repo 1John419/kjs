@@ -13,9 +13,8 @@ const lowerToolSet = [
   { type: 'btn', icon: 'bookmark-folder', ariaLabel: null },
 ];
 
-const upperToolSet = [
-  { type: 'banner', cssModifier: 'bookmark-folder-rename', text: 'Folder Rename'},
-];
+const upperToolSet = [{type: 'banner', cssModifier: 'bookmark-folder-rename',
+  text: 'Folder Rename'},];
 
 class BookmarkFolderRenameView {
 
@@ -45,7 +44,8 @@ class BookmarkFolderRenameView {
     this.dialog = template.divDialog('bookmark-folder-rename', dialogToolset);
     this.scroll.appendChild(this.dialog);
 
-    this.message = template.element('div', 'message', 'bookmark-folder-rename', null, null);
+    this.message = template.element('div', 'message',
+      'bookmark-folder-rename', null, null);
     this.scroll.appendChild(this.message);
 
     this.page.appendChild(this.scroll);
@@ -81,7 +81,8 @@ class BookmarkFolderRenameView {
     this.dialogBtns = this.dialog.querySelector('.dialog-btns');
     this.btnSave = this.dialogBtns.querySelector('.btn-dialog--save');
 
-    this.btnBookmarkFolder = this.toolbarLower.querySelector('.btn-icon--bookmark-folder');
+    this.btnBookmarkFolder = this.toolbarLower
+      .querySelector('.btn-icon--bookmark-folder');
   }
 
   hide() {

@@ -12,9 +12,8 @@ const lowerToolSet = [
   { type: 'btn', icon: 'bookmark-folder', ariaLabel: null },
 ];
 
-const upperToolSet = [
-  { type: 'banner', cssModifier: 'bookmark-folder-delete', text: 'Folder Delete' },
-];
+const upperToolSet = [{ type: 'banner', cssModifier: 'bookmark-folder-delete',
+  text: 'Folder Delete' },];
 
 class BookmarkFolderDeleteView {
 
@@ -68,13 +67,15 @@ class BookmarkFolderDeleteView {
   }
 
   getElements() {
-    this.banner = this.toolbarUpper.querySelector('.banner--bookmark-folder-delete');
+    this.banner = this.toolbarUpper
+      .querySelector('.banner--bookmark-folder-delete');
 
     this.label = this.dialog.querySelector('.dialog-label');
     this.dialogBtns = this.dialog.querySelector('.dialog-btns');
     this.btnDelete = this.dialogBtns.querySelector('.btn-dialog--delete');
 
-    this.btnBookmarkFolder = this.toolbarLower.querySelector('.btn-icon--bookmark-folder');
+    this.btnBookmarkFolder = this.toolbarLower
+      .querySelector('.btn-icon--bookmark-folder');
   }
 
   hide() {

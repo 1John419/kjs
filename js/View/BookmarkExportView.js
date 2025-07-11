@@ -72,7 +72,8 @@ class BookmarkExportview {
     this.textarea = this.scroll.querySelector('.dialog-textarea');
 
     this.btnBack = this.toolbarLower.querySelector('.btn-icon--back');
-    this.btnBookmarkFolder = this.toolbarLower.querySelector('.btn-icon--bookmark-folder');
+    this.btnBookmarkFolder = this.toolbarLower
+      .querySelector('.btn-icon--bookmark-folder');
   }
 
   hide() {
