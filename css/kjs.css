@@ -390,11 +390,6 @@ ul {
   text-align: center;
 }
 
-.checkbox-container {
-  margin: 0;
-  padding-bottom: 1.0rem;
-}
-
 .colophon {
   margin: 0 2.0rem 0 2.0rem;
 }
@@ -726,6 +721,65 @@ ul {
   display: block;
   min-height: var(--target-size);
   text-align: left;
+}
+
+.strong-def--lemma {
+  margin-bottom: 0.5rem;
+}
+
+.strong-def--pron {
+  margin-bottom: 0.5rem;
+}
+
+.strong-def--xlit {
+  margin-bottom: 0.5rem;
+}
+
+.strong-def-list {
+  list-style-position: outside;
+  padding-left: 1.0rem;;
+}
+
+.strong-def-list--deriv {
+  list-style: '▽ ';
+}
+
+.strong-def-list--kjv-def {
+  list-style: '◁ ';
+}
+
+.strong-def-list--strong-def {
+  list-style: '▷ ';
+}
+
+.strong-fragment {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.strong-list {
+  display: flex;
+  flex-flow: column nowrap;
+  width: 4.5em;
+}
+
+.strong-words {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+  margin-top: 1.0rem;
+}
+
+.super {
+  font-size: 0.8em;
+  vertical-align: super;
+}
+
+.table {
+  border: 1px solid;
+  border-collapse: collapse;
+  display: table;
+  width: 100%;
 }
 
 .superscription {
