@@ -2,7 +2,7 @@
 
 const appCaches = [
   {
-    name: 'core-20250710.01',
+    name: 'core-20260317.01',
     urls: [
       '/',
       '/bundle.js',
@@ -38,7 +38,7 @@ const appCaches = [
     ]
   },
   {
-    name: 'help-20250710.01',
+    name: 'help-20260317.01',
     urls: [
       '/help/bookmark.html',
       '/help/clipboard-mode.html',
