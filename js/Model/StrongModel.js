@@ -443,7 +443,7 @@ class StrongModel {
       this.wordVerseObjs = await tomeDb.verses.bulkGet(verses);
       queue.publish('strong.wordVerse.update', this.wordVerseObjs);
     } else {
-      this.strongIdx.word.tomeBin = [];
+      this.wordTomeBin = [];
       queue.publish('strong.wordTomeBin.update', this.wordTomeBin);
       this.wordVerseObjs = [];
       queue.publish('strong.wordVerse.update', this.wordVerseObjs);
