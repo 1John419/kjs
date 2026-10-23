@@ -25,6 +25,8 @@ const upperToolSet = [
 const localBinIdx = 0;
 const loadIncrement = 50;
 
+const lastOtVerseIdx = 23144;
+
 class StrongResultView {
 
   constructor() {

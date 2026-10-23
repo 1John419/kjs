@@ -21,6 +21,8 @@ const upperToolSet = [{type: 'btn-banner', cssModifier: 'search-result',
 const localBinIdx = 0;
 const loadIncrement = 50;
 
+const lastOtVerseIdx = 23144;
+
 class SearchResultView {
 
   constructor() {
@@ -117,7 +119,15 @@ class SearchResultView {
     const searchText = document.createElement('span');
     searchText.classList.add('span-result-text');
     const ref = this.buildRefSpan(verseObj);
-    const text = document.createTextNode(verseObj.v[tomeIdx.verse.text]);
+
+    var verseText = verseObj.v[tomeIdx.verse.text];
+    if (verseObj.k > lastOtVerseIdx) {
+      verseText = verseText.replaceAll('@', '');
+      verseText = verseText.replaceAll('#', '');
+    }
+
+    const text = document.createTextNode(verseText);
+
     searchText.appendChild(ref);
     searchText.appendChild(text);
     btn.appendChild(searchText);

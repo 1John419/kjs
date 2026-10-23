@@ -2,7 +2,7 @@
 
 const appCaches = [
   {
-    name: 'core-20260317.01',
+    name: 'core-20261023.01',
     urls: [
       '/',
       '/bundle.js',
@@ -17,7 +17,7 @@ const appCaches = [
     ]
   },
   {
-    name: 'css-20250715.01',
+    name: 'css-20251023.01',
     urls: [
       '/css/font.css',
       '/css/kjs.css',
@@ -38,7 +38,7 @@ const appCaches = [
     ]
   },
   {
-    name: 'help-20260317.01',
+    name: 'help-20261023.01',
     urls: [
       '/help/bookmark.html',
       '/help/clipboard-mode.html',
@@ -53,7 +53,7 @@ const appCaches = [
     ]
   },
   {
-    name: 'json-20250710.01',
+    name: 'json-20251023.01',
     urls: [
       '/json/kjv_lists.json',
       '/json/kjv_name.json',

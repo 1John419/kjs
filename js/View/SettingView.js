@@ -105,11 +105,13 @@ const templateSettingReadOption = (id, name) => {
   const btnAcrostics = templateBtnReadOption('acrostics', 'Acrostics');
   const btnColophons = templateBtnReadOption('colophons', 'Colophons');
   const btnParagraphs = templateBtnReadOption('paragraphs', 'Paragraphs');
+  const btnRedLetter = templateBtnReadOption('redLetter', 'Red Letter');
   const btnSuperscriptions = templateBtnReadOption('superscriptions',
     'Superscriptions');
   container.appendChild(btnAcrostics);
   container.appendChild(btnColophons);
   container.appendChild(btnParagraphs);
+  container.appendChild(btnRedLetter);
   container.appendChild(btnSuperscriptions);
   divSetting.appendChild(heading);
   divSetting.appendChild(container);
@@ -297,6 +299,8 @@ class SettingView {
       .querySelector('[data-type="colophons"]');
     this.btnParagraphs = this.divSettingReadOption
       .querySelector('[data-type="paragraphs"]');
+    this.btnRedLetter = this.divSettingReadOption
+      .querySelector('[data-type="redLetter"]');
     this.btnSuperscriptions = this.divSettingReadOption
       .querySelector('[data-type="superscriptions"]');
 
@@ -335,11 +339,21 @@ class SettingView {
         queue.publish('colophons.toogle', null);
       } else if (type === 'paragraphs') {
         queue.publish('paragraphs.toogle', null);
+      } else if (type === 'redLetter') {
+        queue.publish('redLetter.toogle', null);
       } else if (type === 'superscriptions') {
         queue.publish('superscriptions.toogle', null);
       }
     }
 
+  }
+
+  redLetterUpdate(redLetter) {
+    if (redLetter) {
+      this.btnRedLetter.classList.add('btn-read-option--active');
+    } else {
+      this.btnRedLetter.classList.remove('btn-read-option--active');
+    }
   }
 
   scrollClick(event) {
@@ -389,6 +403,10 @@ class SettingView {
 
     queue.subscribe('paragraphs.update', (paragraphs) => {
       this.paragraphsUpdate(paragraphs);
+    });
+
+    queue.subscribe('redLetter.update', (redLetter) => {
+      this.redLetterUpdate(redLetter);
     });
 
     queue.subscribe('setting.hide', () => {

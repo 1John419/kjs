@@ -10,7 +10,7 @@ const strongSetup = {
     words: 'k',
   },
   url: '/json/strong_name.json',
-  version: '2024-05-09',
+  version: '2026-10-23',
 };
 
 export let strongNameDb = null;

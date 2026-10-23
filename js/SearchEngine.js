@@ -122,7 +122,7 @@ class SearchEngine {
     for (const verseObj of verseObjs) {
       this.verseIdx = verseObj.k;
       const re = this.buildRegExp(this.searchTerms, this.flags);
-      const text = verseObj.v[tomeIdx.verse.text].replace(/[!();:,.?-]/g, '');
+      const text = verseObj.v[tomeIdx.verse.text].replace(/[@#!();:,.?-]/g, '');
       this.verseCount = (text.match(re) || []).length;
       if (this.verseCount > 0) {
         this.rig.tomeBin[binIdx.tomeBinIdx.verses].push(this.verseIdx);

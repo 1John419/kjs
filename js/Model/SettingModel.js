@@ -199,6 +199,16 @@ class SettingModel {
     this.paragraphsChange(!this.paragraphs);
   }
 
+  redLetterChange(redLetter) {
+    this.redletter = redLetter;
+    this.saveRedLetter();
+    queue.publish('redLetter.update', this.redletter);
+  }
+
+  redLetterToogle() {
+    this.redLetterChange(!this.redletter);
+  }
+
   restore() {
     this.initializeFonts();
     this.restoreFont();
@@ -209,11 +219,12 @@ class SettingModel {
     this.restoreAcrostics();
     this.restoreColophons();
     this.restoreParagraphs();
+    this.restoreRedLetter();
     this.restoreSuperscriptions();
   }
 
   restoreAcrostics() {
-    const defaultAcrostics = false;
+    const defaultAcrostics = true;
     let acrostics = localStorage.getItem('acrostics');
     if (!acrostics) {
       acrostics = defaultAcrostics;
@@ -231,7 +242,7 @@ class SettingModel {
   }
 
   restoreColophons() {
-    const defaultColophons = false;
+    const defaultColophons = true;
     let colophons = localStorage.getItem('colophons');
     if (!colophons) {
       colophons = defaultColophons;
@@ -303,7 +314,7 @@ class SettingModel {
   }
 
   restoreParagraphs() {
-    const defaultParagraphs = false;
+    const defaultParagraphs = true;
     let paragraphs = localStorage.getItem('paragraphs');
     if (!paragraphs) {
       paragraphs = defaultParagraphs;
@@ -320,8 +331,26 @@ class SettingModel {
     this.paragraphsChange(paragraphs);
   }
 
+  restoreRedLetter() {
+    const defaultRedLetter = true;
+    let redLetter = localStorage.getItem('redLetter');
+    if (!redLetter) {
+      redLetter = defaultRedLetter;
+    } else {
+      try {
+        redLetter = JSON.parse(redLetter);
+      } catch (error) {
+        redLetter = defaultRedLetter;
+      }
+      if (typeof redLetter !== 'boolean') {
+        redLetter = defaultRedLetter;
+      }
+    }
+    this.redLetterChange(redLetter);
+  }
+
   restoreSuperscriptions() {
-    const defaultSuperscriptions = false;
+    const defaultSuperscriptions = true;
     let superscriptions = localStorage.getItem('superscriptions');
     if (!superscriptions) {
       superscriptions = defaultSuperscriptions;
@@ -380,6 +409,10 @@ class SettingModel {
     localStorage.setItem('paragraphs', JSON.stringify(this.paragraphs));
   }
 
+  saveRedLetter() {
+    localStorage.setItem('redLetter', JSON.stringify(this.redletter));
+  }
+
   saveSuperscriptions() {
     localStorage.setItem('superscriptions',
       JSON.stringify(this.superscriptions));
@@ -412,6 +445,10 @@ class SettingModel {
 
     queue.subscribe('paragraphs.toogle', () => {
       this.paragraphsToogle();
+    });
+
+    queue.subscribe('redLetter.toogle', () => {
+      this.redLetterToogle();
     });
 
     queue.subscribe('setting.restore', () => {
