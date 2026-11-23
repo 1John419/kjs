@@ -88,28 +88,28 @@ class SettingModel {
       fontClass: 'font--open-sans'
     });
     this.fonts.push({
-      fontName: 'Roboto Slab',
-      fontClass: 'font--roboto-slab'
+      fontName: 'Noto Serif',
+      fontClass: 'font--noto-serif'
     });
     this.fonts.push({
       fontName: 'Merriweather',
       fontClass: 'font--merriweather'
     });
     this.fonts.push({
-      fontName: 'Courgette',
-      fontClass: 'font--courgette'
+      fontName: 'Mali',
+      fontClass: 'font--mali'
     });
     this.fonts.push({
-      fontName: 'Merienda',
-      fontClass: 'font--merienda'
+      fontName: 'Averia Libre',
+      fontClass: 'font--averia-libre'
     });
     this.fonts.push({
       fontName: 'Roboto Mono',
       fontClass: 'font--roboto-mono'
     });
     this.fonts.push({
-      fontName: 'Inconsolata',
-      fontClass: 'font--inconsolata'
+      fontName: 'IBM Plex Mono',
+      fontClass: 'font--ibm-plex-mono'
     });
     queue.publish('fonts.update', this.fonts);
   }
@@ -189,6 +189,16 @@ class SettingModel {
     queue.publish('themes.update', this.themes);
   }
 
+  italicsChange(italics) {
+    this.italics = italics;
+    this.saveItalics();
+    queue.publish('italics.update', this.italics);
+  }
+
+  italicsToogle() {
+    this.italicsChange(!this.italics);
+  }
+
   paragraphsChange(paragraphs) {
     this.paragraphs = paragraphs;
     this.saveParagraphs();
@@ -218,6 +228,7 @@ class SettingModel {
     this.restoreTheme();
     this.restoreAcrostics();
     this.restoreColophons();
+    this.restoreItalics();
     this.restoreParagraphs();
     this.restoreRedLetter();
     this.restoreSuperscriptions();
@@ -313,6 +324,24 @@ class SettingModel {
     this.fontVariantChange(fontVariant);
   }
 
+  restoreItalics() {
+    const defaultItalics = true;
+    let italics = localStorage.getItem('italics');
+    if (!italics) {
+      italics = defaultItalics;
+    } else {
+      try {
+        italics = JSON.parse(italics);
+      } catch (error) {
+        italics = defaultItalics;
+      }
+      if (typeof italics !== 'boolean') {
+        italics = defaultItalics;
+      }
+    }
+    this.italicsChange(italics);
+  }
+
   restoreParagraphs() {
     const defaultParagraphs = true;
     let paragraphs = localStorage.getItem('paragraphs');
@@ -405,6 +434,10 @@ class SettingModel {
     localStorage.setItem('fontVariant', JSON.stringify(this.fontVariant));
   }
 
+  saveItalics() {
+    localStorage.setItem('italics', JSON.stringify(this.italics));
+  }
+
   saveParagraphs() {
     localStorage.setItem('paragraphs', JSON.stringify(this.paragraphs));
   }
@@ -441,6 +474,10 @@ class SettingModel {
 
     queue.subscribe('font-variant.change', (fontVariant) => {
       this.fontVariantChange(fontVariant);
+    });
+
+    queue.subscribe('italics.toogle', () => {
+      this.italicsToogle();
     });
 
     queue.subscribe('paragraphs.toogle', () => {

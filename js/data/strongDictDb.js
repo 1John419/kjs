@@ -10,7 +10,7 @@ const strongSetup = {
     dict: 'k',
   },
   url: '/json/strong_dict.json',
-  version: '2026-10-23',
+  version: '2026-11-23',
 };
 
 export const strongCitations = {};

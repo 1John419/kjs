@@ -512,6 +512,10 @@ ul {
   width: calc(var(--target-size) - 6px);
 }
 
+.italic {
+  font-style: italic;
+}
+
 .king {
   margin-bottom: 0.25rem;
   text-align: center;

@@ -113,25 +113,40 @@ class SearchResultView {
   }
 
   buildVerse(verseObj) {
-    const btn = document.createElement('div');
-    btn.classList.add('btn-result');
-    btn.dataset.verseIdx = verseObj.k;
-    const searchText = document.createElement('span');
-    searchText.classList.add('span-result-text');
+    const verse = document.createElement('div');
+    verse.classList.add('btn-result');
+    verse.dataset.verseIdx = verseObj.k;
     const ref = this.buildRefSpan(verseObj);
+    verse.appendChild(ref);
+    const text = template.element('span', 'result-text', null, null,
+      verseObj.v[tomeIdx.verse.text]);
 
-    var verseText = verseObj.v[tomeIdx.verse.text];
-    if (verseObj.k > lastOtVerseIdx) {
-      verseText = verseText.replaceAll('@', '');
-      verseText = verseText.replaceAll('#', '');
+    if (this.italics) {
+      text.innerHTML = text.innerHTML.replaceAll(
+        '$', '<span class="italic">');
+      text.innerHTML = text.innerHTML.replaceAll(
+        '%', '</span>');
+    }
+    else {
+      text.innerHTML = text.innerHTML.replaceAll('$', '');
+      text.innerHTML = text.innerHTML.replaceAll('%', '');
     }
 
-    const text = document.createTextNode(verseText);
+    if (verseObj.k > lastOtVerseIdx) {
+      if (this.redLetter) {
+        text.innerHTML = text.innerHTML.replaceAll(
+          '@', '<span class="quote">');
+        text.innerHTML = text.innerHTML.replaceAll(
+          '#', '</span>');
+      }
+      else {
+        text.innerHTML = text.innerHTML.replaceAll('@', '');
+        text.innerHTML = text.innerHTML.replaceAll('#', '');
+      }
+    }
 
-    searchText.appendChild(ref);
-    searchText.appendChild(text);
-    btn.appendChild(searchText);
-    return btn;
+    verse.appendChild(text);
+    return verse;
   }
 
   changeFont() {
@@ -313,6 +328,16 @@ class SearchResultView {
 
     queue.subscribe('font-variant.update', (fontVariant) => {
       this.fontVariantUpdate(fontVariant);
+    });
+
+    queue.subscribe('italics.update', (italics) => {
+      this.italics = italics;
+      this.updateResult();
+    });
+
+    queue.subscribe('redLetter.update', (redLetter) => {
+      this.redLetter = redLetter;
+      this.updateResult();
     });
 
     queue.subscribe('rig.update', (rig) => {

@@ -10,7 +10,7 @@ const dbSetup = {
     words: 'k',
   },
   url: '/json/kjv_pure.json',
-  version: '2026-10-23',
+  version: '2026-11-23',
 };
 
 export let kjvPureDb = null;

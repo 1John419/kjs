@@ -104,12 +104,14 @@ const templateSettingReadOption = (id, name) => {
     null);
   const btnAcrostics = templateBtnReadOption('acrostics', 'Acrostics');
   const btnColophons = templateBtnReadOption('colophons', 'Colophons');
+  const btnItalics = templateBtnReadOption('italics', 'Italics');
   const btnParagraphs = templateBtnReadOption('paragraphs', 'Paragraphs');
   const btnRedLetter = templateBtnReadOption('redLetter', 'Red Letter');
-  const btnSuperscriptions = templateBtnReadOption('superscriptions',
-    'Superscriptions');
+  const btnSuperscriptions = templateBtnReadOption(
+    'superscriptions', 'Superscriptions');
   container.appendChild(btnAcrostics);
   container.appendChild(btnColophons);
+  container.appendChild(btnItalics);
   container.appendChild(btnParagraphs);
   container.appendChild(btnRedLetter);
   container.appendChild(btnSuperscriptions);
@@ -297,6 +299,8 @@ class SettingView {
       .querySelector('[data-type="acrostics"]');
     this.btnColophons = this.divSettingReadOption
       .querySelector('[data-type="colophons"]');
+    this.btnItalics = this.divSettingReadOption
+      .querySelector('[data-type="italics"]');
     this.btnParagraphs = this.divSettingReadOption
       .querySelector('[data-type="paragraphs"]');
     this.btnRedLetter = this.divSettingReadOption
@@ -322,6 +326,14 @@ class SettingView {
     this.lastTheme = null;
   }
 
+  italicsUpdate(italics) {
+    if (italics) {
+      this.btnItalics.classList.add('btn-read-option--active');
+    } else {
+      this.btnItalics.classList.remove('btn-read-option--active');
+    }
+  }
+
   paragraphsUpdate(paragraphs) {
     if (paragraphs) {
       this.btnParagraphs.classList.add('btn-read-option--active');
@@ -337,6 +349,8 @@ class SettingView {
         queue.publish('acrostics.toogle', null);
       } else if (type === 'colophons') {
         queue.publish('colophons.toogle', null);
+      } else if (type === 'italics') {
+        queue.publish('italics.toogle', null);
       } else if (type === 'paragraphs') {
         queue.publish('paragraphs.toogle', null);
       } else if (type === 'redLetter') {
@@ -399,6 +413,10 @@ class SettingView {
 
     queue.subscribe('font-variant.update', (fontVariant) => {
       this.fontVariantUpdate(fontVariant);
+    });
+
+    queue.subscribe('italics.update', (italics) => {
+      this.italicsUpdate(italics);
     });
 
     queue.subscribe('paragraphs.update', (paragraphs) => {

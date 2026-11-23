@@ -2,7 +2,7 @@
 
 const appCaches = [
   {
-    name: 'core-20261023.01',
+    name: 'core-20261123.01',
     urls: [
       '/',
       '/bundle.js',
@@ -17,28 +17,36 @@ const appCaches = [
     ]
   },
   {
-    name: 'css-20251023.01',
+    name: 'css-20261123.01',
     urls: [
       '/css/font.css',
       '/css/kjs.css',
     ]
   },
   {
-    name: 'font-20250710.01',
+    name: 'font-20261123.01',
     urls: [
-      '/font/courgette-v18-latin-regular.woff2',
-      '/font/inconsolata-v36-latin-regular.woff2',
-      '/font/merienda-v21-latin-regular.woff2',
-      '/font/merriweather-v32-latin-regular.woff2',
-      '/font/noto-serif-hebrew-v29-latin-regular.woff2',
-      '/font/open-sans-v43-latin-regular.woff2',
-      '/font/roboto-mono-v30-latin-regular.woff2',
-      '/font/roboto-slab-v35-latin-regular.woff2',
-      '/font/roboto-v48-latin-regular.woff2',
+      '/font/averia-sans-libre-v20-latin-300italic.woff2',
+      '/font/averia-sans-libre-v20-latin-regular.woff2',
+      '/font/ibm-plex-mono-v23-latin-300italic.woff2',
+      '/font/ibm-plex-mono-v23-latin-regular.woff2',
+      '/font/mali-v13-latin-300italic.woff2',
+      '/font/mali-v13-latin-regular.woff2',
+      '/font/merriweather-v33-latin-300italic.woff2',
+      '/font/merriweather-v33-latin-regular.woff2',
+      '/font/noto-sans-hebrew-v50-latin-regular.woff2',
+      '/font/noto-serif-v33-latin-300italic.woff2',
+      '/font/noto-serif-v33-latin-regular.woff2',
+      '/font/open-sans-v44-latin-300italic.woff2',
+      '/font/open-sans-v44-latin-regular.woff2',
+      '/font/roboto-mono-v31-latin-300italic.woff2',
+      '/font/roboto-mono-v31-latin-regular.woff2',
+      '/font/roboto-v51-latin-300italic.woff2',
+      '/font/roboto-v51-latin-regular.woff2',
     ]
   },
   {
-    name: 'help-20261023.01',
+    name: 'help-20261123.01',
     urls: [
       '/help/bookmark.html',
       '/help/clipboard-mode.html',
@@ -53,7 +61,7 @@ const appCaches = [
     ]
   },
   {
-    name: 'json-20251023.01',
+    name: 'json-20261123.01',
     urls: [
       '/json/kjv_lists.json',
       '/json/kjv_name.json',

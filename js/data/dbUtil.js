@@ -1,7 +1,7 @@
 'use strict';
 
 import { progress } from '../progress.js';
-import { Dexie } from '../lib/dexie.v4.0.4.min.mjs';
+import { Dexie } from '../lib/dexie.v4.4.7.min.mjs';
 
 export const dbUtil = {};
 

@@ -56,7 +56,32 @@ class StrongResultView {
     resultText.classList.add('span-search-text');
     const ref = this.buildRefSpan(verseObj);
     resultText.appendChild(ref);
-    const text = this.buildStrongText(verseObj);
+    let text = this.buildStrongText(verseObj);
+
+    if (this.italics) {
+      text = text.replaceAll(
+        '$', '<span class="italic">');
+      text = text.replaceAll(
+        '%', '</span>');
+    }
+    else {
+      text = text.replaceAll('$', '');
+      text = text.replaceAll('%', '');
+    }
+
+    if (verseObj.k > lastOtVerseIdx) {
+      if (this.redLetter) {
+        text = text.replaceAll(
+          '@', '<span class="quote">');
+        text = text.replaceAll(
+          '#', '</span>');
+      }
+      else {
+        text = text.replaceAll('@', '');
+        text = text.replaceAll('#', '');
+      }
+    }
+
     resultText.insertAdjacentHTML('beforeend', text);
     btn.appendChild(resultText);
     return btn;
@@ -289,6 +314,9 @@ class StrongResultView {
   }
 
   loadVerses() {
+    if (typeof this.filteredVerses == 'undefined') {
+      return;
+    }
     let verses;
     if (this.verseCount <= loadIncrement) {
       verses = this.filteredVerses;
@@ -339,6 +367,16 @@ class StrongResultView {
 
     queue.subscribe('font-variant.update', (fontVariant) => {
       this.fontVariantUpdate(fontVariant);
+    });
+
+    queue.subscribe('italics.update', (italics) => {
+      this.italics = italics;
+      this.updateResult();
+    });
+
+    queue.subscribe('redLetter.update', (redLetter) => {
+      this.redLetter = redLetter;
+      this.updateResult();
     });
 
     queue.subscribe('strong-result.hide', () => {

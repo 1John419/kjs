@@ -3,7 +3,15 @@
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/roboto-v48-latin-regular.woff2') format('woff2');
+  src: url('/font/roboto-v51-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Roboto';
+  font-style: italic;
+  font-weight: 300;
+  src: url('/font/roboto-v51-latin-300italic.woff2') format('woff2');
 }
 
 .font--roboto {
@@ -15,7 +23,15 @@
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/open-sans-v43-latin-regular.woff2') format('woff2');
+  src: url('/font/open-sans-v44-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 300;
+  src: url('/font/open-sans-v44-latin-300italic.woff2') format('woff2');
 }
 
 .font--open-sans {
@@ -24,14 +40,22 @@
 
 @font-face {
   font-display: swap;
-  font-family: 'Roboto Slab';
+  font-family: 'Noto Serif';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/roboto-slab-v35-latin-regular.woff2') format('woff2');
+  src: url('/fonts/noto-serif-v33-latin-regular.woff2') format('woff2');
 }
 
-.font--roboto-slab {
-  font-family: 'Roboto Slab', serif;
+@font-face {
+  font-display: swap;
+  font-family: 'Noto Serif';
+  font-style: italic;
+  font-weight: 300;
+  src: url('/fonts/noto-serif-v33-latin-300italic.woff2') format('woff2');
+}
+
+.font--noto-serif {
+  font-family: 'Noto Serif', serif;
 }
 
 @font-face {
@@ -39,35 +63,60 @@
   font-family: 'Merriweather';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/merriweather-v32-latin-regular.woff2') format('woff2');
+  src: url('/font/merriweather-v33-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Merriweather';
+  font-style: italic;
+  font-weight: 300;
+  src: url('/font/merriweather-v33-latin-300italic.woff2') format('woff2');
 }
 
 .font--merriweather {
   font-family: 'Merriweather', serif;
 }
 
+
 @font-face {
   font-display: swap;
-  font-family: 'Courgette';
+  font-family: 'Mali';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/courgette-v18-latin-regular.woff2') format('woff2');
-}
-
-.font--courgette {
-  font-family: 'Courgette', cursive;
+  src: url('/font/mali-v13-latin-regular.woff2') format('woff2');
 }
 
 @font-face {
   font-display: swap;
-  font-family: 'Merienda';
-  font-style: normal;
-  font-weight: 400;
-  src: url('/font/merienda-v21-latin-regular.woff2') format('woff2');
+  font-family: 'Mali';
+  font-style: italic;
+  font-weight: 300;
+  src: url('/font/mali-v13-latin-300italic.woff2') format('woff2');
 }
 
-.font--merienda {
-  font-family: 'Mereanda', cursive;
+.font--mali {
+  font-family: 'Mali', cursive;
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Averia Libre';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/font/averia-sans-libre-v20-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Averia Libre';
+  font-style: italic;
+  font-weight: 300;
+  src: url('/font/averia-sans-libre-v20-latin-300italic.woff2') format('woff2');
+}
+
+.font--averia-libre {
+  font-family: 'Averia Libre', cursive;
 }
 
 @font-face {
@@ -75,23 +124,40 @@
   font-family: 'Roboto Mono';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/roboto-mono-v30-latin-regular.woff2') format('woff2');
+  src: url('/font/roboto-mono-v31-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Roboto Mono';
+  font-style: italic;
+  font-weight: 300;
+  src: url('/font/roboto-mono-v31-latin-300italic.woff2') format('woff2');
 }
 
 .font--roboto-mono {
   font-family: 'Roboto Mono', monospace;
 }
 
+
 @font-face {
   font-display: swap;
-  font-family: 'Inconsolata';
+  font-family: 'IBM Plex Mono';
   font-style: normal;
   font-weight: 400;
-  src: url('/font/inconsolata-v36-latin-regular.woff2') format('woff2');
+  src: url('/fonts/ibm-plex-mono-v23-latin-regular.woff2') format('woff2');
 }
 
-.font--inconsolata {
-  font-family: 'Inconsolata', monospace;
+@font-face {
+  font-display: swap;
+  font-family: 'IBM Plex Mono';
+  font-style: italic;
+  font-weight: 300;
+  src: url('/fonts/ibm-plex-mono-v23-latin-300italic.woff2') format('woff2');
+}
+
+.font--ibm-plex-mono {
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 @font-face {

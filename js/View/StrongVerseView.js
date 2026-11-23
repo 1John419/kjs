@@ -54,10 +54,36 @@ class StrongVerseView {
 
   buildStrongFragment(map) {
     const text = map[strongIdx.map.verseFragment];
+
     const strongFragment = template.element('div', 'strong-fragment', null, 
       null, null);
     const verseFragment = template.element('div', 'verse-fragment', null, 
       null, text);
+
+    if (this.italics) {
+      verseFragment.innerHTML = verseFragment.innerHTML.replaceAll(
+        '$', '<span class="italic">');
+      verseFragment.innerHTML = verseFragment.innerHTML.replaceAll(
+        '%', '</span>');
+    }
+    else {
+      verseFragment.innerHTML = verseFragment.innerHTML.replaceAll('$', '');
+      verseFragment.innerHTML = verseFragment.innerHTML.replaceAll('%', '');
+    }
+
+    if (this.redLetter) {
+      verseFragment.innerHTML = verseFragment.innerHTML.replaceAll(
+        '@', '<span class="quote">');
+      verseFragment.innerHTML = verseFragment.innerHTML.replaceAll(
+        '#', '</span>');
+    }
+    else {
+      verseFragment.innerHTML = verseFragment.innerHTML.replaceAll('@', '');
+      verseFragment.innerHTML = verseFragment.innerHTML.replaceAll('#', '');
+    }
+
+
+
     const strongList = template.element('div', 'strong-list', null, null, null);
     for (const num of map[strongIdx.map.strongNums]) {
       const btn = template.element('div', 'btn-strong', null, null, num);
@@ -113,6 +139,16 @@ class StrongVerseView {
   }
 
   subscribe() {
+    queue.subscribe('italics.update', (italics) => {
+      this.italics = italics;
+      this.updateVerse();
+    });
+
+    queue.subscribe('redLetter.update', (redLetter) => {
+      this.redLetter = redLetter;
+      this.updateVerse();
+    });
+
     queue.subscribe('strong-verse.hide', () => {
       this.hide();
     });
@@ -153,6 +189,9 @@ class StrongVerseView {
   }
 
   updateVerse() {
+    if (typeof this.verse == 'undefined') {
+      return;
+    }
     this.scroll.scrollTop = 0;
     util.removeAllChildren(this.list);
     const docFragment = document.createDocumentFragment();
